@@ -18,7 +18,6 @@ export { TypewriterEffect } from './typewriter-effect';
 
 // All other components...
 export { ThreeDCard } from './3d-card';
-export { Timeline } from './timeline';
 export { AuroraBackground } from './aurora-background';
 export { BackgroundBeams } from './background-beams';
 export { BackgroundGradient } from './background-gradient';
