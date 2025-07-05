@@ -31,7 +31,8 @@ const config: StorybookConfig = {
       "@/hooks": path.resolve(__dirname, "../aceternity-components-library/hooks"),
       "@/data": path.resolve(__dirname, "../aceternity-components-library/data"),
       "@/fonts": path.resolve(__dirname, "../aceternity-components-library/fonts"),
-      "react-tweet/api": "react-tweet"
+      "react-tweet/api": "react-tweet",
+      "@/components/magicui": path.resolve(__dirname, "../aceternity-components-library/components/ui/magicui")
     };
     return config;
   }
