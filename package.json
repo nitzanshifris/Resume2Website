@@ -17,6 +17,9 @@
     "gen:stories": "node scripts/generate-stories.js"
   },
   "devDependencies": {
+    "@aceternity/components-library": "workspace:*",
+    "@cv2web/design-tokens": "workspace:*",
+    "@emotion/is-prop-valid": "^1.3.1",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-interactions": "^8.6.14",
     "@storybook/blocks": "^8.6.14",
@@ -25,12 +28,14 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "fast-glob": "^3.3.2",
+    "react-tweet": "^0.13.2",
+    "canvas-confetti": "^1.9.2",
+    "@radix-ui/react-accordion": "^1.0.5",
+    "shiki": "^0.14.4",
     "jsdom": "^26.1.0",
     "storybook": "8.6.14",
     "vite": "^7.0.2",
-    "vitest": "^3.2.4",
-    "@cv2web/design-tokens": "workspace:*",
-    "@aceternity/components-library": "workspace:*",
-    "fast-glob": "^3.3.2"
+    "vitest": "^3.2.4"
   }
 }
