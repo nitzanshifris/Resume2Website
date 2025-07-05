@@ -2,8 +2,8 @@
   "name": "@aceternity/components-library",
   "version": "1.0.0",
   "description": "Complete Aceternity UI components library optimized for CV2WEB and general use",
-  "main": "components/ui/index.js",
-  "types": "components/ui/index.d.ts",
+  "main": "components/ui/index.ts",
+  "types": "components/ui/index.ts",
   "files": [
     "components/**/*",
     "lib/**/*",
@@ -11,11 +11,11 @@
     "hooks/**/*"
   ],
   "exports": {
-    ".": "./components/ui/index.js",
-    "./components/*": "./components/ui/*/index.js",
-    "./lib/*": "./lib/*.js",
+    ".": "./components/ui/index.ts",
+    "./components/*": "./components/ui/*/index.ts",
+    "./lib/*": "./lib/*.ts",
     "./styles/*": "./styles/*.css",
-    "./hooks/*": "./hooks/*.js"
+    "./hooks/*": "./hooks/*.ts"
   },
   "scripts": {
     "build": "tsc",
