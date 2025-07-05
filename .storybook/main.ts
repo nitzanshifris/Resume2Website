@@ -1,4 +1,8 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import type { StorybookConfig } from "@storybook/nextjs";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config: StorybookConfig = {
   stories: [
@@ -16,9 +20,9 @@ const config: StorybookConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
-      "@cv2web/design-tokens": require('path').resolve(__dirname, "../packages/design-tokens"),
-      "@cv2web/design-tokens/theme.css": require('path').resolve(__dirname, "../packages/design-tokens/theme.css"),
-      "@aceternity/components-library": require('path').resolve(__dirname, "../aceternity-components-library/components/ui")
+      "@cv2web/design-tokens": path.resolve(__dirname, "../packages/design-tokens"),
+      "@cv2web/design-tokens/theme.css": path.resolve(__dirname, "../packages/design-tokens/theme.css"),
+      "@aceternity/components-library": path.resolve(__dirname, "../aceternity-components-library/components/ui")
     };
     return config;
   }
