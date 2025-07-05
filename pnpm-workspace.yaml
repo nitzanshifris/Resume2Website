@@ -1,0 +1,4 @@
+packages:
+  - "packages/*"
+  - "aceternity-components-library"
+  - "aceternity-gallery-app" 

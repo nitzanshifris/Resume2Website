@@ -1,5 +1,10 @@
 # Aceternity Components Library
 
+> **2025-07-04** – Library fully synced with latest Magic-UI components & packs (134 components, 54 packs). Added support for:
+> – Animated Gradient/Text/Special Effects
+> – Education Timeline, Moving Border, Meteors, MacBook Scroll.
+> – Complete packs hierarchy (hero-sections, cta-sections, bento-grids, etc.).
+
 A complete, production-ready React component library with beautiful animations and modern design patterns. Optimized for CV2WEB portfolio generation and general use.
 
 ## 🚀 Quick Start

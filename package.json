@@ -1,0 +1,15 @@
+{
+  "name": "cv2web-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*",
+    "aceternity-components-library",
+    "aceternity-gallery-app"
+  ],
+  "scripts": {
+    "dev:renderer": "pnpm --filter new-renderer dev",
+    "build:renderer": "pnpm --filter new-renderer build",
+    "lint:renderer": "pnpm --filter new-renderer lint"
+  }
+} 

@@ -268,5 +268,45 @@
     "category": "cta",
     "cv2webUsage": "common",
     "description": "Complete CTA section with background images"
+  },
+  "education-timeline": {
+    "name": "education-timeline",
+    "files": ["components/education-timeline.tsx"],
+    "dependencies": ["framer-motion", "clsx"],
+    "registryDependencies": [],
+    "type": "component",
+    "category": "content",
+    "cv2webUsage": "common",
+    "description": "Animated education journey timeline component"
+  },
+  "moving-border": {
+    "name": "moving-border",
+    "files": ["components/moving-border/index.tsx"],
+    "dependencies": ["framer-motion", "clsx"],
+    "registryDependencies": [],
+    "type": "component",
+    "category": "effect",
+    "cv2webUsage": "occasional",
+    "description": "Component demonstrating animated moving border effect"
+  },
+  "meteors": {
+    "name": "meteors",
+    "files": ["components/meteors/index.tsx"],
+    "dependencies": ["framer-motion", "clsx"],
+    "registryDependencies": [],
+    "type": "component",
+    "category": "background",
+    "cv2webUsage": "occasional",
+    "description": "Animated meteors background component"
+  },
+  "macbook-scroll": {
+    "name": "macbook-scroll",
+    "files": ["components/macbook-scroll/index.tsx"],
+    "dependencies": ["framer-motion", "clsx"],
+    "registryDependencies": [],
+    "type": "component",
+    "category": "showcase",
+    "cv2webUsage": "occasional",
+    "description": "Scroll-triggered MacBook showcase component"
   }
 }
