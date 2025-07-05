@@ -24,7 +24,8 @@ const config: StorybookConfig = {
       "@cv2web/design-tokens": path.resolve(__dirname, "../packages/design-tokens"),
       "@cv2web/design-tokens/theme.css": path.resolve(__dirname, "../packages/design-tokens/theme.css"),
       "@aceternity/components-library": path.resolve(__dirname, "../aceternity-components-library/components/ui"),
-      "@/component-library": path.resolve(__dirname, "../aceternity-components-library")
+      "@/component-library": path.resolve(__dirname, "../aceternity-components-library"),
+      "@/lib": path.resolve(__dirname, "../aceternity-components-library/lib")
     };
     return config;
   }
