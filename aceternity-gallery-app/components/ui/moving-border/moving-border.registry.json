@@ -1,0 +1,23 @@
+{
+  "name": "moving-border",
+  "description": "A border that moves around the container. Perfect for making your buttons stand out",
+  "type": "registry:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "devDependencies": [],
+  "tailwind": {
+    "config": {}
+  },
+  "cssVars": {},
+  "files": [
+    {
+      "name": "moving-border.tsx",
+      "content": ""
+    }
+  ],
+  "category": "Utilities",
+  "subcategory": "Buttons",
+  "preview": {
+    "image": "/previews/moving-border.png",
+    "video": "/previews/moving-border.mp4"
+  }
+}

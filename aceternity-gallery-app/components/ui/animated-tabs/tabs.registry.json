@@ -1,0 +1,33 @@
+{
+  "name": "tabs",
+  "type": "registry:ui",
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "components/ui/animated-tabs/tabs-base.tsx",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/animated-tabs/tabs-demo.tsx",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/animated-tabs/tabs.types.ts",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/animated-tabs/index.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "tailwind": {
+    "config": {}
+  },
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "css": [
+    {
+      "path": "globals.css",
+      "content": ".no-visible-scrollbar {\n  scrollbar-width: none;\n  -ms-overflow-style: none;\n  -webkit-overflow-scrolling: touch;\n}\n\n.no-visible-scrollbar::-webkit-scrollbar {\n  display: none;\n}"
+    }
+  ]
+}

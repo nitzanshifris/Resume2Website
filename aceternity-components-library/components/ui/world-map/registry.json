@@ -1,0 +1,21 @@
+{
+  "name": "world-map",
+  "type": "components:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge", "dotted-map", "next-themes"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "world-map.tsx",
+      "content": ""
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {}
+      }
+    }
+  },
+  "cssVars": {}
+}

@@ -1,0 +1,27 @@
+{
+  "name": "sticky-banner",
+  "type": "registry:ui",
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "components/ui/sticky-banner/sticky-banner-base.tsx",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/sticky-banner/sticky-banner-demo.tsx",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/sticky-banner/sticky-banner.types.ts",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/sticky-banner/index.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "tailwind": {
+    "config": {}
+  },
+  "dependencies": ["motion", "clsx", "tailwind-merge"]
+}

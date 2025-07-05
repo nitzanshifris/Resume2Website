@@ -1,0 +1,56 @@
+{
+  "name": "background-beams-with-collision",
+  "type": "component",
+  "files": [
+    {
+      "name": "background-beams-with-collision-base.tsx",
+      "content": "Core component with collision detection and explosion effects"
+    },
+    {
+      "name": "background-beams-with-collision-hero-text.tsx",
+      "content": "Hero section with gradient text effect"
+    },
+    {
+      "name": "background-beams-with-collision-interactive-demo.tsx",
+      "content": "Interactive demo with stats display"
+    },
+    {
+      "name": "background-beams-with-collision-minimal.tsx",
+      "content": "Minimal implementation example"
+    },
+    {
+      "name": "background-beams-with-collision.types.ts",
+      "content": "TypeScript type definitions"
+    },
+    {
+      "name": "index.tsx",
+      "content": "Component exports"
+    }
+  ],
+  "component": {
+    "name": "BackgroundBeamsWithCollision",
+    "description": "Animated beams that fall and explode on collision",
+    "props": [
+      {
+        "name": "children",
+        "type": "ReactNode",
+        "required": true,
+        "description": "Content to display over the beams"
+      },
+      {
+        "name": "className",
+        "type": "string",
+        "required": false,
+        "description": "Additional CSS classes for the container"
+      }
+    ]
+  },
+  "dependencies": [
+    "framer-motion",
+    "clsx",
+    "tailwind-merge",
+    "@tabler/icons-react"
+  ],
+  "tags": ["background", "animation", "collision", "particles", "interactive"],
+  "version": "1.0.0"
+}

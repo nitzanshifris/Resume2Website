@@ -1,0 +1,117 @@
+[
+  {
+    "section": "hero",
+    "component_type": "background-gradient",
+    "import_path": "@/components/ui/background-gradient",
+    "props": {
+      "title": "Lanford Jaden",
+      "subtitle": "Software Engineer",
+      "description": "Results-driven software engineer with a Master's degree in Computer Science and a strong passion for developing innovative software solutions. Experienced in collaborating with cross-functional teams and delivering high-quality code on time.",
+      "className": "absolute inset-0",
+      "_richness": {
+        "score": 0.3,
+        "recommendation": "compact",
+        "item_count": 0
+      },
+      "_global_layout": {
+        "density": "dense",
+        "total_sections": 5,
+        "suggestions": {
+          "use_tabs": false,
+          "use_accordions": true,
+          "use_animations": false,
+          "spacing": "compact"
+        }
+      }
+    },
+    "priority": 0
+  },
+  {
+    "section": "summary",
+    "component_type": "text-generate-effect",
+    "import_path": "@/components/ui/text-generate-effect",
+    "props": {
+      "words": "Results-driven software engineer with a Master's degree in Computer Science and a strong passion for developing innovative software solutions. Experienced in collaborating with cross-functional teams and delivering high-quality code on time.",
+      "className": "text-4xl font-bold",
+      "duration": 0.5,
+      "_richness": {
+        "score": 0.75,
+        "recommendation": "standard",
+        "item_count": 3
+      }
+    },
+    "priority": 1
+  },
+  {
+    "section": "education",
+    "component_type": "card-stack",
+    "import_path": "@/components/ui/card-stack",
+    "props": {
+      "items": [
+        {
+          "id": 4548365520,
+          "content": {
+            "title": "",
+            "description": "",
+            "metadata": ""
+          }
+        }
+      ],
+      "layout": "row",
+      "component": "card-stack",
+      "_richness": {
+        "score": 0.6,
+        "recommendation": "standard",
+        "item_count": 2
+      }
+    },
+    "priority": 2
+  },
+  {
+    "section": "skills",
+    "component_type": "bento-grid",
+    "import_path": "@/components/ui/bento-grid",
+    "props": {
+      "cards": [
+        {
+          "title": "",
+          "description": "",
+          "containerClassName": "col-span-1 min-h-[6rem] bg-gradient-to-br from-blue-500 to-purple-600",
+          "className": "h-full"
+        }
+      ],
+      "className": "grid grid-cols-1 md:grid-cols-1 gap-4 max-w-7xl mx-auto w-full",
+      "_richness": {
+        "score": 0.95,
+        "recommendation": "premium",
+        "item_count": 13
+      }
+    },
+    "priority": 3
+  },
+  {
+    "section": "languages",
+    "component_type": "animated-tooltip",
+    "import_path": "@/components/ui/animated-tooltip",
+    "props": {
+      "items": [
+        {
+          "id": 4548183616,
+          "content": {
+            "title": "",
+            "description": "",
+            "metadata": ""
+          }
+        }
+      ],
+      "layout": "row",
+      "component": "animated-tooltip",
+      "_richness": {
+        "score": 0.99,
+        "recommendation": "standard",
+        "item_count": 3
+      }
+    },
+    "priority": 4
+  }
+]

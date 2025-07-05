@@ -1,0 +1,21 @@
+{
+  "name": "vortex",
+  "type": "components:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge", "simplex-noise"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "vortex.tsx",
+      "content": ""
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {}
+      }
+    }
+  },
+  "cssVars": {}
+}

@@ -1,0 +1,32 @@
+{
+  "name": "placeholders-and-vanish-input",
+  "type": "registry:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "placeholders-and-vanish-input-base.tsx",
+      "content": "placeholders-and-vanish-input component implementation"
+    },
+    {
+      "name": "placeholders-and-vanish-input-demo.tsx", 
+      "content": "placeholders-and-vanish-input demo implementation"
+    },
+    {
+      "name": "placeholders-and-vanish-input.types.ts",
+      "content": "placeholders-and-vanish-input type definitions"
+    },
+    {
+      "name": "index.tsx",
+      "content": "placeholders-and-vanish-input exports"
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {}
+      }
+    }
+  }
+}

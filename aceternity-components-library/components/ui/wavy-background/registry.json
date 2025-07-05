@@ -1,0 +1,21 @@
+{
+  "name": "wavy-background",
+  "type": "components:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge", "simplex-noise"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "wavy-background.tsx",
+      "content": ""
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {}
+      }
+    }
+  },
+  "cssVars": {}
+}

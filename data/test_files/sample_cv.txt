@@ -1,0 +1,35 @@
+John Doe
+Senior Software Engineer
+
+Email: john.doe@example.com
+Phone: +1-555-123-4567
+LinkedIn: linkedin.com/in/johndoe
+
+SUMMARY
+Experienced software engineer with 8+ years developing scalable web applications. 
+Expert in Python, JavaScript, and cloud technologies.
+
+EXPERIENCE
+
+Senior Software Engineer
+Tech Corp Inc. | 2020 - Present
+• Led development of microservices architecture serving 1M+ users
+• Reduced API response time by 40% through optimization
+• Mentored team of 5 junior developers
+
+Software Engineer  
+StartupXYZ | 2016 - 2020
+• Built RESTful APIs using Python/Django
+• Implemented CI/CD pipeline with Jenkins
+• Developed React-based frontend applications
+
+EDUCATION
+
+BS Computer Science
+University of Technology | 2012 - 2016
+
+SKILLS
+• Languages: Python, JavaScript, Java
+• Frameworks: Django, React, Node.js
+• Cloud: AWS, Docker, Kubernetes
+• Databases: PostgreSQL, MongoDB, Redis

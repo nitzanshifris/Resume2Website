@@ -1,0 +1,37 @@
+{
+  "name": "glowing-effect",
+  "type": "components:ui",
+  "dependencies": ["@/lib/utils", "motion/react"],
+  "files": [
+    {
+      "name": "glowing-effect-base.tsx",
+      "content": "Core GlowingEffect component with mouse tracking and dynamic glow effects"
+    },
+    {
+      "name": "glowing-effect-demo.tsx", 
+      "content": "Demo variants including default and enhanced bento grid layouts"
+    },
+    {
+      "name": "glowing-effect.types.ts",
+      "content": "TypeScript type definitions for GlowingEffect and GridItem props"
+    },
+    {
+      "name": "index.tsx",
+      "content": "Export file for all GlowingEffect components and types"
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {
+          "gridTemplateRows": {
+            "none": "none"
+          },
+          "gridArea": {
+            "custom": "var(--grid-area)"
+          }
+        }
+      }
+    }
+  }
+}

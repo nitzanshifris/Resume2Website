@@ -1,0 +1,47 @@
+{
+  "name": "following-pointer",
+  "type": "component",
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "files": [
+    {
+      "name": "following-pointer-base.tsx",
+      "content": "components/ui/following-pointer/following-pointer-base.tsx"
+    },
+    {
+      "name": "following-pointer.types.ts",
+      "content": "components/ui/following-pointer/following-pointer.types.ts"
+    },
+    {
+      "name": "index.tsx",
+      "content": "components/ui/following-pointer/index.tsx"
+    }
+  ],
+  "tailwind": {
+    "config": {}
+  },
+  "cssVars": {},
+  "interface": {
+    "name": "FollowerPointerCardProps",
+    "props": [
+      {
+        "name": "children",
+        "type": "ReactNode",
+        "description": "The content to be rendered inside the component",
+        "required": true
+      },
+      {
+        "name": "className",
+        "type": "string",
+        "description": "Additional CSS classes",
+        "required": false
+      },
+      {
+        "name": "title",
+        "type": "string | ReactNode",
+        "description": "The title to be displayed on the pointer",
+        "required": false,
+        "default": "William Shakespeare"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "meteors",
+  "description": "A group of beams in the background of a container, sort of like meteors",
+  "type": "registry:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "devDependencies": [],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {
+          "keyframes": {
+            "meteor-effect": {
+              "0%": { "transform": "rotate(215deg) translateX(0)", "opacity": "1" },
+              "70%": { "opacity": "1" },
+              "100%": { "transform": "rotate(215deg) translateX(-500px)", "opacity": "0" }
+            }
+          },
+          "animation": {
+            "meteor-effect": "meteor-effect linear infinite"
+          }
+        }
+      }
+    }
+  },
+  "cssVars": {},
+  "files": [
+    {
+      "name": "meteors.tsx",
+      "content": ""
+    }
+  ],
+  "category": "Special Effects",
+  "subcategory": "Animated Elements",
+  "preview": {
+    "image": "/previews/meteors.png",
+    "video": "/previews/meteors.mp4"
+  }
+}

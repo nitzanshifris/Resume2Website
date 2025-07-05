@@ -1,0 +1,140 @@
+{
+  "name": "@aceternity/components-library",
+  "version": "1.0.0",
+  "description": "Complete Aceternity UI components library optimized for CV2WEB and general use",
+  "main": "components/ui/index.js",
+  "types": "components/ui/index.d.ts",
+  "files": [
+    "components/**/*",
+    "lib/**/*",
+    "styles/**/*",
+    "hooks/**/*"
+  ],
+  "exports": {
+    ".": "./components/ui/index.js",
+    "./components/*": "./components/ui/*/index.js",
+    "./lib/*": "./lib/*.js",
+    "./styles/*": "./styles/*.css",
+    "./hooks/*": "./hooks/*.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint components lib hooks",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "typescript",
+    "tailwindcss",
+    "framer-motion",
+    "aceternity",
+    "cv2web",
+    "portfolio",
+    "animations"
+  ],
+  "author": "Aceternity",
+  "license": "MIT",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.0",
+    "class-variance-authority": "^0.7.1",
+    "framer-motion": "^12.16.0",
+    "motion": "^12.18.1",
+    "@tabler/icons-react": "^3.34.0",
+    "lucide-react": "^0.454.0",
+    "react-icons": "^5.5.0",
+    "@react-three/fiber": "^9.1.2",
+    "@react-three/drei": "^10.3.0",
+    "three": "^0.177.0",
+    "three-globe": "^2.42.11",
+    "cobe": "^0.6.4",
+    "simplex-noise": "^4.0.3",
+    "dotted-map": "^2.2.3",
+    "react-dropzone": "^14.3.5",
+    "react-fast-marquee": "^1.6.5",
+    "react-markdown": "^10.1.0",
+    "react-rough-notation": "^1.0.5",
+    "react-syntax-highlighter": "^15.6.1",
+    "react-wrap-balancer": "^1.1.1",
+    "react-element-to-jsx-string": "^17.0.1",
+    "sonner": "^2.0.5",
+    "date-fns": "^4.1.0",
+    "fuzzy-search": "^3.2.1",
+    "qss": "^3.0.0",
+    "@tsparticles/engine": "^3.8.1",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/slim": "^3.8.1",
+    "@radix-ui/react-hover-card": "^1.1.14",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "@headlessui/react": "^2.2.4"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "tailwindcss": "^3.0.0",
+    "next": "^14.0.0 || ^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.0.1",
+    "@types/three": "^0.177.0",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "typescript": "^5.8.3",
+    "eslint": "^9.17.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49"
+  },
+  "cv2web": {
+    "ready": true,
+    "totalComponents": 134,
+    "totalPacks": 54,
+    "coreComponents": [
+      "hero-parallax",
+      "hero-highlight", 
+      "timeline",
+      "bento-grid",
+      "floating-dock",
+      "text-generate-effect",
+      "card-hover-effect"
+    ],
+    "corePacks": [
+      "hero-section-with-images-grid",
+      "modern-hero-with-gradients",
+      "three-column-bento-grid",
+      "testimonials-marquee-grid",
+      "simple-cta-with-images"
+    ],
+    "categories": {
+      "hero": ["hero-parallax", "hero-highlight"],
+      "content": ["timeline", "card-hover-effect", "animated-testimonials"],
+      "layout": ["bento-grid", "layout-grid"],
+      "text": ["text-generate-effect", "typewriter-effect", "flip-words"],
+      "navigation": ["floating-dock", "floating-navbar"],
+      "background": ["aurora-background", "background-gradient", "background-beams"],
+      "3d": ["3d-card", "3d-pin", "3d-marquee"],
+      "animation": ["meteors", "sparkles", "shooting-stars"]
+    },
+    "packCategories": {
+      "hero-packs": ["hero-section-with-images-grid", "modern-hero-with-gradients"],
+      "layout-packs": ["three-column-bento-grid"],
+      "testimonial-packs": ["testimonials-marquee-grid"],
+      "cta-packs": ["simple-cta-with-images"],
+      "card-packs": ["content-card", "expandable-card-on-click"],
+      "footer-packs": ["simple-footer-with-four-grids"],
+      "pricing-packs": ["simple-pricing-with-three-tiers"]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aceternity/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/aceternity/ui/issues"
+  },
+  "homepage": "https://ui.aceternity.com"
+}

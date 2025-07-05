@@ -1,0 +1,50 @@
+{
+  "name": "animated-testimonials",
+  "type": "component",
+  "files": [
+    {
+      "name": "animated-testimonials-base.tsx",
+      "content": "Core animated testimonials component with image stack and text animations"
+    },
+    {
+      "name": "animated-testimonials-standard.tsx",
+      "content": "Standard testimonials showcase with manual navigation"
+    },
+    {
+      "name": "animated-testimonials-autoplay.tsx",
+      "content": "Autoplay enabled testimonials variant"
+    },
+    {
+      "name": "animated-testimonials.types.ts",
+      "content": "TypeScript type definitions"
+    },
+    {
+      "name": "index.tsx",
+      "content": "Component exports"
+    }
+  ],
+  "component": {
+    "name": "AnimatedTestimonials",
+    "description": "Beautiful testimonials showcase with smooth animations and 3D effects",
+    "props": [
+      {
+        "name": "testimonials",
+        "type": "Testimonial[]",
+        "required": true,
+        "description": "Array of testimonial objects"
+      },
+      {
+        "name": "autoplay",
+        "type": "boolean",
+        "default": "false",
+        "description": "Enable automatic rotation"
+      }
+    ]
+  },
+  "dependencies": [
+    "@tabler/icons-react",
+    "framer-motion"
+  ],
+  "tags": ["testimonials", "animation", "3d", "carousel", "slider"],
+  "version": "1.0.0"
+}

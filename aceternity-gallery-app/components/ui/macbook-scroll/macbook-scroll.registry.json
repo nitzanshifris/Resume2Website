@@ -1,0 +1,23 @@
+{
+  "name": "macbook-scroll",
+  "description": "A 3D MacBook Pro animation component that responds to scroll",
+  "type": "registry:ui",
+  "dependencies": ["framer-motion"],
+  "devDependencies": [],
+  "tailwind": {
+    "config": {}
+  },
+  "cssVars": {},
+  "files": [
+    {
+      "name": "macbook-scroll.tsx",
+      "content": ""
+    }
+  ],
+  "category": "Special Effects",
+  "subcategory": "3D Effects",
+  "preview": {
+    "image": "/previews/macbook-scroll.png",
+    "video": "/previews/macbook-scroll.mp4"
+  }
+}

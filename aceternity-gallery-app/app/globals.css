@@ -1,0 +1,245 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+  }
+  
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+  }
+  
+  body {
+    @apply bg-white dark:bg-black;
+  }
+}
+
+@layer utilities {
+  .transform-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .animation-delay-2000 {
+    animation-delay: 2000ms;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4000ms;
+  }
+  
+  .shadow-derek {
+    box-shadow: 0px 0px 0px 1px rgb(0 0 0 / 0.06),
+      0px 1px 1px -0.5px rgb(0 0 0 / 0.06), 0px 3px 3px -1.5px rgb(0 0 0 / 0.06),
+      0px 6px 6px -3px rgb(0 0 0 / 0.06), 0px 12px 12px -6px rgb(0 0 0 / 0.06),
+      0px 24px 24px -12px rgb(0 0 0 / 0.06);
+  }
+  
+  .shadow-input {
+    box-shadow: 0px 2px 3px -1px rgba(0, 0, 0, 0.1),
+      0px 1px 0px 0px rgba(25, 28, 33, 0.02),
+      0px 0px 0px 1px rgba(25, 28, 33, 0.08);
+  }
+  
+  .bg-dot-black\/\[0\.2\] {
+    background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='black' fill-opacity='0.2'/%3E%3C/svg%3E");
+    background-size: 30px 30px;
+  }
+  
+  .dark\:bg-dot-white\/\[0\.2\] {
+    background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='white' fill-opacity='0.2'/%3E%3C/svg%3E");
+    background-size: 30px 30px;
+  }
+  
+  /* Aceternity-style backgrounds */
+  .bg-aceternity {
+    @apply bg-white dark:bg-black;
+  }
+  
+  .bg-aceternity-gradient {
+    @apply bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950;
+  }
+  
+  .bg-aceternity-subtle {
+    @apply bg-gradient-to-b from-white/20 to-transparent dark:from-gray-500/20;
+  }
+  
+  .bg-aceternity-card {
+    @apply bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm;
+  }
+  
+  .border-aceternity {
+    @apply border-gray-200 dark:border-gray-800;
+  }
+  
+  .shadow-aceternity {
+    @apply shadow-sm ring-1 ring-gray-900/5 dark:ring-gray-950/5;
+  }
+  
+  /* Advanced Aceternity effects */
+  .glow-effect {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(147, 51, 234, 0.1),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  .card-spotlight:hover .glow-effect {
+    opacity: 1;
+  }
+  
+  .text-glow {
+    @apply drop-shadow-[0_0_35px_rgba(168,85,247,0.3)];
+  }
+  
+  .card-spotlight {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+    @apply relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(800px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.03),transparent_40%)] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500;
+  }
+  
+  .border-glow {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .border-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(
+      var(--angle, 0deg),
+      rgba(147, 51, 234, 0.5),
+      rgba(59, 130, 246, 0.5),
+      transparent,
+      rgba(147, 51, 234, 0.5)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .border-glow:hover::before {
+    opacity: 1;
+    animation: spin 4s linear infinite;
+  }
+  
+  @property --angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+  
+  @keyframes spin {
+    from {
+      --angle: 0deg;
+    }
+    to {
+      --angle: 360deg;
+    }
+  }
+  
+  .shimmer-effect {
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent hover:before:animate-shimmer;
+  }
+  
+  .noise-overlay {
+    @apply relative after:absolute after:inset-0 after:bg-[url('/noise.webp')] after:opacity-[0.015] after:mix-blend-soft-light after:pointer-events-none;
+  }
+  
+  .gradient-border {
+    background: linear-gradient(to right bottom, rgb(0, 0, 0), rgb(0, 0, 0)),
+                linear-gradient(to right bottom, rgb(168, 85, 247), rgb(59, 130, 246));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+}
+
+@keyframes move {
+  0% {
+    transform: translateX(-200px);
+  }
+  100% {
+    transform: translateX(200px);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(100px) scale(0);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(80px) scale(0.2);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-1000px) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@layer utilities {
+  .animate-blob {
+    animation: blob 10s infinite;
+  }
+  
+  .animate-gradient {
+    animation: gradient 6s linear infinite;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

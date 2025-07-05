@@ -1,0 +1,21 @@
+{
+  "name": "wobble-card",
+  "type": "components:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "wobble-card.tsx",
+      "content": ""
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {}
+      }
+    }
+  },
+  "cssVars": {}
+}

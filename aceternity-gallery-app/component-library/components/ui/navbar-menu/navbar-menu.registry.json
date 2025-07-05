@@ -1,0 +1,36 @@
+{
+  "name": "navbar-menu",
+  "type": "registry:ui",
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "navbar-menu-base.tsx",
+      "content": "navbar-menu component implementation"
+    },
+    {
+      "name": "navbar-menu-demo.tsx", 
+      "content": "navbar-menu demo implementation"
+    },
+    {
+      "name": "navbar-menu.types.ts",
+      "content": "navbar-menu type definitions"
+    },
+    {
+      "name": "index.tsx",
+      "content": "navbar-menu exports"
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {
+          "boxShadow": {
+            "input": "0px 2px 3px -1px rgba(0,0,0,0.1), 0px 1px 0px 0px rgba(25,28,33,0.02), 0px 0px 0px 1px rgba(25,28,33,0.08)"
+          }
+        }
+      }
+    }
+  }
+}

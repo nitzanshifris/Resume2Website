@@ -1,0 +1,75 @@
+{
+  "name": "file-upload",
+  "type": "component",
+  "files": [
+    {
+      "name": "file-upload-base.tsx",
+      "content": "Core file upload component with drag and drop, animations, and file preview"
+    },
+    {
+      "name": "file-upload-standard.tsx",
+      "content": "Standard file upload implementation with basic file handling"
+    },
+    {
+      "name": "file-upload.types.ts",
+      "content": "TypeScript type definitions"
+    },
+    {
+      "name": "index.tsx",
+      "content": "Component exports"
+    }
+  ],
+  "component": {
+    "name": "FileUpload",
+    "description": "Beautiful file upload component with drag and drop support and smooth animations",
+    "props": [
+      {
+        "name": "onChange",
+        "type": "(files: File[]) => void",
+        "required": true,
+        "description": "Callback function when files are selected"
+      },
+      {
+        "name": "className",
+        "type": "string",
+        "description": "Additional CSS classes for the upload area"
+      },
+      {
+        "name": "containerClassName",
+        "type": "string",
+        "description": "Additional CSS classes for the container"
+      },
+      {
+        "name": "maxFiles",
+        "type": "number",
+        "default": "10",
+        "description": "Maximum number of files allowed"
+      },
+      {
+        "name": "accept",
+        "type": "Record<string, string[]>",
+        "description": "Accepted file types"
+      },
+      {
+        "name": "maxSize",
+        "type": "number",
+        "description": "Maximum file size in bytes"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disable the upload component"
+      }
+    ]
+  },
+  "dependencies": [
+    "@tabler/icons-react",
+    "framer-motion",
+    "react-dropzone",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "tags": ["file-upload", "drag-drop", "animation", "form", "input"],
+  "version": "1.0.0"
+}

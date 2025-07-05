@@ -1,0 +1,42 @@
+{
+  "name": "floating-navbar",
+  "type": "component",
+  "description": "A floating navigation bar that hides on scroll down and reveals on scroll up",
+  "dependencies": {
+    "framer-motion": "^11.0.0"
+  },
+  "files": [
+    {
+      "name": "floating-navbar-base.tsx",
+      "path": "components/ui/floating-navbar/floating-navbar-base.tsx"
+    },
+    {
+      "name": "floating-navbar-standard.tsx", 
+      "path": "components/ui/floating-navbar/floating-navbar-standard.tsx"
+    },
+    {
+      "name": "floating-navbar-minimal.tsx",
+      "path": "components/ui/floating-navbar/floating-navbar-minimal.tsx"
+    },
+    {
+      "name": "floating-navbar-portfolio.tsx",
+      "path": "components/ui/floating-navbar/floating-navbar-portfolio.tsx"
+    },
+    {
+      "name": "floating-navbar.types.ts",
+      "path": "components/ui/floating-navbar/floating-navbar.types.ts"
+    },
+    {
+      "name": "index.tsx",
+      "path": "components/ui/floating-navbar/index.tsx"
+    }
+  ],
+  "tailwind": {
+    "config": {}
+  },
+  "cssVars": {},
+  "meta": {
+    "category": "navigation",
+    "tags": ["navbar", "navigation", "scroll", "sticky", "floating"]
+  }
+}

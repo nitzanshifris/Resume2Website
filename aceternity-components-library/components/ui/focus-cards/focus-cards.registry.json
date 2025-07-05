@@ -1,0 +1,35 @@
+{
+  "name": "focus-cards",
+  "type": "component",
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "files": [
+    {
+      "name": "focus-cards-base.tsx",
+      "content": "components/ui/focus-cards/focus-cards-base.tsx"
+    },
+    {
+      "name": "focus-cards.types.ts",
+      "content": "components/ui/focus-cards/focus-cards.types.ts"
+    },
+    {
+      "name": "index.tsx",
+      "content": "components/ui/focus-cards/index.tsx"
+    }
+  ],
+  "tailwind": {
+    "config": {}
+  },
+  "cssVars": {},
+  "interface": {
+    "name": "FocusCardsProps",
+    "props": [
+      {
+        "name": "cards",
+        "type": "Card[]",
+        "description": "Array of cards with title and src properties",
+        "required": false,
+        "default": "defaultCards"
+      }
+    ]
+  }
+}

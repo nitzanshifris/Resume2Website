@@ -1,0 +1,44 @@
+{
+  "name": "flip-words",
+  "type": "registry:ui",
+  "files": [
+    {
+      "path": "components/ui/flip-words/flip-words-base.tsx",
+      "content": "flip-words-base.tsx",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/ui/flip-words/flip-words-hero-title.tsx", 
+      "content": "flip-words-hero-title.tsx",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/ui/flip-words/flip-words-testimonial-highlight.tsx",
+      "content": "flip-words-testimonial-highlight.tsx", 
+      "type": "registry:component"
+    },
+    {
+      "path": "components/ui/flip-words/flip-words-feature-showcase.tsx",
+      "content": "flip-words-feature-showcase.tsx",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/ui/flip-words/flip-words.types.ts",
+      "content": "flip-words.types.ts",
+      "type": "registry:type"
+    },
+    {
+      "path": "components/ui/flip-words/index.tsx",
+      "content": "index.tsx", 
+      "type": "registry:index"
+    }
+  ],
+  "dependencies": [
+    "framer-motion",
+    "clsx",
+    "tailwind-merge"
+  ],
+  "tailwind": {
+    "config": {}
+  }
+}

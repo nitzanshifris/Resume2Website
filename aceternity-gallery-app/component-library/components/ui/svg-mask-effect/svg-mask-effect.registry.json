@@ -1,0 +1,33 @@
+{
+  "name": "svg-mask-effect",
+  "type": "registry:ui",
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "components/ui/svg-mask-effect/svg-mask-effect-base.tsx",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/svg-mask-effect/svg-mask-effect-demo.tsx",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/svg-mask-effect/svg-mask-effect.types.ts",
+      "type": "registry:ui"
+    },
+    {
+      "path": "components/ui/svg-mask-effect/index.tsx",
+      "type": "registry:ui"
+    }
+  ],
+  "tailwind": {
+    "config": {}
+  },
+  "dependencies": ["motion", "clsx", "tailwind-merge"],
+  "assets": [
+    {
+      "path": "public/mask.svg",
+      "content": "<svg width=\"1298\" height=\"1298\" viewBox=\"0 0 1298 1298\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n  <circle cx=\"649\" cy=\"649\" r=\"649\" fill=\"black\" />\n</svg>"
+    }
+  ]
+}

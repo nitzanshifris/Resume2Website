@@ -1,0 +1,90 @@
+{
+  "name": "background-gradient",
+  "displayName": "Background Gradient",
+  "description": "An animated gradient that sits at the background of a card, button or anything",
+  "category": "backgrounds",
+  "tags": ["card", "background", "gradient", "special", "call to action", "animation", "product"],
+  "variants": [
+    {
+      "name": "product-card",
+      "displayName": "Product Card",
+      "description": "E-commerce product showcase with animated gradient background",
+      "file": "background-gradient-product-card.tsx",
+      "preview": "BackgroundGradientProductCard"
+    },
+    {
+      "name": "feature-card",
+      "displayName": "Feature Card",
+      "description": "Service/feature presentation with icon and feature list",
+      "file": "background-gradient-feature-card.tsx",
+      "preview": "BackgroundGradientFeatureCard"
+    },
+    {
+      "name": "profile-card",
+      "displayName": "Profile Card",
+      "description": "User profile card with avatar, bio, and social links",
+      "file": "background-gradient-profile-card.tsx",
+      "preview": "BackgroundGradientProfileCard"
+    },
+    {
+      "name": "minimal",
+      "displayName": "Minimal",
+      "description": "Simple gradient background with minimal content",
+      "file": "background-gradient-minimal.tsx",
+      "preview": "BackgroundGradientMinimal"
+    },
+    {
+      "name": "static",
+      "displayName": "Static",
+      "description": "Non-animated version of the gradient background",
+      "file": "background-gradient-static.tsx",
+      "preview": "BackgroundGradientStatic"
+    }
+  ],
+  "dependencies": [
+    "motion",
+    "clsx",
+    "tailwind-merge",
+    "@tabler/icons-react"
+  ],
+  "files": [
+    "background-gradient-base.tsx",
+    "background-gradient-product-card.tsx",
+    "background-gradient-feature-card.tsx",
+    "background-gradient-profile-card.tsx",
+    "background-gradient-minimal.tsx",
+    "background-gradient-static.tsx",
+    "background-gradient.types.ts",
+    "index.tsx"
+  ],
+  "props": {
+    "BackgroundGradient": {
+      "children": {
+        "type": "React.ReactNode",
+        "required": false,
+        "description": "The content to be rendered within the gradient background"
+      },
+      "className": {
+        "type": "string",
+        "required": false,
+        "description": "CSS class for the inner div"
+      },
+      "containerClassName": {
+        "type": "string",
+        "required": false,
+        "description": "CSS class for the outermost div"
+      },
+      "animate": {
+        "type": "boolean",
+        "required": false,
+        "default": true,
+        "description": "Whether the gradient should animate"
+      }
+    }
+  },
+  "installation": {
+    "dependencies": ["motion", "clsx", "tailwind-merge", "@tabler/icons-react"],
+    "utils": ["cn"],
+    "styles": ["dark mode compatible", "requires motion/react for animations"]
+  }
+}

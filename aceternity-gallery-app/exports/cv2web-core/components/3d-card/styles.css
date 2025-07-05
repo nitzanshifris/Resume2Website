@@ -1,0 +1,20 @@
+/* Base styles for the 3D card container */
+.card-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Smooth transitions for all transformations */
+.card-transform {
+  transition: transform 0.2s ease-linear;
+  transform-style: preserve-3d;
+}
+
+/* Optional: Add some default shadows and depth effects */
+.card-body {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+} 

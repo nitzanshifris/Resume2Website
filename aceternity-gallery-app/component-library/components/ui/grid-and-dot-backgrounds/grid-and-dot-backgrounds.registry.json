@@ -1,0 +1,40 @@
+{
+  "name": "grid-and-dot-backgrounds",
+  "type": "components:ui",
+  "registryDependencies": ["utils"],
+  "dependencies": ["react", "clsx", "tailwind-merge"],
+  "devDependencies": [],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {
+          "backgroundImage": {
+            "grid-black": "linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)",
+            "grid-white": "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+            "dot-black": "radial-gradient(circle, rgba(0,0,0,0.3) 1px, transparent 1px)",
+            "dot-white": "radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)"
+          }
+        }
+      }
+    }
+  },
+  "cssVars": {},
+  "files": [
+    {
+      "name": "grid-and-dot-backgrounds-base.tsx",
+      "content": "// Grid and Dot Backgrounds base component implementation"
+    },
+    {
+      "name": "grid-and-dot-backgrounds-demo.tsx", 
+      "content": "// Grid and Dot Backgrounds demo variants"
+    },
+    {
+      "name": "grid-and-dot-backgrounds.types.ts",
+      "content": "// Grid and Dot Backgrounds TypeScript types"
+    },
+    {
+      "name": "index.tsx",
+      "content": "// Grid and Dot Backgrounds exports"
+    }
+  ]
+}
