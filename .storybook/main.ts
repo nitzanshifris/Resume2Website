@@ -30,7 +30,8 @@ const config: StorybookConfig = {
       "@/components": path.resolve(__dirname, "../aceternity-components-library/components"),
       "@/hooks": path.resolve(__dirname, "../aceternity-components-library/hooks"),
       "@/data": path.resolve(__dirname, "../aceternity-components-library/data"),
-      "@/fonts": path.resolve(__dirname, "../aceternity-components-library/fonts")
+      "@/fonts": path.resolve(__dirname, "../aceternity-components-library/fonts"),
+      "react-tweet/api": "react-tweet"
     };
     return config;
   }
