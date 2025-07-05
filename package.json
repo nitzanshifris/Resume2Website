@@ -13,7 +13,8 @@
     "lint:renderer": "pnpm --filter new-renderer lint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "vitest"
+    "test": "vitest",
+    "gen:stories": "node scripts/generate-stories.js"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^8.6.14",
@@ -29,6 +30,7 @@
     "vite": "^7.0.2",
     "vitest": "^3.2.4",
     "@cv2web/design-tokens": "workspace:*",
-    "@aceternity/components-library": "workspace:*"
+    "@aceternity/components-library": "workspace:*",
+    "fast-glob": "^3.3.2"
   }
 }

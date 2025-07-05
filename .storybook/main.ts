@@ -6,7 +6,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config: StorybookConfig = {
   stories: [
-    "../packages/**/src/**/*.stories.@(js|jsx|ts|tsx|mdx)"
+    "../packages/**/src/**/*.stories.@(js|jsx|ts|tsx|mdx)",
+    "../aceternity-components-library/components/**/*.stories.@(ts|tsx|mdx)"
   ],
   addons: [
     "@storybook/addon-essentials",
@@ -22,7 +23,8 @@ const config: StorybookConfig = {
       ...(config.resolve.alias || {}),
       "@cv2web/design-tokens": path.resolve(__dirname, "../packages/design-tokens"),
       "@cv2web/design-tokens/theme.css": path.resolve(__dirname, "../packages/design-tokens/theme.css"),
-      "@aceternity/components-library": path.resolve(__dirname, "../aceternity-components-library/components/ui")
+      "@aceternity/components-library": path.resolve(__dirname, "../aceternity-components-library/components/ui"),
+      "@/component-library": path.resolve(__dirname, "../aceternity-components-library")
     };
     return config;
   }
