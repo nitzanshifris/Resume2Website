@@ -1,0 +1,197 @@
+{
+  "hero": {
+    "fullName": "Professional",
+    "summaryTagline": "Practical Event Coordinator with 5+ years experience in organizing large-scale events from design through to fruitful execution. Skilled at motivating large revenue gains and substantial expense savings through efficient budget management and vendor negotiation. Influential in meeting tight deadlines and directing high-quality events.",
+    "title": "",
+    "location": {}
+  },
+  "contact": {
+    "email": "email@email.com",
+    "phone": "",
+    "location": {
+      "city": "",
+      "state": ""
+    }
+  },
+  "experience": {
+    "experienceItems": [
+      {
+        "jobTitle": "Event Coordinator",
+        "companyName": "Bright Event Rentals",
+        "location": {
+          "city": null,
+          "state": "Florida",
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "January 2016",
+          "endDate": "June 2021",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Coordinated and successfully organized an extensive variety of events for Fortune 500 clients, including conferences, fundraisers, shareholder meetings, and luncheons.",
+          "Recommended efficient layouts for events and coordinated all staff management, internal/ external communication functions, event logistics, and the event life cycle.",
+          "Managed and coordinated 160+ events per year, accomplishing punctual and under-budget execution with 98%+ client satisfaction",
+          "Communicated with clients, vendors, staff, and city officials to keep customer loyalty and successfully organized events at the internal and external levels.",
+          "Collaborated with the fire department to obtain all suitable building and fire protection permits."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Event Coordinator",
+        "companyName": "Classic Party Rentals",
+        "location": {
+          "city": "Biloxi",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "June 2021",
+          "endDate": "June 2021",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Provided organization and aid for arranging 120+ events per year, including catering, handling location permits, decor, and logistics.",
+          "Designed invitations and promotional materials, organized floor plans and booked proposals and all logistics functions.",
+          "Increased income by over 57% by sourcing possible vendors and obtaining cost-efficient contracts.",
+          "Organized and directed all transportation, registration, and hotel accommodations, ensuring the smooth execution of every event activity."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "skills": {
+    "skillCategories": [
+      {
+        "categoryName": "Technical Skills",
+        "skills": [
+          "Oracle Marketing Cloud"
+        ]
+      },
+      {
+        "categoryName": "Professional Skills",
+        "skills": [
+          "Event coordination",
+          "Event organization",
+          "Event logistics",
+          "Event life cycle management",
+          "Event direction",
+          "Catering coordination",
+          "Decor coordination",
+          "Transportation coordination",
+          "Registration coordination",
+          "Hotel accommodation coordination",
+          "Floor plan organization",
+          "Proposal booking",
+          "Location permits",
+          "Permit acquisition",
+          "Meeting tight deadlines",
+          "Punctual execution",
+          "Budget management",
+          "Invoicing and Finance",
+          "Fundraising",
+          "Contract negotiation",
+          "Vendor negotiation",
+          "Vendor sourcing",
+          "Customer relationship management (CRM) software",
+          "Raiser's Edge",
+          "Public Relations",
+          "Client communication",
+          "Vendor communication",
+          "Staff communication",
+          "Official communication",
+          "Internal communication",
+          "External communication",
+          "Customer loyalty",
+          "Client satisfaction",
+          "Sales and marketing",
+          "Social media promotion",
+          "Visual design",
+          "Invitation design",
+          "Promotional material design",
+          "Collaboration",
+          "Project management",
+          "Staff management"
+        ]
+      },
+      {
+        "categoryName": "Tools & Software",
+        "skills": [
+          "Microsoft Office"
+        ]
+      }
+    ]
+  },
+  "education": {
+    "educationItems": [
+      {
+        "degree": "A",
+        "fieldOfStudy": "Hotel & Event Management",
+        "institution": "University of New York",
+        "location": {
+          "city": "Brooklyn",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "January 2020",
+          "endDate": "June 2021",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": [
+          "Public Relations",
+          "Invoicing and Finance",
+          "Sales and Marketing",
+          "Microsoft Office",
+          "Social Media Promotion"
+        ],
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Certificate",
+        "fieldOfStudy": "Business Management, Hospitality & Tourism",
+        "institution": "Udemy Online",
+        "location": null,
+        "dateRange": {
+          "startDate": "June 2021",
+          "endDate": "June 2021",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Diploma",
+        "fieldOfStudy": "Wedding Coordination & Planning",
+        "institution": "Events and Entertainment Association of Orange Country",
+        "location": null,
+        "dateRange": {
+          "startDate": "June 2021",
+          "endDate": "June 2021",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "hero": {
+    "fullName": "Professional",
+    "summaryTagline": "Personable IT Consultant with 5+ years of experience in a global technology firm. CompTIA A+ Certification. Scored the region leading QST rating based on internal reviews (97.86%). I am seeking to leverage solid technical skills and abilities to advance my career as the next IT consultant for Linsang Group.",
+    "title": "",
+    "location": {}
+  },
+  "contact": {
+    "email": "email@email.com",
+    "phone": "",
+    "location": {
+      "city": "",
+      "state": ""
+    }
+  },
+  "experience": {
+    "experienceItems": [
+      {
+        "jobTitle": "IT Consultant",
+        "companyName": "Amazon",
+        "location": {
+          "city": "Jacksonville",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "Jan 2020",
+          "endDate": "Jun 2021",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Administered first-level MHE and PKMS support and under-provided SOPs to make appropriate corrections when necessary.",
+          "Researched and documented existing and new processes for IT Support Teams and interacted with business users and other IT groups to ascertain business requirements and design proposed system enhancements.",
+          "Communicated issues, resolutions, and the project status to IT management and user community and ensured the deadlines were met and quality was maximized.",
+          "Deployed, reset, configured, and replaced equipment as needed, such as CLI Terminals, Printers, Silex Printer boxes., CPUs and laptops.",
+          "Coached newly hired IT specialists on advanced technical procedures."
+        ],
+        "technologiesUsed": [
+          "MHE",
+          "PKMS",
+          "CLI Terminals",
+          "Printers",
+          "Silex Printer boxes",
+          "CPUs",
+          "laptops"
+        ],
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "IT Consultant",
+        "companyName": "PWC Pengcheng",
+        "location": null,
+        "dateRange": {
+          "startDate": "Jan 2019",
+          "endDate": "Dec 2021",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Identified software and hardware issues and listened to client concerns.",
+          "Encouraged timely and relevant upgrades for client products when necessary.",
+          "Devised a workable scheme to accomplish business objectives.",
+          "Scheduled and allocated project activities, identified tools, standards, and guidelines suitable for projects.",
+          "Provided risk management by monitoring project schedules.",
+          "Reported on a project's status regularly through emails and weekly meetings; formally tracked problems and issues to closure."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "skills": {
+    "skillCategories": [
+      {
+        "categoryName": "Professional Skills",
+        "skills": [
+          "IT Support",
+          "MHE Support",
+          "PKMS Support",
+          "Equipment Deployment",
+          "Equipment Configuration",
+          "Hardware Troubleshooting",
+          "Software Troubleshooting",
+          "Application Administration",
+          "Ticketing Systems Management",
+          "CLI Terminals",
+          "Printers",
+          "CPUs",
+          "Laptops",
+          "Product Upgrades",
+          "Software Updates",
+          "Network Security",
+          "Ethical Hacking",
+          "Routing and Switching",
+          "Networking",
+          "IT Project Management",
+          "Project Scheduling",
+          "Resource Allocation",
+          "Project Planning",
+          "Risk Management",
+          "Project Monitoring",
+          "Project Status Reporting",
+          "Project Reporting",
+          "Issue Tracking",
+          "Deadline Management",
+          "Business Requirements Gathering",
+          "System Enhancement Design",
+          "Strategic Planning",
+          "Business Objective Alignment",
+          "Solution Identification",
+          "Process Improvement",
+          "Business Administration",
+          "Strategy & Operations",
+          "IT Innovation",
+          "Communication",
+          "Coaching",
+          "Technical Training",
+          "Active Listening",
+          "Client Relations",
+          "Client Advisory",
+          "Client Liaison",
+          "Problem Resolution",
+          "Quality Assurance",
+          "Standards Adherence",
+          "Personable",
+          "Process Documentation",
+          "Database Management",
+          "CompTIA A+",
+          "Microsoft Certified Solutions Expert",
+          "CCNA Routing and Switching"
+        ]
+      }
+    ]
+  },
+  "education": {
+    "educationItems": [
+      {
+        "degree": "Bachelor of Science",
+        "fieldOfStudy": "Information Systems Management",
+        "institution": "Miami University",
+        "location": {
+          "city": "Miami Beach",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "Jan 2020",
+          "endDate": "Jun 2021",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": [
+          "Network Security",
+          "IT Project Management",
+          "Business Administration",
+          "Strategy & Operations",
+          "IT Innovation",
+          "Ethical Hacking",
+          "Database Management"
+        ],
+        "exchangePrograms": null
+      }
+    ]
+  }
+}

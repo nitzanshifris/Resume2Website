@@ -1,0 +1,301 @@
+{
+  "hero": {
+    "fullName": "Professional Portfolio",
+    "summaryTagline": "Recent Bachelor of Marketing & Business Management graduate seeking an internship that will allow for learning the ins and outs of the advertising field and provide an opportunity to add value to ABC Marketing by applying theoretical knowledge into practice. Previous informal experience with social media channel set up and blogging has been gained during university as part of the Campus Newspaper team.",
+    "title": "",
+    "location": {}
+  },
+  "contact": {
+    "email": "contact@example.com",
+    "phone": "",
+    "location": {
+      "city": "",
+      "state": ""
+    }
+  },
+  "experience": {
+    "experienceItems": [
+      {
+        "jobTitle": "University News Paper Editor",
+        "companyName": "Columbus State University",
+        "location": {
+          "city": "Boston",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "November 2016",
+          "endDate": "February 2019",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Created three new websites for the Columbus State University's marketing, engineering and medical faculties within a period of two months",
+          "Responsible for weekly editor's comments for the newspaper",
+          "Proofread and edit write ups from staff members"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Marketing Intern",
+        "companyName": "Coca Cola",
+        "location": null,
+        "dateRange": {
+          "startDate": "June 2017",
+          "endDate": "September 2017",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Update database of 5000 clients using MS Access and categorize data in accordance with client demographics",
+          "Accumulate quantitative and qualitative data to prepare market studies and analytics",
+          "Conduct competitor analysis"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": "Internship",
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Business Management Intern",
+        "companyName": "Boston Legal",
+        "location": {
+          "city": "Boston",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "July 2018",
+          "endDate": "September 2018",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Instrumental in transferring 2000 client files onto the new digital CRM system",
+          "Assist with general office work in HR and operational departments",
+          "Assist in the write up of policies and procedures",
+          "Check production reports and comparing with financial reports",
+          "Assist in updating safety documentation on the company system"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": "Internship",
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "General Intern",
+        "companyName": "Florida County Healthcare Association",
+        "location": {
+          "city": "Tampa",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "March 2016",
+          "endDate": "August 2016",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Instrumental in organizing the weekly Q&A session between management and members of the association and handled all email correspondence preceding and following these events.",
+          "Answer phone inquiries, direct calls and take messages",
+          "Schedule travel arrangements of directors",
+          "Receive and post packages and registered letters from couriers",
+          "Taking minutes and distributing notes after meetings"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": "Internship",
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Administrator",
+        "companyName": "Boston Small Business Association",
+        "location": {
+          "city": "Boston",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "September 2015",
+          "endDate": "September 2015",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Job shadowing for two weeks at Boston Small Business Association"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": "Externship",
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Weekend Care Giver",
+        "companyName": "Sunshine Retirement Village",
+        "location": {
+          "city": "Boston",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "July 2012",
+          "endDate": "June 2015",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Assisting residents with shopping and banking activities",
+          "Organize weekly Bingo games"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": "Volunteer",
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "skills": {
+    "skillCategories": [
+      {
+        "categoryName": "Programming Languages",
+        "skills": [
+          "HTML"
+        ]
+      },
+      {
+        "categoryName": "Software & Tools",
+        "skills": [
+          "MS Office"
+        ]
+      },
+      {
+        "categoryName": "Business & Marketing",
+        "skills": [
+          "Marketing",
+          "Business Management",
+          "Social Media"
+        ]
+      },
+      {
+        "categoryName": "Project Management",
+        "skills": [
+          "Project Management"
+        ]
+      },
+      {
+        "categoryName": "Data & Analytics",
+        "skills": [
+          "Data Analysis"
+        ]
+      },
+      {
+        "categoryName": "Communication",
+        "skills": [
+          "Content Creation",
+          "Communication"
+        ]
+      }
+    ]
+  },
+  "education": {
+    "educationItems": [
+      {
+        "degree": "Bachelor of Marketing & Business Management",
+        "fieldOfStudy": "Marketing & Business Management",
+        "institution": "Columbus State University",
+        "location": {
+          "city": "Atlanta",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "SEPTEMBER 2016",
+          "endDate": "FEBRUARY 2019",
+          "isCurrent": false
+        },
+        "gpa": "3.6",
+        "honors": [
+          "Honors Program",
+          "Dean's list for 8 Semesters"
+        ],
+        "minors": [
+          "Political Science",
+          "Communications",
+          "Economics"
+        ],
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "High School Diploma",
+        "fieldOfStudy": null,
+        "institution": "Hawthorne High School",
+        "location": {
+          "city": "Boston",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": null,
+          "endDate": "FEBRUARY 2016",
+          "isCurrent": false
+        },
+        "gpa": "3.7",
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Certificate",
+        "fieldOfStudy": "HTML",
+        "institution": "Udemy Online",
+        "location": {
+          "city": "Online",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": null,
+          "endDate": "APRIL 2018",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Advanced Excel Course",
+        "fieldOfStudy": "Excel",
+        "institution": "ICT Computer College",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": null,
+          "endDate": "OCTOBER 2017",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "hero": {
+    "fullName": "Professional",
+    "summaryTagline": "Talented Nutrition Consultant with three years of experience. Skilled in nutrition and food preparation and looking to deliver healthy, delicious meals at Woodacre Nursing Home. At 7-Star Senior Living, cheerfully cleaned kitchens and prepared three meals daily for 120+ residents. Received a promotion to head Nutrition Consultant within five months of hiring due to efficiency and interpersonal skills.",
+    "title": "",
+    "location": {}
+  },
+  "contact": {
+    "email": "email@email.com",
+    "phone": "",
+    "location": {
+      "city": "",
+      "state": ""
+    }
+  },
+  "experience": {
+    "experienceItems": [
+      {
+        "jobTitle": "Nutritional Consultant",
+        "companyName": "WIC Port Washington",
+        "location": {
+          "city": "Port Washington",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "Jan 2021",
+          "endDate": "Present",
+          "isCurrent": true
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Required to prescribe supplemental food packages tailored to clients' needs and nutrition status per USDA established WIC Program policy.",
+          "Provided nutrition education counseling on morbid obesity, high cholesterol, and diabetes for uninsured patients at the health center.",
+          "Performed nutrition assessments and WIC certifications.",
+          "Provided nutrition education counseling and assessed nutritional status for participants of the WIC program.",
+          "Certified and enrolled participants according to the WIC program and state regulatory guidelines."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": "Part-Time",
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Nutritional Consultant",
+        "companyName": "DaVita Delmas",
+        "location": {
+          "city": "Delmas",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "Jan 2016",
+          "endDate": "Nov 2019",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Worked with neurologists in the initiation and nitration of drugs related to anemia and secondary hyperparathyroidism.",
+          "Participated in clinical CQI monitoring programs, including osteodystrophy management, kinetics, anemia, and nutrition management.",
+          "Monitored laboratory indicators of bone mineral status and anemia in hemodialysis patients.",
+          "Provided nutrition educational support to help patients improve their health."
+        ],
+        "technologiesUsed": null,
+        "summary": "Registered Nutrition Consultant/Educator responsible for educating, counseling, and supporting patients to make long-term behavior and lifestyle changes.",
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "skills": {
+    "skillCategories": [
+      {
+        "categoryName": "Professional Skills",
+        "skills": [
+          "Nutrition",
+          "Nutrition education counseling",
+          "Nutrition assessments",
+          "Nutritional status assessment",
+          "Dietary education",
+          "Nutritional care",
+          "Prescribing supplemental food packages",
+          "Morbid obesity counseling",
+          "High cholesterol counseling",
+          "Diabetes counseling",
+          "Long-term behavior and lifestyle change support",
+          "Nutrition management (clinical)",
+          "Nutrition support",
+          "Decreasing TPN usage",
+          "Certified Nutrition Consulting",
+          "Food preparation",
+          "Kitchen maintenance",
+          "Kitchen equipment operation",
+          "Food sanitation",
+          "Food sciences",
+          "WIC certifications",
+          "WIC program participant enrollment",
+          "Collaboration with neurologists",
+          "Drug initiation and nitration (anemia, hyperparathyroidism)",
+          "Clinical CQI monitoring",
+          "Osteodystrophy management",
+          "Kinetics monitoring",
+          "Anemia management",
+          "Laboratory indicator monitoring",
+          "Bone mineral status monitoring",
+          "Anemia monitoring",
+          "Supervision",
+          "Staff evaluation",
+          "Food production employee management",
+          "Dietary manager management",
+          "Educational program development",
+          "Public health education",
+          "Mass media communication",
+          "Platform promotion",
+          "Efficiency",
+          "Interpersonal skills",
+          "Patient education",
+          "Patient counseling",
+          "Patient support"
+        ]
+      }
+    ]
+  },
+  "education": {
+    "educationItems": [
+      {
+        "degree": "Master of Science",
+        "fieldOfStudy": "Dietary Education",
+        "institution": "Golden Valley University",
+        "location": {
+          "city": "Golden Valley",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "Jul 2020",
+          "endDate": "Jul 2021",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Bachelor of Science",
+        "fieldOfStudy": "Food Sciences",
+        "institution": "Wisconsin State University",
+        "location": {
+          "city": "Madisonville",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "Jan 2018",
+          "endDate": "Dec 2020",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "French Associates Degree",
+        "fieldOfStudy": "Nutrition",
+        "institution": "St. Louis University",
+        "location": {
+          "city": "Louisville",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "Jan 2015",
+          "endDate": "Oct 2017",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  }
+}
