@@ -2,18 +2,9 @@
 import { cn } from "../../lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import type { HoverEffectProps } from "./card-hover-effect.types";
 
-export const HoverEffect = ({
-  items,
-  className,
-}: {
-  items: {
-    title: string;
-    description: string;
-    link: string;
-  }[];
-  className?: string;
-}) => {
+export const HoverEffect = ({ items, className }: HoverEffectProps) => {
   let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
@@ -61,9 +52,13 @@ export const HoverEffect = ({
 export const Card = ({
   className,
   children,
+  style,
+  ...rest
 }: {
   className?: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
+  [key: string]: any;
 }) => {
   return (
     <div
@@ -71,6 +66,8 @@ export const Card = ({
         "rounded-2xl h-full w-full p-4 overflow-hidden bg-black border border-transparent dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
         className
       )}
+      style={style}
+      {...rest}
     >
       <div className="relative z-50">
         <div className="p-4">{children}</div>

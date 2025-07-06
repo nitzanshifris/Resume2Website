@@ -18,6 +18,8 @@ interface FlickeringGridProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: number;
   className?: string;
   maxOpacity?: number;
+  /** Frames per second cap (to reduce CPU). Default 30 */
+  fps?: number;
 }
 
 export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
@@ -29,6 +31,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
   height,
   className,
   maxOpacity = 0.3,
+  fps = 30,
   ...props
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -124,6 +127,9 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 
     let animationFrameId: number;
     let gridParams: ReturnType<typeof setupCanvas>;
+    let lastTime = 0;
+    let lastDraw = 0;
+    const frameInterval = 1000 / fps;
 
     const updateCanvasSize = () => {
       const newWidth = width || container.clientWidth;
@@ -134,23 +140,25 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 
     updateCanvasSize();
 
-    let lastTime = 0;
     const animate = (time: number) => {
       if (!isInView) return;
 
       const deltaTime = (time - lastTime) / 1000;
-      lastTime = time;
+      if (time - lastDraw >= frameInterval) {
+        lastTime = time;
+        lastDraw = time;
 
-      updateSquares(gridParams.squares, deltaTime);
-      drawGrid(
-        ctx,
-        canvas.width,
-        canvas.height,
-        gridParams.cols,
-        gridParams.rows,
-        gridParams.squares,
-        gridParams.dpr,
-      );
+        updateSquares(gridParams.squares, deltaTime);
+        drawGrid(
+          ctx,
+          canvas.width,
+          canvas.height,
+          gridParams.cols,
+          gridParams.rows,
+          gridParams.squares,
+          gridParams.dpr,
+        );
+      }
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -178,7 +186,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
     };
-  }, [setupCanvas, updateSquares, drawGrid, width, height, isInView]);
+  }, [setupCanvas, updateSquares, drawGrid, width, height, isInView, fps]);
 
   return (
     <div

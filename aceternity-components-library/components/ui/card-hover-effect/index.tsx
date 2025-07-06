@@ -13,3 +13,5 @@ export {
 
 // V2 Demo
 export { CardHoverEffectDemoV2 } from "./gallery/card-hover-effect-demo-v2";
+
+export type { HoverEffectProps, HoverEffectItem } from "./card-hover-effect.types";
