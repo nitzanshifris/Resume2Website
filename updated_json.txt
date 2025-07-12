@@ -1,0 +1,493 @@
+{
+  "hero": {
+    "fullName": "Michelle Lopez",
+    "professionalTitle": "Fashion Designer",
+    "summaryTagline": "A Fashion Visionary, Creator, and Innovator.",
+    "profilePhotoUrl": "/placeholder.svg?width=200&height=200"
+  },
+  "contact": {
+    "email": "michelle.lopez@email.com",
+    "phone": "(541) 754-3010",
+    "location": {
+      "city": "New York",
+      "state": null,
+      "country": "USA"
+    },
+    "professionalLinks": [
+      {
+        "platform": "linkedin",
+        "url": "#"
+      },
+      {
+        "platform": "resume",
+        "url": "/michelle-lopez-cv.pdf"
+      },
+      {
+        "platform": "pinterest",
+        "url": "#"
+      }
+    ],
+    "availability": "Available for collaborations and new projects."
+  },
+  "summary": {
+    "summaryText": "My philosophy is rooted in the belief that fashion is a powerful form of self-expression. I strive to create pieces that are not only beautiful and innovative but also timeless, empowering the wearer with confidence and grace. Each design is a story, woven from threads of history, art, and modern sensibility.",
+    "yearsOfExperience": null,
+    "keySpecializations": [],
+    "careerHighlights": []
+  },
+  "experience": {
+    "sectionTitle": "Career Milestones",
+    "experienceItems": [
+      {
+        "jobTitle": "Senior Fashion Designer",
+        "companyName": "Escada",
+        "location": {
+          "city": "Milan",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "2017",
+          "endDate": "2021",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Led the design of commercially successful collections, including an acclaimed Art Nouveau-inspired men's line that boosted sales by 46%."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Associate Fashion Designer",
+        "companyName": "Dior",
+        "location": {
+          "city": "New York",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "2014",
+          "endDate": "2017",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Contributed to multiple high-revenue collections, specializing in luxury footwear and accessories."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Junior Fashion Designer",
+        "companyName": "Prada",
+        "location": {
+          "city": "Milan",
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "2011",
+          "endDate": "2014",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Assisted in the development of seasonal collections, from initial concept to final production."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "Academic Provenance",
+    "educationItems": [
+      {
+        "degree": "Master of Fine Arts in Fashion Design",
+        "fieldOfStudy": null,
+        "institution": "Parsons School of Design",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "2012",
+          "endDate": "2014",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": [
+          "My thesis collection, which explored the intersection of technology and haute couture, was featured in the graduate showcase and received industry acclaim."
+        ],
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Bachelor of Arts in Fashion Design",
+        "fieldOfStudy": null,
+        "institution": "Central Saint Martins",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "2008",
+          "endDate": "2011",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": [
+          "Developed a strong foundation in conceptual design, pattern cutting, and garment construction."
+        ],
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Summer Intensive: Italian Leatherworking",
+        "fieldOfStudy": null,
+        "institution": "Polimoda",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": null
+        },
+        "dateRange": {
+          "startDate": "2010",
+          "endDate": "2010",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": [
+          "Studied traditional Italian leather craftsmanship and accessory design in Florence."
+        ],
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "Areas of Expertise",
+    "skillCategories": [
+      {
+        "categoryName": "Design & Concept",
+        "skills": [
+          "Fashion Design",
+          "Conceptual Development",
+          "Trend Forecasting"
+        ]
+      },
+      {
+        "categoryName": "Technical Skills",
+        "skills": [
+          "Pattern Cutting",
+          "Draping",
+          "Garment Construction"
+        ]
+      },
+      {
+        "categoryName": "Digital Tools",
+        "skills": [
+          "Adobe Illustrator",
+          "Adobe Photoshop",
+          "CLO 3D"
+        ]
+      }
+    ],
+    "ungroupedSkills": [
+      "Fabric Sourcing",
+      "Sustainable Practices",
+      "Brand Strategy"
+    ],
+    "proficiencyIndicators": {
+      "English": "Native",
+      "Italian": "Fluent",
+      "French": "Conversational"
+    }
+  },
+  "projects": {
+    "sectionTitle": "Selected Works",
+    "projectItems": [
+      {
+        "title": "Project 'Chrysalis'",
+        "role": null,
+        "duration": null,
+        "dateRange": {
+          "startDate": null,
+          "endDate": null,
+          "isCurrent": false
+        },
+        "description": "A sustainable capsule collection using upcycled materials and zero-waste pattern cutting techniques.",
+        "keyFeatures": null,
+        "technologiesUsed": null,
+        "projectUrl": "#",
+        "imageUrl": null,
+        "projectMetrics": {}
+      },
+      {
+        "title": "3D-Printed Footwear",
+        "role": null,
+        "duration": null,
+        "dateRange": {
+          "startDate": null,
+          "endDate": null,
+          "isCurrent": false
+        },
+        "description": "Collaboration with an engineering lab to develop a line of avant-garde, 3D-printed shoes.",
+        "keyFeatures": null,
+        "technologiesUsed": null,
+        "projectUrl": "#",
+        "imageUrl": null,
+        "projectMetrics": {}
+      },
+      {
+        "title": "The 'Metropolis' Collection",
+        "role": null,
+        "duration": null,
+        "dateRange": {
+          "startDate": null,
+          "endDate": null,
+          "isCurrent": false
+        },
+        "description": "A ready-to-wear line inspired by the architecture of Fritz Lang's 1927 film.",
+        "keyFeatures": null,
+        "technologiesUsed": null,
+        "projectUrl": "#",
+        "imageUrl": null,
+        "projectMetrics": {}
+      }
+    ]
+  },
+  "achievements": {
+    "sectionTitle": "Achievements",
+    "achievements": [
+      {
+        "value": "CFDA/Vogue Fashion Fund Finalist",
+        "label": "",
+        "contextOrDetail": "Recognized as one of the top emerging designers in the nation.",
+        "timeframe": "2023"
+      },
+      {
+        "value": "International Woolmark Prize",
+        "label": "",
+        "contextOrDetail": "Winner of the prestigious award for innovation in wool.",
+        "timeframe": "2022"
+      },
+      {
+        "value": "LVMH Prize for Young Fashion Designers",
+        "label": "",
+        "contextOrDetail": "Shortlisted for the coveted LVMH Prize.",
+        "timeframe": "2021"
+      }
+    ]
+  },
+  "certifications": {
+    "sectionTitle": "Certifications",
+    "certificationItems": [
+      {
+        "title": "Certified Sustainable Fashion Practitioner",
+        "issuingOrganization": "Council for Sustainable Fashion",
+        "issueDate": "2022",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      },
+      {
+        "title": "Global Organic Textile Standard (GOTS)",
+        "issuingOrganization": "GOTS Organization",
+        "issueDate": "2021",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      },
+      {
+        "title": "Leather Working Group (LWG) Certified",
+        "issuingOrganization": "LWG",
+        "issueDate": "2020",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      }
+    ]
+  },
+  "languages": {
+    "sectionTitle": "Languages",
+    "languageItems": [
+      {
+        "language": "English",
+        "proficiency": "Native",
+        "certification": null
+      },
+      {
+        "language": "Italian",
+        "proficiency": "Fluent",
+        "certification": null
+      },
+      {
+        "language": "French",
+        "proficiency": "Conversational",
+        "certification": null
+      }
+    ]
+  },
+  "courses": {
+    "sectionTitle": "Courses & Certifications",
+    "courseItems": [
+      {
+        "title": "Advanced Draping Techniques",
+        "institution": "The Fashion Institute",
+        "year": "2022"
+      },
+      {
+        "title": "Sustainable Textile Science",
+        "institution": "FutureLearn",
+        "year": "2021"
+      },
+      {
+        "title": "Digital Fashion Pro",
+        "institution": "Udemy",
+        "year": "2020"
+      }
+    ]
+  },
+  "volunteer": [
+    {
+      "role": "Mentor for Young Designers",
+      "organization": "Fashion Forward Initiative",
+      "period": "2020 - Present",
+      "description": "Guiding emerging talent in collection development and brand strategy."
+    },
+    {
+      "role": "Workshop Facilitator",
+      "organization": "Dress for Success",
+      "period": "2019",
+      "description": "Led workshops on personal styling and professional wardrobing."
+    },
+    {
+      "role": "Costume Designer",
+      "organization": "Local Community Theatre",
+      "period": "2018",
+      "description": "Designed and created costumes for a local production of 'A Midsummer Night's Dream'."
+    }
+  ],
+  "publications": {
+    "sectionTitle": "Publications",
+    "publications": [
+      {
+        "title": "The Future of Digital Fashion",
+        "authors": null,
+        "publicationType": null,
+        "journalName": "Vogue Business",
+        "conferenceName": null,
+        "publicationDate": "2023",
+        "doi": null,
+        "publicationUrl": "#",
+        "abstract": null
+      },
+      {
+        "title": "Zero-Waste Pattern Cutting: A Manifesto",
+        "authors": null,
+        "publicationType": null,
+        "journalName": "The Design Journal",
+        "conferenceName": null,
+        "publicationDate": "2022",
+        "doi": null,
+        "publicationUrl": "#",
+        "abstract": null
+      },
+      {
+        "title": "Interview: On Craftsmanship",
+        "authors": null,
+        "publicationType": null,
+        "journalName": "Business of Fashion",
+        "conferenceName": null,
+        "publicationDate": "2021",
+        "doi": null,
+        "publicationUrl": "#",
+        "abstract": null
+      }
+    ]
+  },
+  "speaking": {
+    "sectionTitle": "Speaking Engagements",
+    "speakingEngagements": [
+      {
+        "eventName": "Global Fashion Summit",
+        "topic": "Keynote: 'Technology in Haute Couture'",
+        "date": "2024",
+        "venue": "Copenhagen",
+        "role": null,
+        "eventUrl": null,
+        "presentationUrl": null,
+        "audienceSize": null
+      },
+      {
+        "eventName": "Sustainable Brands Conference",
+        "topic": "Panelist: 'The Circular Economy in Fashion'",
+        "date": "2023",
+        "venue": "Paris",
+        "role": null,
+        "eventUrl": null,
+        "presentationUrl": null,
+        "audienceSize": null
+      },
+      {
+        "eventName": "Parsons School of Design",
+        "topic": "Guest Lecturer",
+        "date": "2022",
+        "venue": "New York",
+        "role": null,
+        "eventUrl": null,
+        "presentationUrl": null,
+        "audienceSize": null
+      }
+    ]
+  },
+  "patents": null,
+  "memberships": {
+    "sectionTitle": "Professional Memberships",
+    "memberships": [
+      {
+        "organization": "Council of Fashion Designers of America (CFDA)",
+        "role": "Member",
+        "period": "2023 - Present"
+      },
+      {
+        "organization": "The Costume Society",
+        "role": "Member",
+        "period": "2020 - Present"
+      },
+      {
+        "organization": "American Sewing Guild",
+        "role": "Member",
+        "period": "2018 - Present"
+      }
+    ]
+  },
+  "hobbies": {
+    "sectionTitle": "Hobbies & Interests",
+    "hobbies": [
+      "Vintage Textile Restoration",
+      "Argentine Tango",
+      "Ikebana (Japanese Flower Arranging)",
+      "Sketching Urban Landscapes",
+      "Pottery and Ceramics",
+      "French New Wave Cinema"
+    ]
+  },
+  "unclassified_text": "© 2025 Michelle Lopez. All Rights Reserved."
+}

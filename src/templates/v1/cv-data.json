@@ -1,0 +1,445 @@
+{
+  "hero": {
+    "fullName": "GUY SAGEE",
+    "professionalTitle": null,
+    "summaryTagline": null,
+    "profilePhotoUrl": null
+  },
+  "contact": {
+    "email": "guy.sagee@gmail.com",
+    "phone": "+972 543517650",
+    "location": {
+      "city": "Herzliya",
+      "state": "None",
+      "country": "Israel"
+    },
+    "professionalLinks": null,
+    "availability": null
+  },
+  "summary": {
+    "summaryText": "Highly motivated B.Sc. student in Computational Neuroscience and Cognition with 4 years of diverse experience in research analysis, operations management, and military leadership. Proficient in Python and Excel for data analysis and visualization. Proven ability to lead teams, manage projects, conduct in-depth research, and provide actionable recommendations. Multilingual with strong communication skills.",
+    "yearsOfExperience": 4,
+    "keySpecializations": [
+      "Computational Neuroscience",
+      "Data Analysis",
+      "Research & Market Analysis",
+      "Project Management",
+      "Operations Management",
+      "Financial Management",
+      "Team Leadership",
+      "Tactical Training"
+    ],
+    "careerHighlights": [
+      "Conducted comprehensive research for smart city insights, providing actionable recommendations.",
+      "Managed financial strategies, oversight, and modeling for a media production company."
+    ]
+  },
+  "experience": {
+    "sectionTitle": "Experience",
+    "experienceItems": [
+      {
+        "jobTitle": "Research Analyst",
+        "companyName": "GYT ANALYTICS",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": "Israel"
+        },
+        "dateRange": {
+          "startDate": "2023",
+          "endDate": "2024",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Conducted reviews of government reports, databases, and market analyses for smart city insights.",
+          "Engaged key stakeholders to gather data and perspectives through interviews.",
+          "Identified trends and challenges in smart cities, providing actionable recommendations."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Operations and production manager",
+        "companyName": "ALT MEDIA",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": "Israel"
+        },
+        "dateRange": {
+          "startDate": "2022",
+          "endDate": "2023",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Project management - Led a team of editors, overseeing creative direction, logistics and deadlines.",
+          "Financial management - Managed pricing strategies, financial oversight, collection and financial modeling.",
+          "Video production - Including studio setup, recording, sound, editing and broadcasting."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "First Sergeant, Special Forces Combat Driving Unit Tactical driving instructor",
+        "companyName": "ISRAEL DEFENSE FORCES",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": "Israel"
+        },
+        "dateRange": {
+          "startDate": "2017",
+          "endDate": "2019",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Training included 4-months infantry combat basic training and 8-months advanced driving training on several military vehicles, on-road and off-road, night-vision combat driving.",
+          "Driving instructor, commander of 6-vehicle combat convoy, in multiple one-month intensive driving courses.",
+          "Promoted to sub-unit logistic commander."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": "Mandatory Military Service",
+        "teamSize": 6,
+        "reportingTo": null
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "Education",
+    "educationItems": [
+      {
+        "degree": "B.Sc",
+        "fieldOfStudy": "Computational Neuroscience and Cognition",
+        "institution": "BEN-GURION UNIVERSITY OF THE NEGEV",
+        "location": {
+          "city": "Beer-sheva",
+          "state": null,
+          "country": "Israel"
+        },
+        "dateRange": {
+          "startDate": "2022",
+          "endDate": null,
+          "isCurrent": true
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": [
+          "Data Structures",
+          "Algorithms",
+          "Neural Networks",
+          "Developed academic projects using Python and Java"
+        ],
+        "exchangePrograms": null
+      },
+      {
+        "degree": null,
+        "fieldOfStudy": "neuroscience",
+        "institution": "UNIVERSITY OF INNSBRUCK",
+        "location": {
+          "city": "Innsbruck",
+          "state": null,
+          "country": "Austria"
+        },
+        "dateRange": {
+          "startDate": "fall 2024",
+          "endDate": "spring 2025",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": [
+          "neurophysiology",
+          "cognitive science",
+          "computational modeling"
+        ],
+        "exchangePrograms": [
+          "Semester exchange program in neuroscience"
+        ]
+      },
+      {
+        "degree": "120-hour comprehensive TEFL program",
+        "fieldOfStudy": "TEFL (Teaching English as a Foreign Language)",
+        "institution": "MYTEFL",
+        "location": null,
+        "dateRange": {
+          "startDate": "2020",
+          "endDate": "2020",
+          "isCurrent": false
+        },
+        "gpa": null,
+        "honors": [
+          "Certified English teacher"
+        ],
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Full graduation diploma",
+        "fieldOfStudy": "Physics, Mathematics, English and French",
+        "institution": "ALLIANCE HIGH SCHOOL",
+        "location": {
+          "city": "Tel Aviv",
+          "state": null,
+          "country": "Israel"
+        },
+        "dateRange": {
+          "startDate": "2010",
+          "endDate": "2016",
+          "isCurrent": false
+        },
+        "gpa": "698",
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "Skills",
+    "skillCategories": [
+      {
+        "categoryName": "Programming Languages",
+        "skills": [
+          "Python",
+          "Java"
+        ]
+      },
+      {
+        "categoryName": "Frameworks & Libraries",
+        "skills": [
+          "Numpy",
+          "Matplotlib",
+          "Pandas"
+        ]
+      },
+      {
+        "categoryName": "Data & Analytics Tools",
+        "skills": [
+          "Excel",
+          "Data analysis",
+          "Pivot tables",
+          "Data visualization"
+        ]
+      },
+      {
+        "categoryName": "Business & Strategy",
+        "skills": [
+          "Strategic consulting",
+          "Market analysis",
+          "Trend analysis",
+          "Recommendation generation",
+          "Report writing",
+          "Problem identification"
+        ]
+      },
+      {
+        "categoryName": "Project & Operations Management",
+        "skills": [
+          "Project management",
+          "Operations management",
+          "Logistics",
+          "Deadline management",
+          "Financial management",
+          "Pricing strategies",
+          "Financial oversight",
+          "Collections",
+          "Financial modeling"
+        ]
+      },
+      {
+        "categoryName": "Media Production",
+        "skills": [
+          "Video production",
+          "Studio setup",
+          "Recording",
+          "Sound engineering",
+          "Video editing",
+          "Broadcasting",
+          "Creative direction"
+        ]
+      },
+      {
+        "categoryName": "Research & Data Gathering",
+        "skills": [
+          "Research",
+          "Stakeholder engagement",
+          "Data gathering",
+          "Interviewing"
+        ]
+      },
+      {
+        "categoryName": "Leadership & Training",
+        "skills": [
+          "Team leadership",
+          "Training delivery",
+          "Driving instruction"
+        ]
+      },
+      {
+        "categoryName": "Military & Tactical",
+        "skills": [
+          "Tactical driving",
+          "Combat driving",
+          "Military operations",
+          "Military logistics",
+          "Convoy command"
+        ]
+      }
+    ],
+    "ungroupedSkills": null,
+    "proficiencyIndicators": {
+      "Python": "proficient",
+      "Excel": "proficient",
+      "Java": "basic",
+      "English": "native",
+      "Hebrew": "native",
+      "Spanish": "fluent",
+      "French": "basic"
+    }
+  },
+  "projects": null,
+  "achievements": {
+    "sectionTitle": "Key Achievements",
+    "achievements": [
+      {
+        "value": "698",
+        "label": "Psychometric test score",
+        "contextOrDetail": null,
+        "timeframe": null
+      },
+      {
+        "value": "Certified",
+        "label": "English teacher",
+        "contextOrDetail": "through 120-hour comprehensive TEFL program",
+        "timeframe": null
+      },
+      {
+        "value": "a team of editors",
+        "label": "Led",
+        "contextOrDetail": "as Project Manager, overseeing creative direction, logistics and deadlines",
+        "timeframe": null
+      },
+      {
+        "value": "6-vehicle",
+        "label": "Commanded combat convoy",
+        "contextOrDetail": "as Driving instructor in multiple one-month intensive driving courses",
+        "timeframe": null
+      },
+      {
+        "value": "Promoted",
+        "label": "to sub-unit logistic commander",
+        "contextOrDetail": null,
+        "timeframe": null
+      }
+    ]
+  },
+  "certifications": {
+    "sectionTitle": "Certifications",
+    "certificationItems": [
+      {
+        "title": "Certified English teacher",
+        "issuingOrganization": "MYTEFL",
+        "issueDate": "2020",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      }
+    ]
+  },
+  "languages": {
+    "sectionTitle": "Languages",
+    "languageItems": [
+      {
+        "language": "English",
+        "proficiency": "Native",
+        "certification": null
+      },
+      {
+        "language": "Hebrew",
+        "proficiency": "Native",
+        "certification": null
+      },
+      {
+        "language": "Spanish",
+        "proficiency": "Fluent",
+        "certification": null
+      },
+      {
+        "language": "French",
+        "proficiency": "basic",
+        "certification": null
+      }
+    ]
+  },
+  "courses": {
+    "sectionTitle": "Courses & Training",
+    "courseItems": [
+      {
+        "title": "120-hour comprehensive TEFL program",
+        "issuingOrganization": "MYTEFL",
+        "dateRange": {
+          "startDate": "2020",
+          "endDate": "2020",
+          "isCurrent": false
+        },
+        "certificateNumber": null,
+        "certificateUrl": null,
+        "description": "Certified English teacher"
+      }
+    ]
+  },
+  "volunteer": null,
+  "publications": null,
+  "speaking": {
+    "sectionTitle": "Speaking Engagements",
+    "speakingEngagements": [
+      {
+        "eventName": "One-month intensive driving courses",
+        "topic": "Tactical driving and combat convoy operations",
+        "date": "2017-2019",
+        "venue": "Israel",
+        "role": "Driving instructor, commander",
+        "eventUrl": null,
+        "presentationUrl": null,
+        "audienceSize": 6
+      }
+    ]
+  },
+  "patents": null,
+  "memberships": {
+    "sectionTitle": "Professional Memberships",
+    "memberships": [
+      {
+        "organization": "MyTEFL",
+        "role": "Certified English teacher",
+        "membershipType": "TEFL Certification",
+        "membershipId": null,
+        "dateRange": {
+          "startDate": "2020",
+          "endDate": "2020",
+          "isCurrent": false
+        },
+        "description": "Completed 120-hour comprehensive TEFL program."
+      }
+    ]
+  },
+  "hobbies": {
+    "sectionTitle": "Hobbies & Interests",
+    "hobbies": []
+  },
+  "unclassified_text": null
+}

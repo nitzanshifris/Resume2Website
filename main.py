@@ -12,7 +12,7 @@ import config
 load_dotenv()
 
 # Import our routes
-from api.routes import cv, portfolio, cv_to_portfolio
+from src.api.routes import cv, portfolio, cv_to_portfolio
 
 # Configure logging
 logging.basicConfig(

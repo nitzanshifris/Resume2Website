@@ -1,0 +1,23 @@
+{
+  "test_number": 1,
+  "generated_at": "2025-07-07T20:40:49.174970",
+  "cv_file": "Guy Sagee - CV 425.2 .pdf",
+  "person_name": "GUY SAGEE",
+  "sections_extracted": [
+    "hero",
+    "professionalSummary",
+    "experience",
+    "skills",
+    "education",
+    "courses",
+    "speakingEngagements",
+    "languages",
+    "contact"
+  ],
+  "portfolio_path": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/portfolio_tests/test_1/portfolio",
+  "commands_to_run": [
+    "cd portfolio_tests/test_1/portfolio",
+    "npm install",
+    "npm run dev"
+  ]
+}
