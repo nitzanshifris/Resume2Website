@@ -1,0 +1,334 @@
+{
+  "cleanup_tasks": [
+    {
+      "title": "Read and analyze CLEANUP_RECOMMENDATIONS.md thoroughly",
+      "description": "Thoroughly read CLEANUP_RECOMMENDATIONS.md and understand all recommendations",
+      "priority": "high",
+      "category": "testing"
+    },
+    {
+      "title": "Check all references to files in /legacy/ directory",
+      "description": "Use grep to find all imports and references to /legacy/ files from active code",
+      "priority": "high",
+      "category": "testing"
+    },
+    {
+      "title": "Verify Python functionality migration from /legacy/services/ to /src/",
+      "description": "Compare all Python files in /legacy/services/portfolio/ with /src/core/portfolio_gen/",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Create comprehensive file inventory for deletion",
+      "description": "List all .DS_Store files, .next directories, and other files marked for deletion",
+      "priority": "high",
+      "category": "testing"
+    },
+    {
+      "title": "Check for active references to root-level Python files",
+      "description": "Verify nothing imports from /config.py or /main.py at root level",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Test current functionality before cleanup",
+      "description": "Run all tests and ensure both frontend/backend work before starting cleanup",
+      "priority": "high",
+      "category": "testing"
+    },
+    {
+      "title": "Find and list all .DS_Store files",
+      "description": "Run: find . -name '.DS_Store' -type f to list all .DS_Store files",
+      "priority": "high",
+      "category": "deployment"
+    },
+    {
+      "title": "Remove all .DS_Store files",
+      "description": "Execute: find . -name '.DS_Store' -type f -delete",
+      "priority": "high",
+      "category": "deployment"
+    },
+    {
+      "title": "Add .DS_Store to .gitignore",
+      "description": "Ensure .DS_Store is in .gitignore to prevent future commits",
+      "priority": "high",
+      "category": "deployment"
+    },
+    {
+      "title": "List all .next directories",
+      "description": "Find all 9 .next directories as listed in CLEANUP_RECOMMENDATIONS.md",
+      "priority": "high",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Remove all .next directories",
+      "description": "Delete all .next build directories: find . -name '.next' -type d -exec rm -rf {} +",
+      "priority": "high",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Add .next/ to .gitignore",
+      "description": "Ensure .next/ is properly configured in .gitignore",
+      "priority": "high",
+      "category": "deployment"
+    },
+    {
+      "title": "Check references to root config.py",
+      "description": "Verify no code imports from /config.py, should use src/api/config.py",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Check references to root main.py",
+      "description": "Verify root main.py is not the active entry point",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Delete root config.py and main.py",
+      "description": "Remove legacy Python files from root after verification",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Create detailed inventory of /legacy/ directory",
+      "description": "Document all files in /legacy/ and their migration status",
+      "priority": "high",
+      "category": "testing"
+    },
+    {
+      "title": "Verify all legacy Python code exists in /src/",
+      "description": "Compare functionality between /legacy/services/ and /src/core/",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Check for unique files in /legacy/ not migrated",
+      "description": "Identify any files in /legacy/ that don't have equivalents in /src/",
+      "priority": "high",
+      "category": "testing"
+    },
+    {
+      "title": "Delete entire /legacy/ directory",
+      "description": "Remove /legacy/ directory after all verifications complete",
+      "priority": "high",
+      "category": "deployment"
+    },
+    {
+      "title": "Find all package-lock.json files",
+      "description": "List all package-lock.json files in the project",
+      "priority": "medium",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Remove all package-lock.json files",
+      "description": "Delete package-lock.json files since using pnpm",
+      "priority": "medium",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Verify pnpm-lock.yaml files are present",
+      "description": "Ensure pnpm-lock.yaml exists where needed",
+      "priority": "medium",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Check /tests/results/ directory contents",
+      "description": "Review test output files that shouldn't be in git",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Clean /tests/results/ directory",
+      "description": "Remove test output .txt files from version control",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Add tests/results/*.txt to .gitignore",
+      "description": "Prevent test outputs from being committed",
+      "priority": "medium",
+      "category": "deployment"
+    },
+    {
+      "title": "Remove empty 'write' file from root",
+      "description": "Delete the empty 'write' file in project root",
+      "priority": "low",
+      "category": "deployment"
+    },
+    {
+      "title": "Remove updated_json.txt from root",
+      "description": "Delete temporary file updated_json.txt",
+      "priority": "low",
+      "category": "deployment"
+    },
+    {
+      "title": "Move test_full_pipeline.py to /tests/",
+      "description": "Move from components/gallery-app/aceternity-gallery-app/scripts/ to /tests/",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Move test_model_router.py to /tests/",
+      "description": "Move from components/gallery-app/aceternity-gallery-app/scripts/ to /tests/",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Create /src/utils/scripts/ directory",
+      "description": "Create directory for utility scripts",
+      "priority": "medium",
+      "category": "deployment"
+    },
+    {
+      "title": "Move JS utility scripts to /src/utils/scripts/",
+      "description": "Move build-cv2web-bundle.js, create-button-pages.js, extract-component.js",
+      "priority": "medium",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Move shell scripts to /scripts/ at root",
+      "description": "Move operational shell scripts from gallery-app to root /scripts/",
+      "priority": "medium",
+      "category": "deployment"
+    },
+    {
+      "title": "Create /docs/components/ directory",
+      "description": "Create directory for component documentation",
+      "priority": "low",
+      "category": "deployment"
+    },
+    {
+      "title": "Move component docs to /docs/components/",
+      "description": "Move docs from components/gallery-app/aceternity-gallery-app/docs/",
+      "priority": "low",
+      "category": "deployment"
+    },
+    {
+      "title": "Analyze tests in /legacy/tests/",
+      "description": "Review all test files in legacy directory",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Create test subdirectories structure",
+      "description": "Create /tests/unit/, /tests/integration/, /tests/e2e/",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Move and consolidate test files",
+      "description": "Move tests from /legacy/tests/ to appropriate subdirectories",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Remove duplicate test files",
+      "description": "Identify and remove any duplicate test implementations",
+      "priority": "medium",
+      "category": "testing"
+    },
+    {
+      "title": "Rename 'untitled folder' directories",
+      "description": "Rename all untitled folders in /data/cv_examples/png_examples/",
+      "priority": "low",
+      "category": "deployment"
+    },
+    {
+      "title": "Standardize Next.js config extensions",
+      "description": "Decide on .js vs .mjs for Next.js configs and standardize",
+      "priority": "low",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Standardize Tailwind config extensions",
+      "description": "Decide on .ts vs .js for Tailwind configs and standardize",
+      "priority": "low",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Update .gitignore with comprehensive entries",
+      "description": "Add all recommended .gitignore entries from CLEANUP_RECOMMENDATIONS.md",
+      "priority": "medium",
+      "category": "deployment"
+    },
+    {
+      "title": "Create cleanup.sh script",
+      "description": "Create automated cleanup script at /scripts/cleanup.sh",
+      "priority": "medium",
+      "category": "deployment"
+    },
+    {
+      "title": "Remove node_modules from templates",
+      "description": "Clean node_modules from /src/templates/v1/",
+      "priority": "medium",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Analyze /data/uploads/ directory",
+      "description": "Review 150+ uploaded files and determine cleanup strategy",
+      "priority": "medium",
+      "category": "deployment"
+    },
+    {
+      "title": "Implement upload cleanup policy",
+      "description": "Create policy for managing uploaded files",
+      "priority": "medium",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Consider database location change",
+      "description": "Evaluate moving cv2web.db to standard location",
+      "priority": "low",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Run pnpm run typecheck",
+      "description": "Ensure no TypeScript errors after cleanup",
+      "priority": "high",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Run all Python tests",
+      "description": "Execute pytest and comprehensive_test.py",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Test backend API functionality",
+      "description": "Start backend and test all endpoints",
+      "priority": "high",
+      "category": "backend-fastapi"
+    },
+    {
+      "title": "Test frontend build and dev server",
+      "description": "Run pnpm run build and pnpm run dev",
+      "priority": "high",
+      "category": "frontend-next"
+    },
+    {
+      "title": "Verify CV upload and processing",
+      "description": "Test complete CV to portfolio generation flow",
+      "priority": "high",
+      "category": "testing"
+    },
+    {
+      "title": "Check git repository size reduction",
+      "description": "Measure disk space saved and file count reduction",
+      "priority": "medium",
+      "category": "deployment"
+    },
+    {
+      "title": "Document all changes made",
+      "description": "Create comprehensive changelog of cleanup actions",
+      "priority": "high",
+      "category": "deployment"
+    },
+    {
+      "title": "Commit cleanup changes",
+      "description": "Create clean commit with all cleanup changes",
+      "priority": "high",
+      "category": "deployment"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Task ID: 10
+# Title: Add .DS_Store to .gitignore
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Ensure .DS_Store is in .gitignore to prevent future commits
+# Details:
+
+
+# Test Strategy:
+

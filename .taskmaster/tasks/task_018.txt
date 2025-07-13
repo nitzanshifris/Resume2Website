@@ -1,0 +1,11 @@
+# Task ID: 18
+# Title: Verify all legacy Python code exists in /src/
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Compare functionality between /legacy/services/ and /src/core/
+# Details:
+
+
+# Test Strategy:
+

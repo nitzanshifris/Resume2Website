@@ -1,0 +1,11 @@
+# Task ID: 13
+# Title: Add .next/ to .gitignore
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Ensure .next/ is properly configured in .gitignore
+# Details:
+
+
+# Test Strategy:
+

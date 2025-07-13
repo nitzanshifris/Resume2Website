@@ -1,0 +1,11 @@
+# Task ID: 19
+# Title: Check for unique files in /legacy/ not migrated
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Identify any files in /legacy/ that don't have equivalents in /src/
+# Details:
+
+
+# Test Strategy:
+

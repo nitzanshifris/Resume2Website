@@ -1,0 +1,11 @@
+# Task ID: 28
+# Title: Remove updated_json.txt from root
+# Status: pending
+# Dependencies: None
+# Priority: low
+# Description: Delete temporary file updated_json.txt
+# Details:
+
+
+# Test Strategy:
+

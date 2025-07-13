@@ -1,0 +1,11 @@
+# Task ID: 6
+# Title: Check for active references to root-level Python files
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Verify nothing imports from /config.py or /main.py at root level
+# Details:
+
+
+# Test Strategy:
+

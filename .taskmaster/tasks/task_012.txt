@@ -1,0 +1,11 @@
+# Task ID: 12
+# Title: Remove all .next directories
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Delete all .next build directories: find . -name '.next' -type d -exec rm -rf {} +
+# Details:
+
+
+# Test Strategy:
+

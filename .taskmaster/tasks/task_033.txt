@@ -1,0 +1,11 @@
+# Task ID: 33
+# Title: Move shell scripts to /scripts/ at root
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Move operational shell scripts from gallery-app to root /scripts/
+# Details:
+
+
+# Test Strategy:
+
