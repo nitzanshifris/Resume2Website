@@ -14,6 +14,18 @@
 - Frontend runs on port 3000
 - Max file upload: 10MB
 
+## IMPORTANT: Auto-use Context7
+When asked about any of these, **ALWAYS** use Context7 MCP tools:
+- FastAPI implementation patterns
+- React/Next.js best practices
+- Google Gemini API usage
+- Anthropic Claude API integration
+- AWS Textract/Google Vision OCR
+- Tailwind CSS v4 patterns
+- TypeScript patterns
+- Any library documentation
+- Code examples from external libraries
+
 ## Project Overview
 AI-powered CV to portfolio website converter using FastAPI (Python) + Next.js (TypeScript) in a pnpm monorepo.
 
