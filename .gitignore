@@ -63,6 +63,11 @@ next-env.d.ts
 .env.local
 .env.production
 .env*.local
+
+# TaskMaster AI
+.taskmaster/tasks/
+.taskmaster/research/
+.taskmaster/docs/*.tmp
 *-service-account*.json
 credentials/*.json
 .aws/

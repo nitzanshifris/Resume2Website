@@ -26,6 +26,40 @@ When asked about any of these, **ALWAYS** use Context7 MCP tools:
 - Any library documentation
 - Code examples from external libraries
 
+## IMPORTANT: TaskMaster AI Integration
+TaskMaster AI is configured for AI-driven task management. Use it for:
+- Breaking down complex features into tasks
+- Tracking development progress
+- Generating PRDs (Product Requirements Documents)
+- Research integration for best practices
+
+### TaskMaster Commands
+```bash
+# Initialize TaskMaster in project
+claude> can you please initialize taskmaster-ai into my project?
+
+# Create PRD for a feature
+claude> create a PRD for [feature] at .taskmaster/docs/[feature]-prd.txt
+
+# Parse PRD into tasks
+claude> parse the PRD at .taskmaster/docs/[feature]-prd.txt and generate tasks
+
+# Work with tasks
+claude> what's the next task I should work on?
+claude> show me tasks 1, 3, and 5
+claude> let's implement task 3
+claude> break down task 5 into subtasks
+
+# Update tasks based on changes
+claude> we decided to use [X] instead of [Y]. Update all related tasks
+```
+
+### CV2WEB Specific TaskMaster Usage
+- **CV Extraction**: `create tasks for improving CV extraction with Gemini 2.5 Flash`
+- **UI Components**: `break down portfolio templates focusing on Aceternity components`
+- **API Features**: `create tasks for new FastAPI endpoint with authentication`
+- **Research**: `research latest Next.js 15 patterns and update our frontend tasks`
+
 ## Project Overview
 AI-powered CV to portfolio website converter using FastAPI (Python) + Next.js (TypeScript) in a pnpm monorepo.
 
