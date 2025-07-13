@@ -176,6 +176,13 @@ git push origin main                    # Push to GitHub
 - **CI/CD**: Automated workflows in `.github/workflows/`
 - **Actions**: Claude Code GitHub Action configured
 
+## Debugging Tips
+- **Backend logs**: Check terminal running uvicorn
+- **Frontend errors**: Open browser DevTools Console (F12)
+- **Python errors**: Check venv is activated (`which python` should show venv path)
+- **TypeScript errors**: Run `pnpm run typecheck`
+- **API issues**: Visit http://localhost:2000/docs for FastAPI interactive docs
+
 ## Project Configuration (config.py)
 - **Backend Port**: 2000 (not 8000!)
 - **CORS Origins**: localhost:3000, 3001, 5173
