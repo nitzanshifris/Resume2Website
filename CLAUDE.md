@@ -1,11 +1,18 @@
 # CV2WEB V4 - Claude Code Assistant Guide
 
+## Quick Setup
+```bash
+./quickstart.sh                         # One-command setup (recommended)
+```
+
 ## IMPORTANT: Environment Setup
 - **YOU MUST** use pnpm, not npm or yarn
 - **ALWAYS** run typecheck after making code changes: `pnpm run typecheck`
 - **NEVER** use code from `/legacy/` directory
 - **ALWAYS** check existing components before creating new ones
-- Backend runs on port 2000, frontend on port 3000
+- Backend runs on port **2000** (configured in config.py)
+- Frontend runs on port 3000
+- Max file upload: 10MB
 
 ## Project Overview
 AI-powered CV to portfolio website converter using FastAPI (Python) + Next.js (TypeScript) in a pnpm monorepo.
@@ -14,8 +21,19 @@ AI-powered CV to portfolio website converter using FastAPI (Python) + Next.js (T
 
 ### Backend (Python FastAPI)
 ```bash
+# Setup virtual environment (first time)
+python3 -m venv venv                    # Create venv
+source venv/bin/activate                # Activate (macOS/Linux)
+pip install -r requirements.txt         # Install dependencies
+
+# Run backend
 uvicorn main:app --reload --port 2000  # Start backend
-pytest                                   # Run tests
+python main.py                          # Alternative start method
+
+# Testing
+pytest                                  # Run all tests
+python tests/comprehensive_test.py      # Comprehensive test suite
+python tests/quick_api_test.sh          # Quick API health check
 ```
 
 ### Frontend (Next.js/TypeScript)
@@ -26,14 +44,29 @@ pnpm run build                          # Build project
 pnpm run typecheck                      # Check types (IMPORTANT!)
 pnpm run test                           # Run tests
 pnpm run storybook                      # Component development
+pnpm run gen:stories                    # Generate Storybook stories
+pnpm run gen:props                      # Extract component props
 ```
 
 ### Debug Commands
 ```bash
 pnpm why [package]                      # Check why package installed
-curl http://localhost:2000/docs         # Check if backend running
+curl http://localhost:2000/docs         # Check if backend running (FastAPI docs)
 pnpm ls                                 # List all workspace packages
 git status && git diff                  # Check changes before commit
+```
+
+### Utility Scripts
+```bash
+# Portfolio generation
+python src/utils/generate_complete_portfolio.py
+python src/utils/generate_test_portfolio.py
+
+# Component validation
+python src/utils/validate_registry.py   # Validate component registry
+
+# Development utilities
+python src/utils/setup_keychain.py      # Setup credentials
 ```
 
 ## Code Style (IMPORTANT)
@@ -114,11 +147,20 @@ When you see "Property 'X' does not exist":
 | Large file warning | Use Git LFS for files >50MB |
 | Import not working | Check if using `src/` prefix correctly |
 
-## AI Services
-- **Google Gemini 2.0** - CV extraction (primary)
-- **Claude API** - Content enhancement
-- **Google Cloud Vision** - OCR
+## AI Services & Configuration
+- **Google Gemini 2.5 Flash** - CV extraction (primary, model in config.py)
+- **Claude 3.5 Sonnet** - Content enhancement
+- **Google Cloud Vision** - OCR for images
 - **AWS Textract** - Alternative OCR
+- **OpenAI API** - Optional enhancement
+- **Vercel** - Deployment platform
+- **Pinecone** - Optional vector search
+
+### Credential Setup (IMPORTANT)
+```bash
+python src/utils/setup_keychain.py      # Secure credential storage
+```
+**Never store API keys in files!** Use the keychain manager.
 
 ## Git Workflow
 ```bash
@@ -126,7 +168,23 @@ git status                              # Check changes
 pnpm run typecheck                      # Verify no TS errors
 git add -A                              # Stage changes
 git commit -m "feat: descriptive message"
+git push origin main                    # Push to GitHub
 ```
+
+### GitHub Integration
+- **PR Reviews**: Mention `@claude` in PR comments for AI review
+- **CI/CD**: Automated workflows in `.github/workflows/`
+- **Actions**: Claude Code GitHub Action configured
+
+## Project Configuration (config.py)
+- **Backend Port**: 2000 (not 8000!)
+- **CORS Origins**: localhost:3000, 3001, 5173
+- **Max Upload**: 10MB
+- **File Types**: PDF, DOCX, DOC, TXT, MD, RTF, ODT, HTML, images
+- **Session Expiry**: 7 days
+- **AI Models**: 
+  - Gemini: `gemini-2.5-flash`
+  - Claude: `claude-3-5-sonnet-20241022`
 
 ## REMEMBER
 1. **typecheck** after changes
@@ -134,3 +192,6 @@ git commit -m "feat: descriptive message"
 3. Check **existing code** first
 4. Use **Read/Grep** tools for research
 5. Follow **existing patterns**
+6. Backend runs on **port 2000**
+7. Use **quickstart.sh** for setup
+8. **Never** commit API keys
