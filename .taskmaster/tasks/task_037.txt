@@ -1,0 +1,11 @@
+# Task ID: 37
+# Title: Create test subdirectories structure
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create /tests/unit/, /tests/integration/, /tests/e2e/
+# Details:
+
+
+# Test Strategy:
+

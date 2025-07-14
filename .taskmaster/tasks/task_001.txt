@@ -1,0 +1,93 @@
+# Task ID: 1
+# Title: Create backup branch before starting cleanup
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create a dedicated backup branch from the current main/master branch to preserve the existing codebase state before initiating any cleanup activities.
+# Details:
+This task involves creating a safety net before making potentially breaking changes during the cleanup process. Implementation steps:
+
+1. Ensure your local repository is up to date:
+   ```bash
+   git fetch origin
+   git pull origin main  # or master, depending on your default branch
+   ```
+
+2. Create a new backup branch with a descriptive name and timestamp:
+   ```bash
+   git checkout -b backup/pre-cleanup-$(date +%Y%m%d-%H%M%S)
+   ```
+
+3. Push the backup branch to the remote repository:
+   ```bash
+   git push -u origin backup/pre-cleanup-$(date +%Y%m%d-%H%M%S)
+   ```
+
+4. Document the backup branch creation in the project's changelog or README:
+   - Branch name
+   - Creation date and time
+   - Purpose (pre-cleanup backup)
+   - Last commit hash before cleanup
+
+5. Consider adding branch protection rules if your repository supports it:
+   - Prevent deletion
+   - Restrict push access
+   - Require pull request reviews for any changes
+
+6. Create a tag for easy reference:
+   ```bash
+   git tag -a pre-cleanup-backup -m "Backup before cleanup activities"
+   git push origin pre-cleanup-backup
+   ```
+
+Best practices:
+- Use a consistent naming convention for backup branches
+- Include timestamps to track when backups were created
+- Consider automating this process for future cleanup activities
+- Ensure all team members are aware of the backup branch location
+
+# Test Strategy:
+Verify the backup branch creation with the following steps:
+
+1. Confirm the backup branch exists locally:
+   ```bash
+   git branch | grep backup/pre-cleanup
+   ```
+
+2. Verify the branch was pushed to remote:
+   ```bash
+   git ls-remote --heads origin | grep backup/pre-cleanup
+   ```
+
+3. Check that the backup branch contains the exact same commit history as main/master:
+   ```bash
+   git log --oneline -n 10 main
+   git log --oneline -n 10 backup/pre-cleanup-[timestamp]
+   ```
+   Both outputs should be identical.
+
+4. Verify the tag was created and pushed:
+   ```bash
+   git tag -l | grep pre-cleanup-backup
+   git ls-remote --tags origin | grep pre-cleanup-backup
+   ```
+
+5. Test branch protection (if configured):
+   - Attempt to delete the branch (should fail)
+   - Try direct push to the branch (should be restricted)
+
+6. Confirm documentation was updated:
+   - Check changelog/README for backup branch information
+   - Verify all required details are present (branch name, date, purpose, commit hash)
+
+7. Perform a test restoration:
+   ```bash
+   git checkout -b test-restore backup/pre-cleanup-[timestamp]
+   ```
+   Ensure all files and commit history are intact.
+
+8. Clean up test branch:
+   ```bash
+   git checkout main
+   git branch -d test-restore
+   ```

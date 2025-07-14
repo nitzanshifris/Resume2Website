@@ -1,0 +1,11 @@
+# Task ID: 20
+# Title: Delete entire /legacy/ directory
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Remove /legacy/ directory after all verifications complete
+# Details:
+
+
+# Test Strategy:
+

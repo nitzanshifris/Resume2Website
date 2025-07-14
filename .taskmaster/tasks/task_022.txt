@@ -1,0 +1,11 @@
+# Task ID: 22
+# Title: Remove all package-lock.json files
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Delete package-lock.json files since using pnpm
+# Details:
+
+
+# Test Strategy:
+
