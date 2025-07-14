@@ -56,6 +56,40 @@ claude> break down task 5 into subtasks
 claude> we decided to use [X] instead of [Y]. Update all related tasks
 ```
 
+### AUTOMATIC TaskMaster Workflow (IMPORTANT)
+When user requests ANY new feature or task, Claude Code MUST automatically:
+
+1. **Create PRD First**
+   - Ask clarifying questions if needed
+   - Generate comprehensive PRD
+   - Save to `.taskmaster/docs/[feature]-prd.txt`
+
+2. **Generate Tasks**
+   ```bash
+   taskmaster parse-prd .taskmaster/docs/[feature]-prd.txt
+   ```
+
+3. **Analyze Complexity**
+   ```bash
+   taskmaster analyze-complexity
+   ```
+
+4. **Break Down Complex Tasks**
+   - Any task with complexity > 7 should be expanded
+   - Use specific subtasks (4-6 per complex task)
+
+5. **Execute Systematically**
+   - Show current task details
+   - Implement the task
+   - Mark as done immediately
+   - Move to next task
+
+Example automatic flow:
+```
+User: "Add dark mode to the app"
+Claude: [Automatically creates PRD → generates tasks → analyzes → starts implementation]
+```
+
 ### CV2WEB Specific TaskMaster Usage
 - **CV Extraction**: `create tasks for improving CV extraction with Gemini 2.5 Flash`
 - **UI Components**: `break down portfolio templates focusing on Aceternity components`
@@ -152,6 +186,20 @@ When you see "Property 'X' does not exist":
 4. Add story: `new-component.stories.tsx`
 
 ## Claude Code Specific Instructions
+
+### AUTOMATIC TaskMaster Triggers (MUST USE)
+Use TaskMaster workflow automatically when user says:
+- "add [feature]" / "implement [feature]" / "create [feature]"
+- "build [component/system]" / "develop [functionality]"
+- "I want to [do something]" / "help me [build/create/add]"
+- "let's work on [feature]" / "start working on [task]"
+- Any request involving multiple steps or complex implementation
+
+DO NOT use TaskMaster for:
+- Simple bug fixes
+- Quick questions
+- Code explanations
+- Single file edits
 
 ### Research Before Coding
 - **ALWAYS** use Read/Grep to check existing patterns first
