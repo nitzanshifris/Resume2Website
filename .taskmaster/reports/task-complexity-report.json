@@ -1,0 +1,461 @@
+{
+	"meta": {
+		"generatedAt": "2025-07-13T14:22:33.537Z",
+		"tasksAnalyzed": 56,
+		"totalTasks": 56,
+		"analysisCount": 56,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Create backup branch before starting cleanup",
+			"complexityScore": 4,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Expand this task to include: verifying local and remote branch creation, tagging the backup, documenting the backup in project files, configuring branch protection, and performing a test restoration to ensure the backup is usable.",
+			"reasoning": "This task is procedural and follows standard git workflows, but includes several best practices (naming, tagging, documentation, branch protection, restoration test) that add moderate complexity. Each step is discrete and should be tracked for auditability and safety."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Read and analyze CLEANUP_RECOMMENDATIONS.md thoroughly",
+			"complexityScore": 3,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Expand this task to include: reading the document, extracting recommendations, categorizing them, analyzing impact and feasibility, and preparing a summary report for team review.",
+			"reasoning": "The task is primarily analytical and organizational, requiring careful reading and synthesis but no technical implementation. Adding a summary/reporting step ensures actionable outcomes."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Create comprehensive file inventory for deletion",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Expand this task to include: identifying all .DS_Store files, listing all .next directories, compiling other files marked for deletion, and validating the inventory with stakeholders before deletion.",
+			"reasoning": "This task involves recursive file system operations, cross-referencing documentation, and stakeholder validation. It requires attention to detail and coordination, making it moderately complex."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Create detailed inventory of /legacy/ directory",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Expand this task to include: listing all files, determining migration status, documenting findings in a structured format, reviewing with stakeholders, and updating the inventory as files are migrated or removed.",
+			"reasoning": "This task requires both technical (file system analysis) and collaborative (stakeholder review) steps, as well as ongoing updates, which increases its complexity."
+		},
+		{
+			"taskId": 31,
+			"taskTitle": "Create /src/utils/scripts/ directory",
+			"complexityScore": 2,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Expand this task to include: verifying the directory does not exist, creating it with correct permissions, and adding a README or placeholder file describing its purpose.",
+			"reasoning": "This is a straightforward file system operation with minimal complexity, but documentation is a best practice."
+		},
+		{
+			"taskId": 34,
+			"taskTitle": "Create /docs/components/ directory",
+			"complexityScore": 1,
+			"recommendedSubtasks": 1,
+			"expansionPrompt": "Expand this task to include: creating the directory and adding a README.md or placeholder file that describes its intended use.",
+			"reasoning": "This is a trivial directory creation task with a single documentation step."
+		},
+		{
+			"taskId": 37,
+			"taskTitle": "Create test subdirectories structure",
+			"complexityScore": 2,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Expand this task to include: creating the /tests/unit/, /tests/integration/, and /tests/e2e/ directories, and documenting intended use and placement guidelines for each.",
+			"reasoning": "This is a simple structural task, but adding documentation for test placement and best practices is valuable."
+		},
+		{
+			"taskId": 44,
+			"taskTitle": "Create cleanup.sh script",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Expand this task to include: defining cleanup requirements, drafting the script, testing in a safe environment, adding usage instructions and comments, peer review, and committing to version control.",
+			"reasoning": "This task involves scripting, error handling, documentation, testing, and review. It requires both technical and process rigor, making it moderately complex."
+		},
+		{
+			"taskId": 47,
+			"taskTitle": "Implement upload cleanup policy",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Expand this task to include: analyzing current upload patterns, drafting the cleanup and retention policy, reviewing with the team, documenting the policy, and implementing monitoring or automation for compliance.",
+			"reasoning": "This task requires analysis, policy drafting, team consensus, documentation, and potentially automation, which adds to its complexity."
+		},
+		{
+			"taskId": 55,
+			"taskTitle": "Document all changes made",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Expand this task to include: collecting a list of all changes, writing detailed changelog entries, reviewing for completeness and clarity, and publishing the changelog in the appropriate location.",
+			"reasoning": "This task is primarily documentation-focused but requires thoroughness and accuracy, as well as review and publication steps."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Check all references to files in /legacy/ directory",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on check all references to files in /legacy/ directory.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Verify Python functionality migration from /legacy/services/ to /src/",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on verify python functionality migration from /legacy/services/ to /src/.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Check for active references to root-level Python files",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on check for active references to root-level python files.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Test current functionality before cleanup",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on test current functionality before cleanup.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Find and list all .DS_Store files",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on find and list all .ds_store files.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Remove all .DS_Store files",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on remove all .ds_store files.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Add .DS_Store to .gitignore",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on add .ds_store to .gitignore.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "List all .next directories",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on list all .next directories.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Remove all .next directories",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on remove all .next directories.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Add .next/ to .gitignore",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on add .next/ to .gitignore.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Check references to root config.py",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on check references to root config.py.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Check references to root main.py",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on check references to root main.py.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Delete root config.py and main.py",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on delete root config.py and main.py.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Verify all legacy Python code exists in /src/",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on verify all legacy python code exists in /src/.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Check for unique files in /legacy/ not migrated",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on check for unique files in /legacy/ not migrated.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Delete entire /legacy/ directory",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on delete entire /legacy/ directory.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 21,
+			"taskTitle": "Find all package-lock.json files",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on find all package-lock.json files.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 22,
+			"taskTitle": "Remove all package-lock.json files",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on remove all package-lock.json files.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 23,
+			"taskTitle": "Verify pnpm-lock.yaml files are present",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on verify pnpm-lock.yaml files are present.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 24,
+			"taskTitle": "Check /tests/results/ directory contents",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on check /tests/results/ directory contents.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 25,
+			"taskTitle": "Clean /tests/results/ directory",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on clean /tests/results/ directory.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 26,
+			"taskTitle": "Add tests/results/*.txt to .gitignore",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on add tests/results/*.txt to .gitignore.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 27,
+			"taskTitle": "Remove empty 'write' file from root",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on remove empty 'write' file from root.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 28,
+			"taskTitle": "Remove updated_json.txt from root",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on remove updated_json.txt from root.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 29,
+			"taskTitle": "Move test_full_pipeline.py to /tests/",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on move test_full_pipeline.py to /tests/.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 30,
+			"taskTitle": "Move test_model_router.py to /tests/",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on move test_model_router.py to /tests/.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 32,
+			"taskTitle": "Move JS utility scripts to /src/utils/scripts/",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on move js utility scripts to /src/utils/scripts/.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 33,
+			"taskTitle": "Move shell scripts to /scripts/ at root",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on move shell scripts to /scripts/ at root.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 35,
+			"taskTitle": "Move component docs to /docs/components/",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on move component docs to /docs/components/.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 36,
+			"taskTitle": "Analyze tests in /legacy/tests/",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on analyze tests in /legacy/tests/.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 38,
+			"taskTitle": "Move and consolidate test files",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on move and consolidate test files.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 39,
+			"taskTitle": "Remove duplicate test files",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on remove duplicate test files.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 40,
+			"taskTitle": "Rename 'untitled folder' directories",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on rename 'untitled folder' directories.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 41,
+			"taskTitle": "Standardize Next.js config extensions",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on standardize next.js config extensions.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 42,
+			"taskTitle": "Standardize Tailwind config extensions",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on standardize tailwind config extensions.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 43,
+			"taskTitle": "Update .gitignore with comprehensive entries",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on update .gitignore with comprehensive entries.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 45,
+			"taskTitle": "Remove node_modules from templates",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on remove node_modules from templates.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 46,
+			"taskTitle": "Analyze /data/uploads/ directory",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on analyze /data/uploads/ directory.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 48,
+			"taskTitle": "Consider database location change",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on consider database location change.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 49,
+			"taskTitle": "Run pnpm run typecheck",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on run pnpm run typecheck.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 50,
+			"taskTitle": "Run all Python tests",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on run all python tests.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 51,
+			"taskTitle": "Test backend API functionality",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on test backend api functionality.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 52,
+			"taskTitle": "Test frontend build and dev server",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on test frontend build and dev server.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 53,
+			"taskTitle": "Verify CV upload and processing",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on verify cv upload and processing.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 54,
+			"taskTitle": "Check git repository size reduction",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on check git repository size reduction.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		},
+		{
+			"taskId": 56,
+			"taskTitle": "Commit cleanup changes",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down this task with a focus on commit cleanup changes.",
+			"reasoning": "Automatically added due to missing analysis in AI response."
+		}
+	]
+}

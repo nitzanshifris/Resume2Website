@@ -33,6 +33,8 @@ TaskMaster AI is configured for AI-driven task management. Use it for:
 - Generating PRDs (Product Requirements Documents)
 - Research integration for best practices
 
+**Note**: TaskMaster files are currently in the backup branch (`backup/pre-cleanup-20250713-172843`)
+
 ### TaskMaster Commands
 ```bash
 # Initialize TaskMaster in project
@@ -248,3 +250,10 @@ git push origin main                    # Push to GitHub
 6. Backend runs on **port 2000**
 7. Use **quickstart.sh** for setup
 8. **Never** commit API keys
+
+## Recent Cleanup (2025-07-13)
+- Removed all .DS_Store files and .next directories
+- Deleted unnecessary GitHub branches
+- Removed package-lock.json files (use pnpm)
+- Moved test files from scripts to /tests/
+- **Note**: config.py and main.py at root are still actively used
