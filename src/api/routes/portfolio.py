@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 import aiofiles
 
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 from src.core.portfolio_gen.strategy_registry import strategy_registry
 from src.core.portfolio_gen.utils import create_portfolio_zip
 from src.core.portfolio_gen.template_data_transformer import template_transformer

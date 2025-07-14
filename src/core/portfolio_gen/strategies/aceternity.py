@@ -10,7 +10,7 @@ import shutil
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 from . import PortfolioStrategy
 from ..component_adapter import ComponentAdapter
 
@@ -91,7 +91,7 @@ class AceternityStrategy(PortfolioStrategy):
         cv_data_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(cv_data_path, "w") as f:
-            json.dump(cv_data.model_dump(), f, indent=2)
+            json.dump(cv_data.model_dump_nullable(), f, indent=2)
         
         # Update template variables in key files
         self._update_template_files(cv_data, output_dir)

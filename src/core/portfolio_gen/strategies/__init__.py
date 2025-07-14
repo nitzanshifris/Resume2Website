@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 
 
 class PortfolioStrategy(ABC):

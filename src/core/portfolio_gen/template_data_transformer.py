@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 
 logger = logging.getLogger(__name__)
 
