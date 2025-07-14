@@ -1,5 +1,5 @@
 ---
-allowed-tools: [Bash, Read, Edit, MultiEdit, Write]
+allowed-tools: [Bash, Read, Edit, MultiEdit, Write, TodoWrite]
 description: Get next task and start implementation
 ---
 
@@ -7,10 +7,10 @@ Let me get the next pending task and start implementation.
 
 !taskmaster next
 
-I'll now:
-1. Show the task details
-2. Implement the task
-3. Mark it as complete when done
-4. Move to the next task
+Based on the task shown above, I'll:
+1. Mark it as in-progress
+2. Implement the task step by step
+3. Mark it as done when complete
+4. Show the next task
 
-!taskmaster list --status=pending | head -10
+Starting implementation now...

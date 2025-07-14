@@ -1,12 +1,11 @@
 ---
 allowed-tools: [Bash]
-description: List all tasks with optional status filter
+description: List all tasks with optional status filter or 'all'
 ---
 
-Listing tasks with status filter: $ARGUMENTS
+## TaskMaster Task List
 
-!taskmaster list --status=$ARGUMENTS
+!taskmaster list --status=${ARGUMENTS:-all}
 
-Task Summary:
-!echo "Checking task distribution..."
-!taskmaster list --status=all | grep -E "pending|in-progress|done" | wc -l
+### Quick Stats:
+!taskmaster list --status=all | grep -E "Done:|In Progress:|Pending:" | head -3

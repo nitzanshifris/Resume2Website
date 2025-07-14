@@ -3,18 +3,20 @@ allowed-tools: [TodoWrite, Write, Read, Bash, Task]
 description: Create a new feature with TaskMaster PRD and task generation
 ---
 
-I'll help you create $ARGUMENTS using TaskMaster for structured development.
+I'll help you create **$ARGUMENTS** using TaskMaster for structured development.
 
-First, let me gather requirements:
-
-1. What are the main objectives for $ARGUMENTS?
-2. What are the technical requirements or constraints?
-3. Are there any specific libraries or patterns you want to use?
-
-After understanding your requirements, I'll:
-1. Create a comprehensive PRD
-2. Generate and analyze tasks
-3. Break down complex tasks
-4. Start systematic implementation
+Let me start by creating a comprehensive PRD based on the feature name. I'll make reasonable assumptions and you can correct me if needed.
 
 !echo "Starting TaskMaster workflow for: $ARGUMENTS"
+
+## Creating PRD for $ARGUMENTS
+
+!mkdir -p .taskmaster/docs
+
+Now I'll create a Product Requirements Document for $ARGUMENTS and then:
+1. Generate tasks from the PRD
+2. Analyze task complexity
+3. Break down complex tasks
+4. Start implementation
+
+Please provide any specific requirements or I'll proceed with standard implementation.
