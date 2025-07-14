@@ -1,13 +1,15 @@
 ---
-allowed-tools: [Bash, Read, Edit, MultiEdit, Write, TodoWrite]
+allowed-tools: [Bash, Read, Edit, MultiEdit, Write, TodoWrite, Grep, Task]
 description: Implement a specific task by ID
 ---
 
-Starting implementation of task $ARGUMENTS:
+## Implementing Task #$ARGUMENTS
 
 !taskmaster show --id=$ARGUMENTS
+
+Now marking as in-progress:
 !taskmaster set-status --id=$ARGUMENTS --status=in-progress
 
-I'll now implement this task step by step, following the requirements and subtasks.
+Based on the task details above, I'll implement this step by step.
 
-@.taskmaster/tasks/tasks.json
+Let me analyze what needs to be done and start the implementation...
