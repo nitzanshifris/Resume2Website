@@ -7,7 +7,7 @@
         "description": "Create a dedicated backup branch from the current main/master branch to preserve the existing codebase state before initiating any cleanup activities.",
         "details": "This task involves creating a safety net before making potentially breaking changes during the cleanup process. Implementation steps:\n\n1. Ensure your local repository is up to date:\n   ```bash\n   git fetch origin\n   git pull origin main  # or master, depending on your default branch\n   ```\n\n2. Create a new backup branch with a descriptive name and timestamp:\n   ```bash\n   git checkout -b backup/pre-cleanup-$(date +%Y%m%d-%H%M%S)\n   ```\n\n3. Push the backup branch to the remote repository:\n   ```bash\n   git push -u origin backup/pre-cleanup-$(date +%Y%m%d-%H%M%S)\n   ```\n\n4. Document the backup branch creation in the project's changelog or README:\n   - Branch name\n   - Creation date and time\n   - Purpose (pre-cleanup backup)\n   - Last commit hash before cleanup\n\n5. Consider adding branch protection rules if your repository supports it:\n   - Prevent deletion\n   - Restrict push access\n   - Require pull request reviews for any changes\n\n6. Create a tag for easy reference:\n   ```bash\n   git tag -a pre-cleanup-backup -m \"Backup before cleanup activities\"\n   git push origin pre-cleanup-backup\n   ```\n\nBest practices:\n- Use a consistent naming convention for backup branches\n- Include timestamps to track when backups were created\n- Consider automating this process for future cleanup activities\n- Ensure all team members are aware of the backup branch location",
         "testStrategy": "Verify the backup branch creation with the following steps:\n\n1. Confirm the backup branch exists locally:\n   ```bash\n   git branch | grep backup/pre-cleanup\n   ```\n\n2. Verify the branch was pushed to remote:\n   ```bash\n   git ls-remote --heads origin | grep backup/pre-cleanup\n   ```\n\n3. Check that the backup branch contains the exact same commit history as main/master:\n   ```bash\n   git log --oneline -n 10 main\n   git log --oneline -n 10 backup/pre-cleanup-[timestamp]\n   ```\n   Both outputs should be identical.\n\n4. Verify the tag was created and pushed:\n   ```bash\n   git tag -l | grep pre-cleanup-backup\n   git ls-remote --tags origin | grep pre-cleanup-backup\n   ```\n\n5. Test branch protection (if configured):\n   - Attempt to delete the branch (should fail)\n   - Try direct push to the branch (should be restricted)\n\n6. Confirm documentation was updated:\n   - Check changelog/README for backup branch information\n   - Verify all required details are present (branch name, date, purpose, commit hash)\n\n7. Perform a test restoration:\n   ```bash\n   git checkout -b test-restore backup/pre-cleanup-[timestamp]\n   ```\n   Ensure all files and commit history are intact.\n\n8. Clean up test branch:\n   ```bash\n   git checkout main\n   git branch -d test-restore\n   ```",
-        "status": "completed",
+        "status": "done",
         "dependencies": [],
         "priority": "medium",
         "subtasks": [
@@ -2421,6 +2421,54 @@
             "testStrategy": ""
           }
         ]
+      },
+      {
+        "id": 57,
+        "title": "Install and configure DeepWiki MCP server",
+        "description": "Investigate DeepWiki MCP server availability and configure it in Claude Desktop. The package may require special access or alternative installation method as it's not publicly available on npm registry.",
+        "status": "cancelled",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Investigate DeepWiki MCP server availability:\n   - Check if @modelcontextprotocol/server-deepwiki requires special npm access\n   - Search for alternative package names or repositories\n   - Check the official MCP documentation or GitHub for installation instructions\n   - Look for beta access or waitlist information\n\n2. Alternative installation approaches:\n   - Check if the server is available on GitHub for manual installation\n   - Look for a different package name or scope on npm\n   - Investigate if it's part of a private npm registry\n   - Check if building from source is required\n\n3. Locate Claude Desktop configuration file:\n   - macOS: ~/Library/Application Support/Claude/claude_desktop_config.json\n   - Windows: %APPDATA%\\Claude\\claude_desktop_config.json\n   - Linux: ~/.config/Claude/claude_desktop_config.json\n\n4. Prepare configuration (pending package availability):\n   - Once package location is confirmed, prepare the MCP server configuration\n   - Structure for claude_desktop_config.json:\n   ```json\n   {\n     \"mcpServers\": {\n       \"deepwiki\": {\n         \"command\": \"node\",\n         \"args\": [\"[PATH_TO_DEEPWIKI_SERVER]\"],\n         \"env\": {}\n       }\n     }\n   }\n   ```\n\n5. Document findings:\n   - Create documentation about DeepWiki availability status\n   - Note any access requirements or alternative installation methods\n   - Include troubleshooting for package not found errors",
+        "testStrategy": "1. Verify package availability:\n   - Search npm registry: npm search @modelcontextprotocol/server-deepwiki\n   - Check alternative names: npm search deepwiki mcp\n   - Look for the package on GitHub or official MCP repositories\n\n2. Test alternative installation methods:\n   - If found on GitHub, test git clone and local installation\n   - Verify any build steps if installing from source\n   - Check for specific version requirements or dependencies\n\n3. Validate Claude Desktop configuration structure:\n   - Ensure claude_desktop_config.json exists\n   - Verify JSON syntax for the configuration\n   - Prepare configuration template for when package becomes available\n\n4. Monitor for package availability:\n   - Check official MCP documentation for updates\n   - Look for announcements about DeepWiki MCP server release\n   - Join any waitlists or beta programs if available\n\n5. Document current status:\n   - Create a status report on DeepWiki availability\n   - Note any workarounds or alternatives found\n   - Prepare installation guide for when package becomes available",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Investigate DeepWiki package availability",
+            "description": "Search for the DeepWiki MCP server package in npm registry and alternative sources",
+            "status": "pending",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Check official MCP documentation",
+            "description": "Review Model Context Protocol documentation for DeepWiki server installation instructions",
+            "status": "pending",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Explore alternative installation methods",
+            "description": "Look for GitHub repositories, private registries, or build-from-source options",
+            "status": "pending",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Document findings and prepare configuration",
+            "description": "Create documentation about availability status and prepare configuration template",
+            "status": "pending",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
       }
     ],
     "metadata": {
@@ -2430,7 +2478,209 @@
       "generatedAt": "2025-07-13",
       "created": "2025-07-13T11:47:37.852Z",
       "description": "Tasks for master context",
-      "updated": "2025-07-14T05:15:19.778Z"
+      "updated": "2025-07-14T07:58:46.737Z"
+    }
+  },
+  "claude-docs": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Backup and Initialize Document Structure",
+        "description": "Create a backup of the existing CLAUDE.md file and initialize the new document structure with proper sections and hierarchy",
+        "details": "1. Create backup: `cp CLAUDE.md CLAUDE.md.backup-$(date +%Y%m%d)`\n2. Create new CLAUDE.md with skeleton structure:\n```markdown\n# CV2WEB V4 - Claude Code Development Guide\n\n**Version:** 1.0.0  \n**Last Updated:** [Current Date]\n\n## Project Overview\n### What CV2WEB Does\n### Tech Stack at a Glance\n\n## 🚀 Quick Start\n### Prerequisites\n### One-Command Setup\n\n## 📋 Development Workflow\n### Daily Development Commands\n### Git Workflow\n\n## 🏗️ Architecture\n### Project Structure\n### Data Flow\n\n## ⚙️ Configuration\n### Environment Setup\n### Credential Management\n\n## 🤖 TaskMaster Integration\n### Automatic Workflow Triggers\n### TaskMaster Commands\n### Custom Slash Commands\n\n## 🛠️ Common Development Tasks\n### Adding a New Portfolio Template\n### Adding a New API Endpoint\n\n## 🐛 Troubleshooting\n### Common Issues & Solutions\n### Debug Commands\n\n## 📚 Code Style Guide\n### TypeScript/React\n### Python/FastAPI\n\n## 🚢 Deployment\n### Local Testing\n### Deploy to Vercel\n\n## 📖 Additional Resources\n\n## ⚠️ Critical Reminders\n```\n3. Add metadata header with version control",
+        "testStrategy": "Verify backup exists with correct timestamp, confirm new CLAUDE.md has all required sections with proper hierarchy, validate markdown syntax using a linter",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Create Project Overview and Quick Start Sections",
+        "description": "Write comprehensive project overview explaining CV2WEB's purpose and create a true quick start guide covering 80% use cases",
+        "details": "1. Write Project Overview section:\n```markdown\n## Project Overview\n\n### What CV2WEB Does\nCV2WEB is a full-stack application that transforms CV/resume data into beautiful, interactive portfolio websites. It features:\n- 🎨 Multiple portfolio templates\n- 🤖 AI-powered content generation\n- 📊 Real-time preview\n- 🚀 One-click deployment\n\n### Tech Stack at a Glance\n| Component | Technology |\n|-----------|------------|\n| Frontend | Next.js 14, TypeScript, Tailwind CSS |\n| Backend | FastAPI, Python 3.11+ |\n| AI | Claude API, OpenAI |\n| Database | PostgreSQL, Prisma ORM |\n| Deployment | Vercel, Docker |\n```\n\n2. Create Quick Start section:\n```markdown\n## 🚀 Quick Start\n\n### Prerequisites\n✅ Node.js 18+ and npm/yarn\n✅ Python 3.11+\n✅ Git\n✅ API keys (Claude/OpenAI)\n\n### One-Command Setup\n```bash\n# Clone and setup in one command\ngit clone [repo-url] && cd CV2WEB-V4 && npm run setup:all\n```\n\n💡 **What this does:**\n1. Installs all dependencies\n2. Sets up environment files\n3. Initializes database\n4. Starts development servers\n```",
+        "testStrategy": "Review content for clarity and completeness, verify all commands work as documented, test quick start flow with a new developer, ensure 80% of common tasks are covered",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement Development Workflow Documentation",
+        "description": "Create detailed development workflow section with daily commands, Git workflow, and practical 'Day in the Life' scenarios",
+        "details": "1. Document Daily Development Commands:\n```markdown\n## 📋 Development Workflow\n\n### Daily Development Commands\n\n#### Morning Setup\n```bash\n# 1. Update your branch\ngit pull origin main\n\n# 2. Install any new dependencies\nnpm install && cd backend && pip install -r requirements.txt && cd ..\n\n# 3. Start development servers\nnpm run dev:all\n```\n\n#### During Development\n```bash\n# Frontend only\nnpm run dev:frontend\n\n# Backend only\nnpm run dev:backend\n\n# Run tests\nnpm test\n```\n```\n\n2. Add Git Workflow:\n```markdown\n### Git Workflow\n\n#### Feature Development\n```bash\n# 1. Create feature branch\ngit checkout -b feature/your-feature-name\n\n# 2. Make changes and commit\ngit add .\ngit commit -m \"feat: add new portfolio template\"\n\n# 3. Push and create PR\ngit push origin feature/your-feature-name\n```\n\n⚠️ **Important:** Always pull latest main before creating new branches\n```\n\n3. Include 'Day in the Life' workflow examples",
+        "testStrategy": "Test all commands in sequence, verify Git workflow matches team practices, validate with actual developer usage patterns",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Create Architecture and Configuration Sections",
+        "description": "Document project structure with ASCII diagrams, data flow visualization, and comprehensive configuration management",
+        "details": "1. Create Architecture section with ASCII diagram:\n```markdown\n## 🏗️ Architecture\n\n### Project Structure\n```\nCV2WEB-V4/\n├── frontend/          # Next.js application\n│   ├── app/          # App router pages\n│   ├── components/   # React components\n│   └── lib/          # Utilities\n├── backend/          # FastAPI server\n│   ├── api/          # API endpoints\n│   ├── services/     # Business logic\n│   └── models/       # Data models\n├── shared/           # Shared types/utils\n└── .taskmaster/      # TaskMaster config\n```\n\n### Data Flow\n```\n┌─────────┐     ┌─────────┐     ┌─────────┐\n│   User  │────▶│Frontend │────▶│ Backend │\n└─────────┘     └─────────┘     └─────────┘\n                     │                 │\n                     ▼                 ▼\n                ┌─────────┐     ┌─────────┐\n                │Preview  │     │   AI    │\n                └─────────┘     └─────────┘\n```\n```\n\n2. Document Configuration:\n```markdown\n## ⚙️ Configuration\n\n### Environment Setup\n\n1. Copy environment templates:\n```bash\ncp .env.example .env.local\ncp backend/.env.example backend/.env\n```\n\n2. Required environment variables:\n\n| Variable | Description | Example |\n|----------|-------------|----------|\n| CLAUDE_API_KEY | Claude API key | sk-ant-... |\n| DATABASE_URL | PostgreSQL connection | postgresql://... |\n| NEXTAUTH_SECRET | Auth secret | openssl rand -base64 32 |\n```",
+        "testStrategy": "Verify ASCII diagrams render correctly, test all configuration steps, validate environment variable documentation completeness",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Document TaskMaster Integration",
+        "description": "Create comprehensive TaskMaster section with automatic triggers, commands, and custom slash command documentation",
+        "details": "1. Document TaskMaster Integration:\n```markdown\n## 🤖 TaskMaster Integration\n\n### Automatic Workflow Triggers\n\nTaskMaster automatically handles:\n- 📝 Task creation from PRDs\n- 🔄 Git operations\n- 📊 Progress tracking\n- 🚀 Deployment workflows\n\n### TaskMaster Commands\n\n#### Task Management\n```bash\n# Create task from PRD\n/task create \"Implement new feature\" --from-prd feature.md\n\n# Update task status\n/task update 123 --status in-progress\n\n# List current tasks\n/task list --status pending\n```\n\n#### Workflow Commands\n```bash\n# Start feature development\n/workflow start feature \"portfolio-templates\"\n\n# Complete and deploy\n/workflow complete --deploy\n```\n\n### Custom Slash Commands\n\n| Command | Description | Example |\n|---------|-------------|----------|\n| /generate | Generate code from description | /generate \"React component for user profile\" |\n| /review | Request code review | /review --file components/Profile.tsx |\n| /deploy | Deploy to staging/production | /deploy --target staging |\n```\n\n2. Include configuration examples and best practices",
+        "testStrategy": "Test all TaskMaster commands, verify automatic triggers work as documented, validate custom slash commands",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Document automatic workflow triggers and conditions",
+            "description": "Create detailed documentation for all TaskMaster automatic triggers including task creation from PRDs, Git operations, progress tracking, and deployment workflows",
+            "dependencies": [],
+            "details": "Write comprehensive section covering: 1) PRD parsing triggers and task creation rules, 2) Git hook integrations for automatic operations, 3) Progress tracking triggers based on commit messages and PR status, 4) Deployment workflow triggers and conditions. Include flowcharts showing trigger sequences and decision trees for each automation type.",
+            "status": "pending",
+            "testStrategy": "Verify all trigger scenarios are documented with examples, validate trigger conditions are clearly explained, and ensure flowcharts accurately represent the automation logic"
+          },
+          {
+            "id": 2,
+            "title": "Create comprehensive command reference table",
+            "description": "Build a complete reference table for all TaskMaster commands including task management, workflow commands, and their parameters",
+            "dependencies": [],
+            "details": "Create structured tables with columns: Command, Description, Parameters, Options, Examples, and Output. Cover all commands: task create/update/list/delete, workflow start/complete/status, and utility commands. Include parameter types, required vs optional flags, and real-world usage examples for each command.",
+            "status": "pending",
+            "testStrategy": "Test each command example for accuracy, verify all parameters are documented, and ensure examples cover common use cases"
+          },
+          {
+            "id": 3,
+            "title": "Document custom slash commands with examples",
+            "description": "Create detailed documentation for all custom slash commands including /generate, /review, /deploy and any other custom commands",
+            "dependencies": [],
+            "details": "For each slash command, document: 1) Command syntax and available options, 2) Multiple usage examples covering different scenarios, 3) Expected outputs and response formats, 4) Integration points with other tools, 5) Permission requirements. Include code snippets showing command usage in different contexts.",
+            "status": "pending",
+            "testStrategy": "Validate each example command works as documented, ensure all command options are covered, and verify output examples match actual responses"
+          },
+          {
+            "id": 4,
+            "title": "Write TaskMaster best practices section",
+            "description": "Develop comprehensive best practices guide for using TaskMaster effectively in development workflows",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create sections covering: 1) Workflow optimization tips, 2) Command chaining strategies, 3) Integration with CI/CD pipelines, 4) Team collaboration guidelines, 5) Performance optimization, 6) Security best practices. Include do's and don'ts, common pitfalls to avoid, and recommended workflows for different project types.",
+            "status": "pending",
+            "testStrategy": "Review best practices with development team, validate recommendations against real project experiences, and ensure practices align with security policies"
+          },
+          {
+            "id": 5,
+            "title": "Add configuration and setup instructions",
+            "description": "Create detailed setup guide and configuration documentation for TaskMaster integration",
+            "dependencies": [],
+            "details": "Document: 1) Initial setup steps with prerequisites, 2) Configuration file structure and options, 3) Environment variable requirements, 4) Integration with existing tools (Git, CI/CD, IDEs), 5) Team setup and permissions, 6) Example configurations for different project types. Include troubleshooting tips for common setup issues.",
+            "status": "pending",
+            "testStrategy": "Follow setup instructions on a clean environment, verify all configuration options work as documented, and test integration points"
+          },
+          {
+            "id": 6,
+            "title": "Create TaskMaster troubleshooting guide",
+            "description": "Develop comprehensive troubleshooting documentation covering common issues and their solutions",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "details": "Create troubleshooting sections for: 1) Common error messages and solutions, 2) Performance issues and optimization, 3) Integration problems with external tools, 4) Command failures and debugging steps, 5) FAQ section with quick fixes, 6) Debug mode usage and log analysis. Include decision trees for problem diagnosis and step-by-step resolution guides.",
+            "status": "pending",
+            "testStrategy": "Validate solutions against reported issues, ensure error messages are accurately documented, and verify resolution steps work effectively"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Create Common Development Tasks Section",
+        "description": "Document step-by-step guides for common tasks like adding portfolio templates and API endpoints with real code examples",
+        "details": "1. Document common development tasks:\n```markdown\n## 🛠️ Common Development Tasks\n\n### Adding a New Portfolio Template\n\n#### Step 1: Create Template Component\n```typescript\n// frontend/components/templates/ModernTemplate.tsx\nimport { PortfolioTemplate } from '@/types'\n\nexport const ModernTemplate: PortfolioTemplate = {\n  id: 'modern',\n  name: 'Modern Portfolio',\n  preview: '/previews/modern.png',\n  component: ({ data }) => (\n    <div className=\"modern-template\">\n      {/* Template implementation */}\n    </div>\n  )\n}\n```\n\n#### Step 2: Register Template\n```typescript\n// frontend/lib/templates/index.ts\nimport { ModernTemplate } from '@/components/templates/ModernTemplate'\n\nexport const templates = {\n  // existing templates...\n  modern: ModernTemplate\n}\n```\n\n#### Step 3: Add Preview Image\n```bash\n# Add preview image to public/previews/\ncp modern-preview.png frontend/public/previews/modern.png\n```\n\n### Adding a New API Endpoint\n\n#### Step 1: Create Endpoint\n```python\n# backend/api/endpoints/analytics.py\nfrom fastapi import APIRouter, Depends\nfrom typing import List\n\nrouter = APIRouter()\n\n@router.get(\"/analytics/views\")\nasync def get_portfolio_views(\n    user_id: str = Depends(get_current_user)\n) -> List[AnalyticsData]:\n    \"\"\"Get portfolio view analytics\"\"\"\n    return await analytics_service.get_views(user_id)\n```\n\n#### Step 2: Register Router\n```python\n# backend/api/main.py\nfrom api.endpoints import analytics\n\napp.include_router(analytics.router, prefix=\"/api/v1\")\n```",
+        "testStrategy": "Follow each guide step-by-step to verify completeness, test generated code works as expected, ensure no steps are missing",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Build Troubleshooting Guide",
+        "description": "Create comprehensive troubleshooting section with decision trees, common issues table, and debug commands",
+        "details": "1. Create troubleshooting guide:\n```markdown\n## 🐛 Troubleshooting\n\n### Common Issues & Solutions\n\n| Issue | Symptoms | Solution |\n|-------|----------|----------|\n| Frontend won't start | `Error: Cannot find module` | Run `npm install` in frontend directory |\n| Backend connection error | `Failed to connect to localhost:8000` | Ensure backend is running: `npm run dev:backend` |\n| Database connection failed | `PostgreSQL connection error` | Check DATABASE_URL in .env |\n| API key invalid | `401 Unauthorized` | Verify API keys in backend/.env |\n\n### Debug Commands\n\n#### Check Service Status\n```bash\n# Check if services are running\npm run status\n\n# View logs\npm run logs:frontend\nnpm run logs:backend\n```\n\n#### Database Issues\n```bash\n# Reset database\nnpm run db:reset\n\n# Run migrations\nnpm run db:migrate\n```\n\n### Troubleshooting Decision Tree\n```\nApplication not working?\n│\n├─ Frontend issues?\n│  ├─ Build errors? → npm run clean && npm install\n│  └─ Runtime errors? → Check browser console\n│\n├─ Backend issues?\n│  ├─ Not starting? → Check Python version (3.11+)\n│  └─ API errors? → Check backend logs\n│\n└─ Database issues?\n   ├─ Connection failed? → Verify DATABASE_URL\n   └─ Migration errors? → npm run db:reset\n```\n```\n\n2. Include environment-specific troubleshooting",
+        "testStrategy": "Test each troubleshooting solution, verify debug commands work correctly, validate decision tree covers common scenarios",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Code Style Guide",
+        "description": "Document coding standards, best practices, and examples for TypeScript/React and Python/FastAPI development",
+        "details": "1. Create code style guide:\n```markdown\n## 📚 Code Style Guide\n\n### TypeScript/React\n\n#### Component Structure\n```typescript\n// ✅ Correct: Functional component with proper typing\nimport { FC } from 'react'\nimport { UserProfile } from '@/types'\n\ninterface ProfileCardProps {\n  user: UserProfile\n  onEdit?: () => void\n}\n\nexport const ProfileCard: FC<ProfileCardProps> = ({ user, onEdit }) => {\n  return (\n    <div className=\"profile-card\">\n      <h2>{user.name}</h2>\n      {onEdit && <button onClick={onEdit}>Edit</button>}\n    </div>\n  )\n}\n\n// ❌ Incorrect: Missing types, poor naming\nexport const Card = (props) => {\n  return <div>{props.u.n}</div>\n}\n```\n\n#### State Management\n```typescript\n// ✅ Correct: Typed state with clear naming\nconst [isLoading, setIsLoading] = useState<boolean>(false)\nconst [userData, setUserData] = useState<UserData | null>(null)\n\n// ❌ Incorrect: Untyped, unclear naming\nconst [data, setData] = useState()\n```\n\n### Python/FastAPI\n\n#### API Endpoint Structure\n```python\n# ✅ Correct: Typed, documented, proper error handling\nfrom fastapi import APIRouter, HTTPException, Depends\nfrom typing import List\nfrom pydantic import BaseModel\n\nclass PortfolioResponse(BaseModel):\n    id: str\n    title: str\n    template: str\n\n@router.get(\"/portfolios\", response_model=List[PortfolioResponse])\nasync def get_portfolios(\n    user_id: str = Depends(get_current_user),\n    limit: int = 10\n) -> List[PortfolioResponse]:\n    \"\"\"Get user portfolios with pagination\"\"\"\n    try:\n        portfolios = await portfolio_service.get_by_user(user_id, limit)\n        return portfolios\n    except Exception as e:\n        raise HTTPException(status_code=500, detail=str(e))\n\n# ❌ Incorrect: No types, no error handling\n@router.get(\"/portfolios\")\ndef get_portfolios(user_id):\n    return portfolio_service.get_by_user(user_id)\n```\n```",
+        "testStrategy": "Run linters on example code, verify examples follow team standards, test that incorrect examples actually fail linting",
+        "priority": "low",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Create Deployment Documentation",
+        "description": "Document local testing procedures and Vercel deployment process with security checklists and performance guidelines",
+        "details": "1. Document deployment process:\n```markdown\n## 🚢 Deployment\n\n### Local Testing\n\n#### Pre-deployment Checklist\n- [ ] All tests passing: `npm test`\n- [ ] Build successful: `npm run build`\n- [ ] No console errors\n- [ ] Environment variables set\n- [ ] Database migrations run\n\n#### Local Production Build\n```bash\n# 1. Build production assets\nnpm run build:all\n\n# 2. Test production build locally\nnpm run start:prod\n\n# 3. Run smoke tests\nnpm run test:e2e\n```\n\n### Deploy to Vercel\n\n#### Initial Setup\n```bash\n# 1. Install Vercel CLI\nnpm i -g vercel\n\n# 2. Login to Vercel\nvercel login\n\n# 3. Link project\nvercel link\n```\n\n#### Deployment Commands\n```bash\n# Deploy to preview\nvercel\n\n# Deploy to production\nvercel --prod\n```\n\n#### Environment Variables\n1. Go to Vercel Dashboard → Settings → Environment Variables\n2. Add all variables from `.env.example`\n3. Set different values for preview/production\n\n### Security Checklist\n- [ ] API keys not exposed in frontend\n- [ ] CORS properly configured\n- [ ] Rate limiting enabled\n- [ ] Input validation on all endpoints\n- [ ] SQL injection prevention\n\n### Performance Guidelines\n- Enable caching headers\n- Optimize images (WebP format)\n- Lazy load components\n- Monitor Core Web Vitals\n```",
+        "testStrategy": "Test deployment process end-to-end, verify security checklist items, validate performance guidelines are measurable",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Add Final Sections and Polish",
+        "description": "Complete the document with additional resources, critical reminders, quick reference card, and final formatting polish",
+        "details": "1. Add Additional Resources section:\n```markdown\n## 📖 Additional Resources\n\n### External Documentation\n- [Next.js Documentation](https://nextjs.org/docs)\n- [FastAPI Documentation](https://fastapi.tiangolo.com)\n- [Tailwind CSS](https://tailwindcss.com/docs)\n- [Prisma ORM](https://www.prisma.io/docs)\n\n### Internal Resources\n- [API Documentation](/docs/api)\n- [Component Storybook](/storybook)\n- [Design System](/docs/design-system)\n\n### Learning Path\n1. 📚 Read this guide\n2. 🎯 Complete quick start\n3. 🛠️ Try common tasks\n4. 🚀 Deploy your first change\n```\n\n2. Consolidate Critical Reminders:\n```markdown\n## ⚠️ Critical Reminders\n\n### Always Remember\n- 🔐 Never commit API keys or secrets\n- 🔄 Pull latest main before creating branches\n- 🧪 Run tests before pushing\n- 📝 Update CLAUDE.md with significant changes\n- 🏷️ Use semantic commit messages\n\n### Before Deploying\n- ✅ All tests passing\n- ✅ Code reviewed\n- ✅ Documentation updated\n- ✅ Environment variables verified\n```\n\n3. Create Quick Reference Card:\n```markdown\n# CV2WEB Quick Reference\n\n## Essential Commands\n| Task | Command |\n|------|----------|\n| Start dev | `npm run dev:all` |\n| Run tests | `npm test` |\n| Build | `npm run build` |\n| Deploy | `vercel --prod` |\n\n## Key Directories\n- Frontend: `/frontend`\n- Backend: `/backend`\n- Docs: `/.taskmaster/docs`\n```\n\n4. Final formatting polish:\n- Add consistent spacing between sections\n- Verify all emoji are consistent\n- Check all code blocks have language hints\n- Add table of contents if needed\n- Update version and date",
+        "testStrategy": "Review entire document for consistency, verify all links work, test document renders correctly in different markdown viewers, get feedback from team",
+        "priority": "low",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-14T07:52:52.603Z",
+      "updated": "2025-07-14T07:52:52.603Z",
+      "description": "Tasks for claude-docs context"
     }
   }
 }
