@@ -1,90 +1,183 @@
-# CV2WEB V4 - Claude Code Assistant Guide
+# CV2WEB V4 - Claude Code Development Guide
 
-## Quick Setup
+## Project Overview
+
+CV2WEB is an AI-powered CV to portfolio website converter that transforms resumes into stunning portfolio websites using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo.
+
+### What CV2WEB Does
+- **Extracts** CV data using Google Gemini 2.5 Flash AI
+- **Generates** beautiful portfolio websites with 100+ animated components
+- **Deploys** to Vercel with one click
+- **Supports** multiple file formats (PDF, DOCX, images, etc.)
+
+### Tech Stack at a Glance
+- **Backend**: FastAPI + Python 3.11+ with TypeORM
+- **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4
+- **AI Services**: Gemini, Claude, OpenAI, AWS Textract
+- **UI Libraries**: Aceternity UI, Magic UI (100+ components)
+- **Infrastructure**: Vercel, Railway, PostgreSQL
+
+## 🚀 Quick Start
+
+### Prerequisites
 ```bash
-./quickstart.sh                         # One-command setup (recommended)
+# Required tools
+node >= 18.0.0          # For frontend
+python >= 3.11          # For backend  
+pnpm >= 8.0.0          # Package manager (NOT npm/yarn)
+git                    # Version control
 ```
 
-## IMPORTANT: Environment Setup
-- **YOU MUST** use pnpm, not npm or yarn
-- **ALWAYS** run typecheck after making code changes: `pnpm run typecheck`
-- **NEVER** use code from `/legacy/` directory
-- **ALWAYS** check existing components before creating new ones
-- Backend runs on port **2000** (configured in config.py)
-- Frontend runs on port 3000
-- Max file upload: 10MB
+### One-Command Setup
+```bash
+# Clone and setup everything
+git clone <repo-url> && cd CV2WEB-V4
+./quickstart.sh
 
-## IMPORTANT: Auto-use Context7
-When asked about any of these, **ALWAYS** use Context7 MCP tools:
-- FastAPI implementation patterns
-- React/Next.js best practices
-- Google Gemini API usage
-- Anthropic Claude API integration
-- AWS Textract/Google Vision OCR
-- Tailwind CSS v4 patterns
-- TypeScript patterns
-- Any library documentation
-- Code examples from external libraries
+# This script will:
+# 1. Install all dependencies
+# 2. Setup Python virtual environment
+# 3. Configure environment variables
+# 4. Initialize database
+# 5. Start development servers
+```
 
-## IMPORTANT: TaskMaster AI Integration
-TaskMaster AI is configured for AI-driven task management. Use it for:
-- Breaking down complex features into tasks
-- Tracking development progress
-- Generating PRDs (Product Requirements Documents)
-- Research integration for best practices
+## 📋 Development Workflow
 
-**Note**: TaskMaster files are currently in the backup branch (`backup/pre-cleanup-20250713-172843`)
+### Daily Development Commands
+```bash
+# Frontend development
+pnpm run dev            # Start Next.js dev server (http://localhost:3000)
+pnpm run typecheck      # ⚠️ MUST run before committing
+pnpm run build          # Build for production
+
+# Backend development
+source venv/bin/activate                     # Activate Python environment
+uvicorn main:app --reload --port 2000       # Start FastAPI (http://localhost:2000)
+python main.py                               # Alternative start method
+```
+
+### Git Workflow
+```bash
+# 1. Start new feature
+git checkout -b feature/description
+
+# 2. Make changes and verify
+pnpm run typecheck      # No TypeScript errors
+pytest                  # Backend tests pass
+
+# 3. Commit with conventional format
+git add .
+git commit -m "feat: add new portfolio template"
+# Commit types: feat|fix|docs|style|refactor|test|chore
+
+# 4. Push and create PR
+git push origin feature/description
+gh pr create --title "feat: description" --body "Closes #123"
+```
+
+## 🏗️ Architecture
+
+### Project Structure
+```
+CV2WEB-V4/
+├── src/                    # Backend (FastAPI)
+│   ├── api/               # API routes and endpoints
+│   ├── core/              # Business logic
+│   │   ├── cv_extractors/ # AI-powered CV parsing
+│   │   ├── generators/    # Portfolio generation
+│   │   └── schemas/       # Data models
+│   └── templates/         # Portfolio templates
+├── packages/              
+│   └── new-renderer/      # Frontend (Next.js)
+├── components/            # Shared UI components
+│   ├── aceternity/        # Premium animations
+│   └── magicui/          # Magic UI library
+├── tests/                 # Test suites
+└── .taskmaster/          # AI task management
+```
+
+### Data Flow
+```
+User Upload → File Validation → AI Extraction → Portfolio Generation → Preview → Deploy
+     ↓              ↓                ↓                  ↓                ↓        ↓
+   (FastAPI)    (Security)    (Gemini 2.5)      (Templates)        (Next.js) (Vercel)
+```
+
+## ⚙️ Configuration
+
+### Environment Setup
+```bash
+# Backend configuration (config.py)
+BACKEND_PORT = 2000             # ⚠️ Not 8000!
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:3001"]
+
+# AI Models
+GEMINI_MODEL = "gemini-2.5-flash"
+CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+```
+
+### Credential Management
+```bash
+# ⚠️ NEVER commit API keys! Use keychain manager:
+python src/utils/setup_keychain.py
+
+# This securely stores:
+# - Google Cloud credentials
+# - Anthropic API keys  
+# - OpenAI API keys
+# - AWS credentials
+```
+
+## 🤖 TaskMaster Integration
+
+TaskMaster AI helps break down complex features into manageable tasks.
+
+### Automatic Workflow Triggers
+When you say any of these, TaskMaster activates automatically:
+- "add [feature]" / "implement [feature]" / "create [feature]"
+- "build [component/system]" / "develop [functionality]"
+- "I want to [do something]" / "help me [build/create/add]"
+- "let's work on [feature]" / "start working on [task]"
+- Any request involving multiple steps or complex implementation
+
+DO NOT use TaskMaster for:
+- Simple bug fixes
+- Quick questions
+- Code explanations
+- Single file edits
 
 ### TaskMaster Commands
 ```bash
-# Initialize TaskMaster in project
-claude> can you please initialize taskmaster-ai into my project?
+# View available tasks
+taskmaster list --status=pending
 
-# Create PRD for a feature
-claude> create a PRD for [feature] at .taskmaster/docs/[feature]-prd.txt
+# Get next task
+taskmaster next
 
-# Parse PRD into tasks
-claude> parse the PRD at .taskmaster/docs/[feature]-prd.txt and generate tasks
+# Complete a task
+taskmaster set-status --id=<task-id> --status=done
 
-# Work with tasks
-claude> what's the next task I should work on?
-claude> show me tasks 1, 3, and 5
-claude> let's implement task 3
-claude> break down task 5 into subtasks
+# Break down complex tasks
+taskmaster expand --id=<task-id>
 
-# Update tasks based on changes
-claude> we decided to use [X] instead of [Y]. Update all related tasks
+# Research best practices
+taskmaster research "Next.js 15 patterns"
 ```
 
-### AUTOMATIC TaskMaster Workflow (IMPORTANT)
-When user requests ANY new feature or task, Claude Code MUST automatically:
+### Custom Slash Commands
+Use these in Claude Code chat:
+- `/task:new <feature>` - Start new feature with PRD
+- `/task:next` - Get next task to work on
+- `/task:status` - View project progress
+- `/task:implement <id>` - Start implementing specific task
+- `/task:workflow <feature>` - Complete feature workflow
+- `/task:list [status]` - List tasks by status
+- `/task:expand <id>` - Break down complex task
+- `/task:done <id>` - Mark task as complete
 
-1. **Create PRD First**
-   - Ask clarifying questions if needed
-   - Generate comprehensive PRD
-   - Save to `.taskmaster/docs/[feature]-prd.txt`
-
-2. **Generate Tasks**
-   ```bash
-   taskmaster parse-prd .taskmaster/docs/[feature]-prd.txt
-   ```
-
-3. **Analyze Complexity**
-   ```bash
-   taskmaster analyze-complexity
-   ```
-
-4. **Break Down Complex Tasks**
-   - Any task with complexity > 7 should be expanded
-   - Use specific subtasks (4-6 per complex task)
-
-5. **Execute Systematically**
-   - Show current task details
-   - Implement the task
-   - Mark as done immediately
-   - Move to next task
-
-Example automatic flow:
+### Example TaskMaster Workflow
 ```
 User: "Add dark mode to the app"
 Claude: [Automatically creates PRD → generates tasks → analyzes → starts implementation]
@@ -96,47 +189,181 @@ Claude: [Automatically creates PRD → generates tasks → analyzes → starts i
 - **API Features**: `create tasks for new FastAPI endpoint with authentication`
 - **Research**: `research latest Next.js 15 patterns and update our frontend tasks`
 
-## Project Overview
-AI-powered CV to portfolio website converter using FastAPI (Python) + Next.js (TypeScript) in a pnpm monorepo.
+## 🛠️ Common Development Tasks
 
-## Most Used Commands
+### Adding a New Portfolio Template
+```typescript
+// 1. Create template component
+// src/templates/portfolio-templates/modern-minimal.tsx
+export const ModernMinimalTemplate: React.FC<PortfolioProps> = ({ data }) => {
+  // Template implementation
+}
 
-### Backend (Python FastAPI)
-```bash
-# Setup virtual environment (first time)
-python3 -m venv venv                    # Create venv
-source venv/bin/activate                # Activate (macOS/Linux)
-pip install -r requirements.txt         # Install dependencies
+// 2. Register in generator
+// src/core/generators/portfolio_generator.py
+TEMPLATES = {
+    "modern-minimal": ModernMinimalTemplate,
+    // ... other templates
+}
 
-# Run backend
-uvicorn main:app --reload --port 2000  # Start backend
-python main.py                          # Alternative start method
-
-# Testing
-pytest                                  # Run all tests
-python tests/comprehensive_test.py      # Comprehensive test suite
-python tests/quick_api_test.sh          # Quick API health check
+// 3. Add preview
+// packages/new-renderer/app/templates/[id]/page.tsx
 ```
 
-### Frontend (Next.js/TypeScript)
-```bash
-pnpm install                            # Install dependencies
-pnpm run dev                            # Start dev server
-pnpm run build                          # Build project
-pnpm run typecheck                      # Check types (IMPORTANT!)
-pnpm run test                           # Run tests
-pnpm run storybook                      # Component development
-pnpm run gen:stories                    # Generate Storybook stories
-pnpm run gen:props                      # Extract component props
+### Adding a New API Endpoint
+```python
+# 1. Create route file
+# src/api/routes/analytics.py
+from fastapi import APIRouter, Depends
+router = APIRouter(prefix="/analytics", tags=["analytics"])
+
+@router.get("/usage")
+async def get_usage_stats():
+    return {"total_cvs": 1234}
+
+# 2. Register in main.py
+app.include_router(analytics.router)
+
+# 3. Test the endpoint
+# http://localhost:2000/docs
 ```
+
+## 🐛 Troubleshooting
+
+### Common Issues & Solutions
+
+| Issue | Solution |
+|-------|----------|
+| "Cannot find module" | Run `pnpm install` in project root |
+| TypeScript errors | Run `pnpm run typecheck` to see all errors |
+| "Port 2000 already in use" | Kill existing process: `lsof -ti:2000 \| xargs kill` |
+| Import errors | Ensure using `src/` prefix for absolute imports |
+| CV extraction fails | Check Gemini API quota and credentials |
+| Large file warning | Use Git LFS for files >50MB |
 
 ### Debug Commands
 ```bash
-pnpm why [package]                      # Check why package installed
-curl http://localhost:2000/docs         # Check if backend running (FastAPI docs)
-pnpm ls                                 # List all workspace packages
-git status && git diff                  # Check changes before commit
+# Check service status
+curl http://localhost:2000/health    # Backend health
+curl http://localhost:3000/api/health # Frontend health
+
+# View logs
+docker logs cv2web-backend -f        # Backend logs
+pnpm run dev --verbose               # Frontend verbose logs
+
+# Database issues
+python src/utils/init_db.py          # Reinitialize database
+
+# Check for dependency issues
+pnpm why [package]                   # Check why package installed
+pnpm ls                              # List all workspace packages
 ```
+
+### Debugging Tips
+- **Backend logs**: Check terminal running uvicorn
+- **Frontend errors**: Open browser DevTools Console (F12)
+- **Python errors**: Check venv is activated (`which python` should show venv path)
+- **TypeScript errors**: Run `pnpm run typecheck`
+- **API issues**: Visit http://localhost:2000/docs for FastAPI interactive docs
+
+## 📚 Code Style Guide
+
+### TypeScript/React
+```typescript
+// ✅ CORRECT
+import { useEffect } from 'react'
+export const ProfileCard: React.FC<Props> = ({ user }) => {
+  const [isLoading, setIsLoading] = useState(false)
+  // Component logic
+}
+
+// ❌ INCORRECT  
+const profileCard = require('./ProfileCard')  // No CommonJS
+export default function ProfileCard({user}) {  // Must use arrow functions
+  const [is_loading, set_is_loading] = useState() // Use camelCase
+}
+```
+
+### Python/FastAPI
+```python
+# ✅ CORRECT
+from typing import Optional
+from src.core.schemas import CVData
+
+async def extract_cv_data(file_path: str) -> Optional[CVData]:
+    """Extract CV data with type hints."""
+    # Implementation
+    
+# ❌ INCORRECT
+def extract_cv_data(file_path):  # Missing type hints
+    # Missing docstring
+    from core.schemas import *   # No wildcard imports
+```
+
+### Important Conventions
+- **MUST** use ES modules: `import { foo } from 'bar'` (NOT require)
+- **MUST** run typecheck before committing
+- Prefer functional React components with hooks
+- Use Tailwind CSS classes for styling
+- Use type hints for all Python functions
+- Use absolute imports: `from src.api.routes import cv`
+- Follow PEP 8 conventions
+
+## 🚢 Deployment
+
+### Local Testing
+```bash
+# Build and test production build
+pnpm run build
+pnpm run start
+
+# Test with production environment
+NODE_ENV=production pnpm run start
+```
+
+### Deploy to Vercel
+```bash
+# Automatic deployment on push to main
+git push origin main
+
+# Manual deployment
+vercel --prod
+
+# Preview deployment
+vercel
+```
+
+### GitHub Integration
+- **PR Reviews**: Mention `@claude` in PR comments for AI review
+- **CI/CD**: Automated workflows in `.github/workflows/`
+- **Actions**: Claude Code GitHub Action configured
+
+## 📖 Additional Resources
+
+### Important Files
+- `CLAUDE.md` - This file, for Claude Code context
+- `config.py` - Backend configuration
+- `package.json` - Frontend dependencies and scripts
+- `.taskmaster/` - Task management and PRDs
+- `requirements.txt` - Python dependencies
+
+### AI Services & Configuration
+- **Google Gemini 2.5 Flash** - CV extraction (primary, model in config.py)
+- **Claude 3.5 Sonnet** - Content enhancement
+- **Google Cloud Vision** - OCR for images
+- **AWS Textract** - Alternative OCR
+- **OpenAI API** - Optional enhancement
+- **Vercel** - Deployment platform
+- **Pinecone** - Optional vector search
+
+### External Documentation
+- [FastAPI Docs](https://fastapi.tiangolo.com/)
+- [Next.js 15 Docs](https://nextjs.org/docs)
+- [Tailwind CSS v4](https://tailwindcss.com/docs)
+- [Aceternity UI](https://ui.aceternity.com/)
+- [Magic UI](https://magicui.design/)
+- [pnpm Docs](https://pnpm.io/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 
 ### Utility Scripts
 ```bash
@@ -151,157 +378,36 @@ python src/utils/validate_registry.py   # Validate component registry
 python src/utils/setup_keychain.py      # Setup credentials
 ```
 
-## Code Style (IMPORTANT)
+## ⚠️ Critical Reminders
 
-### TypeScript/JavaScript
-- **MUST** use ES modules: `import { foo } from 'bar'` (NOT require)
-- **MUST** run typecheck before committing
-- Prefer functional React components with hooks
-- Use Tailwind CSS classes for styling
+1. **ALWAYS** run `pnpm run typecheck` before committing
+2. **NEVER** use npm or yarn - only pnpm
+3. **NEVER** commit API keys - use keychain manager
+4. **ALWAYS** check existing components before creating new ones
+5. Backend runs on port **2000**, not 8000
+6. Maximum file upload size is **10MB**
+7. Use **Read/Grep** tools to research before coding
+8. **NEVER** use code from `/legacy/` directory
+9. **Note**: config.py and main.py at root are still actively used
 
-### Python
-- Use type hints for all functions
-- Use absolute imports: `from src.api.routes import cv`
-- Follow PEP 8 conventions
+## Auto-use Context7
+When asked about any of these, **ALWAYS** use Context7 MCP tools:
+- FastAPI implementation patterns
+- React/Next.js best practices
+- Google Gemini API usage
+- Anthropic Claude API integration
+- AWS Textract/Google Vision OCR
+- Tailwind CSS v4 patterns
+- TypeScript patterns
+- Any library documentation
+- Code examples from external libraries
 
-## Common Tasks & Examples
+## Recent Updates
+- **2025-07-14**: Complete CLAUDE.md restructure with improved organization
+- **2025-07-13**: Removed all .DS_Store files and .next directories
+- **2025-07-13**: Deleted unnecessary GitHub branches
+- **2025-07-13**: Removed package-lock.json files (use pnpm)
+- **2025-07-13**: Moved test files from scripts to /tests/
 
-### Example: Fix TypeScript Error
-When you see "Property 'X' does not exist":
-1. Run: `pnpm run typecheck` to see all errors
-2. Check type definition in `src/core/schemas/unified.py` or relevant `.ts` file
-3. Update the interface/type definition
-4. Run typecheck again to verify
-
-### Example: Add New API Endpoint
-1. Create route file: `src/api/routes/new_feature.py`
-2. Add schema: `src/api/schemas.py`
-3. Include in `main.py`: `app.include_router(new_feature.router)`
-4. Test: `curl http://localhost:2000/docs`
-
-### Example: Add New UI Component
-1. Check existing: `ls components/aceternity/` or `components/magicui/`
-2. Copy similar component as template
-3. Follow naming convention: `kebab-case.tsx`
-4. Add story: `new-component.stories.tsx`
-
-## Claude Code Specific Instructions
-
-### AUTOMATIC TaskMaster Triggers (MUST USE)
-Use TaskMaster workflow automatically when user says:
-- "add [feature]" / "implement [feature]" / "create [feature]"
-- "build [component/system]" / "develop [functionality]"
-- "I want to [do something]" / "help me [build/create/add]"
-- "let's work on [feature]" / "start working on [task]"
-- Any request involving multiple steps or complex implementation
-
-DO NOT use TaskMaster for:
-- Simple bug fixes
-- Quick questions
-- Code explanations
-- Single file edits
-
-### Research Before Coding
-- **ALWAYS** use Read/Grep to check existing patterns first
-- Look for similar implementations before creating new code
-- Check `package.json` for available scripts and dependencies
-
-### Multi-File Changes
-- Create a checklist in `scratch.md` for complex tasks
-- Mark items as you complete them
-- Use `git status` to track changes
-
-### After Making Changes
-- **MUST** run: `pnpm run typecheck`
-- If tests exist, run: `pnpm run test`
-- Check for console errors in browser
-- Verify imports are working
-
-## Key Directories
-```
-/src/
-  /api/          - FastAPI backend
-  /core/         - Business logic (CV extraction, portfolio gen)
-  /templates/    - Portfolio templates
-/packages/
-  /new-renderer/ - Next.js app
-/components/     - UI components (Aceternity, Magic UI)
-```
-
-## Architecture Notes
-- Monorepo with pnpm workspaces
-- Strategy pattern for portfolio generators
-- Unified schema for CV data (`src/core/schemas/unified.py`)
-- 100+ animated UI components available
-
-## Common Gotchas & Solutions
-| Problem | Solution |
-|---------|----------|
-| "Cannot find module" | Run `pnpm install` in root |
-| TypeScript errors | Run `pnpm run typecheck` |
-| Port already in use | Kill process or use different port |
-| Large file warning | Use Git LFS for files >50MB |
-| Import not working | Check if using `src/` prefix correctly |
-
-## AI Services & Configuration
-- **Google Gemini 2.5 Flash** - CV extraction (primary, model in config.py)
-- **Claude 3.5 Sonnet** - Content enhancement
-- **Google Cloud Vision** - OCR for images
-- **AWS Textract** - Alternative OCR
-- **OpenAI API** - Optional enhancement
-- **Vercel** - Deployment platform
-- **Pinecone** - Optional vector search
-
-### Credential Setup (IMPORTANT)
-```bash
-python src/utils/setup_keychain.py      # Secure credential storage
-```
-**Never store API keys in files!** Use the keychain manager.
-
-## Git Workflow
-```bash
-git status                              # Check changes
-pnpm run typecheck                      # Verify no TS errors
-git add -A                              # Stage changes
-git commit -m "feat: descriptive message"
-git push origin main                    # Push to GitHub
-```
-
-### GitHub Integration
-- **PR Reviews**: Mention `@claude` in PR comments for AI review
-- **CI/CD**: Automated workflows in `.github/workflows/`
-- **Actions**: Claude Code GitHub Action configured
-
-## Debugging Tips
-- **Backend logs**: Check terminal running uvicorn
-- **Frontend errors**: Open browser DevTools Console (F12)
-- **Python errors**: Check venv is activated (`which python` should show venv path)
-- **TypeScript errors**: Run `pnpm run typecheck`
-- **API issues**: Visit http://localhost:2000/docs for FastAPI interactive docs
-
-## Project Configuration (config.py)
-- **Backend Port**: 2000 (not 8000!)
-- **CORS Origins**: localhost:3000, 3001, 5173
-- **Max Upload**: 10MB
-- **File Types**: PDF, DOCX, DOC, TXT, MD, RTF, ODT, HTML, images
-- **Session Expiry**: 7 days
-- **AI Models**: 
-  - Gemini: `gemini-2.5-flash`
-  - Claude: `claude-3-5-sonnet-20241022`
-
-## REMEMBER
-1. **typecheck** after changes
-2. **pnpm** not npm
-3. Check **existing code** first
-4. Use **Read/Grep** tools for research
-5. Follow **existing patterns**
-6. Backend runs on **port 2000**
-7. Use **quickstart.sh** for setup
-8. **Never** commit API keys
-
-## Recent Cleanup (2025-07-13)
-- Removed all .DS_Store files and .next directories
-- Deleted unnecessary GitHub branches
-- Removed package-lock.json files (use pnpm)
-- Moved test files from scripts to /tests/
-- **Note**: config.py and main.py at root are still actively used
+---
+*Last updated: 2025-07-14 | Version: 4.1*
