@@ -87,6 +87,8 @@ Thumbs.db
 *.temp
 *.bak
 *.backup
+*.cache
+write
 
 # Testing
 .pytest_cache/
