@@ -1,0 +1,11 @@
+# Task ID: 26
+# Title: Add tests/results/*.txt to .gitignore
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Prevent test outputs from being committed
+# Details:
+
+
+# Test Strategy:
+

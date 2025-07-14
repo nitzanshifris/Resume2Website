@@ -1,0 +1,11 @@
+# Task ID: 40
+# Title: Rename 'untitled folder' directories
+# Status: pending
+# Dependencies: None
+# Priority: low
+# Description: Rename all untitled folders in /data/cv_examples/png_examples/
+# Details:
+
+
+# Test Strategy:
+

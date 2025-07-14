@@ -1,0 +1,11 @@
+# Task ID: 29
+# Title: Move test_full_pipeline.py to /tests/
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Move from components/gallery-app/aceternity-gallery-app/scripts/ to /tests/
+# Details:
+
+
+# Test Strategy:
+

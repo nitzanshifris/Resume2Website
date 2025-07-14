@@ -1,0 +1,11 @@
+# Task ID: 31
+# Title: Create /src/utils/scripts/ directory
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create directory for utility scripts
+# Details:
+
+
+# Test Strategy:
+

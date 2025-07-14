@@ -1,0 +1,11 @@
+# Task ID: 35
+# Title: Move component docs to /docs/components/
+# Status: pending
+# Dependencies: None
+# Priority: low
+# Description: Move docs from components/gallery-app/aceternity-gallery-app/docs/
+# Details:
+
+
+# Test Strategy:
+

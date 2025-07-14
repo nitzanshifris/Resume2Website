@@ -1,0 +1,11 @@
+# Task ID: 11
+# Title: List all .next directories
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Find all 9 .next directories as listed in CLEANUP_RECOMMENDATIONS.md
+# Details:
+
+
+# Test Strategy:
+

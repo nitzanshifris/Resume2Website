@@ -1,0 +1,11 @@
+# Task ID: 52
+# Title: Test frontend build and dev server
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Run pnpm run build and pnpm run dev
+# Details:
+
+
+# Test Strategy:
+
