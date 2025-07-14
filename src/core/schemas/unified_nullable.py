@@ -1,10 +1,10 @@
 """
-Unified CV data schemas for CV2WEB.
+Unified CV data schemas with all fields nullable for CV2WEB.
 
 This module defines comprehensive Pydantic models for representing CV/resume data
-in a structured format that can be used across the application.
+in a structured format where ALL fields are nullable (can be null in JSON).
 """
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union, Any
 from pydantic import BaseModel, Field, HttpUrl, EmailStr
 
 
@@ -17,19 +17,19 @@ class Location(BaseModel):
 
 class ProfessionalLink(BaseModel):
     """Represents a professional social media or portfolio link."""
-    platform: str = Field(..., min_length=1, description="Platform name (e.g., LinkedIn, GitHub)")
-    url: HttpUrl = Field(..., description="Full URL to the profile")
+    platform: Optional[str] = None
+    url: Optional[str] = None
 
 class DateRange(BaseModel):
     startDate: Optional[str] = None
     endDate: Optional[str] = None
-    isCurrent: Optional[bool] = False
+    isCurrent: Optional[bool] = None
 
 # ===== CORE SECTIONS =====
 # These are the most common sections found in CVs
 
 class ContactSectionFooter(BaseModel):
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     phone: Optional[str] = None
     location: Optional[Location] = None
     professionalLinks: Optional[List[ProfessionalLink]] = None
@@ -48,7 +48,7 @@ class EducationItem(BaseModel):
     exchangePrograms: Optional[List[str]] = None
 
 class EducationSection(BaseModel):
-    sectionTitle: str = "Education"
+    sectionTitle: Optional[str] = None
     educationItems: Optional[List[EducationItem]] = None
 
 class ExperienceItem(BaseModel):
@@ -65,34 +65,34 @@ class ExperienceItem(BaseModel):
     reportingTo: Optional[str] = None
 
 class ExperienceSection(BaseModel):
-    sectionTitle: str = "Experience"
+    sectionTitle: Optional[str] = None
     experienceItems: Optional[List[ExperienceItem]] = None
 
 class HeroSection(BaseModel):
     fullName: Optional[str] = None
     professionalTitle: Optional[str] = None
     summaryTagline: Optional[str] = None
-    profilePhotoUrl: Optional[HttpUrl] = None
+    profilePhotoUrl: Optional[str] = None
 
 class AchievementItem(BaseModel):
     """Represents a quantifiable achievement or accomplishment."""
-    value: str = Field(..., min_length=1, description="Quantified value (e.g., '40%', '$2M+', 'Best Employee Award')")
-    label: str = Field(..., min_length=1, description="Description of the achievement")
-    contextOrDetail: Optional[str] = Field(None, description="Additional context or details")
-    timeframe: Optional[str] = Field(None, description="Time period (e.g., 'in 6 months', 'Q1 2024')")
+    value: Optional[str] = None
+    label: Optional[str] = None
+    contextOrDetail: Optional[str] = None
+    timeframe: Optional[str] = None
 
 class AchievementsSection(BaseModel):
-    sectionTitle: str = "Key Achievements"
+    sectionTitle: Optional[str] = None
     achievements: Optional[List[AchievementItem]] = None
 
 class LanguageItem(BaseModel):
     """Represents language proficiency information."""
-    language: str = Field(..., min_length=1, description="Language name (e.g., 'English', 'Hebrew', 'Spanish')")
-    proficiency: str = Field(..., min_length=1, description="Proficiency level (e.g., 'Native', 'Fluent', '4/5', '80%', 'B2')")
-    certification: Optional[str] = Field(None, description="Language certification (e.g., 'TOEFL 110', 'IELTS 8.0')")
+    language: Optional[str] = None
+    proficiency: Optional[str] = None
+    certification: Optional[str] = None
 
 class LanguagesSection(BaseModel):
-    sectionTitle: str = "Languages"
+    sectionTitle: Optional[str] = None
     languageItems: Optional[List[LanguageItem]] = None
 
 class CertificationItem(BaseModel):
@@ -101,10 +101,10 @@ class CertificationItem(BaseModel):
     issueDate: Optional[str] = None
     expirationDate: Optional[str] = None
     credentialId: Optional[str] = None
-    verificationUrl: Optional[HttpUrl] = None
+    verificationUrl: Optional[str] = None
 
 class CertificationsSection(BaseModel):
-    sectionTitle: str = "Certifications"
+    sectionTitle: Optional[str] = None
     certificationItems: Optional[List[CertificationItem]] = None
 
 class ProfessionalSummaryOverview(BaseModel):
@@ -116,25 +116,25 @@ class ProfessionalSummaryOverview(BaseModel):
 class ProjectItem(BaseModel):
     title: Optional[str] = None
     role: Optional[str] = None
-    duration: Optional[str] = None  # e.g., "3 months", "Summer 2023"
-    dateRange: Optional[DateRange] = None  # alternative to duration
+    duration: Optional[str] = None
+    dateRange: Optional[DateRange] = None
     description: Optional[str] = None
     keyFeatures: Optional[List[str]] = None
     technologiesUsed: Optional[List[str]] = None
-    projectUrl: Optional[HttpUrl] = None
-    imageUrl: Optional[HttpUrl] = None
+    projectUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
     projectMetrics: Optional[Dict[str, str]] = None
 
 class ProjectsSection(BaseModel):
-    sectionTitle: str = "Projects"
+    sectionTitle: Optional[str] = None
     projectItems: Optional[List[ProjectItem]] = None
 
 class SkillCategory(BaseModel):
-    categoryName: str
-    skills: List[str]
+    categoryName: Optional[str] = None
+    skills: Optional[List[str]] = None
 
 class SkillsSection(BaseModel):
-    sectionTitle: str = "Skills"
+    sectionTitle: Optional[str] = None
     skillCategories: Optional[List[SkillCategory]] = None
     ungroupedSkills: Optional[List[str]] = None
     proficiencyIndicators: Optional[Dict[str, str]] = None
@@ -148,9 +148,11 @@ class VolunteerExperienceItem(BaseModel):
     responsibilities: Optional[List[str]] = None
     impactMetrics: Optional[Dict[str, str]] = None
     commitment: Optional[str] = None
+    # For simpler format
+    period: Optional[str] = None  # Alternative to dateRange
 
 class VolunteerExperienceSection(BaseModel):
-    sectionTitle: str = "Volunteer Experience"
+    sectionTitle: Optional[str] = None
     volunteerItems: Optional[List[VolunteerExperienceItem]] = None
 
 # ===== COMMON ADDITIONAL SECTIONS =====
@@ -158,14 +160,15 @@ class VolunteerExperienceSection(BaseModel):
 
 class CourseItem(BaseModel):
     title: Optional[str] = None
-    issuingOrganization: Optional[str] = None
+    institution: Optional[str] = None  # Changed from issuingOrganization
+    year: Optional[str] = None  # Simplified date field
     dateRange: Optional[DateRange] = None
     certificateNumber: Optional[str] = None
-    certificateUrl: Optional[HttpUrl] = None
+    certificateUrl: Optional[str] = None
     description: Optional[str] = None
 
 class CoursesSection(BaseModel):
-    sectionTitle: str = "Courses & Training"
+    sectionTitle: Optional[str] = None
     courseItems: Optional[List[CourseItem]] = None
 
 # ===== SPECIALIZED SECTIONS =====
@@ -174,16 +177,16 @@ class CoursesSection(BaseModel):
 class PublicationItem(BaseModel):
     title: Optional[str] = None
     authors: Optional[List[str]] = None
-    publicationType: Optional[str] = None  # "Journal", "Conference", "Book Chapter"
-    journalName: Optional[str] = None  # For journal papers
-    conferenceName: Optional[str] = None  # For conference papers
+    publicationType: Optional[str] = None
+    journalName: Optional[str] = None
+    conferenceName: Optional[str] = None
     publicationDate: Optional[str] = None
-    doi: Optional[str] = None  # "10.1038/nature12373"
-    publicationUrl: Optional[HttpUrl] = None  # Full link to paper
+    doi: Optional[str] = None
+    publicationUrl: Optional[str] = None
     abstract: Optional[str] = None
 
 class PublicationsResearchSection(BaseModel):
-    sectionTitle: str = "Publications & Research"
+    sectionTitle: Optional[str] = None
     publications: Optional[List[PublicationItem]] = None
 
 class SpeakingEngagementItem(BaseModel):
@@ -191,45 +194,46 @@ class SpeakingEngagementItem(BaseModel):
     topic: Optional[str] = None
     date: Optional[str] = None
     venue: Optional[str] = None
-    role: Optional[str] = None  # "Keynote Speaker", "Panelist", "Workshop Leader"
-    eventUrl: Optional[HttpUrl] = None
-    presentationUrl: Optional[HttpUrl] = None
+    role: Optional[str] = None
+    eventUrl: Optional[str] = None
+    presentationUrl: Optional[str] = None
     audienceSize: Optional[int] = None
 
 class SpeakingEngagementsSection(BaseModel):
-    sectionTitle: str = "Speaking Engagements"
+    sectionTitle: Optional[str] = None
     speakingEngagements: Optional[List[SpeakingEngagementItem]] = None
 
 class PatentItem(BaseModel):
     title: Optional[str] = None
     patentNumber: Optional[str] = None
     applicationNumber: Optional[str] = None
-    status: Optional[str] = None  # "Granted", "Pending", "Published", "Expired"
+    status: Optional[str] = None
     filingDate: Optional[str] = None
     grantDate: Optional[str] = None
     inventors: Optional[List[str]] = None
-    issuingAuthority: Optional[str] = None  # "USPTO", "EPO", "IL Patent Office"
-    patentUrl: Optional[HttpUrl] = None
+    issuingAuthority: Optional[str] = None
+    patentUrl: Optional[str] = None
     description: Optional[str] = None
 
 class PatentsSection(BaseModel):
-    sectionTitle: str = "Patents"
+    sectionTitle: Optional[str] = None
     patents: Optional[List[PatentItem]] = None
 
 class ProfessionalMembership(BaseModel):
     organization: Optional[str] = None
     role: Optional[str] = None
-    membershipType: Optional[str] = None  # "Full Member", "Associate", "Fellow"
+    membershipType: Optional[str] = None
     membershipId: Optional[str] = None
     dateRange: Optional[DateRange] = None
     description: Optional[str] = None
+    period: Optional[str] = None  # Alternative to dateRange
 
 class ProfessionalMembershipsSection(BaseModel):
-    sectionTitle: str = "Professional Memberships"
+    sectionTitle: Optional[str] = None
     memberships: Optional[List[ProfessionalMembership]] = None
 
 class HobbiesSection(BaseModel):
-    sectionTitle: str = "Hobbies & Interests"
+    sectionTitle: Optional[str] = None
     hobbies: Optional[List[str]] = None
 
 # ===== MAIN CV SCHEMA =====
@@ -248,7 +252,7 @@ class CVData(BaseModel):
     certifications: Optional[CertificationsSection] = None
     languages: Optional[LanguagesSection] = None
     courses: Optional[CoursesSection] = None
-    volunteer: Optional[VolunteerExperienceSection] = None
+    volunteer: Optional[Union[VolunteerExperienceSection, List[VolunteerExperienceItem]]] = None
     
     # Specialized sections (less common)
     publications: Optional[PublicationsResearchSection] = None
@@ -258,12 +262,31 @@ class CVData(BaseModel):
     hobbies: Optional[HobbiesSection] = None
     
     # Catch-all for unstructured content
-    unclassified_text: Optional[List[str]] = Field(None, description="A catch-all for text that could not be categorized into other sections.")
+    unclassified_text: Optional[str] = None
     
     class Config:
         """Pydantic configuration."""
         json_encoders = {
             HttpUrl: str  # Convert HttpUrl to string for JSON serialization
         }
-        validate_assignment = True  # Validate on assignment
+        validate_assignment = True
         use_enum_values = True
+    
+    def model_dump_nullable(self, exclude_none: bool = False) -> Dict[str, Any]:
+        """
+        Custom serialization that ensures all fields are nullable in JSON.
+        Empty strings become null, empty lists remain empty lists.
+        """
+        data = self.model_dump(exclude_none=exclude_none)
+        return self._make_nullable(data)
+    
+    def _make_nullable(self, obj: Any) -> Any:
+        """Recursively convert empty strings to None throughout the data structure."""
+        if isinstance(obj, dict):
+            return {k: self._make_nullable(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._make_nullable(item) for item in obj]
+        elif isinstance(obj, str) and obj == "":
+            return None
+        else:
+            return obj

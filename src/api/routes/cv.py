@@ -47,7 +47,7 @@ init_db()
 # ========== Service Imports ==========
 from src.core.local.text_extractor import text_extractor
 from src.core.cv_extraction.data_extractor import data_extractor
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadResponse, CleanupResponse
 
 # Import authentication dependency
@@ -226,7 +226,7 @@ async def upload_cv(
         logger.info(f"Extracting structured data from {len(text)} characters of text")
         try:
             cv_data = await data_extractor.extract_cv_data(text)
-            logger.info(f"Successfully extracted CV data with {len([f for f in cv_data.model_dump() if cv_data.model_dump()[f]])} sections")
+            logger.info(f"Successfully extracted CV data with {len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])} sections")
             
             # TODO: Save cv_data to database for job_id
             # TODO: Trigger website generation

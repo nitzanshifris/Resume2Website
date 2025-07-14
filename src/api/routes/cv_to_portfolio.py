@@ -23,7 +23,7 @@ from src.core.local.text_extractor import text_extractor
 from src.core.cv_extraction.data_extractor import data_extractor
 # Component selection is now handled by Magic UI MCP scripts
 # Portfolio generation is handled by external scripts
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 import config
 
 logger = logging.getLogger(__name__)
@@ -127,7 +127,7 @@ async def process_cv_to_portfolio(
         # === Step 4: Extract Structured CV Data ===
         try:
             cv_data = await data_extractor.extract_cv_data(text)
-            logger.info(f"Successfully extracted CV data with sections: {[f for f in cv_data.model_dump() if cv_data.model_dump()[f]]}")
+            logger.info(f"Successfully extracted CV data with sections: {[f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]]}")
             
             _job_registry[job_id]["cv_data_extracted"] = True
             _job_registry[job_id]["cv_data"] = cv_data

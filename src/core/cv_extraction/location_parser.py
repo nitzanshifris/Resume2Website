@@ -4,7 +4,7 @@ Handles parsing of various location formats into structured data
 """
 import re
 from typing import Optional, Dict, Tuple
-from src.core.schemas.unified import Location
+from src.core.schemas.unified_nullable import Location
 
 # US state abbreviations
 US_STATES = {

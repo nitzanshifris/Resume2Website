@@ -12,7 +12,7 @@ import shutil
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 from . import PortfolioStrategy
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class MagicUIStrategy(PortfolioStrategy):
         # Save CV data to temporary file for MCP script
         temp_cv_path = output_dir / "cv_data_temp.json"
         with open(temp_cv_path, "w") as f:
-            json.dump(cv_data.model_dump(), f, indent=2)
+            json.dump(cv_data.model_dump_nullable(), f, indent=2)
         
         try:
             # Run MCP script

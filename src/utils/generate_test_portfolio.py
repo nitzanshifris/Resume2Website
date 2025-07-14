@@ -40,7 +40,7 @@ async def generate_test_portfolio(cv_path: Path, test_number: int = 1):
     logger.info("Step 1: Extracting CV data...")
     text = text_extractor.extract_text(str(cv_path))
     cv_data = await data_extractor.extract_cv_data(text)
-    cv_data_dict = cv_data.model_dump()
+    cv_data_dict = cv_data.model_dump_nullable()
     
     person_name = cv_data.hero.fullName if cv_data.hero else "Portfolio"
     logger.info(f"✓ Extracted CV data for: {person_name}")

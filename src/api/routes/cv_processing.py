@@ -20,7 +20,7 @@ from src.api.routes.auth import get_current_user
 from src.api.schemas import UploadResponse
 from src.core.local.text_extractor import TextExtractor
 from src.core.cv_extraction.data_extractor import DataExtractor
-from src.core.schemas.unified import CVData
+from src.core.schemas.unified_nullable import CVData
 import config
 
 logger = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ async def upload_cv(
             data_path = upload_dir / f"{job_id}_data.json"
             
             async with aiofiles.open(data_path, "w") as f:
-                await f.write(json.dumps(cv_data.model_dump(), indent=2))
+                await f.write(json.dumps(cv_data.model_dump_nullable(), indent=2))
             
             logger.info(f"CV data saved: {data_path}")
             

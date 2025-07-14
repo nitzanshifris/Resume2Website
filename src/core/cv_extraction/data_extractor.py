@@ -21,8 +21,8 @@ from .location_parser import parse_location_string, parse_year_range
 # Role inference
 from .role_inferencer import infer_project_role, infer_speaking_event_name, infer_field_of_study
 
-# Import schemas
-from src.core.schemas.unified import (
+# Import schemas - using nullable version for proper JSON output
+from src.core.schemas.unified_nullable import (
     CVData, HeroSection, ProfessionalSummaryOverview, ExperienceSection, 
     EducationSection, SkillsSection, ProjectsSection, 
     CertificationsSection, AchievementsSection,

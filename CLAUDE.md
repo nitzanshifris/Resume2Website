@@ -189,6 +189,52 @@ Claude: [Automatically creates PRD → generates tasks → analyzes → starts i
 - **API Features**: `create tasks for new FastAPI endpoint with authentication`
 - **Research**: `research latest Next.js 15 patterns and update our frontend tasks`
 
+## 🎨 UI Development with Magic MCP
+
+### What is Magic MCP?
+Magic Component Platform (MCP) is an AI-powered tool that generates beautiful UI components through natural language descriptions. It integrates with Cursor IDE and creates production-ready React/TypeScript components.
+
+### Setup for CV2WEB Development
+1. **Install in Cursor**:
+   ```bash
+   # Get API key from https://21st.dev
+   npx @21st-dev/cli@latest install cursor --api-key YOUR_API_KEY
+   ```
+
+2. **Using Magic MCP**:
+   In Cursor's AI chat, type `/ui` followed by your component description:
+   ```
+   /ui create a modern portfolio hero section with animated gradient background
+   /ui create an interactive skills showcase with progress bars
+   /ui create a timeline component for work experience
+   ```
+
+### Benefits for CV2WEB
+- **Rapid Prototyping**: Generate portfolio components instantly
+- **Modern Design**: Access to 21st.dev's component library
+- **TypeScript Ready**: All components are fully typed
+- **Customizable**: Generated components can be modified to match CV2WEB's design system
+
+### Example Use Cases
+```bash
+# Portfolio Components
+/ui create a project gallery with filter buttons and hover effects
+/ui create a testimonials carousel with smooth transitions
+/ui create a contact form with validation and animated feedback
+
+# CV Display Components  
+/ui create a skills matrix with categorized progress bars
+/ui create an education timeline with institution logos
+/ui create a certifications grid with hover details
+```
+
+### Integration Workflow
+1. Use `/ui` in Cursor to generate component
+2. Review and customize the generated code
+3. Move component to appropriate directory (`components/` or `src/templates/`)
+4. Integrate with CV2WEB's data structures
+5. Apply consistent styling with Tailwind CSS
+
 ## 🛠️ Common Development Tasks
 
 ### Adding a New Portfolio Template
@@ -347,6 +393,7 @@ vercel
 - `.taskmaster/` - Task management and PRDs
 - `requirements.txt` - Python dependencies
 
+
 ### AI Services & Configuration
 - **Google Gemini 2.5 Flash** - CV extraction (primary, model in config.py)
 - **Claude 3.5 Sonnet** - Content enhancement
@@ -403,6 +450,7 @@ When asked about any of these, **ALWAYS** use Context7 MCP tools:
 - Code examples from external libraries
 
 ## Recent Updates
+- **2025-07-14**: Added Magic MCP documentation for UI component generation in Cursor
 - **2025-07-14**: Complete CLAUDE.md restructure with improved organization
 - **2025-07-13**: Removed all .DS_Store files and .next directories
 - **2025-07-13**: Deleted unnecessary GitHub branches
