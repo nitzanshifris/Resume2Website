@@ -1,93 +1,79 @@
-# Task ID: 1
-# Title: Create backup branch before starting cleanup
-# Status: pending
-# Dependencies: None
-# Priority: medium
-# Description: Create a dedicated backup branch from the current main/master branch to preserve the existing codebase state before initiating any cleanup activities.
-# Details:
-This task involves creating a safety net before making potentially breaking changes during the cleanup process. Implementation steps:
+You are an AI assistant specializing in software development task analysis and implementation planning. Your goal is to create a comprehensive implementation plan based on the provided task details. 
 
-1. Ensure your local repository is up to date:
-   ```bash
-   git fetch origin
-   git pull origin main  # or master, depending on your default branch
-   ```
+First, carefully read and analyze the following task details:
 
-2. Create a new backup branch with a descriptive name and timestamp:
-   ```bash
-   git checkout -b backup/pre-cleanup-$(date +%Y%m%d-%H%M%S)
-   ```
+<task_details>
+{{TASK_DETAILS}}
+</task_details>
 
-3. Push the backup branch to the remote repository:
-   ```bash
-   git push -u origin backup/pre-cleanup-$(date +%Y%m%d-%H%M%S)
-   ```
+Before providing your implementation plan, break down the task in <task_breakdown> tags:
 
-4. Document the backup branch creation in the project's changelog or README:
-   - Branch name
-   - Creation date and time
-   - Purpose (pre-cleanup backup)
-   - Last commit hash before cleanup
+- List key components of the task
+- Identify potential dependencies between components
+- Note any specific technologies or frameworks mentioned
+- Highlight any constraints or requirements
+- Outline your approach to implementation
 
-5. Consider adding branch protection rules if your repository supports it:
-   - Prevent deletion
-   - Restrict push access
-   - Require pull request reviews for any changes
+This will help ensure a thorough understanding of the task requirements. It's OK for this section to be quite long.
 
-6. Create a tag for easy reference:
-   ```bash
-   git tag -a pre-cleanup-backup -m "Backup before cleanup activities"
-   git push origin pre-cleanup-backup
-   ```
+After your analysis, create a detailed implementation plan following these steps:
 
-Best practices:
-- Use a consistent naming convention for backup branches
-- Include timestamps to track when backups were created
-- Consider automating this process for future cleanup activities
-- Ensure all team members are aware of the backup branch location
+1. Break down the task into logical steps or phases, considering main objectives, dependencies, and subtasks.
 
-# Test Strategy:
-Verify the backup branch creation with the following steps:
+2. For each step or phase, provide:
+   - Specific actions to be taken
+   - Relevant commands or code snippets (if applicable)
+   - Best practices to follow
+   - Potential challenges and how to address them
+   - Estimated complexity (low, medium, high)
+   - Testing strategy
+   - Scalability and performance considerations
 
-1. Confirm the backup branch exists locally:
-   ```bash
-   git branch | grep backup/pre-cleanup
-   ```
+3. Identify risks associated with the task and suggest mitigation strategies.
 
-2. Verify the branch was pushed to remote:
-   ```bash
-   git ls-remote --heads origin | grep backup/pre-cleanup
-   ```
+4. Summarize your implementation plan, highlighting key steps and important considerations.
 
-3. Check that the backup branch contains the exact same commit history as main/master:
-   ```bash
-   git log --oneline -n 10 main
-   git log --oneline -n 10 backup/pre-cleanup-[timestamp]
-   ```
-   Both outputs should be identical.
+Present your response in the following format:
 
-4. Verify the tag was created and pushed:
-   ```bash
-   git tag -l | grep pre-cleanup-backup
-   git ls-remote --tags origin | grep pre-cleanup-backup
-   ```
+<implementation_plan>
+<task_breakdown>
+[Your detailed breakdown of the task]
+</task_breakdown>
 
-5. Test branch protection (if configured):
-   - Attempt to delete the branch (should fail)
-   - Try direct push to the branch (should be restricted)
+<steps>
+1. [First step]
+2. [Second step]
+...
+N. [Final step]
+</steps>
 
-6. Confirm documentation was updated:
-   - Check changelog/README for backup branch information
-   - Verify all required details are present (branch name, date, purpose, commit hash)
+<detailed_plan>
+[Step 1 Name]
+- Actions: [List specific actions]
+- Commands/Code: [Include relevant commands or code snippets]
+- Best Practices: [List best practices to follow]
+- Challenges and Solutions: [Identify potential challenges and how to address them]
+- Complexity: [Estimate: low, medium, high]
+- Testing Strategy: [Outline testing approach]
+- Scalability/Performance: [Note any considerations]
 
-7. Perform a test restoration:
-   ```bash
-   git checkout -b test-restore backup/pre-cleanup-[timestamp]
-   ```
-   Ensure all files and commit history are intact.
+[Step 2 Name]
+...
 
-8. Clean up test branch:
-   ```bash
-   git checkout main
-   git branch -d test-restore
-   ```
+[Step N Name]
+</detailed_plan>
+
+<risks_and_mitigations>
+- Risk 1: [Description]
+  Mitigation: [Strategy to mitigate the risk]
+- Risk 2: [Description]
+  Mitigation: [Strategy to mitigate the risk]
+...
+</risks_and_mitigations>
+
+<summary>
+[Concise summary of the implementation plan, highlighting key steps and important considerations]
+</summary>
+</implementation_plan>
+
+Ensure your analysis is thorough and your implementation plan provides clear, actionable instructions. If you need any clarification on the task details, please ask before proceeding with your plan.

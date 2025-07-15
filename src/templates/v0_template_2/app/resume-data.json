@@ -1,0 +1,296 @@
+{
+  "hero": {
+    "fullName": "MICHELLE LOPEZ",
+    "professionalTitle": "Fashion Designer",
+    "summaryTagline": "Expert Fashion Designer with 11+ years' experience in women's high-end shoes. Launched product lines for Chanel and Gucci. Designs showcased in Elle and Vogue. Attained recognition of top seller fashionista in 2017.",
+    "profilePhotoUrl": "/placeholder.svg?height=160&width=160"
+  },
+  "contact": {
+    "email": "email@email.com",
+    "phone": "(541) 754-3010",
+    "location": {
+      "city": "Los Angeles",
+      "state": "California",
+      "country": "United States"
+    },
+    "professionalLinks": [
+      {
+        "platform": "Linkedin",
+        "url": "https://placeholder.url/linkedin"
+      },
+      {
+        "platform": "Pinterest",
+        "url": "https://placeholder.url/pinterest"
+      },
+      {
+        "platform": "Behance",
+        "url": "https://placeholder.url/behance"
+      },
+      {
+        "platform": "Portfolio",
+        "url": "https://placeholder.url/portfolio"
+      }
+    ],
+    "availability": "Available for Immediate Start"
+  },
+  "summary": {
+    "sectionTitle": "Professional Summary",
+    "summaryText": "Expert Fashion Designer with 11+ years' experience in women's high-end shoes. Launched product lines for Chanel and Gucci. Designs showcased in Elle and Vogue. Attained recognition of top seller fashionista in 2017. A creative and detail-oriented professional with a deep passion for sustainable materials and innovative production techniques.",
+    "yearsOfExperience": 11,
+    "keySpecializations": ["Women's high-end shoes", "Sustainable Fashion", "Accessory Design"],
+    "careerHighlights": [
+      "Launched product lines for Chanel and Gucci",
+      "Designs showcased in Elle and Vogue",
+      "Attained recognition of top seller fashionista in 2017",
+      "Pioneered a zero-waste pattern cutting technique, reducing fabric waste by 25%.",
+      "Led a successful collaboration with a tech company to create a 3D virtual runway show."
+    ]
+  },
+  "experience": {
+    "sectionTitle": "Experience",
+    "experienceItems": [
+      {
+        "jobTitle": "Senior Fashion Designer",
+        "companyName": "Escada",
+        "location": { "city": "Milan", "country": "Italy" },
+        "dateRange": { "startDate": "January 2017", "endDate": "July 2021" },
+        "responsibilitiesAndAchievements": [
+          "Functioned as the lead designer for the 2019 women's winter collection team.",
+          "Ran the whole product design process, from market research to finished product.",
+          "Supervised technical designs of all products from concept to manufacturing."
+        ]
+      },
+      {
+        "jobTitle": "Associate Fashion Designer",
+        "companyName": "Dior Homme",
+        "location": { "city": "New York", "country": "United States" },
+        "dateRange": { "startDate": "January 2014", "endDate": "December 2018" },
+        "responsibilitiesAndAchievements": [
+          "Produced commercial designs reflecting the company's business strategy.",
+          "Developed and upheld effective relations with eight vital partners.",
+          "Worked together with vendors throughout the whole design process."
+        ]
+      },
+      {
+        "jobTitle": "Assistant Designer",
+        "companyName": "Prada",
+        "location": { "city": "Florence", "country": "Italy" },
+        "dateRange": { "startDate": "June 2012", "endDate": "December 2013" },
+        "responsibilitiesAndAchievements": [
+          "Assisted in the development of mood boards and color palettes for seasonal collections.",
+          "Created detailed technical sketches and specifications for manufacturers.",
+          "Managed fabric and trim library, sourcing new materials from international suppliers."
+        ]
+      },
+      {
+        "jobTitle": "Design Intern",
+        "companyName": "Calvin Klein",
+        "location": { "city": "New York", "country": "United States" },
+        "dateRange": { "startDate": "May 2011", "endDate": "August 2011" },
+        "responsibilitiesAndAchievements": [
+          "Supported the design team with research, sketching, and sample preparation.",
+          "Organized and prepared materials for collection presentations and showroom setups.",
+          "Gained hands-on experience in a fast-paced, high-fashion environment."
+        ]
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "Education",
+    "educationItems": [
+      {
+        "degree": "Bachelor of Arts",
+        "fieldOfStudy": "Fashion Design",
+        "institution": "University of Illinois",
+        "location": { "city": "Chicago" },
+        "dateRange": { "startDate": "2008", "endDate": "2012" },
+        "honors": ["2nd place for Best Uniform Design at the Yearly Gallant Show for 2011"]
+      },
+      {
+        "degree": "Associates Degree",
+        "fieldOfStudy": "Fashion Design",
+        "institution": "University of Southern California",
+        "location": { "city": "San Jacinto" },
+        "dateRange": { "startDate": "2006", "endDate": "2008" }
+      },
+      {
+        "degree": "Certificate Program",
+        "fieldOfStudy": "Digital Fashion Pro",
+        "institution": "Parsons School of Design",
+        "location": { "city": "Online" },
+        "dateRange": { "startDate": "Summer 2022", "endDate": "" }
+      },
+      {
+        "degree": "Short Course",
+        "fieldOfStudy": "Draping and Experimental Cutting",
+        "institution": "Central Saint Martins",
+        "location": { "city": "London" },
+        "dateRange": { "startDate": "Summer 2019", "endDate": "" }
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "Skills",
+    "skillCategories": [
+      {
+        "categoryName": "Design Software & Tools",
+        "skills": ["Adobe Illustrator", "Photoshop", "Hand Drafting", "CLO 3D"]
+      },
+      {
+        "categoryName": "Fashion Design",
+        "skills": ["Sketching", "Technical Design", "Fabric Selection", "Mood Board Development"]
+      },
+      {
+        "categoryName": "Business & Strategy",
+        "skills": ["Market Research", "Concept Pitching", "Business Strategy", "Trend Forecasting"]
+      },
+      {
+        "categoryName": "Collaboration",
+        "skills": ["Team Leadership", "Vendor Management", "Cross-functional Communication", "Client Relations"]
+      },
+      { "categoryName": "Languages", "skills": ["English", "Italian", "French", "Spanish"] },
+      {
+        "categoryName": "Sustainability",
+        "skills": ["Circular Design", "Ethical Sourcing", "Upcycling", "Material Innovation"]
+      }
+    ]
+  },
+  "projects": {
+    "sectionTitle": "Projects",
+    "projectItems": [
+      {
+        "title": "Men's Winter Collection (Art Nouveau Style)",
+        "description": "Developed a men's winter collection renowned by Vogue's and Marie Claire's editorial teams for its Art Nouveau style.",
+        "projectUrl": "#"
+      },
+      {
+        "title": "Women's Summer Collection",
+        "description": "Created a highly admired women's summer collection that increased revenue by 38% compared to last year.",
+        "projectUrl": "#"
+      },
+      {
+        "title": "Sustainable Capsule Collection 'Rebirth'",
+        "description": "Designed and launched a 10-piece collection using only upcycled and deadstock materials, featured on 'Green Fashion Weekly'.",
+        "projectUrl": "#"
+      },
+      {
+        "title": "3D Virtual Runway for Metaverse Fashion Week",
+        "description": "Collaborated with a team of 3D artists to create a fully digital collection and immersive runway experience.",
+        "projectUrl": "#"
+      }
+    ]
+  },
+  "achievements": {
+    "sectionTitle": "Key Achievements",
+    "achievements": [
+      { "value": "Top Seller Fashionista", "label": "Attained recognition as", "timeframe": "2017" },
+      { "value": "46%", "label": "sales numbers boosted", "contextOrDetail": "for a men's winter collection" },
+      { "value": "38%", "label": "revenue increased", "contextOrDetail": "for a women's summer collection" },
+      { "value": "6 designers", "label": "Managed a team of", "contextOrDetail": "to create 155 SKUs" },
+      {
+        "value": "Emerging Designer of the Year",
+        "label": "Awarded",
+        "contextOrDetail": "by the International Fashion Group",
+        "timeframe": "2020"
+      },
+      {
+        "value": "30 Under 30",
+        "label": "Featured in Forbes'",
+        "contextOrDetail": "Art & Style category",
+        "timeframe": "2021"
+      }
+    ]
+  },
+  "certifications": {
+    "sectionTitle": "Certifications",
+    "certificationItems": [
+      { "title": "Adobe Certified Expert - Illustrator", "issuingOrganization": "Adobe", "issueDate": "July 2021" },
+      {
+        "title": "Luxury Brand Management",
+        "issuingOrganization": "Business of Fashion (BoF)",
+        "issueDate": "March 2022"
+      },
+      {
+        "title": "Sustainable Fashion",
+        "issuingOrganization": "Copenhagen Business School",
+        "issueDate": "January 2023"
+      },
+      {
+        "title": "Certified Pattern Maker",
+        "issuingOrganization": "The Pattern Making School",
+        "issueDate": "June 2019"
+      }
+    ]
+  },
+  "languages": {
+    "sectionTitle": "Languages",
+    "languageItems": [
+      { "language": "English", "proficiency": "Native speaker" },
+      { "language": "Italian", "proficiency": "Fluent" },
+      { "language": "French", "proficiency": "Professional Working Proficiency" },
+      { "language": "Spanish", "proficiency": "Conversational" }
+    ]
+  },
+  "publications": {
+    "sectionTitle": "Publications",
+    "publications": [
+      {
+        "title": "Evolution of faux leather and high ankle boots.",
+        "publicationType": "Dissertation",
+        "publicationDate": "2012",
+        "publicationUrl": "#"
+      },
+      {
+        "title": "The Future is Upcycled: A Designer's View",
+        "publicationType": "Guest Blog Post, 'The Sustainable Stylist'",
+        "publicationDate": "2022",
+        "publicationUrl": "#"
+      },
+      {
+        "title": "From Sketch to Metaverse: An Interview with Michelle Lopez",
+        "publicationType": "Alumni Magazine, University of Illinois",
+        "publicationDate": "2023",
+        "publicationUrl": "#"
+      },
+      {
+        "title": "Color Theory in Modern Accessory Design",
+        "publicationType": "Co-authored article, 'Design Quarterly'",
+        "publicationDate": "2020",
+        "publicationUrl": "#"
+      }
+    ]
+  },
+  "speaking": {
+    "sectionTitle": "Speaking Engagements",
+    "speakingEngagements": [
+      {
+        "eventName": "Concept Development Meetings",
+        "topic": "Original concept pitches for directional product lines",
+        "date": "2017 - 2021",
+        "venue": "Escada, Milan"
+      },
+      {
+        "eventName": "Future of Fashion Conference",
+        "topic": "Panelist on 'Sustainability in Luxury'",
+        "date": "2022",
+        "venue": "Online"
+      },
+      {
+        "eventName": "University of Illinois - Design School",
+        "topic": "Guest Lecture: 'Building a Career in High Fashion'",
+        "date": "2023",
+        "venue": "Chicago, IL"
+      },
+      {
+        "eventName": "Adobe MAX",
+        "topic": "Workshop: 'Digital Sketching with Illustrator for Fashion'",
+        "date": "2021",
+        "venue": "Online"
+      }
+    ]
+  },
+  "hobbies": {
+    "sectionTitle": "Hobbies & Interests",
+    "hobbies": ["Art History", "Rugby", "Cricket", "Photography", "Vintage Film", "Pottery"]
+  }
+}

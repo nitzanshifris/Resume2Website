@@ -57,24 +57,47 @@ uvicorn main:app --reload --port 2000       # Start FastAPI (http://localhost:20
 python main.py                               # Alternative start method
 ```
 
-### Git Workflow
-```bash
-# 1. Start new feature
-git checkout -b feature/description
+### Git Workflow - MANDATORY BRANCH-BASED DEVELOPMENT
 
-# 2. Make changes and verify
+⚠️ **CRITICAL**: Claude Code MUST follow these Git rules:
+1. **NEVER** work directly on `main` branch
+2. **ALWAYS** create a feature branch before making changes
+3. **ALWAYS** ask for explicit approval before `git push`
+4. **ALWAYS** ask for explicit approval before `git commit`
+
+```bash
+# 1. MANDATORY: Check current branch first
+git branch --show-current  # Must NOT be 'main'
+
+# 2. Create feature branch (REQUIRED)
+git checkout -b feature/description
+# Branch naming: feature/*, fix/*, docs/*, refactor/*
+
+# 3. Make changes and verify
 pnpm run typecheck      # No TypeScript errors
 pytest                  # Backend tests pass
 
-# 3. Commit with conventional format
-git add .
-git commit -m "feat: add new portfolio template"
+# 4. Stage changes (ask user first)
+git add .               # ⚠️ Requires user approval
+
+# 5. Commit (ask user first)
+git commit -m "feat: add new portfolio template"  # ⚠️ Requires user approval
 # Commit types: feat|fix|docs|style|refactor|test|chore
 
-# 4. Push and create PR
-git push origin feature/description
+# 6. Push (ask user first)
+git push origin feature/description  # ⚠️ Requires user approval
+
+# 7. Create PR
 gh pr create --title "feat: description" --body "Closes #123"
 ```
+
+#### Git Safety Checklist for Claude Code
+- [ ] Currently on feature branch (not main)
+- [ ] All tests passing
+- [ ] TypeScript checks passing
+- [ ] User approved staging changes
+- [ ] User approved commit message
+- [ ] User approved push to remote
 
 ## 🏗️ Architecture
 
@@ -414,15 +437,11 @@ vercel
 
 ### Utility Scripts
 ```bash
-# Portfolio generation
-python src/utils/generate_complete_portfolio.py
-python src/utils/generate_test_portfolio.py
-
-# Component validation
-python src/utils/validate_registry.py   # Validate component registry
-
 # Development utilities
 python src/utils/setup_keychain.py      # Setup credentials
+
+# Note: Portfolio generation scripts have been moved to legacy/
+# New template-based portfolio system is being implemented
 ```
 
 ## ⚠️ Critical Reminders
@@ -436,6 +455,13 @@ python src/utils/setup_keychain.py      # Setup credentials
 7. Use **Read/Grep** tools to research before coding
 8. **NEVER** use code from `/legacy/` directory
 9. **Note**: config.py and main.py at root are still actively used
+10. **ALWAYS** ask for explicit approval before running `git push` - never push without permission
+11. **ALWAYS** work on feature branches - NEVER on main branch
+12. **ALWAYS** ask for approval before `git add`, `git commit`, or `git push`
+13. **ALWAYS** use isolated sandbox environments for code generation
+14. **ALWAYS** implement live readable logging for transparency
+15. **ALWAYS** use CV examples from `data/cv_examples/` directory for testing - NEVER use made-up CV data
+16. **ALWAYS** use existing actual code from the codebase - NEVER create or run demos, tests, or proof-of-concept files
 
 ## Auto-use Context7
 When asked about any of these, **ALWAYS** use Context7 MCP tools:
@@ -449,13 +475,107 @@ When asked about any of these, **ALWAYS** use Context7 MCP tools:
 - Any library documentation
 - Code examples from external libraries
 
+## 🔒 Isolated Environment & Sandbox Development
+
+### Portfolio Generation Sandboxing
+To ensure security and prevent direct code pollution, ALL portfolio generation MUST use isolated environments:
+
+```bash
+# Sandbox directory structure
+CV2WEB-V4/
+├── sandboxes/              # Isolated environment for code generation
+│   ├── .gitignore          # Ignore all sandbox contents
+│   └── portfolios/         # Generated portfolio sandboxes
+│       └── {job-id}/       # Individual portfolio sandbox
+│           ├── src/        # Generated code
+│           ├── package.json
+│           └── preview.url # Preview link
+```
+
+### Sandbox Workflow
+1. **Create isolated environment** for each portfolio generation
+2. **Generate code** in sandbox, not main codebase
+3. **Preview in isolation** before user approval
+4. **Export approved code** to final destination
+5. **Clean up sandbox** after completion
+
+### Claude SDK Best Practices
+- Use persistent memory via Markdown files in `.claude/memory/`
+- Implement retry logic with exponential backoff
+- Cache API responses to reduce redundant calls
+- Stream responses for real-time feedback
+- Use structured prompts for consistent output
+
+## 📊 Live Readable Logging
+
+### Logging Standards
+```python
+# src/utils/live_logger.py
+import logging
+from datetime import datetime
+from typing import Any, Dict
+
+class LiveLogger:
+    """Structured logging with live readable output."""
+    
+    def __init__(self, name: str):
+        self.logger = logging.getLogger(name)
+        self.logger.setLevel(logging.INFO)
+        
+        # Console handler with readable format
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter(
+            '%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s',
+            datefmt='%H:%M:%S'
+        )
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+    
+    def step(self, step_name: str, details: Dict[str, Any] = None):
+        """Log a major step in the process."""
+        self.logger.info(f"🚀 STEP: {step_name}")
+        if details:
+            for key, value in details.items():
+                self.logger.info(f"   └─ {key}: {value}")
+    
+    def progress(self, task: str, current: int, total: int):
+        """Log progress for long-running tasks."""
+        percentage = (current / total) * 100
+        bar = '█' * int(percentage / 5) + '░' * (20 - int(percentage / 5))
+        self.logger.info(f"⏳ {task}: [{bar}] {percentage:.1f}%")
+    
+    def success(self, message: str):
+        """Log successful completion."""
+        self.logger.info(f"✅ SUCCESS: {message}")
+    
+    def warning(self, message: str):
+        """Log warnings."""
+        self.logger.warning(f"⚠️  WARNING: {message}")
+    
+    def error(self, message: str, error: Exception = None):
+        """Log errors with details."""
+        self.logger.error(f"❌ ERROR: {message}")
+        if error:
+            self.logger.error(f"   └─ Details: {str(error)}")
+```
+
+### Logging Best Practices
+1. **Use structured prefixes**: 🚀 (start), ⏳ (progress), ✅ (success), ⚠️ (warning), ❌ (error)
+2. **Log at decision points**: Show AI reasoning process
+3. **Include timing**: Track performance of each step
+4. **Be concise but informative**: One line per action
+5. **Group related logs**: Use indentation for sub-tasks
+
 ## Recent Updates
-- **2025-07-14**: Added Magic MCP documentation for UI component generation in Cursor
-- **2025-07-14**: Complete CLAUDE.md restructure with improved organization
-- **2025-07-13**: Removed all .DS_Store files and .next directories
-- **2025-07-13**: Deleted unnecessary GitHub branches
-- **2025-07-13**: Removed package-lock.json files (use pnpm)
-- **2025-07-13**: Moved test files from scripts to /tests/
+- **2025-01-14**: Added isolated environment requirements and live logging standards
+- **2025-01-14**: Enhanced Git workflow with mandatory branch-based development
+- **2025-01-14**: Added Claude SDK best practices from video learnings
+- **2025-01-14**: Added Magic MCP documentation for UI component generation in Cursor
+- **2025-01-14**: Complete CLAUDE.md restructure with improved organization
+- **2025-01-13**: Removed all .DS_Store files and .next directories
+- **2025-01-13**: Deleted unnecessary GitHub branches
+- **2025-01-13**: Removed package-lock.json files (use pnpm)
+- **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-07-14 | Version: 4.1*
+*Last updated: 2025-01-14 | Version: 4.2*
