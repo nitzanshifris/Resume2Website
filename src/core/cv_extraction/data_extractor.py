@@ -50,68 +50,49 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import config
 
-# Configuration
-GEMINI_MODEL = config.GEMINI_MODEL
-CLAUDE_FALLBACK_MODEL = config.CLAUDE_MODEL
-DEFAULT_MAX_TOKENS = 4000
-DEFAULT_TEMPERATURE = 0.1
+# Configuration - Claude 4 Opus Only
+PRIMARY_MODEL = config.PRIMARY_MODEL  # claude-4-opus
+FALLBACK_MODEL = config.FALLBACK_MODEL  # claude-4-opus
+DEFAULT_MAX_TOKENS = config.EXTRACTION_MAX_TOKENS  # 4000
+DEFAULT_TEMPERATURE = config.EXTRACTION_TEMPERATURE  # 0.0
 
 
 class DataExtractor:
     """
-    Extracts structured data from CV text using Gemini 2.5 Pro.
-    Excellent quality at 85% less cost than Opus.
+    Extracts structured data from CV text using Claude 4 Opus ONLY.
+    Maximum determinism and consistency for reliable CV processing.
     """
     
-    def __init__(self, api_key: Optional[str] = None, claude_api_key: Optional[str] = None):
-        """Initialize with API keys from keychain or environment"""
-        # Setup Gemini (primary)
-        google_api_key = api_key
-        if not google_api_key:
-            if KEYCHAIN_AVAILABLE:
-                google_api_key = get_gemini_api_key()
-            if not google_api_key:
-                google_api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
-                
-        if google_api_key:
-            try:
-                genai.configure(api_key=google_api_key)
-                self.gemini_model = genai.GenerativeModel(GEMINI_MODEL)
-                self.gemini_available = True
-                logger.info(f"Gemini {GEMINI_MODEL} initialized successfully")
-            except Exception as e:
-                logger.warning(f"Failed to initialize Gemini: {e}")
-                self.gemini_available = False
-        else:
-            self.gemini_available = False
-            
-        # Setup Claude (fallback)
-        anthropic_api_key = claude_api_key
+    def __init__(self, api_key: Optional[str] = None):
+        """Initialize with Claude 4 Opus only"""
+        
+        # Setup Claude 4 Opus as primary and only model
+        anthropic_api_key = api_key
         if not anthropic_api_key:
             if KEYCHAIN_AVAILABLE:
                 anthropic_api_key = get_anthropic_api_key()
             if not anthropic_api_key:
                 anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
                 
-        if anthropic_api_key:
-            try:
-                self.claude_client = AsyncAnthropic(api_key=anthropic_api_key)
-                self.claude_available = True
-                logger.info("Claude fallback initialized successfully")
-            except Exception as e:
-                logger.warning(f"Failed to initialize Claude: {e}")
-                self.claude_available = False
-        else:
-            self.claude_available = False
+        if not anthropic_api_key:
+            raise ValueError("ANTHROPIC_API_KEY required for Claude 4 Opus extraction")
+                
+        try:
+            self.claude_client = AsyncAnthropic(api_key=anthropic_api_key)
+            self.claude_available = True
+            logger.info(f"Claude 4 Opus ({PRIMARY_MODEL}) initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Claude 4 Opus: {e}")
+            raise ValueError(f"Failed to initialize Claude 4 Opus: {e}")
             
-        # Ensure at least one model is available
-        if not self.gemini_available and not self.claude_available:
-            raise ValueError("No LLM available! Need either GOOGLE_API_KEY or ANTHROPIC_API_KEY")
+        # Disable Gemini completely
+        self.gemini_available = False
             
-        self.generation_config = {
-            "temperature": DEFAULT_TEMPERATURE,
-            "max_output_tokens": DEFAULT_MAX_TOKENS,
-            "response_mime_type": "application/json"
+        # Claude 4 Opus configuration for maximum determinism
+        self.claude_config = {
+            "temperature": DEFAULT_TEMPERATURE,  # 0.0 for maximum determinism
+            "max_tokens": DEFAULT_MAX_TOKENS,    # 4000
+            "top_p": config.EXTRACTION_TOP_P     # 0.1 for restricted token selection
         }
         
         # Section to schema mapping
@@ -135,50 +116,25 @@ class DataExtractor:
             "memberships": ProfessionalMembershipsSection
         }
         
-        # Log available models
-        models = []
-        if self.gemini_available:
-            models.append(f"Gemini ({GEMINI_MODEL})")
-        if self.claude_available:
-            models.append(f"Claude ({CLAUDE_FALLBACK_MODEL})")
-        logger.info(f"DataExtractor initialized with: {', '.join(models)}")
+        # Log Claude 4 Opus initialization
+        logger.info(f"DataExtractor initialized with Claude 4 Opus ({PRIMARY_MODEL}) - Maximum Determinism Mode")
     
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     async def _call_llm_with_retry(self, prompt: str, section_name: str) -> Any:
-        """Call LLM with automatic fallback"""
-        # Try Gemini first if available
-        if self.gemini_available:
-            try:
-                logger.debug(f"Calling Gemini for {section_name}")
-                response = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda: self.gemini_model.generate_content(
-                        prompt,
-                        generation_config=self.generation_config
-                    )
-                )
-                return ("gemini", response.text)
-            except Exception as e:
-                logger.warning(f"Gemini failed for {section_name}: {e}")
-                if not self.claude_available:
-                    raise
-                    
-        # Fallback to Claude
-        if self.claude_available:
-            try:
-                logger.info(f"Using Claude fallback for {section_name}")
-                response = await self.claude_client.messages.create(
-                    model=CLAUDE_FALLBACK_MODEL,
-                    max_tokens=DEFAULT_MAX_TOKENS,
-                    temperature=DEFAULT_TEMPERATURE,
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                return ("claude", response.content[0].text)
-            except Exception as e:
-                logger.error(f"Claude also failed for {section_name}: {e}")
-                raise
-                
-        raise Exception("No LLM available")
+        """Call Claude 4 Opus with retry logic for maximum determinism"""
+        try:
+            logger.debug(f"Calling Claude 4 Opus for {section_name}")
+            response = await self.claude_client.messages.create(
+                model=PRIMARY_MODEL,  # claude-4-opus
+                max_tokens=self.claude_config["max_tokens"],
+                temperature=self.claude_config["temperature"],  # 0.0
+                top_p=self.claude_config["top_p"],  # 0.1
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return ("claude-4-opus", response.content[0].text)
+        except Exception as e:
+            logger.error(f"Claude 4 Opus failed for {section_name}: {e}")
+            raise
     
     def _create_section_prompt(self, section_name: str, section_schema: Optional[Type[BaseModel]], 
                               raw_text: str) -> str:
@@ -186,8 +142,16 @@ class DataExtractor:
         
         schema_json = json.dumps(section_schema.model_json_schema(), indent=2) if section_schema else "{}"
         
-        # Base instructions
-        base_prompt = f"""You are a world-class CV parsing expert. Extract information for the "{section_name}" section ONLY.
+        # Base instructions with deterministic requirements
+        base_prompt = f"""You are a world-class CV parsing expert using Claude 4 Opus for maximum determinism. Extract information for the "{section_name}" section ONLY.
+
+CRITICAL DETERMINISTIC REQUIREMENTS:
+- Extract ONLY what is explicitly stated in the CV text
+- Do NOT infer, guess, or hallucinate any information
+- Use exact text from the CV when possible
+- If uncertain about any field, leave it as null rather than guessing
+- Be completely consistent in naming and formatting
+- Do NOT add creative interpretations or assumptions
 
 Analyze the entire CV text and find information relevant to this section.
 Return a single JSON object that strictly adheres to the provided schema.
@@ -203,7 +167,7 @@ CV Text:
 {raw_text}
 ---
 
-Extract the {section_name} data and return ONLY the JSON object:"""
+Extract the {section_name} data and return ONLY the JSON object. Be completely deterministic and consistent:"""
 
         # Section-specific enhancements
         if section_name == "experience":
@@ -898,6 +862,62 @@ IMPORTANT:
                 return line.strip()
         
         return None
+    
+    def calculate_extraction_confidence(self, cv_data: Any, raw_text: str) -> float:
+        """Calculate confidence score for extraction quality (0.0-1.0)"""
+        try:
+            if not cv_data:
+                return 0.0
+                
+            sections = cv_data.model_dump_nullable() if hasattr(cv_data, 'model_dump_nullable') else cv_data
+            
+            # 1. Data completeness (40%)
+            total_sections = 15  # Total possible sections
+            non_null_sections = len([v for v in sections.values() if v is not None and v != {}])
+            completeness_score = min(non_null_sections / total_sections, 1.0) * 0.4
+            
+            # 2. Text coverage (30%) - estimate how much of original text is represented
+            extracted_text_length = self._estimate_extracted_text_length(sections)
+            coverage_score = min(extracted_text_length / len(raw_text), 1.0) * 0.3
+            
+            # 3. Validation quality (30%) - using existing validation
+            _, validation_issues = date_validator.validate_and_fix_cv_data(sections)
+            validation_score = max(0, 1.0 - len(validation_issues) / 10) * 0.3
+            
+            total_score = completeness_score + coverage_score + validation_score
+            
+            logger.info(f"Confidence calculated: {total_score:.2f} "
+                       f"(completeness: {completeness_score/0.4:.2f}, "
+                       f"coverage: {coverage_score/0.3:.2f}, "
+                       f"validation: {validation_score/0.3:.2f})")
+            
+            return total_score
+            
+        except Exception as e:
+            logger.warning(f"Failed to calculate confidence score: {e}")
+            return 0.5  # Default moderate confidence
+    
+    def _estimate_extracted_text_length(self, sections: dict) -> int:
+        """Estimate total character count of extracted text"""
+        total_chars = 0
+        
+        try:
+            for section_name, section_data in sections.items():
+                if not section_data:
+                    continue
+                    
+                # Convert to string and count approximate characters
+                if isinstance(section_data, dict):
+                    total_chars += len(str(section_data))
+                elif isinstance(section_data, list):
+                    total_chars += sum(len(str(item)) for item in section_data)
+                else:
+                    total_chars += len(str(section_data))
+                    
+        except Exception as e:
+            logger.warning(f"Error estimating text length: {e}")
+            
+        return total_chars
 
 
 # Create singleton instance for easy import
