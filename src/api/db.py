@@ -55,7 +55,7 @@ def init_db():
             )
         ''')
         
-        # Create cv_uploads table with file_hash for caching
+        # Create cv_uploads table 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS cv_uploads (
                 upload_id TEXT PRIMARY KEY,
@@ -66,10 +66,19 @@ def init_db():
                 upload_date TEXT NOT NULL,
                 cv_data TEXT,
                 status TEXT DEFAULT 'processing',
-                file_hash TEXT,
                 FOREIGN KEY (user_id) REFERENCES users (user_id)
             )
         ''')
+        
+        # Add file_hash column if it doesn't exist (migration)
+        try:
+            conn.execute('ALTER TABLE cv_uploads ADD COLUMN file_hash TEXT')
+            logger.info("Added file_hash column to cv_uploads table")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" in str(e).lower():
+                logger.info("file_hash column already exists")
+            else:
+                logger.warning(f"Unexpected error adding file_hash column: {e}")
         
         # Create cv_extraction_cache table for deterministic caching
         conn.execute('''
@@ -85,8 +94,13 @@ def init_db():
             )
         ''')
         
-        # Create indexes for performance
-        conn.execute('CREATE INDEX IF NOT EXISTS idx_cv_uploads_file_hash ON cv_uploads(file_hash)')
+        # Create indexes for performance (safe creation)
+        try:
+            conn.execute('CREATE INDEX IF NOT EXISTS idx_cv_uploads_file_hash ON cv_uploads(file_hash)')
+            logger.info("Created file_hash index")
+        except sqlite3.OperationalError as e:
+            logger.warning(f"Could not create file_hash index: {e}")
+            
         conn.execute('CREATE INDEX IF NOT EXISTS idx_cv_uploads_user_id ON cv_uploads(user_id)')
         conn.execute('CREATE INDEX IF NOT EXISTS idx_extraction_cache_created ON cv_extraction_cache(created_at)')
         
