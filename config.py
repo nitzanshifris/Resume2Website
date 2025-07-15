@@ -39,6 +39,12 @@ SESSION_EXPIRY_DAYS = 7
 UPLOAD_DIR = "data/uploads"
 OUTPUT_DIR = "data/outputs"
 
-# AI Models
-GEMINI_MODEL = "gemini-2.5-flash"
-CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+# AI Models - Using Claude 4 Opus ONLY for maximum determinism
+PRIMARY_MODEL = "claude-4-opus"  # Claude 4 Opus for deterministic extraction
+FALLBACK_MODEL = "claude-4-opus"  # Also Claude 4 Opus as fallback
+GEMINI_MODEL = "gemini-2.5-flash"  # Keeping for legacy compatibility but not used
+
+# Deterministic extraction settings
+EXTRACTION_TEMPERATURE = 0.0  # Maximum determinism
+EXTRACTION_TOP_P = 0.1  # Restrict token selection
+EXTRACTION_MAX_TOKENS = 4000
