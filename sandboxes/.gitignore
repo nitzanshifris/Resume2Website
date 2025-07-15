@@ -1,0 +1,6 @@
+# Ignore all sandbox contents
+portfolios/*
+!portfolios/.gitkeep
+
+# But keep directory structure
+!.gitignore

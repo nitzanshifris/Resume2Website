@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV2WEB SSE Test Client</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+        .status.connecting { background: #fff3cd; color: #856404; }
+        .log-container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            font-family: 'Courier New', monospace;
+        }
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+            background: white;
+            border-radius: 3px;
+        }
+        .log-entry.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .log-entry.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        .log-entry.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .timestamp {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .message-type {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #28a745);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 CV2WEB SSE Test Client</h1>
+            <p>Test Server-Sent Events infrastructure</p>
+        </div>
+        
+        <div class="controls">
+            <button id="connectBtn" onclick="connectHeartbeat()">Connect Heartbeat</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+            <button onclick="clearLog()">Clear Log</button>
+            <button onclick="testCVExtraction()">Test CV Extraction Stream</button>
+            <button onclick="testPortfolioGeneration()">Test Portfolio Generation</button>
+        </div>
+        
+        <div id="status" class="status disconnected">❌ Disconnected</div>
+        
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+            <div id="progressText">0% - Ready</div>
+        </div>
+        
+        <div class="log-container" id="logContainer">
+            <div class="log-entry">
+                <span class="timestamp">[Ready]</span>
+                <span class="message-type">INFO:</span>
+                SSE Test Client initialized. Click "Connect Heartbeat" to start testing.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let connectionCount = 0;
+
+        function updateStatus(status, message) {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${status}`;
+            
+            const icons = {
+                connected: '✅',
+                connecting: '🔄',
+                disconnected: '❌'
+            };
+            
+            statusEl.textContent = `${icons[status]} ${message}`;
+        }
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `
+                <span class="timestamp">[${timestamp}]</span>
+                <span class="message-type">${type.toUpperCase()}:</span>
+                ${message}
+            `;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateProgress(progress, message) {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            progressContainer.style.display = 'block';
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `${progress}% - ${message}`;
+        }
+
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        function connectHeartbeat() {
+            if (eventSource) {
+                disconnect();
+            }
+
+            updateStatus('connecting', 'Connecting to heartbeat...');
+            log('Connecting to SSE heartbeat endpoint...');
+
+            eventSource = new EventSource('http://localhost:2000/api/v1/sse/heartbeat');
+            
+            eventSource.onopen = function(event) {
+                updateStatus('connected', 'Connected to heartbeat');
+                log('✅ SSE connection established', 'success');
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+            };
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`📨 Default message: ${JSON.stringify(data, null, 2)}`);
+                } catch (e) {
+                    log(`📨 Raw message: ${event.data}`);
+                }
+            };
+
+            // Handle specific event types
+            eventSource.addEventListener('heartbeat', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`💓 Heartbeat: ${data.connections} active connections`);
+                } catch (e) {
+                    log(`💓 Heartbeat: ${event.data}`);
+                }
+            });
+
+            eventSource.addEventListener('progress', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    updateProgress(data.progress, data.message);
+                    log(`⏳ Progress: ${data.progress}% - ${data.message}`);
+                } catch (e) {
+                    log(`⏳ Progress: ${event.data}`);
+                }
+            });
+
+            eventSource.addEventListener('step', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`🚀 Step ${data.stepNumber}/${data.totalSteps}: ${data.stepName}`);
+                } catch (e) {
+                    log(`🚀 Step: ${event.data}`);
+                }
+            });
+
+            eventSource.addEventListener('complete', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`✅ Complete: ${data.result.message}`, 'success');
+                    updateProgress(100, 'Completed');
+                    setTimeout(hideProgress, 3000);
+                } catch (e) {
+                    log(`✅ Complete: ${event.data}`, 'success');
+                }
+            });
+
+            eventSource.addEventListener('error', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`❌ Error: ${data.message} (${data.errorCode})`, 'error');
+                } catch (e) {
+                    log(`❌ Error: ${event.data}`, 'error');
+                }
+            });
+
+            eventSource.addEventListener('warning', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`⚠️ Warning: ${data.message}`, 'warning');
+                } catch (e) {
+                    log(`⚠️ Warning: ${event.data}`, 'warning');
+                }
+            });
+
+            eventSource.onerror = function(event) {
+                log('❌ SSE connection error', 'error');
+                updateStatus('disconnected', 'Connection error');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+            };
+        }
+
+        function disconnect() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                updateStatus('disconnected', 'Disconnected');
+                log('🔌 SSE connection closed');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+                hideProgress();
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '';
+            hideProgress();
+        }
+
+        function testCVExtraction() {
+            log('🧪 Testing CV extraction stream would require file upload...');
+            log('💡 Use the POST /api/v1/sse/cv/extract-streaming endpoint with a file');
+        }
+
+        function testPortfolioGeneration() {
+            log('🧪 Testing portfolio generation stream...');
+            log('💡 This would connect to /api/v1/sse/portfolio/generate-streaming/{job_id}');
+        }
+
+        // Close connection when page unloads
+        window.addEventListener('beforeunload', function() {
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
+    </script>
+</body>
+</html>

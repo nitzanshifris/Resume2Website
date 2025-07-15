@@ -1,0 +1,33 @@
+:root {
+  --max-width: 1100px;
+  --border-radius: 12px;
+
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+
+  --primary-glow: conic-gradient(
+    from 180deg at 50% 50%,
+    #16abff33 0deg,
+    #0885ba33 55deg,
+    #1375b133 120deg,
+    #0070f333 160deg,
+    transparent 360deg
+  );
+  --secondary-glow: radial-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+
+  --accent: hsl(262 83% 60%); /* Default theme color */
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}

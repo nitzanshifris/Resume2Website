@@ -48,6 +48,7 @@ init_db()
 from src.core.local.text_extractor import text_extractor
 from src.core.cv_extraction.data_extractor import data_extractor
 from src.core.schemas.unified_nullable import CVData
+from src.utils.enhanced_sse_logger import EnhancedSSELogger, WorkflowPhase
 from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadResponse, CleanupResponse
 
 # Import authentication dependency

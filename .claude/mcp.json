@@ -4,6 +4,10 @@
       "command": "node",
       "args": ["-e", "require('dotenv').config({path:'.env'}); require('child_process').execSync('npx -y --package=task-master-ai task-master-ai', {stdio:'inherit', env:{...process.env}})"],
       "cwd": "/Users/nitzan_shifris/Desktop/CV2WEB-V4"
+    },
+    "@21st-dev/magic": {
+      "command": "npx",
+      "args": ["-y", "@21st-dev/magic@latest", "API_KEY=\"your-api-key\""]
     }
   }
 }
