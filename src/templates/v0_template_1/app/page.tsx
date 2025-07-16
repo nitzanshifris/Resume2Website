@@ -2,12 +2,13 @@
 
 import type React from "react"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import type { DragEndEvent } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
 import { toast } from "sonner"
 
 import { initialData, contentIconMap, type PortfolioData } from "@/lib/data"
+import { fetchLatestCVData, adaptCV2WebToTemplate } from "@/lib/cv-data-adapter"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme/theme-provider"
 
@@ -25,7 +26,6 @@ import { CardCarousel } from "@/components/card-carousel"
 import { HeroSection } from "@/components/hero-section"
 import { SkillsSection } from "@/components/skills-section"
 import { ContactSection } from "@/components/contact-section"
-import { SettingsButton } from "@/components/settings-button"
 import { AccordionLayout } from "@/components/layouts/accordion-layout"
 import { ListLayout } from "@/components/layouts/list-layout"
 import { HobbyCard } from "@/components/hobby-card"
@@ -75,13 +75,298 @@ export default function FashionPortfolioPage() {
   const [data, setData] = useState<PortfolioData>(initialData)
   const [showPhoto, setShowPhoto] = useState(true)
   const [orderedSections, setOrderedSections] = useState<SectionKey[]>(initialSectionKeys)
-  const { theme } = useTheme()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { theme, setTheme, themes } = useTheme()
+
+  /* Load CV Data */ /* ------------------------------------------- */
+  useEffect(() => {
+    const loadCVData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        // Try to get session ID from various sources
+        const sessionId = getSessionId()
+        
+        if (sessionId) {
+          console.log('🔄 Loading CV data from API...')
+          const cvData = await fetchLatestCVData(sessionId)
+          setData(cvData)
+          console.log('✅ CV data loaded successfully')
+          toast.success('Portfolio loaded from your CV data!')
+        } else {
+          console.log('⚠️ No session ID found, using demo data')
+          toast.info('Showing demo portfolio - connect your CV for personalized content')
+        }
+      } catch (err) {
+        console.error('❌ Failed to load CV data:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load CV data')
+        toast.error('Failed to load CV data, showing demo content')
+        // Keep using initialData as fallback
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCVData()
+  }, [])
+
+  /* Listen for Theme Changes and Content Updates from Parent */ /* ------------------- */
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Only accept messages from parent window
+      if (event.source !== window.parent) return
+      
+      if (event.data?.type === 'CHANGE_THEME') {
+        const themeId = event.data.themeId
+        
+        // Map theme IDs to theme indices
+        const themeMap: Record<string, number> = {
+          'cream-gold': 0,
+          'midnight-blush': 1,
+          'evergreen': 2,
+          'interstellar': 3,
+          'serene-sky': 4,
+          'crimson-night': 5
+        }
+        
+        const themeIndex = themeMap[themeId]
+        if (themeIndex !== undefined && themes[themeIndex]) {
+          // Change theme using the theme provider
+          setTheme(themes[themeIndex].name)
+          console.log('🎨 Theme changed to:', themes[themeIndex].name)
+        }
+      } else if (event.data?.type === 'TOGGLE_PHOTO') {
+        setShowPhoto(event.data.show)
+        console.log('📸 Profile photo visibility:', event.data.show)
+      } else if (event.data?.type === 'TOGGLE_SECTION') {
+        const { section, visible } = event.data
+        setSectionVisibility(prev => ({ ...prev, [section]: visible }))
+        console.log('👁️ Section visibility updated:', section, visible)
+      } else if (event.data?.type === 'ADD_ITEM') {
+        const { section, item } = event.data
+        
+        // Add new item to the appropriate section
+        setData(prev => {
+          const newData = { ...prev }
+          
+          switch(section) {
+            case 'projects':
+              newData.projects.projectItems = [...newData.projects.projectItems, item]
+              break
+            case 'hobbies':
+              newData.hobbies.hobbyItems = [...newData.hobbies.hobbyItems, item]
+              break
+            case 'courses':
+              newData.courses.courseItems = [...newData.courses.courseItems, item]
+              break
+            case 'certifications':
+              newData.certifications.certificationItems = [...newData.certifications.certificationItems, item]
+              break
+            case 'volunteer':
+              newData.volunteer.volunteerItems = [...newData.volunteer.volunteerItems, item]
+              break
+            case 'achievements':
+              newData.achievements.achievementItems = [...newData.achievements.achievementItems, item]
+              break
+            case 'publications':
+              newData.publications.publicationItems = [...newData.publications.publicationItems, item]
+              break
+            case 'speaking':
+              newData.speakingEngagements.engagementItems = [...newData.speakingEngagements.engagementItems, item]
+              break
+            case 'memberships':
+              newData.memberships.membershipItems = [...newData.memberships.membershipItems, item]
+              break
+          }
+          
+          return newData
+        })
+        
+        console.log('➕ Added new item to section:', section)
+      } else if (event.data?.type === 'UPDATE_CONTENT') {
+        const { sectionId, content } = event.data
+        
+        // Map section IDs to data paths
+        const sectionMapping: Record<string, (content: string) => void> = {
+          'fullName': (content: string) => {
+            setData(prev => ({
+              ...prev,
+              hero: {
+                ...prev.hero,
+                fullName: content
+              }
+            }))
+          },
+          'professionalTitle': (content: string) => {
+            setData(prev => ({
+              ...prev,
+              hero: {
+                ...prev.hero,
+                professionalTitle: content
+              }
+            }))
+          },
+          'summary': (content: string) => {
+            setData(prev => ({
+              ...prev,
+              summary: {
+                ...prev.summary,
+                summaryText: content
+              }
+            }))
+          },
+          'experience': (content: string) => {
+            // Parse experience text back into structured data
+            const experiences = content.split('\n\n').map(exp => {
+              const lines = exp.split('\n')
+              const [jobInfo, dateInfo] = lines
+              const [jobTitle, companyName] = (jobInfo || '').split(' at ')
+              const [startDate, endDate] = (dateInfo || '').split(' - ')
+              
+              return {
+                jobTitle: jobTitle?.trim() || '',
+                companyName: companyName?.trim() || '',
+                dateRange: {
+                  startDate: startDate?.trim() || '',
+                  endDate: endDate?.trim() || '',
+                  isCurrent: endDate?.trim().toLowerCase() === 'present'
+                },
+                responsibilitiesAndAchievements: []
+              }
+            })
+            
+            setData(prev => ({
+              ...prev,
+              experience: {
+                ...prev.experience,
+                experienceItems: experiences
+              }
+            }))
+          },
+          'skills': (content: string) => {
+            // Parse skills back into categories
+            const lines = content.split('\n')
+            const categories = lines.map(line => {
+              const [categoryName, skills] = line.split(':')
+              return {
+                categoryName: categoryName?.trim() || '',
+                skills: skills?.split(',').map(s => s.trim()).filter(Boolean) || []
+              }
+            }).filter(cat => cat.categoryName)
+            
+            setData(prev => ({
+              ...prev,
+              skills: {
+                ...prev.skills,
+                skillCategories: categories
+              }
+            }))
+          },
+          'education': (content: string) => {
+            // Parse education text back into structured data
+            const educations = content.split('\n\n').map(edu => {
+              const lines = edu.split('\n')
+              const [degreeInfo, institution] = lines
+              const [degree, fieldOfStudy] = (degreeInfo || '').split(' in ')
+              
+              return {
+                degree: degree?.trim() || '',
+                fieldOfStudy: fieldOfStudy?.trim() || '',
+                institution: institution?.trim() || '',
+                dateRange: { startDate: '', endDate: '' }
+              }
+            })
+            
+            setData(prev => ({
+              ...prev,
+              education: {
+                ...prev.education,
+                educationItems: educations
+              }
+            }))
+          },
+          'contact': (content: string) => {
+            const lines = content.split('\n')
+            setData(prev => ({
+              ...prev,
+              contact: {
+                ...prev.contact,
+                email: lines[0] || '',
+                phone: lines[1] || ''
+              }
+            }))
+          },
+          'email': (content: string) => {
+            setData(prev => ({
+              ...prev,
+              contact: {
+                ...prev.contact,
+                email: content
+              }
+            }))
+          },
+          'phone': (content: string) => {
+            setData(prev => ({
+              ...prev,
+              contact: {
+                ...prev.contact,
+                phone: content
+              }
+            }))
+          },
+          'summaryTagline': (content: string) => {
+            setData(prev => ({
+              ...prev,
+              hero: {
+                ...prev.hero,
+                summaryTagline: content
+              }
+            }))
+          }
+        }
+        
+        if (sectionMapping[sectionId]) {
+          sectionMapping[sectionId](content)
+          console.log('📝 Content updated for section:', sectionId)
+        }
+      }
+    }
+    
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
+  /* Helper function to get session ID */ /* -------------------- */
+  const getSessionId = (): string | null => {
+    // Try URL params first (for direct links)
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const sessionFromUrl = urlParams.get('session')
+      if (sessionFromUrl) return sessionFromUrl
+      
+      // Try localStorage (from CV editor)
+      const sessionFromStorage = localStorage.getItem('sessionId')
+      if (sessionFromStorage) return sessionFromStorage
+      
+      // Development fallback
+      if (process.env.NODE_ENV === 'development') {
+        return 'dev-session'
+      }
+    }
+    
+    return null
+  }
 
   const [sectionVisibility, setSectionVisibility] = useState<Record<SectionKey, boolean>>(() => {
     const visibility: Partial<Record<SectionKey, boolean>> = {}
     for (const key of initialSectionKeys) visibility[key] = hasContent(data[key])
     return visibility as Record<SectionKey, boolean>
   })
+
+  /* Update section visibility when data changes */ /* ----------- */
+  // Removed automatic visibility update based on content to respect manual settings from website editor
 
   const getGradientForIndex = (index: number) => {
     const gradients = [
@@ -219,7 +504,7 @@ export default function FashionPortfolioPage() {
 
     /* 3. Projects (carousel) --------------------------------------- */
     projects:
-      sectionVisibility.projects && data.projects.projectItems.length ? (
+      sectionVisibility.projects ? (
         <Section
           id="projects"
           title={data.projects.sectionTitle}
@@ -227,31 +512,56 @@ export default function FashionPortfolioPage() {
           isVisible
           fullWidth
         >
-          <CardCarousel
-            items={data.projects.projectItems}
-            itemClassName="basis-1/2"
-            renderItem={(item, i) => (
-              <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
-                <BentoGridItem
-                  className={cn("h-full shadow-lg", cardBgClasses[i % cardBgClasses.length])}
-                  icon={contentIconMap[item.icon]}
-                  title={
-                    <EditableText
-                      initialValue={item.title}
-                      onSave={(v) => handleSave(`projects.projectItems.${i}.title`, v)}
-                    />
-                  }
-                  description={
-                    <EditableText
-                      textarea
-                      initialValue={item.description}
-                      onSave={(v) => handleSave(`projects.projectItems.${i}.description`, v)}
-                    />
-                  }
-                />
-              </a>
-            )}
-          />
+          {data.projects.projectItems.length > 0 ? (
+            <CardCarousel
+              items={data.projects.projectItems}
+              itemClassName="basis-1/2"
+              renderItem={(item, i) => (
+                <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                  <BentoGridItem
+                    className={cn("h-full shadow-lg", cardBgClasses[i % cardBgClasses.length])}
+                    icon={contentIconMap[item.icon]}
+                    title={
+                      <EditableText
+                        initialValue={item.title}
+                        onSave={(v) => handleSave(`projects.projectItems.${i}.title`, v)}
+                      />
+                    }
+                    description={
+                      <EditableText
+                        textarea
+                        initialValue={item.description}
+                        onSave={(v) => handleSave(`projects.projectItems.${i}.description`, v)}
+                      />
+                    }
+                  />
+                </a>
+              )}
+            />
+          ) : (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-4">No projects added yet</p>
+                <GlowingButton
+                  onClick={() => {
+                    // Send message to parent to add new project
+                    window.parent.postMessage({
+                      type: 'ADD_ITEM',
+                      section: 'projects',
+                      item: {
+                        title: 'New Project',
+                        description: 'Project description...',
+                        link: 'https://example.com',
+                        icon: 'project'
+                      }
+                    }, '*')
+                  }}
+                >
+                  Add Your First Project
+                </GlowingButton>
+              </div>
+            </div>
+          )}
         </Section>
       ) : null,
 
@@ -407,7 +717,7 @@ export default function FashionPortfolioPage() {
 
     /* 10. Hobbies (carousel with HobbyCard) -------------------------------------------- */
     hobbies:
-      sectionVisibility.hobbies && data.hobbies.hobbyItems.length ? (
+      sectionVisibility.hobbies ? (
         <Section
           id="hobbies"
           title={data.hobbies.sectionTitle}
@@ -416,23 +726,45 @@ export default function FashionPortfolioPage() {
           className="bg-secondary/30"
           fullWidth
         >
-          <CardCarousel
-            items={data.hobbies.hobbyItems}
-            itemClassName="basis-1/3"
-            renderItem={(item, i) => {
-              const selectedGradient = getGradientForIndex(i)
+          {data.hobbies.hobbyItems.length > 0 ? (
+            <CardCarousel
+              items={data.hobbies.hobbyItems}
+              itemClassName="basis-1/3"
+              renderItem={(item, i) => {
+                const selectedGradient = getGradientForIndex(i)
 
-              return (
-                <HobbyCard
-                  title={item.title}
-                  onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.title`, v)}
-                  style={{
-                    backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                return (
+                  <HobbyCard
+                    title={item.title}
+                    onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.title`, v)}
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                    }}
+                  />
+                )
+              }}
+            />
+          ) : (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-4">No hobbies added yet</p>
+                <GlowingButton
+                  onClick={() => {
+                    // Send message to parent to add new hobby
+                    window.parent.postMessage({
+                      type: 'ADD_ITEM',
+                      section: 'hobbies',
+                      item: {
+                        title: 'New Hobby'
+                      }
+                    }, '*')
                   }}
-                />
-              )
-            }}
-          />
+                >
+                  Add Your First Hobby
+                </GlowingButton>
+              </div>
+            </div>
+          )}
         </Section>
       ) : null,
 
@@ -625,20 +957,37 @@ export default function FashionPortfolioPage() {
   }
 
   /* ── Render ────────────────────────────────────────────────────── */
-  return (
-    <main className="bg-background text-foreground antialiased min-w-[1280px]">
-      <FloatingNav navItems={navItems} maxVisibleItems={6} />
+  if (isLoading) {
+    return (
+      <main className="bg-background text-foreground antialiased min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-lg text-muted-foreground">Loading your portfolio...</p>
+        </div>
+      </main>
+    )
+  }
 
-      <SettingsButton
-        showPhoto={showPhoto}
-        onShowPhotoChange={setShowPhoto}
-        orderedSections={orderedSections}
-        sectionVisibility={sectionVisibility}
-        onToggleSection={toggleSection}
-        handleDragEnd={handleDragEnd}
-        data={data}
-        formatLabel={formatLabel}
-      />
+  if (error) {
+    return (
+      <main className="bg-background text-foreground antialiased min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <p className="text-lg text-red-500 mb-4">⚠️ {error}</p>
+          <p className="text-muted-foreground mb-4">Showing demo content instead.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90"
+          >
+            Retry
+          </button>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="bg-background text-foreground antialiased w-full max-w-full overflow-x-hidden">
+      <FloatingNav navItems={navItems} maxVisibleItems={6} />
 
       {/* Hero */}
       <HeroSection data={data.hero} onSave={(field, v) => handleSave(`hero.${field}`, v)} showPhoto={showPhoto} />

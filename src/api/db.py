@@ -45,6 +45,30 @@ def init_db():
             # Column already exists, ignore
             pass
         
+        # Add phone column to existing users table if it doesn't exist
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
+            conn.commit()
+        except sqlite3.OperationalError:
+            # Column already exists, ignore
+            pass
+        
+        # Add date_of_birth column to existing users table if it doesn't exist
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN date_of_birth TEXT")
+            conn.commit()
+        except sqlite3.OperationalError:
+            # Column already exists, ignore
+            pass
+        
+        # Add location column to existing users table if it doesn't exist
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN location TEXT")
+            conn.commit()
+        except sqlite3.OperationalError:
+            # Column already exists, ignore
+            pass
+        
         # Create sessions table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
@@ -122,15 +146,15 @@ def init_db():
             conn.close()
 
 
-def create_user(email: str, password_hash: str, name: str = None) -> str:
+def create_user(email: str, password_hash: str, name: str = None, phone: str = None) -> str:
     """Create a new user in database"""
     conn = get_db_connection()
     user_id = str(uuid.uuid4())
     
     try:
         conn.execute(
-            "INSERT INTO users (user_id, email, password_hash, name, created_at) VALUES (?, ?, ?, ?, ?)",
-            (user_id, email, password_hash, name, datetime.utcnow().isoformat())
+            "INSERT INTO users (user_id, email, password_hash, name, phone, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (user_id, email, password_hash, name, phone, datetime.utcnow().isoformat())
         )
         conn.commit()
         return user_id
@@ -146,7 +170,7 @@ def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         cursor = conn.execute(
-            "SELECT user_id, email, password_hash, name, created_at FROM users WHERE email = ?",
+            "SELECT user_id, email, password_hash, name, phone, date_of_birth, location, created_at FROM users WHERE email = ?",
             (email,)
         )
         row = cursor.fetchone()
@@ -154,6 +178,60 @@ def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
         if row:
             return dict(row)  # With row_factory this is cleaner
         return None
+    finally:
+        conn.close()
+
+
+def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+    """Get user by ID"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute(
+            "SELECT user_id, email, password_hash, name, phone, date_of_birth, location, created_at FROM users WHERE user_id = ?",
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        
+        if row:
+            return dict(row)
+        return None
+    finally:
+        conn.close()
+
+
+def update_user_profile(user_id: str, name: str = None, phone: str = None, date_of_birth: str = None, location: str = None) -> bool:
+    """Update user profile information"""
+    conn = get_db_connection()
+    try:
+        # Build dynamic update query based on provided fields
+        updates = []
+        values = []
+        
+        if name is not None:
+            updates.append("name = ?")
+            values.append(name)
+        if phone is not None:
+            updates.append("phone = ?")
+            values.append(phone)
+        if date_of_birth is not None:
+            updates.append("date_of_birth = ?")
+            values.append(date_of_birth)
+        if location is not None:
+            updates.append("location = ?")
+            values.append(location)
+        
+        if not updates:
+            return False  # No fields to update
+        
+        values.append(user_id)  # Add user_id for WHERE clause
+        
+        query = f"UPDATE users SET {', '.join(updates)} WHERE user_id = ?"
+        conn.execute(query, values)
+        conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to update user profile: {e}")
+        return False
     finally:
         conn.close()
 

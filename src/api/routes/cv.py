@@ -38,6 +38,8 @@ from src.api.db import (
     init_db,
     create_user,
     get_user_by_email,
+    get_user_by_id,
+    update_user_profile,
     create_session,
     get_user_id_from_session,
     cleanup_old_sessions as db_cleanup_old_sessions,
@@ -58,7 +60,7 @@ from src.core.local.text_extractor import text_extractor
 from src.core.cv_extraction.data_extractor import data_extractor
 from src.core.schemas.unified_nullable import CVData
 from src.utils.enhanced_sse_logger import EnhancedSSELogger, WorkflowPhase
-from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadResponse, CleanupResponse
+from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadResponse, CleanupResponse, UserProfileUpdate
 
 # Import authentication dependency
 from src.api.routes.auth import get_current_user
@@ -98,7 +100,7 @@ async def register(user_data: UserCreate) -> SessionResponse:
     """
     # Check if email already exists and create user
     try:
-        user_id = create_user(user_data.email, hash_password(user_data.password), user_data.name)
+        user_id = create_user(user_data.email, hash_password(user_data.password), user_data.name, user_data.phone)
     except ValueError:
         raise HTTPException(status_code=400, detail="Email already registered")
     
@@ -154,6 +156,160 @@ async def login(user_data: UserLogin) -> SessionResponse:
     )
 
 
+@router.post("/auth/google/callback", response_model=SessionResponse)
+async def google_oauth_callback(request: Dict[str, Any]) -> SessionResponse:
+    """
+    Handle Google OAuth callback.
+    
+    Args:
+        request: Contains 'code' and 'redirect_uri' from Google OAuth
+        
+    Returns:
+        SessionResponse with session_id and user_id
+    """
+    try:
+        import requests
+        import json
+        
+        code = request.get('code')
+        redirect_uri = request.get('redirect_uri')
+        
+        if not code:
+            raise HTTPException(status_code=400, detail="Authorization code missing")
+        
+        # Exchange code for tokens
+        google_client_id = os.getenv('GOOGLE_CLIENT_ID')
+        google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+        
+        if not google_client_id:
+            logger.error("GOOGLE_CLIENT_ID not configured.")
+            raise HTTPException(
+                status_code=500, 
+                detail="Google OAuth Client ID is missing. Please configure GOOGLE_CLIENT_ID environment variable."
+            )
+        
+        if not google_client_secret or google_client_secret == 'YOUR_GOOGLE_CLIENT_SECRET_HERE':
+            logger.error("GOOGLE_CLIENT_SECRET not configured properly.")
+            raise HTTPException(
+                status_code=500, 
+                detail="Google OAuth Client Secret is missing. Please get the secret from Google Cloud Console and update the GOOGLE_CLIENT_SECRET environment variable."
+            )
+        
+        # Get tokens from Google
+        token_response = requests.post('https://oauth2.googleapis.com/token', data={
+            'client_id': google_client_id,
+            'client_secret': google_client_secret,
+            'code': code,
+            'grant_type': 'authorization_code',
+            'redirect_uri': redirect_uri
+        })
+        
+        if not token_response.ok:
+            logger.error(f"Google token exchange failed: {token_response.text}")
+            raise HTTPException(status_code=400, detail="Failed to exchange authorization code")
+        
+        tokens = token_response.json()
+        access_token = tokens.get('access_token')
+        
+        if not access_token:
+            raise HTTPException(status_code=400, detail="No access token received")
+        
+        # Get user info from Google
+        user_response = requests.get(
+            'https://www.googleapis.com/oauth2/v2/userinfo',
+            headers={'Authorization': f'Bearer {access_token}'}
+        )
+        
+        if not user_response.ok:
+            logger.error(f"Google user info failed: {user_response.text}")
+            raise HTTPException(status_code=400, detail="Failed to get user information")
+        
+        user_info = user_response.json()
+        email = user_info.get('email')
+        name = user_info.get('name', '')
+        
+        if not email:
+            raise HTTPException(status_code=400, detail="Email not provided by Google")
+        
+        # Check if user exists
+        existing_user = get_user_by_email(email)
+        
+        if existing_user:
+            # User exists - log them in
+            user_id = existing_user["user_id"]
+            session_id = create_session(user_id)
+            
+            logger.info(f"Google OAuth login for existing user: {email}")
+            
+            return SessionResponse(
+                message="Welcome back! Logged in successfully with Google.",
+                session_id=session_id,
+                user_id=user_id,
+                user={
+                    "id": user_id,
+                    "email": email,
+                    "name": existing_user.get("name", name)
+                }
+            )
+        else:
+            # User doesn't exist - create new account
+            # For OAuth users, we'll generate a random password since they won't use it
+            import secrets
+            random_password = secrets.token_urlsafe(32)
+            
+            user_id = create_user(email, hash_password(random_password), name)
+            session_id = create_session(user_id)
+            
+            logger.info(f"Google OAuth registration for new user: {email}")
+            
+            return SessionResponse(
+                message="Welcome to CV2WEB! Account created successfully with Google.",
+                session_id=session_id,
+                user_id=user_id,
+                user={
+                    "id": user_id,
+                    "email": email,
+                    "name": name
+                }
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Google OAuth callback error: {e}")
+        raise HTTPException(status_code=500, detail="Authentication failed. Please try again.")
+
+
+@router.get("/auth/google/status")
+async def google_oauth_status():
+    """
+    Check if Google OAuth is configured and available
+    """
+    google_client_id = os.getenv('GOOGLE_CLIENT_ID')
+    google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+    
+    has_client_id = bool(google_client_id)
+    has_client_secret = bool(google_client_secret and google_client_secret != 'YOUR_GOOGLE_CLIENT_SECRET_HERE')
+    is_available = has_client_id and has_client_secret
+    
+    status_details = {
+        "available": is_available,
+        "client_id_configured": has_client_id,
+        "client_secret_configured": has_client_secret
+    }
+    
+    if is_available:
+        status_details["message"] = "Google OAuth is fully configured"
+    elif has_client_id and not has_client_secret:
+        status_details["message"] = "Google OAuth Client Secret missing. Please get it from Google Cloud Console."
+    elif not has_client_id:
+        status_details["message"] = "Google OAuth Client ID missing"
+    else:
+        status_details["message"] = "Google OAuth is not configured"
+    
+    return status_details
+
+
 # ========== MAIN CV PROCESSING ENDPOINT ==========
 
 @router.post("/upload", response_model=UploadResponse)
@@ -193,7 +349,10 @@ async def upload_cv(
             detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024}MB"
         )
     
-    # === 2.5 CALCULATE FILE HASH FOR CACHING ===
+    # === 2.5 GET FILE EXTENSION ===
+    file_extension = Path(file.filename).suffix.lower()
+    
+    # === 2.6 CALCULATE FILE HASH FOR CACHING ===
     file_hash = hashlib.sha256(file_content).hexdigest()
     logger.info(f"File hash calculated: {file_hash[:8]}...")
     
@@ -233,9 +392,7 @@ async def upload_cv(
             job_id=job_id
         )
 
-    # Check file extension
-    file_extension = Path(file.filename).suffix.lower()
-    
+    # Check file extension against allowed types
     if file_extension not in config.ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400, 
@@ -244,7 +401,6 @@ async def upload_cv(
 
     # === 3. FILE STORAGE ===
     job_id = str(uuid.uuid4())
-    file_extension = Path(file.filename).suffix.lower()
     
     # Security check against path traversal
     if '..' in file.filename or '/' in file_extension or '\\' in file_extension:
@@ -547,7 +703,19 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
     # Construct file path
     BASE_DIR = Path(__file__).parent.parent.parent.parent  # Go up to project root
     file_extension = cv_upload['file_type'].lower()
-    file_path = BASE_DIR / "data" / "uploads" / f"{job_id}{file_extension}"
+    
+    # Check if this is a multi-file upload
+    multi_file_dir = BASE_DIR / "data" / "uploads" / job_id
+    if multi_file_dir.exists() and multi_file_dir.is_dir():
+        # This is a multi-file upload, return the first file for preview
+        files = sorted(multi_file_dir.glob("*"))
+        if files:
+            file_path = files[0]  # Return first file
+        else:
+            raise HTTPException(status_code=404, detail="No files found in upload")
+    else:
+        # Single file upload
+        file_path = BASE_DIR / "data" / "uploads" / f"{job_id}{file_extension}"
     
     # Check if file exists
     if not file_path.exists():
@@ -586,3 +754,409 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
             "Access-Control-Allow-Headers": "X-Session-ID"
         }
     )
+
+
+@router.post("/upload-multiple", response_model=UploadResponse)
+async def upload_multiple_files(
+    files: List[UploadFile] = File(...),
+    current_user_id: str = Depends(get_current_user)
+) -> UploadResponse:
+    """
+    Upload multiple files to be processed as a single CV.
+    Particularly useful for multi-page image CVs.
+    
+    Args:
+        files: List of files (images, PDFs, etc.)
+        current_user_id: Automatically injected by FastAPI
+        
+    Returns:
+        Job details including job_id
+    """
+    logger.info(f"User {current_user_id} uploading {len(files)} files")
+    
+    # Validate all files first
+    allowed_files = []
+    total_size = 0
+    
+    for file in files:
+        # Basic validation
+        if not file.filename:
+            continue
+            
+        # Get file extension
+        file_extension = Path(file.filename).suffix.lower()
+        if file_extension not in config.ALLOWED_EXTENSIONS:
+            logger.warning(f"Skipping file {file.filename} - invalid type {file_extension}")
+            continue
+            
+        # Read file content
+        file_content = await file.read()
+        file_size = len(file_content)
+        total_size += file_size
+        
+        # Size check
+        if total_size > config.MAX_UPLOAD_SIZE * 3:  # Allow 3x size for multiple files
+            raise HTTPException(
+                status_code=413,
+                detail=f"Total file size exceeds limit of {config.MAX_UPLOAD_SIZE * 3 / 1024 / 1024:.1f}MB"
+            )
+        
+        allowed_files.append({
+            'filename': file.filename,
+            'extension': file_extension,
+            'content': file_content,
+            'size': file_size
+        })
+        
+        # Reset file position
+        await file.seek(0)
+    
+    if not allowed_files:
+        raise HTTPException(status_code=400, detail="No valid files provided")
+    
+    # Generate single job ID for all files
+    job_id = str(uuid.uuid4())
+    
+    # Create upload directory
+    BASE_DIR = Path(__file__).parent.parent.parent.parent
+    upload_dir = BASE_DIR / "data" / "uploads" / job_id
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Save all files
+    saved_files = []
+    try:
+        for idx, file_data in enumerate(allowed_files):
+            # Save each file with index prefix
+            file_path = upload_dir / f"{idx:02d}_{file_data['filename']}"
+            async with aiofiles.open(file_path, "wb") as f:
+                await f.write(file_data['content'])
+            saved_files.append(str(file_path))
+            logger.info(f"Saved file {idx + 1}/{len(allowed_files)}: {file_path}")
+    except Exception as e:
+        logger.error(f"Failed to save files: {e}")
+        # Clean up on failure
+        import shutil
+        if upload_dir.exists():
+            shutil.rmtree(upload_dir)
+        raise HTTPException(status_code=500, detail="Failed to save uploaded files")
+    
+    # Create database record with actual filenames
+    filenames = [f['filename'] for f in allowed_files]
+    combined_filename = ", ".join(filenames) if len(filenames) <= 3 else f"{filenames[0]}, {filenames[1]} +{len(filenames)-2} more"
+    
+    # Determine primary file type based on first file
+    primary_extension = allowed_files[0]['extension'] if allowed_files else '.multi'
+    
+    upload_id = create_cv_upload(
+        user_id=current_user_id,
+        job_id=job_id,
+        filename=combined_filename,
+        file_type=primary_extension,  # Use first file's extension
+        file_hash=None  # No single hash for multiple files
+    )
+    
+    # Process files asynchronously
+    import asyncio
+    asyncio.create_task(process_multiple_files(job_id, saved_files, current_user_id))
+    
+    return UploadResponse(
+        message=f"Processing {len(allowed_files)} files as single CV",
+        job_id=job_id
+    )
+
+
+async def process_multiple_files(job_id: str, file_paths: List[str], user_id: str):
+    """
+    Process multiple files as a single CV.
+    Combines text from all files before extraction.
+    """
+    try:
+        logger.info(f"Starting multi-file processing for job {job_id}")
+        
+        # Extract text from all files
+        combined_text = ""
+        for file_path in file_paths:
+            try:
+                text = text_extractor.extract_text(file_path)
+                if text and text.strip():
+                    combined_text += f"\n\n--- File: {Path(file_path).name} ---\n\n{text}"
+            except Exception as e:
+                logger.error(f"Failed to extract text from {file_path}: {e}")
+        
+        if not combined_text.strip():
+            update_cv_upload_status(job_id, 'failed', error_message="No text content found in files")
+            return
+        
+        # Extract CV data from combined text
+        logger.info(f"Extracting CV data from combined text ({len(combined_text)} chars)")
+        cv_data = await data_extractor.extract_cv_data(combined_text)
+        
+        if cv_data:
+            # Store extraction result
+            import json
+            cv_data_json = json.dumps(cv_data.model_dump_nullable())
+            update_cv_upload_status(job_id, 'completed', cv_data_json)
+            logger.info(f"✅ Multi-file CV extraction completed for job {job_id}")
+        else:
+            update_cv_upload_status(job_id, 'failed', error_message="Failed to extract CV data")
+            logger.error(f"Failed to extract CV data for job {job_id}")
+            
+    except Exception as e:
+        logger.error(f"Multi-file processing error for job {job_id}: {e}")
+        update_cv_upload_status(job_id, 'failed', error_message=str(e))
+
+
+@router.get("/download/{job_id}/all")
+async def get_all_files(job_id: str, current_user_id: str = Depends(get_current_user)):
+    """
+    Get information about all files in a multi-file upload.
+    
+    Args:
+        job_id: The job ID of the CV upload
+        current_user_id: Automatically injected by FastAPI
+        
+    Returns:
+        List of files with their details
+    """
+    # Get user's CV uploads to verify ownership
+    uploads = get_user_cv_uploads(current_user_id)
+    
+    # Find the specific upload
+    cv_upload = None
+    for upload in uploads:
+        if upload['job_id'] == job_id:
+            cv_upload = upload
+            break
+    
+    if not cv_upload:
+        raise HTTPException(status_code=404, detail="CV not found")
+    
+    # Check if this is a multi-file upload
+    BASE_DIR = Path(__file__).parent.parent.parent.parent
+    multi_file_dir = BASE_DIR / "data" / "uploads" / job_id
+    
+    if multi_file_dir.exists() and multi_file_dir.is_dir():
+        # Get all files in the directory
+        files = []
+        for file_path in sorted(multi_file_dir.glob("*")):
+            files.append({
+                "filename": file_path.name,
+                "size": file_path.stat().st_size,
+                "type": file_path.suffix.lower(),
+                "url": f"/api/v1/download/{job_id}/{file_path.name}"
+            })
+        
+        return {
+            "job_id": job_id,
+            "is_multi_file": True,
+            "files": files,
+            "total_files": len(files)
+        }
+    else:
+        # Single file upload
+        return {
+            "job_id": job_id,
+            "is_multi_file": False,
+            "files": [{
+                "filename": cv_upload['filename'],
+                "type": cv_upload['file_type'],
+                "url": f"/api/v1/download/{job_id}"
+            }],
+            "total_files": 1
+        }
+
+
+@router.get("/download/{job_id}/{filename}")
+async def download_specific_file(
+    job_id: str, 
+    filename: str, 
+    current_user_id: str = Depends(get_current_user)
+):
+    """
+    Download a specific file from a multi-file upload.
+    
+    Args:
+        job_id: The job ID of the CV upload
+        filename: The specific filename to download
+        current_user_id: Automatically injected by FastAPI
+        
+    Returns:
+        The requested file
+    """
+    # Get user's CV uploads to verify ownership
+    uploads = get_user_cv_uploads(current_user_id)
+    
+    # Find the specific upload
+    cv_upload = None
+    for upload in uploads:
+        if upload['job_id'] == job_id:
+            cv_upload = upload
+            break
+    
+    if not cv_upload:
+        raise HTTPException(status_code=404, detail="CV not found")
+    
+    # Construct file path
+    BASE_DIR = Path(__file__).parent.parent.parent.parent
+    file_path = BASE_DIR / "data" / "uploads" / job_id / filename
+    
+    # Security check - ensure the file is within the job directory
+    try:
+        file_path = file_path.resolve()
+        expected_dir = (BASE_DIR / "data" / "uploads" / job_id).resolve()
+        if not str(file_path).startswith(str(expected_dir)):
+            raise HTTPException(status_code=403, detail="Access denied")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid file path")
+    
+    # Check if file exists
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Determine MIME type based on file extension
+    file_extension = file_path.suffix.lower()
+    mime_type_map = {
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.txt': 'text/plain',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.webp': 'image/webp',
+        '.heic': 'image/heic',
+        '.heif': 'image/heif',
+        '.tiff': 'image/tiff',
+        '.tif': 'image/tiff',
+        '.bmp': 'image/bmp'
+    }
+    
+    media_type = mime_type_map.get(file_extension, 'application/octet-stream')
+    
+    # Return the file
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f"inline; filename=\"{filename}\"",
+            "Cache-Control": "public, max-age=3600",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET",
+            "Access-Control-Allow-Headers": "X-Session-ID"
+        }
+    )
+
+
+@router.get("/current-user-info")
+async def get_current_user_info(current_user_id: str = Depends(get_current_user)):
+    """
+    Get current user information from registration data.
+    
+    Returns:
+        User info with name and email from registration
+    """
+    from src.api.db import get_user_by_id
+    
+    logger.info(f"Getting user info for user_id: {current_user_id}")
+    
+    # Get user from database
+    user_db = get_user_by_id(current_user_id)
+    
+    if not user_db:
+        logger.error(f"User not found in database: {current_user_id}")
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Return user info from registration
+    user_info = {
+        "user_id": current_user_id,
+        "name": user_db.get('name', ''),
+        "email": user_db.get('email', '')
+    }
+    
+    logger.info(f"Retrieved user info for {current_user_id}: name='{user_info['name']}', email='{user_info['email']}'")
+    
+    return user_info
+
+
+@router.get("/profile")
+async def get_user_profile(current_user_id: str = Depends(get_current_user)):
+    """
+    Get complete user profile information.
+    
+    Returns:
+        Complete user profile with all fields
+    """
+    logger.info(f"Getting profile for user_id: {current_user_id}")
+    
+    # Get user from database
+    user_db = get_user_by_id(current_user_id)
+    
+    if not user_db:
+        logger.error(f"User not found in database: {current_user_id}")
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Return complete profile (excluding password)
+    profile = {
+        "user_id": current_user_id,
+        "name": user_db.get('name', ''),
+        "email": user_db.get('email', ''),
+        "phone": user_db.get('phone', ''),
+        "date_of_birth": user_db.get('date_of_birth', ''),
+        "location": user_db.get('location', ''),
+        "created_at": user_db.get('created_at', '')
+    }
+    
+    logger.info(f"Retrieved profile for {current_user_id}")
+    
+    return profile
+
+
+@router.put("/profile")
+async def update_profile(
+    profile_data: UserProfileUpdate,
+    current_user_id: str = Depends(get_current_user)
+):
+    """
+    Update user profile information.
+    
+    Args:
+        profile_data: Updated profile data
+        current_user_id: Automatically injected by FastAPI
+        
+    Returns:
+        Success message and updated profile
+    """
+    logger.info(f"Updating profile for user_id: {current_user_id}")
+    
+    # Update profile in database
+    success = update_user_profile(
+        user_id=current_user_id,
+        name=profile_data.name,
+        phone=profile_data.phone,
+        date_of_birth=profile_data.date_of_birth,
+        location=profile_data.location
+    )
+    
+    if not success:
+        logger.error(f"Failed to update profile for user {current_user_id}")
+        raise HTTPException(status_code=500, detail="Failed to update profile")
+    
+    # Get updated profile
+    user_db = get_user_by_id(current_user_id)
+    updated_profile = {
+        "user_id": current_user_id,
+        "name": user_db.get('name', ''),
+        "email": user_db.get('email', ''),
+        "phone": user_db.get('phone', ''),
+        "date_of_birth": user_db.get('date_of_birth', ''),
+        "location": user_db.get('location', ''),
+        "created_at": user_db.get('created_at', '')
+    }
+    
+    logger.info(f"Successfully updated profile for {current_user_id}")
+    
+    return {
+        "message": "Profile updated successfully",
+        "profile": updated_profile
+    }

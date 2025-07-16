@@ -39,9 +39,9 @@ SESSION_EXPIRY_DAYS = 7
 UPLOAD_DIR = "data/uploads"
 OUTPUT_DIR = "data/outputs"
 
-# AI Models - Using Claude 4 Opus ONLY for maximum determinism
-PRIMARY_MODEL = "claude-4-opus"  # Claude 4 Opus for deterministic extraction
-FALLBACK_MODEL = "claude-4-opus"  # Also Claude 4 Opus as fallback
+# AI Models - Using Claude 4 Opus for maximum determinism
+PRIMARY_MODEL = "claude-opus-4-20250514"  # Claude 4 Opus for deterministic extraction
+FALLBACK_MODEL = "claude-opus-4-20250514"  # Also Claude 4 Opus as fallback
 GEMINI_MODEL = "gemini-2.5-flash"  # Keeping for legacy compatibility but not used
 
 # Deterministic extraction settings

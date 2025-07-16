@@ -12,7 +12,7 @@ import config
 load_dotenv()
 
 # Import our routes
-from src.api.routes import cv, portfolio, sse, workflows, cv_enhanced
+from src.api.routes import cv, portfolio, sse, workflows, cv_enhanced, portfolio_generator
 
 # Configure logging
 logging.basicConfig(
@@ -40,6 +40,7 @@ app.add_middleware(
 # Include routers
 app.include_router(cv.router, prefix="/api/v1")
 app.include_router(portfolio.router, prefix="/api/v1")
+app.include_router(portfolio_generator.router, prefix="/api/v1")  # New portfolio generator
 # app.include_router(cv_to_portfolio.router, prefix="/api/v1")  # Deprecated - moved to legacy
 app.include_router(sse.router, prefix="/api/v1")
 app.include_router(workflows.router, prefix="/api/v1")

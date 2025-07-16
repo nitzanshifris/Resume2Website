@@ -5,17 +5,24 @@
 CV2WEB is an AI-powered CV to portfolio website converter that transforms resumes into stunning portfolio websites using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo.
 
 ### What CV2WEB Does
-- **Extracts** CV data using Google Gemini 2.5 Flash AI
-- **Generates** beautiful portfolio websites with 100+ animated components
+- **Extracts** CV data using Claude 4 Opus for maximum determinism (temperature 0.0)
+- **Supports** multiple file uploads including PNG/JPEG images processed together
+- **Generates** beautiful portfolio websites with 100+ animated components in isolated sandbox environments
+- **Provides** AI-powered portfolio expert guidance using Claude 4 for personalized recommendations
+- **Offers** full CV editing capabilities with CRUD operations and original file preservation
+- **Manages** multiple portfolio instances with real-time health monitoring and server management
+- **Authenticates** users with both email/password and Google OAuth
 - **Deploys** to Vercel with one click
 - **Supports** multiple file formats (PDF, DOCX, images, etc.)
 
 ### Tech Stack at a Glance
-- **Backend**: FastAPI + Python 3.11+ with TypeORM
+- **Backend**: FastAPI + Python 3.11+ with SQLite database
 - **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4
-- **AI Services**: Gemini, Claude, OpenAI, AWS Textract
-- **UI Libraries**: Aceternity UI, Magic UI (100+ components)
-- **Infrastructure**: Vercel, Railway, PostgreSQL
+- **Authentication**: Google OAuth 2.0 + Email/Password with bcrypt
+- **AI Services**: Google Gemini 2.5 Flash, Claude 4, OpenAI, AWS Textract
+- **UI Libraries**: Aceternity UI, Magic UI (100+ animated components)
+- **Infrastructure**: Vercel deployment, Railway, local development
+- **Database**: SQLite with session-based authentication
 
 ## 🚀 Quick Start
 
@@ -54,7 +61,7 @@ pnpm run build          # Build for production
 # Backend development
 source venv/bin/activate                     # Activate Python environment
 uvicorn main:app --reload --port 2000       # Start FastAPI (http://localhost:2000)
-python main.py                               # Alternative start method
+python3 main.py                              # Alternative start method
 ```
 
 ### Git Workflow - MANDATORY BRANCH-BASED DEVELOPMENT
@@ -106,25 +113,73 @@ gh pr create --title "feat: description" --body "Closes #123"
 CV2WEB-V4/
 ├── src/                    # Backend (FastAPI)
 │   ├── api/               # API routes and endpoints
+│   │   └── routes/        # Individual route modules
+│   │       ├── portfolio_expert.py    # AI portfolio guidance
+│   │       ├── portfolio_generator.py # Portfolio creation & management
+│   │       └── cv.py                  # CV CRUD operations
 │   ├── core/              # Business logic
-│   │   ├── cv_extractors/ # AI-powered CV parsing
-│   │   ├── generators/    # Portfolio generation
+│   │   ├── cv_extraction/ # AI-powered CV parsing (Claude 4)
+│   │   ├── generators/    # Portfolio generation system
 │   │   └── schemas/       # Data models
-│   └── templates/         # Portfolio templates
+│   ├── services/          # Business services
+│   │   └── claude_portfolio_expert.py # AI expert service
+│   └── templates/         # Portfolio templates with data adapters
+│       └── v0_template_1/ # Modern portfolio template
+│           └── lib/       # Data transformation adapters
 ├── packages/              
 │   └── new-renderer/      # Frontend (Next.js)
+│       └── components/    # React components
 ├── components/            # Shared UI components
 │   ├── aceternity/        # Premium animations
 │   └── magicui/          # Magic UI library
-├── tests/                 # Test suites
-└── .taskmaster/          # AI task management
+├── data/                  # File storage and examples
+│   ├── uploads/          # User uploaded files (preserved)
+│   └── generated_portfolios/ # Generated portfolio outputs
+├── sandboxes/            # Isolated portfolio generation environments
+├── tests/                # Test suites
+├── docs/                 # Technical documentation
+└── .taskmaster/         # AI task management
 ```
 
 ### Data Flow
 ```
-User Upload → File Validation → AI Extraction → Portfolio Generation → Preview → Deploy
-     ↓              ↓                ↓                  ↓                ↓        ↓
-   (FastAPI)    (Security)    (Gemini 2.5)      (Templates)        (Next.js) (Vercel)
+User Upload → File Validation → AI Extraction → CV Editor → Portfolio Expert → Generation → Preview → Deploy
+     ↓              ↓                ↓             ↓            ↓                ↓           ↓        ↓
+   (FastAPI)    (Security)      (Claude 4)   (CRUD Ops)   (AI Guidance)    (Sandbox)   (Next.js) (Vercel)
+```
+
+### New Portfolio Generation Pipeline
+```
+1. CV Upload & Processing
+   ├── File preservation in data/uploads/
+   ├── Claude 4 Opus extraction (temperature 0.0)
+   ├── Advanced section classification
+   └── File hash caching for deduplication
+
+2. CV Editor (CRUD Operations)
+   ├── Edit extracted sections (Hero, Contact, Experience, Education, Skills)
+   ├── Add/remove/reorder items in lists
+   ├── Real-time data validation
+   └── Save changes to SQLite database
+
+3. Portfolio Expert (AI Guidance)
+   ├── CV analysis for completeness and industry insights
+   ├── Personalized recommendations based on experience level
+   ├── Content strategy and technical guidance
+   └── Style preferences and template suggestions
+
+4. Portfolio Generation (Isolated Sandboxes)
+   ├── Create isolated Next.js environment
+   ├── Inject CV data via adapter system
+   ├── Install dependencies and configure environment
+   ├── Start development server on unique port
+   └── Real-time health monitoring
+
+5. Portfolio Management
+   ├── Multiple portfolio instances per user
+   ├── Server start/stop/restart operations
+   ├── Health checks and status monitoring
+   └── Direct preview links to running portfolios
 ```
 
 ## ⚙️ Configuration
@@ -137,14 +192,15 @@ MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:3001"]
 
 # AI Models
-GEMINI_MODEL = "gemini-2.5-flash"
-CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+PRIMARY_MODEL = "claude-opus-4-20250514"  # Claude 4 Opus for deterministic extraction
+FALLBACK_MODEL = "claude-opus-4-20250514"
+EXTRACTION_TEMPERATURE = 0.0  # Maximum determinism
 ```
 
 ### Credential Management
 ```bash
 # ⚠️ NEVER commit API keys! Use keychain manager:
-python src/utils/setup_keychain.py
+python3 src/utils/setup_keychain.py
 
 # This securely stores:
 # - Google Cloud credentials
@@ -262,21 +318,37 @@ Magic Component Platform (MCP) is an AI-powered tool that generates beautiful UI
 
 ### Adding a New Portfolio Template
 ```typescript
-// 1. Create template component
-// src/templates/portfolio-templates/modern-minimal.tsx
-export const ModernMinimalTemplate: React.FC<PortfolioProps> = ({ data }) => {
-  // Template implementation
+// 1. Create template directory structure
+// src/templates/new-template/
+├── app/                     # Next.js app directory
+│   ├── page.tsx            # Main portfolio page
+│   ├── globals.css         # Template-specific styles
+│   └── layout.tsx          # Layout component
+├── lib/                    # Template utilities
+│   ├── cv-data-adapter.tsx # Data transformation adapter
+│   └── data.tsx           # Data types and demo data
+├── components/             # Template-specific components
+├── package.json           # Template dependencies
+└── tailwind.config.js     # Tailwind configuration
+
+// 2. Implement CV data adapter
+// src/templates/new-template/lib/cv-data-adapter.tsx
+export const adaptCVData = (cvData: CVData): TemplateData => {
+  return {
+    hero: {
+      name: cvData.hero?.name || "Your Name",
+      title: cvData.hero?.title || "Professional Title",
+      // ... other mappings
+    }
+  }
 }
 
-// 2. Register in generator
-// src/core/generators/portfolio_generator.py
-TEMPLATES = {
-    "modern-minimal": ModernMinimalTemplate,
-    // ... other templates
+// 3. Register template in portfolio generator
+// src/api/routes/portfolio_generator.py
+AVAILABLE_TEMPLATES = {
+    "v0_template_1": "/src/templates/v0_template_1",
+    "new-template": "/src/templates/new-template",
 }
-
-// 3. Add preview
-// packages/new-renderer/app/templates/[id]/page.tsx
 ```
 
 ### Adding a New API Endpoint
@@ -284,17 +356,74 @@ TEMPLATES = {
 # 1. Create route file
 # src/api/routes/analytics.py
 from fastapi import APIRouter, Depends
+from src.api.dependencies import get_current_user
+
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 @router.get("/usage")
-async def get_usage_stats():
-    return {"total_cvs": 1234}
+async def get_usage_stats(user=Depends(get_current_user)):
+    return {"total_cvs": 1234, "user_id": user.id}
 
 # 2. Register in main.py
-app.include_router(analytics.router)
+from src.api.routes import analytics
+app.include_router(analytics.router, prefix="/api/v1")
 
 # 3. Test the endpoint
 # http://localhost:2000/docs
+```
+
+### Working with Portfolio Expert System
+```python
+# Using the Portfolio Expert API
+# src/api/routes/portfolio_expert.py
+
+# 1. Start expert session
+POST /api/v1/portfolio-expert/start-session
+{
+    "cv_data": {...},  # Optional: Include CV data for analysis
+    "user_preferences": {...}  # Optional: Style preferences
+}
+
+# 2. Chat with expert
+POST /api/v1/portfolio-expert/chat
+{
+    "session_id": "session_123",
+    "message": "What template would work best for a software engineer?"
+}
+
+# 3. Generate portfolio from expert recommendations
+POST /api/v1/portfolio-expert/generate
+{
+    "session_id": "session_123",
+    "template_id": "v0_template_1",
+    "customizations": {...}
+}
+```
+
+### Managing Portfolio Instances
+```python
+# Portfolio Generation and Management
+# src/api/routes/portfolio_generator.py
+
+# 1. Create new portfolio
+POST /api/v1/portfolios/generate
+{
+    "job_id": "user_cv_id",
+    "template": "v0_template_1",
+    "config": {...}
+}
+
+# 2. List user's portfolios
+GET /api/v1/portfolios
+
+# 3. Get portfolio status
+GET /api/v1/portfolios/{portfolio_id}/status
+
+# 4. Restart portfolio server
+POST /api/v1/portfolios/{portfolio_id}/restart
+
+# 5. Stop portfolio server
+POST /api/v1/portfolios/{portfolio_id}/stop
 ```
 
 ## 🐛 Troubleshooting
@@ -306,9 +435,17 @@ app.include_router(analytics.router)
 | "Cannot find module" | Run `pnpm install` in project root |
 | TypeScript errors | Run `pnpm run typecheck` to see all errors |
 | "Port 2000 already in use" | Kill existing process: `lsof -ti:2000 \| xargs kill` |
+| Portfolio server won't start | Check ports 4000+ range availability |
 | Import errors | Ensure using `src/` prefix for absolute imports |
-| CV extraction fails | Check Gemini API quota and credentials |
+| CV extraction fails | Check Claude API quota and credentials |
 | Large file warning | Use Git LFS for files >50MB |
+| SSE connection error | Normal for MVP - using simulated progress instead |
+| PDF not displaying | Check file exists in `data/uploads/` with job_id |
+| Portfolio Expert timeout | Check Claude API rate limits and retry |
+| Sandbox generation fails | Verify Node.js and pnpm available in PATH |
+| CV data not loading in template | Check cv-data-adapter.tsx implementation |
+| Multiple portfolio conflicts | Each portfolio uses unique port (4000+) |
+| File preservation issues | Ensure proper session authentication |
 
 ### Debug Commands
 ```bash
@@ -316,12 +453,25 @@ app.include_router(analytics.router)
 curl http://localhost:2000/health    # Backend health
 curl http://localhost:3000/api/health # Frontend health
 
+# Portfolio management
+curl http://localhost:2000/api/v1/portfolios        # List user portfolios
+curl http://localhost:2000/api/v1/portfolios/status # Check all portfolio status
+
+# Portfolio Expert debugging
+curl -X POST http://localhost:2000/api/v1/portfolio-expert/start-session \
+  -H "Content-Type: application/json" \
+  -d '{"cv_data": null}'
+
 # View logs
 docker logs cv2web-backend -f        # Backend logs
 pnpm run dev --verbose               # Frontend verbose logs
 
 # Database issues
-python src/utils/init_db.py          # Reinitialize database
+python3 src/utils/init_db.py          # Reinitialize database
+
+# Portfolio sandbox debugging
+ps aux | grep node                   # Check running portfolio servers
+lsof -i :4000-4010                  # Check portfolio port usage
 
 # Check for dependency issues
 pnpm why [package]                   # Check why package installed
@@ -418,8 +568,7 @@ vercel
 
 
 ### AI Services & Configuration
-- **Google Gemini 2.5 Flash** - CV extraction (primary, model in config.py)
-- **Claude 3.5 Sonnet** - Content enhancement
+- **Claude 4 Opus** - CV extraction (primary, deterministic with temperature 0.0)
 - **Google Cloud Vision** - OCR for images
 - **AWS Textract** - Alternative OCR
 - **OpenAI API** - Optional enhancement
@@ -438,7 +587,7 @@ vercel
 ### Utility Scripts
 ```bash
 # Development utilities
-python src/utils/setup_keychain.py      # Setup credentials
+python3 src/utils/setup_keychain.py      # Setup credentials
 
 # Note: Portfolio generation scripts have been moved to legacy/
 # New template-based portfolio system is being implemented
@@ -566,7 +715,135 @@ class LiveLogger:
 4. **Be concise but informative**: One line per action
 5. **Group related logs**: Use indentation for sub-tasks
 
+## 📄 CV Processing & Display
+
+### Upload and Processing Flow
+```
+1. User uploads CV → Backend extracts text → AI analyzes structure → Data saved to SQLite
+2. Processing shows simulated progress (SSE ready but not required for MVP)
+3. Original files are preserved for display
+4. Users can edit extracted data before generating portfolio
+```
+
+### CV Editor Workflow
+After CV upload, users are directed to the CV Editor where they can:
+- Edit all extracted sections (Hero, Contact, Experience, Education, Skills)
+- Add/remove/reorder items in lists
+- Save changes to database
+- Generate portfolio with edited data
+
+### File Display Implementation
+```typescript
+// My Resume page now shows actual uploaded PDF
+// Files are served via /api/v1/download/{job_id} endpoint
+// Authentication handled via X-Session-ID header
+```
+
+### API Endpoints for CV Management
+```python
+# Get all user's CVs
+GET /api/v1/my-cvs
+
+# Get specific CV data
+GET /api/v1/cv/{job_id}
+
+# Update CV data
+PUT /api/v1/cv/{job_id}
+
+# Download original file
+GET /api/v1/download/{job_id}
+```
+
+### Portfolio Expert API Endpoints
+```python
+# Start new expert session
+POST /api/v1/portfolio-expert/start-session
+{
+    "cv_data": Optional[CVData],
+    "user_preferences": Optional[Dict]
+}
+
+# Chat with portfolio expert
+POST /api/v1/portfolio-expert/chat
+{
+    "session_id": str,
+    "message": str
+}
+
+# Generate portfolio with expert guidance
+POST /api/v1/portfolio-expert/generate
+{
+    "session_id": str,
+    "template_id": str,
+    "customizations": Optional[Dict]
+}
+
+# Get expert session history
+GET /api/v1/portfolio-expert/session/{session_id}
+```
+
+### Portfolio Generation & Management API
+```python
+# Generate new portfolio
+POST /api/v1/portfolios/generate
+{
+    "job_id": str,
+    "template": str,
+    "config": Optional[Dict]
+}
+
+# List user's portfolios
+GET /api/v1/portfolios
+
+# Get portfolio status
+GET /api/v1/portfolios/{portfolio_id}/status
+
+# Start portfolio server
+POST /api/v1/portfolios/{portfolio_id}/start
+
+# Stop portfolio server
+POST /api/v1/portfolios/{portfolio_id}/stop
+
+# Restart portfolio server
+POST /api/v1/portfolios/{portfolio_id}/restart
+
+# Delete portfolio
+DELETE /api/v1/portfolios/{portfolio_id}
+
+# Get portfolio preview URL
+GET /api/v1/portfolios/{portfolio_id}/preview
+```
+
+### SSE Infrastructure (Ready for Future Use)
+- Full SSE service implemented (`src/services/sse_service.py`)
+- SSE routes available (`src/api/routes/sse.py`)
+- Frontend SSE connection ready (`lib/api.ts`)
+- Currently using simulated progress for better UX
+
 ## Recent Updates
+
+### Major Release: Portfolio Expert & Advanced Generation System (2025-01-16)
+- **🤖 Portfolio Expert System**: Implemented AI-powered portfolio guidance using Claude 4 for personalized recommendations, CV analysis, and content strategy
+- **🏭 Advanced Portfolio Generation**: Complete portfolio generation pipeline with isolated sandbox environments, real-time health monitoring, and server management
+- **🔄 CV Data Adapter System**: Sophisticated data transformation layer for converting CV extraction format to template-specific data structures
+- **📋 Portfolio Management**: Multiple portfolio instances per user with start/stop/restart operations and unique port allocation (4000+ range)
+- **🛡️ Enhanced File Preservation**: Permanent file storage with session-based authentication for secure file serving
+- **📊 Template Progress Display**: Real-time progress indicators for CV processing, template selection, generation, and preview stages
+- **🎯 Expert Session Management**: Persistent chat sessions with CV analysis, industry insights, and personalized guidance
+- **⚙️ Sandbox Infrastructure**: Isolated Next.js environments with dependency management and health monitoring
+- **🔗 API Expansion**: New endpoints for portfolio expert, generation management, and enhanced CV operations
+- **📖 Documentation Enhancement**: Added CV Editor implementation guide and comprehensive API documentation
+
+### Previous Updates
+- **2025-01-15**: Fixed critical cross-section contamination with advanced classifier
+- **2025-01-15**: Implemented Claude 4 Opus deterministic extraction (temperature 0.0)
+- **2025-01-15**: Added comprehensive deduplication for skills/certifications/languages
+- **2025-01-15**: Enhanced section classification with priority matrix system
+- **2025-01-15**: Implemented CV Editor with full CRUD operations for extracted data
+- **2025-01-15**: Added original file preservation and display in My Resume page
+- **2025-01-15**: Created download endpoint for serving uploaded files
+- **2025-01-15**: Removed resume builder modal - direct flow to CV editor
+- **2025-01-15**: Fixed SSE connection errors with graceful fallback
 - **2025-01-14**: Added isolated environment requirements and live logging standards
 - **2025-01-14**: Enhanced Git workflow with mandatory branch-based development
 - **2025-01-14**: Added Claude SDK best practices from video learnings
@@ -578,4 +855,4 @@ class LiveLogger:
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-01-14 | Version: 4.2*
+*Last updated: 2025-01-16 | Version: 4.4*

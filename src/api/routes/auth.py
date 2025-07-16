@@ -20,8 +20,7 @@ async def get_current_user(
 ) -> str:
     """
     Get current user ID from session.
-    In development: returns test user
-    In production: validates session
+    Always validates session for authenticated endpoints.
     
     Returns:
         user_id string
@@ -29,11 +28,7 @@ async def get_current_user(
     Raises:
         HTTPException 401 if unauthorized
     """
-    if IS_DEVELOPMENT:
-        logger.debug("Development mode - using dev user")
-        return "dev-user-123"
-    
-    # Production - require valid session
+    # Always require valid session for authenticated endpoints
     if not session_id:
         raise HTTPException(
             status_code=401, 
@@ -48,6 +43,7 @@ async def get_current_user(
             detail="Invalid session. Please login"
         )
     
+    logger.debug(f"Authenticated user: {user_id}")
     return user_id
 
 

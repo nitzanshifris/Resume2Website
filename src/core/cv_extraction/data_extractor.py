@@ -169,8 +169,64 @@ CV Text:
 
 Extract the {section_name} data and return ONLY the JSON object. Be completely deterministic and consistent:"""
 
-        # Section-specific enhancements
-        if section_name == "experience":
+        # Section-specific enhancements with cross-section exclusion rules
+        if section_name == "skills":
+            base_prompt = base_prompt.replace(
+                "Extract the skills data",
+                """Extract ONLY technical skills, software proficiencies, and professional competencies.
+🚨 CRITICAL EXCLUSIONS - DO NOT INCLUDE:
+- Language names (English, Spanish, French, etc.) → These belong in Languages section
+- Certification titles (CompTIA A+, AWS Certified, etc.) → These belong in Certifications section
+- Course names or training programs → These belong in Courses/Education section
+- Job titles or roles → These belong in Experience section
+
+✅ ONLY INCLUDE:
+- Programming languages (Python, JavaScript, Java, etc.)
+- Frameworks and libraries (React, Django, Express, etc.)
+- Software tools (Excel, Photoshop, AutoCAD, etc.)
+- Technical methodologies (Agile, DevOps, CI/CD, etc.)
+- Professional skills (Project Management, Data Analysis, etc.)
+
+Group skills into logical categories like "Programming Languages", "Frameworks", "Tools", etc."""
+            )
+        
+        elif section_name == "languages":
+            base_prompt = base_prompt.replace(
+                "Extract the languages data",
+                """Extract ONLY spoken/written natural languages and their proficiency levels.
+🚨 CRITICAL EXCLUSIONS - DO NOT INCLUDE:
+- Programming languages (Python, JavaScript, Java, etc.) → These belong in Skills section
+- Technical terms or software names → These belong in Skills section
+- Framework names → These belong in Skills section
+
+✅ ONLY INCLUDE:
+- Natural human languages (English, Spanish, French, Mandarin, etc.)
+- Proficiency levels (Native, Fluent, Conversational, Basic, etc.)
+- Language certifications (if specifically mentioned)
+
+Look for patterns like "Fluent in Spanish", "Native English", "Conversational French"."""
+            )
+        
+        elif section_name == "certifications":
+            base_prompt = base_prompt.replace(
+                "Extract the certifications data",
+                """Extract ONLY formal certifications, licenses, and professional credentials.
+🚨 CRITICAL EXCLUSIONS - DO NOT INCLUDE:
+- General skills without certification → These belong in Skills section
+- Course completions without formal certification → These belong in Courses section
+- Language proficiencies → These belong in Languages section
+- Educational degrees → These belong in Education section
+
+✅ ONLY INCLUDE:
+- Professional certifications (CompTIA A+, AWS Certified, PMP, etc.)
+- Industry licenses (CPA, Bar License, Medical License, etc.)
+- Vendor certifications (Microsoft Certified, Cisco CCNA, etc.)
+- Safety certifications (First Aid, CPR, OSHA, etc.)
+
+Look for keywords: "Certified", "Certification", "Licensed", "Accredited", issuing organizations."""
+            )
+        
+        elif section_name == "experience":
             base_prompt = base_prompt.replace(
                 "Extract the experience data",
                 """Extract ALL work experience including internships.
@@ -793,7 +849,7 @@ IMPORTANT:
                     enhanced['summary']['careerHighlights'] = highlights[:5]
                     logger.debug(f"Limited careerHighlights from {len(highlights)} to 5 items")
         
-        # Apply smart deduplication
+        # Apply smart deduplication for achievements
         try:
             from src.core.local.smart_deduplicator import smart_deduplicator
             enhanced = smart_deduplicator.deduplicate_cv_data(enhanced)
@@ -806,7 +862,28 @@ IMPORTANT:
                     for dup in report['duplicate_groups']:
                         logger.debug(f"Duplicate: '{dup['text'][:60]}...' in {dup['sources']}")
         except Exception as e:
-            logger.warning(f"Deduplication failed, continuing without it: {e}")
+            logger.warning(f"Achievement deduplication failed, continuing without it: {e}")
+        
+        # Apply advanced section classification and cross-section deduplication
+        try:
+            from src.core.cv_extraction.advanced_section_classifier import advanced_classifier
+            logger.info("🚀 Starting advanced section classification")
+            enhanced, classification_report = advanced_classifier.enhance_cv_data(enhanced)
+            
+            # Log classification results
+            if classification_report['duplicates_fixed'] > 0:
+                logger.info(f"🔧 Advanced classifier fixed {classification_report['duplicates_fixed']} cross-section duplicates")
+            
+            if classification_report['total_issues_found'] > 0:
+                logger.warning(f"⚠️  {classification_report['total_issues_found']} classification issues remain: {classification_report['validation_issues']}")
+            else:
+                logger.info("✅ All sections properly classified, no cross-contamination detected")
+                
+        except Exception as e:
+            logger.error(f"❌ Advanced section classification failed: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            # Continue without advanced classification
         
         # Enhance hero section with contact info
         if enhanced.get("contact") and not enhanced.get("hero"):
