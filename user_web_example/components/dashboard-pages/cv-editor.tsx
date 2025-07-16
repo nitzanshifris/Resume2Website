@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,6 +20,7 @@ import {
   Edit3
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Confetti, type ConfettiRef } from "@/components/ui/confetti"
 
 interface CVEditorProps {
   userName?: string
@@ -33,6 +34,7 @@ export default function CVEditor({ userName }: CVEditorProps) {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null)
   const [profilePhotoShape, setProfilePhotoShape] = useState<'circle' | 'square' | 'rounded'>('circle')
   const [isGeneratingPortfolio, setIsGeneratingPortfolio] = useState(false)
+  const confettiRef = useRef<ConfettiRef>(null)
 
   // Get CSS classes for profile photo shape
   const getPhotoShapeClasses = (shape: string) => {
@@ -219,6 +221,16 @@ export default function CVEditor({ userName }: CVEditorProps) {
       }
 
       const result = await response.json()
+      
+      // Fire confetti animation
+      if (confettiRef.current) {
+        confettiRef.current.fire({
+          particleCount: 150,
+          spread: 90,
+          origin: { y: 0.6 },
+          colors: ['#10b981', '#0ea5e9', '#3b82f6', '#8b5cf6', '#ec4899']
+        })
+      }
       
       // Show success message
       alert(`Portfolio generated successfully! 🎉\n\nYour portfolio is now available at: ${result.url}\n\nYou can view it in the "My Website" section.`)
@@ -3016,6 +3028,9 @@ export default function CVEditor({ userName }: CVEditorProps) {
           </Button>
         </Card>
       </motion.div>
+      
+      {/* Confetti component - doesn't render anything, just provides the fire method */}
+      <Confetti ref={confettiRef} manualstart={true} />
     </div>
   )
 }

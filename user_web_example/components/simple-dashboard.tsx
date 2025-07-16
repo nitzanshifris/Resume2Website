@@ -23,6 +23,7 @@ import ResumeBuilder from "./resume-builder"
 interface SimpleDashboardProps {
   userName?: string
   onBackToHome?: () => void
+  initialPage?: string
 }
 
 const navigationItems = [
@@ -42,8 +43,8 @@ const premiumFeatures = [
   { id: "recruiters", label: "Recruiter Outreach", icon: Users, premium: true },
 ]
 
-export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHome }: SimpleDashboardProps) {
-  const [activePage, setActivePage] = useState("overview")
+export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHome, initialPage = "overview" }: SimpleDashboardProps) {
+  const [activePage, setActivePage] = useState(initialPage)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
   // Upload flow states

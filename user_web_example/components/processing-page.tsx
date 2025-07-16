@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 import { createSSEConnection, ProcessingStatus } from "@/lib/api"
+import { Confetti, type ConfettiRef } from "@/components/ui/confetti"
 
 interface ProcessingPageProps {
   isOpen: boolean
@@ -19,6 +20,7 @@ export default function ProcessingPage({ isOpen, jobId, onComplete, onTemplateSe
   const [currentMessage, setCurrentMessage] = useState("Bringing your career story to life...")
   const [showTemplateSelect, setShowTemplateSelect] = useState(false)
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus | null>(null)
+  const confettiRef = useRef<ConfettiRef>(null)
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -56,10 +58,19 @@ export default function ProcessingPage({ isOpen, jobId, onComplete, onTemplateSe
         
         if (step.progress === 100) {
           clearInterval(interval)
+          // Fire confetti when complete
+          if (confettiRef.current) {
+            confettiRef.current.fire({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#10b981', '#0ea5e9', '#3b82f6']
+            })
+          }
           // Auto-complete after showing 100%
           setTimeout(() => {
             onComplete()
-          }, 500)
+          }, 1500)
         }
       }
     }, 800)
@@ -217,6 +228,9 @@ export default function ProcessingPage({ isOpen, jobId, onComplete, onTemplateSe
           {/* Floating background elements */}
           <div className="fixed top-1/4 left-1/4 w-32 h-32 bg-gradient-to-br from-emerald-200/20 to-emerald-300/20 rounded-full blur-3xl -z-10" />
           <div className="fixed bottom-1/4 right-1/4 w-40 h-40 bg-gradient-to-br from-sky-200/20 to-blue-300/20 rounded-full blur-3xl -z-10" />
+          
+          {/* Confetti component - doesn't render anything, just provides the fire method */}
+          <Confetti ref={confettiRef} manualstart={true} />
         </div>
       </motion.div>
     </AnimatePresence>

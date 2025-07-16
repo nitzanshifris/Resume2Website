@@ -356,12 +356,111 @@ const CV2WebOrbitingIcons: React.FC<CV2WebOrbitingIconsProps> = ({
 // Main CV2Web Auth Hero Component
 const CV2WebAuthHero: React.FC = () => {
   const [isTransformed, setIsTransformed] = useState(false);
+  const [currentCVIndex, setCurrentCVIndex] = useState(0);
+  const [activeCardSet, setActiveCardSet] = useState(0);
+
+  // CV Examples with diverse professionals
+  const cvExamples = [
+    {
+      name: "Sarah Chen",
+      role: "Product Designer",
+      years: "7+ Years",
+      skills: ["Figma", "Design Systems", "User Research"],
+      color: "from-purple-500 to-pink-500",
+      initials: "SC",
+      cvColor: "bg-purple-50",
+      cvAccent: "bg-purple-600",
+      email: "sarah.chen@email.com",
+      phone: "+1 (555) 123-4567"
+    },
+    {
+      name: "Marcus Rodriguez",
+      role: "Data Scientist",
+      years: "5+ Years",
+      skills: ["Python", "ML", "TensorFlow"],
+      color: "from-blue-500 to-cyan-500",
+      initials: "MR",
+      cvColor: "bg-blue-50",
+      cvAccent: "bg-blue-600",
+      email: "marcus.r@email.com",
+      phone: "+1 (555) 234-5678"
+    },
+    {
+      name: "Amara Okafor",
+      role: "Marketing Director",
+      years: "10+ Years",
+      skills: ["Strategy", "Analytics", "Leadership"],
+      color: "from-orange-500 to-red-500",
+      initials: "AO",
+      cvColor: "bg-orange-50",
+      cvAccent: "bg-orange-600",
+      email: "amara.okafor@email.com",
+      phone: "+1 (555) 345-6789"
+    },
+    {
+      name: "Dimitri Petrov",
+      role: "Software Architect",
+      years: "12+ Years",
+      skills: ["Cloud", "Microservices", "DevOps"],
+      color: "from-green-500 to-emerald-500",
+      initials: "DP",
+      cvColor: "bg-green-50",
+      cvAccent: "bg-green-600",
+      email: "d.petrov@email.com",
+      phone: "+1 (555) 456-7890"
+    },
+    {
+      name: "Priya Patel",
+      role: "UX Researcher",
+      years: "6+ Years",
+      skills: ["User Testing", "Analytics", "Workshops"],
+      color: "from-indigo-500 to-purple-500",
+      initials: "PP",
+      cvColor: "bg-indigo-50",
+      cvAccent: "bg-indigo-600",
+      email: "priya.p@email.com",
+      phone: "+1 (555) 567-8901"
+    },
+    {
+      name: "Emma Thompson",
+      role: "Financial Analyst",
+      years: "8+ Years",
+      skills: ["Excel", "Python", "Risk Analysis"],
+      color: "from-amber-500 to-yellow-500",
+      initials: "ET",
+      cvColor: "bg-amber-50",
+      cvAccent: "bg-amber-600",
+      email: "emma.t@email.com",
+      phone: "+1 (555) 678-9012"
+    }
+  ];
 
   // Cycle transformation every 4 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setIsTransformed(prev => !prev);
     }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Data-oriented card display system
+  const cardSets = [
+    [0, 1, 2], // First set of 3 cards
+    [3, 4, 5], // Second set of 3 cards
+  ];
+  
+  const cardPositions = [
+    { x: 40, y: 180, delay: 0 },       // Left position - moved right and down
+    { x: 180, y: 80, delay: 0.2 },     // Top center position  
+    { x: 320, y: 160, delay: 0.4 },    // Right position - spread much wider
+  ];
+  
+  // Rotate between card sets every 10 seconds (optimized timing)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveCardSet(prev => (prev + 1) % cardSets.length);
+    }, 10000);
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -420,130 +519,261 @@ const CV2WebAuthHero: React.FC = () => {
         refresh
       />
       
-      {/* CV to Website Transformation Animation */}
-      <div className="absolute inset-8 flex items-center justify-center">
-        <div className="relative w-80 h-80">
-          {/* Central Transforming Element - ENHANCED */}
-          <motion.div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-            animate={isTransformed ? { 
-              scale: [1, 1.1, 1], 
-              rotateY: [0, 10, 0],
-              rotateX: [0, 5, 0]
-            } : { 
-              scale: [1, 0.95, 1],
-              rotateY: [0, -10, 0],
-              rotateX: [0, -5, 0]
-            }}
-            transition={{ duration: 2, ease: "easeInOut" }}
-          >
-            <AnimatePresence mode="wait">
-              {isTransformed ? (
-                // Website Layout - LARGER & MORE DETAILED
-                <motion.div 
-                  key="website"
-                  initial={{ opacity: 0, scale: 0.7, rotateY: -90 }}
-                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  exit={{ opacity: 0, scale: 0.7, rotateY: 90 }}
-                  transition={{ duration: 1, ease: "backOut" }}
-                  className="w-32 h-40 bg-gradient-to-br from-emerald-500 via-sky-400 to-blue-600 rounded-xl p-3 shadow-2xl border border-white/40"
-                >
-                  <div className="bg-white/95 rounded-lg h-full flex flex-col p-2">
-                    {/* Website Header */}
-                    <div className="h-2 bg-gradient-to-r from-emerald-500 to-sky-500 rounded mb-1.5"></div>
-                    {/* Navigation */}
-                    <div className="flex gap-1 mb-2">
-                      <div className="h-1 bg-gray-300 rounded flex-1"></div>
-                      <div className="h-1 bg-gray-300 rounded flex-1"></div>
-                      <div className="h-1 bg-gray-300 rounded flex-1"></div>
-                    </div>
-                    {/* Hero Section */}
-                    <div className="h-3 bg-gradient-to-r from-purple-200 to-blue-200 rounded mb-1"></div>
-                    {/* Content Grid */}
-                    <div className="flex-1 grid grid-cols-2 gap-1 mb-1">
-                      <div className="bg-gradient-to-br from-emerald-200 to-emerald-300 rounded"></div>
-                      <div className="bg-gradient-to-br from-sky-200 to-sky-300 rounded"></div>
-                    </div>
-                    {/* Footer */}
-                    <div className="h-1.5 bg-gradient-to-r from-yellow-200 via-orange-200 to-pink-200 rounded"></div>
-                  </div>
-                </motion.div>
-              ) : (
-                // CV Document - LARGER & MORE DETAILED  
-                <motion.div 
-                  key="cv"
-                  initial={{ opacity: 0, scale: 0.7, rotateY: 90 }}
-                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  exit={{ opacity: 0, scale: 0.7, rotateY: -90 }}
-                  transition={{ duration: 1, ease: "backOut" }}
-                  className="w-28 h-36 bg-white rounded-xl shadow-2xl p-3 border-2 border-gray-200"
-                >
-                  <div className="text-[8px] text-gray-800 font-bold mb-1.5">John Doe</div>
-                  <div className="text-[6px] text-gray-600 mb-1">Senior Developer</div>
-                  <div className="h-px bg-gray-400 mb-2"></div>
-                  
-                  {/* CV Sections */}
-                  <div className="space-y-1">
-                    <div className="text-[5px] text-emerald-600 font-bold mb-0.5">EXPERIENCE</div>
-                    <div className="space-y-0.5">
-                      <div className="h-0.5 bg-gray-500 rounded w-full"></div>
-                      <div className="h-0.5 bg-gray-400 rounded w-4/5"></div>
-                      <div className="h-0.5 bg-gray-400 rounded w-3/4"></div>
-                    </div>
-                    
-                    <div className="text-[5px] text-emerald-600 font-bold mb-0.5 mt-1.5">SKILLS</div>
-                    <div className="flex gap-0.5 flex-wrap">
-                      <div className="w-3 h-0.5 bg-blue-400 rounded"></div>
-                      <div className="w-4 h-0.5 bg-green-400 rounded"></div>
-                      <div className="w-2 h-0.5 bg-purple-400 rounded"></div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="text-[7px] text-emerald-600 font-bold">CV</div>
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+      {/* CV Cards Animation - Defined Rectangle Area */}
+      <div className="absolute bottom-16 left-4 w-[500px] h-[500px] pointer-events-none">
+        {/* Show only visible cards */}
+        <AnimatePresence>
+        {cardSets[activeCardSet].map((cvIndex, positionIndex) => {
+          const cv = cvExamples[cvIndex];
+          const position = cardPositions[positionIndex];
           
-          {/* Floating Portfolio Elements */}
-          {portfolioElements.map((item, index) => (
+          // Simple, clean positioning
+          const finalPos = { 
+            x: position.x, 
+            y: position.y, 
+            rotate: -4 + (positionIndex * 4), // Minimal rotation to avoid overlap
+            scale: 1.0  // Slightly smaller cards
+          };
+          
+          return (
             <motion.div
-              key={index}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              animate={{
-                x: [
-                  Math.cos((index * 60) * Math.PI / 180) * item.radius,
-                  Math.cos((index * 60 + 60) * Math.PI / 180) * item.radius,
-                  Math.cos((index * 60 + 120) * Math.PI / 180) * item.radius,
-                  Math.cos((index * 60 + 180) * Math.PI / 180) * item.radius,
-                  Math.cos((index * 60 + 240) * Math.PI / 180) * item.radius,
-                  Math.cos((index * 60 + 300) * Math.PI / 180) * item.radius,
-                  Math.cos((index * 60) * Math.PI / 180) * item.radius,
-                ],
-                y: [
-                  Math.sin((index * 60) * Math.PI / 180) * item.radius,
-                  Math.sin((index * 60 + 60) * Math.PI / 180) * item.radius,
-                  Math.sin((index * 60 + 120) * Math.PI / 180) * item.radius,
-                  Math.sin((index * 60 + 180) * Math.PI / 180) * item.radius,
-                  Math.sin((index * 60 + 240) * Math.PI / 180) * item.radius,
-                  Math.sin((index * 60 + 300) * Math.PI / 180) * item.radius,
-                  Math.sin((index * 60) * Math.PI / 180) * item.radius,
-                ],
+              key={`${activeCardSet}-${cvIndex}`}
+              className="absolute"
+              initial={{ 
+                x: finalPos.x, 
+                y: finalPos.y + 50, 
+                rotate: finalPos.rotate,
+                scale: 0,
+                opacity: 0
+              }}
+              animate={{ 
+                x: finalPos.x,
+                y: finalPos.y,
+                rotate: finalPos.rotate,
+                scale: finalPos.scale,
+                opacity: 1,
+                rotateY: [0, 0, 180, 180, 0, 0] // Simple flip animation
+              }}
+              exit={{
+                y: finalPos.y - 20,
+                opacity: 0,
+                scale: finalPos.scale * 0.9,
+                transition: { duration: 1, ease: "easeOut" }
               }}
               transition={{
-                duration: item.duration,
-                ease: "linear",
-                repeat: Infinity,
-                delay: item.delay,
+                duration: 0.8,
+                delay: position.delay,
+                ease: "easeOut",
+                opacity: {
+                  duration: 0.5,
+                  delay: position.delay
+                },
+                rotateY: {
+                  duration: 2, // 2 second flip
+                  delay: position.delay + 1.5, // Start flip 1.5 seconds after card appears
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatDelay: 3 // Wait 3 seconds between flips
+                }
               }}
+              style={{ transformStyle: "preserve-3d" }}
             >
-              {item.element}
+              {/* CV Card */}
+              <div className="relative w-48 h-60" style={{ transformStyle: "preserve-3d" }}>
+                {/* Front Side - CV */}
+                <div 
+                  className={`absolute inset-0 ${cv.cvColor} rounded-lg shadow-2xl p-2.5 border border-gray-200 backface-hidden overflow-hidden`}
+                  style={{ backfaceVisibility: "hidden" }}
+                >
+                  {/* Traditional CV Header */}
+                  <div className="mb-2">
+                    <div className="text-[10px] font-bold text-gray-900 tracking-wide">{cv.name.toUpperCase()}</div>
+                    <div className="text-[7px] text-gray-700 font-medium">{cv.role}</div>
+                    <div className="flex gap-2 mt-1">
+                      <div className="text-[5px] text-gray-600">{cv.email}</div>
+                      <div className="text-[5px] text-gray-600">•</div>
+                      <div className="text-[5px] text-gray-600">{cv.phone}</div>
+                    </div>
+                  </div>
+                  
+                  <div className={`h-0.5 ${cv.cvAccent} mb-2`}></div>
+                  
+                  {/* CV Content - Traditional Layout */}
+                  <div className="space-y-1.5">
+                    {/* Professional Summary */}
+                    <div>
+                      <div className={`text-[6px] font-bold ${cv.cvAccent} text-white px-1 py-0.5 inline-block rounded`}>PROFESSIONAL SUMMARY</div>
+                      <div className="mt-0.5 space-y-0.5">
+                        <div className="h-0.5 bg-gray-300 rounded w-full"></div>
+                        <div className="h-0.5 bg-gray-300 rounded w-11/12"></div>
+                        <div className="h-0.5 bg-gray-300 rounded w-4/5"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Experience */}
+                    <div>
+                      <div className={`text-[6px] font-bold ${cv.cvAccent} text-white px-1 py-0.5 inline-block rounded`}>EXPERIENCE</div>
+                      <div className="mt-0.5 space-y-1">
+                        <div>
+                          <div className="text-[5px] font-semibold text-gray-800">{cv.years} • Senior Position</div>
+                          <div className="h-0.5 bg-gray-300 rounded w-5/6 mt-0.5"></div>
+                        </div>
+                        <div>
+                          <div className="text-[5px] font-semibold text-gray-800">Previous Role</div>
+                          <div className="h-0.5 bg-gray-300 rounded w-4/6 mt-0.5"></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Skills */}
+                    <div>
+                      <div className={`text-[6px] font-bold ${cv.cvAccent} text-white px-1 py-0.5 inline-block rounded`}>SKILLS</div>
+                      <div className="flex gap-1 flex-wrap mt-0.5">
+                        {cv.skills.map((skill, idx) => (
+                          <div 
+                            key={idx}
+                            className="text-[5px] px-1 py-0.5 border border-gray-400 rounded text-gray-700 bg-white"
+                          >
+                            {skill}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Education */}
+                    <div>
+                      <div className={`text-[6px] font-bold ${cv.cvAccent} text-white px-1 py-0.5 inline-block rounded`}>EDUCATION</div>
+                      <div className="mt-0.5">
+                        <div className="h-0.5 bg-gray-300 rounded w-3/4"></div>
+                        <div className="h-0.5 bg-gray-300 rounded w-1/2 mt-0.5"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Back Side - Beautiful Modern Website */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-lg shadow-2xl overflow-hidden"
+                  style={{ 
+                    backfaceVisibility: "hidden",
+                    transform: "rotateY(180deg)"
+                  }}
+                >
+                  {/* Beautiful gradient overlay */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${cv.color} opacity-30`}></div>
+                  
+                  {/* Animated particles background */}
+                  <div className="absolute inset-0 opacity-20">
+                    {[...Array(15)].map((_, i) => (
+                      <div 
+                        key={i}
+                        className={`absolute w-1 h-1 bg-gradient-to-r ${cv.color} rounded-full animate-pulse`}
+                        style={{
+                          left: `${Math.random() * 100}%`,
+                          top: `${Math.random() * 100}%`,
+                          animationDelay: `${i * 0.2}s`,
+                          animationDuration: `${2 + Math.random() * 2}s`
+                        }}
+                      />
+                    ))}
+                  </div>
+                  
+                  <div className="relative h-full flex flex-col p-4">
+                    {/* Modern Website Header */}
+                    <div className="mb-3">
+                      {/* Site Logo/Brand */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${cv.color} shadow-lg`}></div>
+                        <div className="text-[8px] text-white font-bold tracking-wide">{cv.name.split(' ')[0]}.dev</div>
+                      </div>
+                      
+                      {/* Hero Section */}
+                      <div className={`bg-gradient-to-r ${cv.color} rounded-lg p-2 shadow-xl`}>
+                        <div className="text-xs font-bold text-white mb-1">
+                          {cv.name}
+                        </div>
+                        <div className="text-[8px] text-white/90">
+                          {cv.role}
+                        </div>
+                        <div className="text-[6px] text-white/80 mt-1">
+                          {cv.years} Experience
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Modern Navigation */}
+                    <div className="flex gap-2 mb-3">
+                      {['Home', 'Portfolio', 'About', 'Contact'].map((item, i) => (
+                        <div key={i} className={`flex-1 text-center py-1 px-1 rounded text-[6px] font-medium ${
+                          i === 0 
+                            ? `bg-gradient-to-r ${cv.color} text-white` 
+                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                        }`}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Modern Content Sections */}
+                    <div className="flex-1 space-y-2">
+                      {/* Featured Work */}
+                      <div className="bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+                        <div className="text-[7px] text-white font-semibold mb-1.5">Featured Projects</div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {[1, 2].map((project) => (
+                            <div key={project} className={`bg-gradient-to-br ${cv.color} rounded p-1.5 h-8 relative overflow-hidden`}>
+                              <div className="text-[6px] text-white font-medium">Project {project}</div>
+                              <div className="absolute bottom-0 right-0 w-6 h-6 bg-white/20 rounded-full transform translate-x-2 translate-y-2"></div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Skills Showcase */}
+                      <div className="bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+                        <div className="text-[7px] text-white font-semibold mb-1.5">Core Skills</div>
+                        <div className="flex flex-wrap gap-1">
+                          {cv.skills.map((skill, idx) => (
+                            <div key={idx} className={`text-[6px] px-1.5 py-0.5 bg-gradient-to-r ${cv.color} rounded-full text-white font-medium opacity-90`}>
+                              {skill}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Experience Stats */}
+                      <div className="bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+                        <div className="text-[7px] text-white font-semibold mb-1.5">Experience</div>
+                        <div className="flex items-center gap-2">
+                          <div className={`text-[10px] font-bold bg-gradient-to-r ${cv.color} bg-clip-text text-transparent`}>
+                            {cv.years}
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <div className={`h-1 bg-gradient-to-r ${cv.color} rounded-full`}></div>
+                            <div className={`h-0.5 bg-gradient-to-r ${cv.color} rounded-full opacity-60`}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Modern Footer */}
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between bg-white/5 rounded-lg p-1.5">
+                        <div className="text-[6px] text-gray-400">© 2024 {cv.name.split(' ')[0]}</div>
+                        <div className="flex gap-1">
+                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${cv.color} animate-pulse`}></div>
+                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${cv.color} animate-pulse opacity-70`} style={{animationDelay: '0.5s'}}></div>
+                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${cv.color} animate-pulse opacity-50`} style={{animationDelay: '1s'}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
-          ))}
-        </div>
+          );
+        })}
+        </AnimatePresence>
       </div>
 
       {/* Enhanced CV Transformation Effects */}
@@ -607,28 +837,28 @@ const CV2WebAuthHero: React.FC = () => {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 via-sky-400 to-blue-600 border-2 border-white/20"
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 via-sky-400 to-blue-600 border-2 border-white/20"
                 />
               ))}
             </div>
-            <span className="text-xs text-gray-400">
+            <span className="text-base text-gray-300">
               Join 10,000+ professionals already using CV2WEB
             </span>
           </div>
           
           {/* CV2WEB Features */}
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-emerald-300">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-xs">Document to Website Magic</span>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 text-emerald-300">
+              <Sparkles className="w-5 h-5" />
+              <span className="text-base">Document to Website Magic</span>
             </div>
-            <div className="flex items-center space-x-2 text-sky-300">
-              <Rocket className="w-4 h-4" />
-              <span className="text-xs">Live Transformation Preview</span>
+            <div className="flex items-center space-x-3 text-sky-300">
+              <Rocket className="w-5 h-5" />
+              <span className="text-base">Live Transformation Preview</span>
             </div>
-            <div className="flex items-center space-x-2 text-blue-300">
-              <Code className="w-4 h-4" />
-              <span className="text-xs">Interactive Portfolio Elements</span>
+            <div className="flex items-center space-x-3 text-blue-300">
+              <Code className="w-5 h-5" />
+              <span className="text-base">Interactive Portfolio Elements</span>
             </div>
           </div>
         </motion.div>

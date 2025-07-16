@@ -99,11 +99,30 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
         setCvData(parsedCV)
         
         // Auto-fill DOB and location if empty and available in CV
-        setFormData(prev => ({
-          ...prev,
-          dateOfBirth: prev.dateOfBirth || parsedCV.hero?.dateOfBirth || '',
-          location: prev.location || parsedCV.contact?.location || parsedCV.contact?.address || ''
-        }))
+        setFormData(prev => {
+          let locationString = prev.location || ''
+          
+          // If location from CV is an object, format it as a string
+          if (!locationString && parsedCV.contact?.location) {
+            const loc = parsedCV.contact.location
+            if (typeof loc === 'object') {
+              locationString = `${loc.city || ''}${loc.city && loc.state ? ', ' : ''}${loc.state || ''}${(loc.city || loc.state) && loc.country ? ', ' : ''}${loc.country || ''}`.trim()
+            } else {
+              locationString = loc
+            }
+          }
+          
+          // If still no location, try address
+          if (!locationString && parsedCV.contact?.address) {
+            locationString = parsedCV.contact.address
+          }
+          
+          return {
+            ...prev,
+            dateOfBirth: prev.dateOfBirth || parsedCV.hero?.dateOfBirth || '',
+            location: locationString
+          }
+        })
       }
     } catch (error) {
       console.error('Error fetching CV data:', error)
@@ -210,7 +229,11 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
               </div>
               <p className="text-xl text-gray-600 mb-2 font-medium">{formData.name || 'User'}</p>
               <p className="text-xl text-gray-600 mb-2">{formData.email}</p>
-              <p className="text-gray-500 mb-3">{formData.location}</p>
+              <p className="text-gray-500 mb-3">
+                {typeof formData.location === 'object' && formData.location 
+                  ? `${formData.location.city || ''}${formData.location.city && formData.location.state ? ', ' : ''}${formData.location.state || ''}${(formData.location.city || formData.location.state) && formData.location.country ? ', ' : ''}${formData.location.country || ''}`
+                  : formData.location || ''}
+              </p>
               <div className="flex items-center gap-3">
                 <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
                   Premium Plan

@@ -24,6 +24,10 @@ import ResumeBuilder from "@/components/resume-builder"
 import ProcessingPage from "@/components/processing-page"
 import PricingModal from "@/components/pricing-modal"
 import SimpleDashboard from "@/components/simple-dashboard"
+import AuthModal from "@/components/auth-modal"
+import { useAuthContext } from "@/contexts/AuthContext"
+import { useRouter } from "next/navigation"
+import { RoughNotation } from 'react-rough-notation'
 
 const renderColoredTypewriterText = (text: string, colorSegments: { text: string; color: string }[]) => {
   let result = text
@@ -480,6 +484,8 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [showStrikeThrough, setShowStrikeThrough] = useState(false)
+  const [showCVCard, setShowCVCard] = useState(true)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showNewTypewriter, setShowNewTypewriter] = useState(false)
@@ -543,7 +549,11 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
     const sequence = async () => {
       // Stage 1: CV Display (keep original content visible)
       setStage("initial")
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      
+      // Show strike-through animation on "PDF résumé"
+      setShowStrikeThrough(true)
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
       // Stage 2: Quick Morphing (still original content)
       setStage("morphing")
@@ -551,6 +561,12 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
 
       // Stage 3: Dissolution (still original content)
       setStage("dissolving")
+      // Trigger text change FIRST, then hide strike-through
+      setTimeout(() => {
+        setShowNewTypewriter(true)  // Change text immediately
+        // Then hide the strike-through after a tiny delay
+        setTimeout(() => setShowStrikeThrough(false), 50)
+      }, 1000)
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
       // Stage 4: Website Materialization (MacBook appears)
@@ -575,7 +591,9 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
     }
   }, [isPlaying])
 
-  // Trigger new typewriter on desktop AFTER MacBook starts materializing
+  // Trigger new typewriter is now handled in the animation sequence
+  // This useEffect is disabled to prevent duplicate triggers
+  /*
   useEffect(() => {
     if (!isMobile && !showNewTypewriter && isPlaying && stage === "materializing") {
       const timer = setTimeout(() => {
@@ -584,6 +602,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
       return () => clearTimeout(timer)
     }
   }, [isMobile, showNewTypewriter, isPlaying, stage])
+  */
 
   useLayoutEffect(() => {
     if (headlineRef.current) {
@@ -592,8 +611,17 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
   }, [stage])
 
   const handleStartDemo = () => {
-    setIsPlaying(true)
+    console.log('🚀 handleStartDemo called! Current isPlaying:', isPlaying, 'stage:', stage)
+    
+    // Reset everything to initial state before starting
+    setStage("typewriter")
     setProgress(0)
+    setShowNewTypewriter(false)
+    setShowStrikeThrough(false)
+    setShowCVCard(true)
+    
+    // Start the animation
+    setIsPlaying(true)
   }
 
   // Mobile-First Layout
@@ -649,15 +677,18 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                     onAnimationComplete={() => handleLoadingComplete(1)}
                   >
                     <span className="text-gray-800">
-                      Turn your <span className="text-gray-800 italic relative inline-block">
-                        PDF résumé
-                        <span className="absolute top-1/2 left-0 w-full h-0.5 bg-red-500 transform -rotate-1 z-10" style={{ 
-                          background: '#dc2626',
-                          opacity: '0.6',
-                          borderRadius: '1px',
-                          filter: 'blur(0.2px)'
-                        }}></span>
-                      </span> into a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">Web&nbsp;Portfolio</span> in <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">One&nbsp;click</span>.
+                      Turn your <RoughNotation 
+                        type="crossed-off" 
+                        show={showStrikeThrough}
+                        color="#dc2626"
+                        strokeWidth={3}
+                        animationDuration={800}
+                        animationDelay={0}
+                        iterations={2}
+                        padding={0}
+                      >
+                        <span className="text-gray-800 italic inline-block">PDF résumé</span>
+                      </RoughNotation> into a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">Web&nbsp;Portfolio</span> in <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">One&nbsp;click</span>.
                     </span>
                   </motion.div>
                 )}
@@ -716,18 +747,6 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                   withMacOSEffects 
                   onClick={!isPlaying ? handleStartDemo : undefined}
                 />
-                {/* See How It Works button as a floating layer on top of the CV image (mobile only) */}
-                <button
-                  onClick={handleStartDemo}
-                  className="absolute left-1/2 bottom-[73%] -translate-x-1/2 z-30 px-4 py-2.5 rounded-full text-base font-semibold shadow-lg md:hidden whitespace-nowrap group relative bg-black border-2 border-black transition-all duration-300 hover:scale-105"
-                  style={{ minWidth: '170px' }}
-                  disabled={isPlaying}
-                >
-                  <span className="relative z-10 inline-flex items-center">
-                    <span className="bg-clip-text group-hover:text-transparent bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 transition-colors duration-300 text-white">See how it works</span>
-                    <ArrowRight className="ml-2 w-5 h-5 text-white group-hover:text-emerald-400 transition-colors duration-300" />
-                  </span>
-                </button>
               </motion.div>
             )}
             {/* Particle/Fireworks effect: show during 'morphing' and 'dissolving' */}
@@ -796,18 +815,18 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
         <div className={`${isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
           <div className="w-full h-full flex flex-col justify-center gap-12">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, ease: "easeOut" }}
               className={`max-w-none w-full relative ${isTransformationStage() ? "space-y-16" : "space-y-16"}`}
             >
 
 
               {/* Component 2: Main Headline - much bigger for transformation stage */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
                 className={isTransformationStage() ? "" : ""}
               >
                 <AnimatePresence mode="wait">
@@ -817,102 +836,88 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                       initial={{ opacity: 1 }}
                       exit={{
                         opacity: 0,
-                        transition: { duration: 1.5, ease: "easeOut" },
+                        transition: { duration: 0.15, ease: "easeOut" },
                       }}
                       className={`${isTransformationStage() ? "text-4xl xs:text-4xl sm:text-5xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl 3xl:text-8xl" : "text-5xl xs:text-5xl sm:text-6xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl 3xl:text-9xl"} font-bold max-w-[120%]`}
                       style={{ lineHeight: '0.95' }}
                     >
                       <motion.span
-                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{
-                          duration: 0.8,
-                          ease: [0.34, 1.56, 0.64, 1],
-                          delay: 0.6
+                          duration: 1.2,
+                          ease: "easeOut",
+                          delay: 0.3
                         }}
                         className="text-foreground"
                       >
                         <div className={`${isTransformationStage() ? "mb-6" : "mb-8"}`} style={{ fontWeight: 700 }}>
                           <span className="text-gray-800 font-bold">
-                            Turn your <span className="text-gray-800 italic relative inline-block">
-                              PDF résumé
-                              <span className="absolute top-1/2 left-0 w-full h-0.5 bg-red-500 transform -rotate-1 z-10" style={{ 
-                                background: '#dc2626',
-                                opacity: '0.6',
-                                borderRadius: '1px',
-                                filter: 'blur(0.2px)'
-                              }}></span>
-                            </span> into a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">Web&nbsp;Portfolio</span> in <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">One&nbsp;click</span>.
+                            Turn your <RoughNotation 
+                              type="crossed-off" 
+                              show={showStrikeThrough}
+                              color="#dc2626"
+                              strokeWidth={3}
+                              animationDuration={800}
+                              animationDelay={0}
+                              iterations={2}
+                              padding={0}
+                            >
+                              <span className="text-gray-800 italic inline-block">PDF résumé</span>
+                            </RoughNotation> into a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">Web&nbsp;Portfolio</span> in <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">One&nbsp;click</span>.
                           </span>
                         </div>
                         <motion.div 
                           className={`${isTransformationStage() ? "text-base xs:text-lg sm:text-xl md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl" : "text-lg xs:text-xl sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl"} text-black font-medium leading-tight max-w-[120%]`}
                           style={{ fontWeight: 500 }}
-                          initial={{ opacity: 0, y: 15 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.6, delay: 0.6 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
                         >
                           Take control of your career, stand out, get&nbsp;interviews
                         </motion.div>
                         
-                        {/* Watch how it works button - desktop only */}
-                        {!isPlaying && (
-                          <div 
-                            className="hidden md:block mt-6 relative isolate" 
-                            style={{ 
-                              zIndex: 10000,
-                              isolation: 'isolate',
-                              pointerEvents: 'auto'
+                        {/* Watch how it works button - Enhanced with better click area and effects */}
+                        <div style={{ minHeight: '80px', marginTop: '32px' }}>
+                          {!isPlaying && (
+                            <button
+                            onClick={() => {
+                              console.log('🎬 Starting demo animation!');
+                              handleStartDemo();
+                            }}
+                            className="group px-10 py-4 bg-black border-2 border-black rounded-full font-semibold text-base md:text-lg shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
+                            style={{
+                              minWidth: '200px',
+                              minHeight: '56px'
                             }}
                           >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                console.log('Button clicked!');
-                                handleStartDemo();
-                              }}
-                              disabled={isPlaying}
-                              className="px-8 py-2.5 rounded-full text-base md:text-lg font-semibold shadow-lg whitespace-nowrap group relative bg-black border-2 border-black cursor-pointer isolate"
-                              style={{ 
-                                position: 'relative', 
-                                zIndex: 10000,
-                                transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-                                transform: 'scale(1)',
-                                backfaceVisibility: 'hidden',
-                                isolation: 'isolate',
-                                pointerEvents: 'auto'
-                              }}
-                              onMouseEnter={(e) => {
-                                console.log('Button hover!');
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                              }}
-                            >
-                              <span className="relative z-10 inline-flex items-center pointer-events-auto">
-                                <span className="bg-clip-text group-hover:text-transparent bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 transition-colors duration-200 text-white">Watch how it works</span>
-                                <ArrowRight className="ml-3 w-5 h-5 text-white group-hover:text-emerald-400 transition-colors duration-200" />
+                            <span className="relative z-10 flex items-center justify-center">
+                              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white group-hover:from-emerald-500 group-hover:via-sky-400 group-hover:to-blue-600 transition-all duration-300">
+                                Watch how it works
                               </span>
+                              <ArrowRight className="ml-3 w-5 h-5 text-white group-hover:text-emerald-400 transition-colors duration-300" />
+                            </span>
+                            {/* Hover effect background */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                             </button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </motion.span>
                     </motion.div>
                   ) : (
                     <motion.div
                       key="new-headline"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                      className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-bold max-w-[120%] text-left"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 1.5, ease: "easeInOut" }}
+                      className="text-5xl xs:text-5xl sm:text-6xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl 3xl:text-9xl font-bold max-w-[120%] text-left"
                       style={{ lineHeight: '0.9' }}
                     >
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <div className="text-foreground">Take</div>
                         <div className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Control</div>
                       </div>
-                      <div className="text-2xl md:text-4xl text-gray-600 font-semibold mt-4 leading-tight">
+                      <div className="text-2xl md:text-3xl lg:text-4xl text-gray-600 font-semibold mt-6 leading-tight">
                         Stand Out, Get Interviews
                       </div>
                     </motion.div>
@@ -922,32 +927,27 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
 
               {/* Start now button - keep in original position on left side */}
               <AnimatePresence mode="wait">
-                {stage === "complete" ? (
+                {showNewTypewriter ? (
                   <motion.div
                     key="transform-button"
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    initial={{ opacity: 0 }}
                     animate={{
                       opacity: 1,
-                      y: 0,
-                      scale: 1,
                     }}
                     transition={{
-                      duration: 1.5,
-                      ease: "easeInOut",
-                      delay: 1.5,
+                      duration: 1.2,
+                      ease: "easeOut",
+                      delay: 0.2,
                     }}
                     className={`flex ${isTransformationStage() ? "justify-start" : "justify-start"}`}
                   >
                     <div className="flex gap-4">
                       <motion.div
-                        animate={{
-                          scale: [1, 1.02, 1],
-                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{
-                          duration: 2,
-                          repeat: 2,
-                          ease: "easeInOut",
-                          delay: 2.5,
+                          duration: 0.8,
+                          ease: "easeOut",
                         }}
                       >
                         <Button
@@ -955,21 +955,17 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                           onClick={onOpenModal}
                           className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 w-auto text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
                         >
-                          <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.8, delay: 1.0 }}
-                          >
+                          <span>
                             Start now
                             <ArrowRight className="ml-3 w-5 h-5 inline-block" />
-                          </motion.span>
+                          </span>
                         </Button>
                       </motion.div>
                       
                       <motion.div
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 1.8 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
                       >
                         <Button
                           size="lg"
@@ -1010,16 +1006,14 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
 
 
             <AnimatePresence mode="wait">
-              {(stage === "initial" || stage === "intro" || stage === "typewriter") && (
+              {(stage === "initial" || stage === "intro" || stage === "typewriter") && !showNewTypewriter && (
                 <motion.div
                   key="initial"
                 initial={{ opacity: 0, scale: 0.95, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{
                     opacity: 0,
-                    scale: 1.05,
-                    y: -20,
-                    filter: "blur(4px)",
+                    x: 100,
                     transition: { duration: 0.6, ease: "easeInOut" },
                   }}
                 transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 1.0 }}
@@ -1034,13 +1028,17 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                 </motion.div>
               )}
 
-              {(stage === "morphing" || stage === "dissolving") && (
+              {(stage === "morphing" || stage === "dissolving") && !showNewTypewriter && (
                 <motion.div
                   key="transforming"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  exit={{ 
+                    opacity: 0,
+                    x: 100,
+                    scale: 0.95
+                  }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
                 className="w-[290px] xs:w-[335px] sm:w-[385px] md:w-[430px] lg:w-[480px] xl:w-[530px] h-[385px] xs:w-[430px] sm:h-[525px] md:h-[575px] lg:h-[625px] xl:h-[675px] relative"
                 >
                   <motion.div
@@ -1096,9 +1094,22 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
 }
 
 // Apple-style Navbar Component
-const AppleNavbar = ({ onOpenModal }: { onOpenModal: () => void }) => {
+const AppleNavbar = ({ 
+  onOpenModal, 
+  isAuthenticated, 
+  user, 
+  onLogout,
+  onShowDashboard 
+}: { 
+  onOpenModal: () => void
+  isAuthenticated: boolean
+  user: any
+  onLogout: () => void
+  onShowDashboard: () => void
+}) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1116,69 +1127,162 @@ const AppleNavbar = ({ onOpenModal }: { onOpenModal: () => void }) => {
     setIsMobileMenuOpen(false)
   }
 
+  const handleUploadClick = () => {
+    if (isAuthenticated) {
+      // Show dashboard with resume page
+      onShowDashboard()
+    } else {
+      // Open auth modal
+      onOpenModal()
+    }
+  }
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
-          ? "bg-white/80 backdrop-blur-md border-b border-gray-200/20 shadow-sm"
-          : "bg-transparent"
+          ? "bg-white/95 backdrop-blur-xl border-b border-gray-200/30 shadow-lg"
+          : "bg-white/10 backdrop-blur-sm"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+        <div className="flex items-center justify-between h-20">
+          {/* Logo - Fixed on left */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center cursor-pointer"
+            className="flex items-center cursor-pointer flex-shrink-0"
             onClick={() => scrollToSection('hero')}
           >
-            <div className="text-xl font-bold bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">
-              CV2Web
+            <div className="flex items-center space-x-2">
+              {/* Logo Icon */}
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 via-sky-400 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                <svg 
+                  className="w-6 h-6 text-white" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+                  />
+                </svg>
               </div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
+                CV2Web
+              </div>
+            </div>
           </motion.div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {[
-              { name: 'Home', id: 'hero' },
-              { name: 'Demo', id: 'demo' },
-              { name: 'Research', id: 'research' },
-              { name: 'FAQ', id: 'faq' }
-            ].map((item) => (
-              <motion.button
-                key={item.name}
-                onClick={() => scrollToSection(item.id)}
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {item.name}
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 rounded-full"
-                  initial={{ scaleX: 0 }}
-                  whileHover={{ scaleX: 1 }}
-                  transition={{ duration: 0.2 }}
-                />
-              </motion.button>
-            ))}
-      </div>
+          {/* Center Navigation Only */}
+          <div className="hidden md:flex items-center flex-1 justify-center">
+            <div className="flex items-center space-x-8">
+              {[
+                { name: 'Home', id: 'hero' },
+                { name: 'Demo', id: 'demo' },
+                { name: 'Research', id: 'research' },
+                { name: 'FAQ', id: 'faq' }
+              ].map((item) => (
+                <motion.button
+                  key={item.name}
+                  onClick={() => scrollToSection(item.id)}
+                  className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-medium transition-all duration-200 relative group"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="relative z-10">{item.name}</span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-sky-400/10 to-blue-600/10 rounded-lg"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileHover={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 rounded-full"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </motion.button>
+              ))}
+            </div>
+          </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          {/* Right Section - Auth and Upload CV */}
+          <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
+            {isAuthenticated ? (
+              // Logged in - show user info and logout
+              <>
+                <span className="text-sm text-gray-700">
+                  Welcome, {user?.name || 'User'}
+                </span>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={onLogout}
+                    variant="outline"
+                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                  >
+                    Logout
+                  </Button>
+                </motion.div>
+              </>
+            ) : (
+              // Not logged in - show login button
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={onOpenModal}
+                  variant="outline"
+                  className="relative px-6 py-2.5 rounded-full text-sm font-medium text-gray-700 border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 transition-all duration-300 group overflow-hidden"
+                >
+                  <span className="relative z-10">Login</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-sky-400/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Button>
+              </motion.div>
+            )}
+            
+            {/* Upload CV Button */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <Button
-                onClick={onOpenModal}
-                className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg"
+                onClick={handleUploadClick}
+                className="relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all duration-300 transform hover:shadow-xl hover:-translate-y-0.5 overflow-hidden group"
               >
-                Get Started
+                {/* Animated background gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                
+                {/* Button content */}
+                <span className="relative flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  Upload your CV now
+                </span>
+                
+                {/* Shine effect */}
+                <div className="absolute inset-0 -top-2 h-full w-1/2 bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700" />
               </Button>
             </motion.div>
-      </div>
+          </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -1200,9 +1304,9 @@ const AppleNavbar = ({ onOpenModal }: { onOpenModal: () => void }) => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
-              className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-200/20"
+              className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200/30 shadow-lg"
             >
-              <div className="px-2 pt-2 pb-3 space-y-1">
+              <div className="px-4 pt-4 pb-6 space-y-2">
                 {[
                   { name: 'Home', id: 'hero' },
                   { name: 'Demo', id: 'demo' },
@@ -1218,14 +1322,56 @@ const AppleNavbar = ({ onOpenModal }: { onOpenModal: () => void }) => {
                     {item.name}
                   </motion.button>
                 ))}
-                <motion.div className="pt-2" whileTap={{ scale: 0.95 }}>
+                
+                {/* Upload CV Button for Mobile */}
+                <motion.div className="pt-4 pb-2" whileTap={{ scale: 0.95 }}>
                   <Button
-                    onClick={onOpenModal}
-                    className="w-full bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                    onClick={handleUploadClick}
+                    className="w-full bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white px-6 py-3 rounded-full text-base font-semibold shadow-lg transition-all duration-300"
                   >
-                    Get Started
-              </Button>
+                    <svg
+                      className="w-5 h-5 mr-2 inline-block"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    Upload your CV now
+                  </Button>
                 </motion.div>
+                
+                {/* Auth buttons */}
+                {isAuthenticated ? (
+                  <motion.div className="pt-2 border-t border-gray-200" whileTap={{ scale: 0.95 }}>
+                    <div className="px-3 py-2 text-sm text-gray-600">
+                      Welcome, {user?.name || 'User'}
+                    </div>
+                    <Button
+                      onClick={onLogout}
+                      variant="outline"
+                      className="w-full mt-2"
+                    >
+                      Logout
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <motion.div className="pt-2" whileTap={{ scale: 0.95 }}>
+                    <Button
+                      onClick={onOpenModal}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Login
+                    </Button>
+                  </motion.div>
+                )}
           </div>
         </motion.div>
       )}
@@ -1246,12 +1392,22 @@ export default function Home() {
   const [showPricing, setShowPricing] = useState(false)
   const [isPostPayment, setIsPostPayment] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  
+  // Use the real authentication system
+  const { isAuthenticated, user, signIn, signOut } = useAuthContext()
   
   const sections = ['hero', 'demo', 'research', 'ugc-reels', 'faq']
 
   // Modal handlers
   const handleOpenModal = () => {
-    setIsModalOpen(true)
+    if (isAuthenticated) {
+      // User is logged in - go directly to dashboard
+      setShowDashboard(true)
+    } else {
+      // User not logged in - show auth modal
+      setShowAuthModal(true)
+    }
   }
 
   const handleCloseModal = () => {
@@ -1283,6 +1439,24 @@ export default function Home() {
 
   const handleUploadClose = () => {
     setShowUpload(false)
+  }
+
+  // Authentication handlers
+  const handleAuthSuccess = async (data: any) => {
+    // Use the real auth system to sign in
+    await signIn(data.session_id, data.user)
+    setShowAuthModal(false)
+    // After successful auth, go to dashboard
+    setShowDashboard(true)
+  }
+
+  const handleAuthClose = () => {
+    setShowAuthModal(false)
+  }
+
+  const handleLogout = () => {
+    signOut()
+    setShowDashboard(false)
   }
 
   // Builder flow handlers
@@ -1439,13 +1613,25 @@ export default function Home() {
   }, [currentSection, isScrolling, isMobile, sections])
 
   // Show dashboard if processing is complete
-  if (showDashboard) {
-    return <SimpleDashboard userName="Alex Johnson" />
+  if (showDashboard && isAuthenticated) {
+    return (
+      <SimpleDashboard 
+        userName={user?.name || "User"} 
+        onBackToHome={() => setShowDashboard(false)}
+        initialPage="resume"
+      />
+    )
   }
 
   return (
     <main className="min-h-screen bg-background">
-      <AppleNavbar onOpenModal={handleOpenModal} />
+      <AppleNavbar 
+        onOpenModal={handleOpenModal} 
+        isAuthenticated={isAuthenticated}
+        user={user}
+        onLogout={handleLogout}
+        onShowDashboard={() => setShowDashboard(true)}
+      />
       <section id="hero" className="pt-16 relative min-h-screen">
         <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-white/50 to-gray-100 z-20"></div>
         <CV2WebDemo onOpenModal={handleOpenModal} />
@@ -1555,6 +1741,13 @@ export default function Home() {
       <PricingModal
         isOpen={showPricing}
         onPlanSelected={handlePlanSelected}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={handleAuthClose}
+        onAuthSuccess={handleAuthSuccess}
       />
     </main>
   )
