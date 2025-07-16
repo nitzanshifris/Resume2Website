@@ -1,4 +1,4 @@
-const flattenColorPalette = require("tailwindcss/lib/util/flattenColorPalette")
+// Removed flattenColorPalette to fix compilation issues
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -82,14 +82,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), addVariablesForColors],
-}
-
-function addVariablesForColors({ addBase, theme }) {
-  const allColors = flattenColorPalette(theme("colors"))
-  const newVars = Object.fromEntries(Object.entries(allColors).map(([key, val]) => [`--${key}`, val]))
-
-  addBase({
-    ":root": newVars,
-  })
+  plugins: [require("tailwindcss-animate")],
 }

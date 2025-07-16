@@ -12,7 +12,7 @@ from fastapi.responses import StreamingResponse
 from datetime import datetime
 
 # Internal imports
-from src.api.routes.auth import get_current_user, get_current_user_for_sse, validate_sse_permissions, require_admin
+from src.api.routes.auth import get_current_user, get_current_user_for_sse, get_current_user_optional, validate_sse_permissions, require_admin
 from src.services.rate_limiter import rate_limiter, apply_rate_limits
 from src.services.sse_service import sse_service, SSEMessage
 from src.core.local.text_extractor import text_extractor
@@ -53,7 +53,8 @@ async def check_sse_rate_limit(
 async def extract_cv_streaming(
     job_id: str,
     request: Request,
-    current_user_id: str = Depends(get_current_user)
+    session_id: Optional[str] = None,
+    current_user_id: str = Depends(get_current_user_optional)
 ):
     """
     Stream CV extraction progress in real-time via SSE

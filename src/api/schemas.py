@@ -4,6 +4,7 @@ Pydantic schemas for request/response validation.
 This module defines all request and response models for the CV2WEB API.
 """
 from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, Dict, Any
 
 
 # ========== REQUEST MODELS ==========
@@ -12,12 +13,16 @@ class UserCreate(BaseModel):
     """Schema for user registration"""
     email: EmailStr
     password: str = Field(min_length=8, max_length=100, description="At least 8 characters")
+    name: str = Field(min_length=1, max_length=100, description="Full name")
+    phone: Optional[str] = Field(None, max_length=20, description="Phone number")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "email": "user@example.com",
-                "password": "secure_password123"
+                "password": "secure_password123",
+                "name": "John Doe",
+                "phone": "+1234567890"
             }
         }
 
@@ -36,6 +41,24 @@ class UserLogin(BaseModel):
         }
 
 
+class UserProfileUpdate(BaseModel):
+    """Schema for updating user profile"""
+    name: Optional[str] = Field(None, min_length=1, max_length=100, description="Full name")
+    phone: Optional[str] = Field(None, max_length=20, description="Phone number")
+    date_of_birth: Optional[str] = Field(None, description="Date of birth (YYYY-MM-DD)")
+    location: Optional[str] = Field(None, max_length=100, description="Location/Address")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "John Doe",
+                "phone": "+1234567890",
+                "date_of_birth": "1990-01-01",
+                "location": "New York, NY"
+            }
+        }
+
+
 # ========== RESPONSE MODELS ==========
 
 class SessionResponse(BaseModel):
@@ -43,6 +66,7 @@ class SessionResponse(BaseModel):
     message: str
     session_id: str
     user_id: str
+    user: Optional[Dict[str, Any]] = None
 
 
 class UploadResponse(BaseModel):

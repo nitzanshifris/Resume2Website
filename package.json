@@ -11,6 +11,7 @@
     "dev:renderer": "pnpm --filter new-renderer dev",
     "build:renderer": "pnpm --filter new-renderer build",
     "lint:renderer": "pnpm --filter new-renderer lint",
+    "typecheck": "pnpm --filter new-renderer exec tsc --noEmit",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest",
