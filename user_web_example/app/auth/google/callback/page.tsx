@@ -55,6 +55,12 @@ function GoogleCallbackContent() {
           setStatus('success');
           setMessage('Successfully authenticated with Google!');
           
+          // Trigger storage change event for other tabs/contexts
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'cv2web_session_id',
+            newValue: data.session_id
+          }));
+          
           // Redirect to main page after success
           setTimeout(() => {
             router.push('/');

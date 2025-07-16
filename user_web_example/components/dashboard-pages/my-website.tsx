@@ -285,8 +285,10 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
       // So we just need to send it to the API
       
       const sessionId = localStorage.getItem('cv2web_session_id') || 'dev-session'
+      // Update the CV data for the job associated with this portfolio
+      const jobId = selectedPortfolio.job_id
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/portfolio/${selectedPortfolio.portfolio_id}/cv-data`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/cv/${jobId}`,
         {
           method: 'PUT',
           headers: {
@@ -298,19 +300,43 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
       )
 
       if (!response.ok) {
-        throw new Error('Failed to save changes')
+        const errorData = await response.text()
+        console.error('Failed to save changes:', errorData)
+        throw new Error(`Failed to save changes: ${response.status}`)
       }
 
       const result = await response.json()
       
-      // Show success message
-      alert('Changes saved successfully! The portfolio will reload to show your updates.')
-      
-      // Reload the iframe to show the updated content
-      const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
-      if (iframe) {
-        iframe.src = iframe.src // Force reload
+      // Optionally trigger portfolio regeneration to apply the changes
+      try {
+        const regenResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/portfolios/${selectedPortfolio.portfolio_id}/regenerate`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Session-ID': sessionId
+            }
+          }
+        )
+        
+        if (!regenResponse.ok) {
+          console.warn('Portfolio regeneration failed, but CV data was saved')
+        }
+      } catch (regenError) {
+        console.warn('Could not trigger portfolio regeneration:', regenError)
       }
+      
+      // Show success message
+      alert('Changes saved successfully! The portfolio will update shortly.')
+      
+      // Reload the iframe after a short delay to allow regeneration
+      setTimeout(() => {
+        const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
+        if (iframe) {
+          iframe.src = iframe.src // Force reload
+        }
+      }, 2000)
       
     } catch (error) {
       console.error('Error saving portfolio changes:', error)
