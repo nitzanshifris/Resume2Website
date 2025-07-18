@@ -1,0 +1,13 @@
+{
+  "portfolio_id": "976de905-215a-4d6d-8382-1459af6417fd",
+  "user_id": "dev-user-123",
+  "job_id": "2a618834-b3ed-4574-b57d-00222c767ab8",
+  "created_at": "2025-07-16T01:10:17.556366",
+  "port": 4004,
+  "url": "http://localhost:4004",
+  "directory": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/data/generated_portfolios/dev-user-123_976de905-215a-4d6d-8382-1459af6417fd",
+  "status": "active",
+  "template": "v0_template_1",
+  "cv_filename": "Chicago-Resume-Template-Creative.pdf",
+  "last_updated": "2025-07-16T01:31:00.494480"
+}

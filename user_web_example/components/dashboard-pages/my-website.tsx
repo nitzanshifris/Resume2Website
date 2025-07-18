@@ -35,9 +35,12 @@ import {
   Plus,
   Trash2,
   GripVertical,
-  Globe
+  Globe,
+  Crown,
+  Sparkles
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import PricingModal from "@/components/pricing-modal"
 
 interface MyWebsiteProps {
   userName?: string
@@ -61,6 +64,7 @@ interface Portfolio {
   template: string
   cv_filename: string
   status: string
+  job_id?: string
 }
 
 export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
@@ -74,6 +78,8 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
   const [isRestartingServer, setIsRestartingServer] = useState(false)
   const [currentCVData, setCurrentCVData] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [showPricingModal, setShowPricingModal] = useState(false)
+  const [sectionContent, setSectionContent] = useState<Record<string, string>>({})
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     hero: true,
     contact: true,
@@ -561,6 +567,15 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
             <div className="flex items-center gap-2">
               {selectedPortfolio && (
                 <>
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => setShowPricingModal(true)}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    Take Control
+                  </Button>
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -1589,6 +1604,17 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
           </div>
         </div>
       </motion.div>
+
+      {/* Pricing Modal */}
+      <PricingModal 
+        isOpen={showPricingModal}
+        onPlanSelected={(planId) => {
+          console.log('Plan selected:', planId)
+          // The pricing modal will handle the redirect and payment processing
+        }}
+        onClose={() => setShowPricingModal(false)}
+        jobId={selectedPortfolio?.job_id}
+      />
     </div>
   )
 } 

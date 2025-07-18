@@ -814,6 +814,34 @@ DELETE /api/v1/portfolios/{portfolio_id}
 GET /api/v1/portfolios/{portfolio_id}/preview
 ```
 
+### Payment System & Pricing API (TODO - Backend Implementation)
+```python
+# Process payment for selected plan
+POST /api/v1/payments/process
+{
+    "planId": str,  # "go-live", "get-hired", or "turn-heads"
+    "jobId": Optional[str],
+    "paymentMethod": Dict  # Stripe/PayPal payment details
+}
+
+# Get user's subscription status
+GET /api/v1/payments/subscription
+
+# Process refund (Get Hired plan only)
+POST /api/v1/payments/refund
+{
+    "orderId": str,
+    "reason": str
+}
+```
+
+### Pricing Tiers & Features
+| Plan | Price | Features | Limitations |
+|------|-------|----------|-------------|
+| **Go Live** | $14.90 | • Professional portfolio<br>• Mobile responsive<br>• SEO optimized<br>• Direct deploy<br>• 1 generation | • CV2WEB branding included<br>• Limited customization |
+| **Get Hired** | $19.90 | • Premium portfolio<br>• No watermarks<br>• Full customization<br>• 3 generations<br>• Multiple templates<br>• 1 month free hosting | • Then $7.90/month hosting<br>• Refund if unsatisfied |
+| **Turn Heads** | $89.90 | • Custom design by experts<br>• Recruiter optimization<br>• Unlimited revisions<br>• Priority support<br>• 1 year free hosting | • Then $7.90/year hosting |
+
 ### SSE Infrastructure (Ready for Future Use)
 - Full SSE service implemented (`src/services/sse_service.py`)
 - SSE routes available (`src/api/routes/sse.py`)
@@ -821,6 +849,24 @@ GET /api/v1/portfolios/{portfolio_id}/preview
 - Currently using simulated progress for better UX
 
 ## Recent Updates
+
+### Critical Fixes & Enhancements (2025-01-18)
+- **🐛 Fixed CV Extraction Error**: Resolved issue with `johnathan_Resume.pdf` causing extraction failures due to None education items in date validator
+- **🔄 CV Editor Auto-Refresh**: Added event listener for `cvUploadComplete` to automatically refresh CV editor data when new CV is uploaded
+- **🔃 Manual Refresh Button**: Added refresh button in CV editor header for manual data refresh
+- **✅ Date Validator Improvements**: Added comprehensive None checks and defensive programming to prevent `'NoneType' object has no attribute 'get'` errors
+- **🎯 Section Content State Fix**: Fixed `setSectionContent is not defined` error in My Website page by adding missing state declaration
+- **📝 Enhanced Error Logging**: Added full traceback logging for CV extraction errors to aid debugging
+
+### Payment System & Pricing Tiers Implementation (2025-01-17)
+- **💳 Three-Tier Pricing System**: Implemented complete payment component with Go Live ($14.90), Get Hired ($19.90), and Turn Heads ($89.90) plans
+- **🎨 Modern Pricing UI**: Built with Tabler icons and gradient designs, featuring Most Popular badges and clear feature differentiation
+- **🚀 "Take Control" Integration**: Added prominent purple-to-pink gradient button in My Website page that opens pricing modal
+- **📱 Responsive Pricing Modal**: Full-screen modal with dark mode support and smooth animations
+- **🔄 Plan-Specific Routing**: Different user flows for each tier - branded template for Go Live, template selection for Get Hired, premium onboarding for Turn Heads
+- **💰 Payment Processing Ready**: Pre-configured for Stripe/PayPal integration with simulated payment flow
+- **🏷️ Resume2Web Branded Template**: Created special branded template variant for affordable Go Live tier
+- **📋 Future Task Tracking**: Added 6 payment-related tasks to TaskMaster for Vercel hosting, domain connection, refund system, and monthly billing
 
 ### Major Release: Portfolio Expert & Advanced Generation System (2025-01-16)
 - **🤖 Portfolio Expert System**: Implemented AI-powered portfolio guidance using Claude 4 for personalized recommendations, CV analysis, and content strategy
@@ -855,4 +901,4 @@ GET /api/v1/portfolios/{portfolio_id}/preview
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-01-16 | Version: 4.4*
+*Last updated: 2025-01-17 | Version: 4.5*

@@ -144,6 +144,11 @@ class DateValidator:
         for edu in education_items:
             if not edu:  # Skip None items
                 continue
+            
+            # Ensure edu is a dictionary
+            if not isinstance(edu, dict):
+                logger.warning(f"Skipping non-dict education item: {type(edu)}")
+                continue
                 
             # Check for certifications in education
             degree = (edu.get('degree') or '').lower()
@@ -172,9 +177,15 @@ class DateValidator:
                 issues.append(issue)
                 logger.error(f"Misclassification: {issue['message']} - {issue['item']}")
             
+            # Double-check edu is still valid (defensive programming)
+            if not edu or not isinstance(edu, dict):
+                logger.warning("Education item became None or non-dict during processing")
+                continue
+                
             # Check for illogical dates
-            start_date = edu.get('dateRange', {}).get('startDate')
-            end_date = edu.get('dateRange', {}).get('endDate')
+            date_range = edu.get('dateRange', {}) if edu else {}
+            start_date = date_range.get('startDate') if date_range else None
+            end_date = date_range.get('endDate') if date_range else None
             
             if start_date and end_date:
                 start_parsed = self.parse_date(start_date)
@@ -242,6 +253,8 @@ class DateValidator:
         """Clean irrelevant items from coursework lists"""
         if cv_data.get('education') and cv_data['education'].get('educationItems'):
             for edu in cv_data['education']['educationItems']:
+                if not edu or not isinstance(edu, dict):
+                    continue
                 if edu.get('relevantCoursework'):
                     original = edu['relevantCoursework']
                     # Filter out non-course items
