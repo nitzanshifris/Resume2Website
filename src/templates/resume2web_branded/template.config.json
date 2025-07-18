@@ -1,0 +1,36 @@
+{
+  "name": "Resume2Web Professional",
+  "id": "resume2web_branded",
+  "version": "1.0.0",
+  "tier": "go-live",
+  "price": "$0.90",
+  "description": "Professional portfolio template with Resume2Web branding. Perfect for quick deployment at an affordable price.",
+  "features": [
+    "Modern responsive design",
+    "Dark mode support",
+    "SEO optimized",
+    "Professional animations",
+    "Contact form integration",
+    "Social media links",
+    "Print-friendly layout",
+    "Resume2Web branding"
+  ],
+  "branding": {
+    "level": "full",
+    "removable": false,
+    "position": "footer",
+    "customization": {
+      "allowColorOverride": true,
+      "allowLayoutChange": true,
+      "allowAnimationToggle": true
+    }
+  },
+  "preview": {
+    "thumbnail": "/assets/resume2web-template-preview.png",
+    "demoUrl": "https://demo.resume2web.com/branded"
+  },
+  "requirements": {
+    "node": ">=18.0.0",
+    "nextjs": "^15.0.0"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "portfolio_id": "a45e6769-2df7-4e6e-9940-044938f0ee1d",
+  "user_id": "d045f1de-2f9e-4f80-9168-a4194f5714a5",
+  "job_id": "6bdbe9bc-5c44-4459-91ce-34f1002ddebe",
+  "created_at": "2025-07-16T06:56:39.006418",
+  "port": 4013,
+  "url": "http://localhost:4013",
+  "directory": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/data/generated_portfolios/d045f1de-2f9e-4f80-9168-a4194f5714a5_a45e6769-2df7-4e6e-9940-044938f0ee1d",
+  "status": "active",
+  "template": "v0_template_1",
+  "cv_filename": "Sydney-Resume-Template-Modern.pdf"
+}

@@ -452,6 +452,17 @@ async def upload_cv(
         logger.info(f"🤖 Extracting structured data using Claude 4 Opus from {len(text)} characters of text")
         try:
             cv_data = await data_extractor.extract_cv_data(text)
+            
+            if not cv_data:
+                logger.error("❌ CV data extraction returned None")
+                update_cv_upload_status(job_id, 'failed', error_message="Failed to extract CV data - no data returned")
+                # Return success with job_id even if extraction failed
+                return UploadResponse(
+                    status="success",
+                    message="File uploaded but CV extraction failed. Please try again.",
+                    job_id=job_id
+                )
+            
             sections_count = len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])
             logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
             
@@ -482,6 +493,8 @@ async def upload_cv(
             
         except Exception as e:
             logger.error(f"Failed to extract CV data: {e}")
+            import traceback
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
             # Mark as failed but still return job_id
             update_cv_upload_status(job_id, 'failed')
         

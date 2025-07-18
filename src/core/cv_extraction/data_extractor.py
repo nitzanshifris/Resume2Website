@@ -740,10 +740,17 @@ IMPORTANT:
                     logger.error(f"Retry failed for '{section_name}': {e}")
         
         # Post-processing enhancements
-        final_cv_data = self._enhance_extracted_data(final_cv_data, raw_text)
+        try:
+            final_cv_data = self._enhance_extracted_data(final_cv_data, raw_text)
+        except Exception as e:
+            logger.error(f"Error during post-processing enhancement: {e}")
+            import traceback
+            logger.error(f"Enhancement traceback: {traceback.format_exc()}")
+            # Continue with unenhanced data
         
         # Create CVData object
         try:
+            logger.info(f"Creating CVData object with keys: {list(final_cv_data.keys())}")
             cv_data = CVData(**final_cv_data)
             # Deduplicate certifications and courses
             cv_data = self._deduplicate_certifications_courses(cv_data)
@@ -769,26 +776,32 @@ IMPORTANT:
     
     def _enhance_extracted_data(self, data: Dict[str, Any], raw_text: str) -> Dict[str, Any]:
         """Post-process extracted data for quality enhancement"""
+        if data is None:
+            logger.error("_enhance_extracted_data received None data")
+            return {}
+        
         enhanced = data.copy()
         
         # Extract dissertations from education and add to publications
-        if enhanced.get('education') and enhanced['education'].get('educationItems'):
+        if enhanced.get('education') and isinstance(enhanced['education'], dict) and enhanced['education'].get('educationItems'):
             dissertations_found = []
-            for edu_item in enhanced['education']['educationItems']:
-                if edu_item.get('relevantCoursework'):
-                    for coursework in edu_item['relevantCoursework']:
-                        if 'dissertation' in coursework.lower():
-                            # Extract dissertation title and topic
-                            dissertation_match = re.search(r'[Dd]issertation.*?["\'](.+?)["\']', coursework)
-                            if dissertation_match:
-                                dissertation_title = dissertation_match.group(1)
-                                dissertations_found.append({
-                                    'title': dissertation_title,
-                                    'institution': edu_item.get('institution'),
-                                    'degree': edu_item.get('degree'),
-                                    'fieldOfStudy': edu_item.get('fieldOfStudy')
-                                })
-                                logger.debug(f"Found dissertation in education: {dissertation_title}")
+            education_items = enhanced['education'].get('educationItems', [])
+            if isinstance(education_items, list):
+                for edu_item in education_items:
+                    if isinstance(edu_item, dict) and edu_item.get('relevantCoursework'):
+                        for coursework in edu_item['relevantCoursework']:
+                            if 'dissertation' in coursework.lower():
+                                # Extract dissertation title and topic
+                                dissertation_match = re.search(r'[Dd]issertation.*?["\'](.+?)["\']', coursework)
+                                if dissertation_match:
+                                    dissertation_title = dissertation_match.group(1)
+                                    dissertations_found.append({
+                                        'title': dissertation_title,
+                                        'institution': edu_item.get('institution'),
+                                        'degree': edu_item.get('degree'),
+                                        'fieldOfStudy': edu_item.get('fieldOfStudy')
+                                    })
+                                    logger.debug(f"Found dissertation in education: {dissertation_title}")
             
             # Add dissertations to publications if not already there
             if dissertations_found:
@@ -868,16 +881,22 @@ IMPORTANT:
         try:
             from src.core.cv_extraction.advanced_section_classifier import advanced_classifier
             logger.info("🚀 Starting advanced section classification")
-            enhanced, classification_report = advanced_classifier.enhance_cv_data(enhanced)
+            classified_data, classification_report = advanced_classifier.enhance_cv_data(enhanced)
             
-            # Log classification results
-            if classification_report['duplicates_fixed'] > 0:
-                logger.info(f"🔧 Advanced classifier fixed {classification_report['duplicates_fixed']} cross-section duplicates")
-            
-            if classification_report['total_issues_found'] > 0:
-                logger.warning(f"⚠️  {classification_report['total_issues_found']} classification issues remain: {classification_report['validation_issues']}")
+            # Check if classification returned valid data
+            if classified_data is not None:
+                enhanced = classified_data
+                
+                # Log classification results
+                if classification_report['duplicates_fixed'] > 0:
+                    logger.info(f"🔧 Advanced classifier fixed {classification_report['duplicates_fixed']} cross-section duplicates")
+                
+                if classification_report['total_issues_found'] > 0:
+                    logger.warning(f"⚠️  {classification_report['total_issues_found']} classification issues remain: {classification_report['validation_issues']}")
+                else:
+                    logger.info("✅ All sections properly classified, no cross-contamination detected")
             else:
-                logger.info("✅ All sections properly classified, no cross-contamination detected")
+                logger.error("❌ Advanced classifier returned None data")
                 
         except Exception as e:
             logger.error(f"❌ Advanced section classification failed: {e}")
