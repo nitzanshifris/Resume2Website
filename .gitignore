@@ -81,6 +81,7 @@ logs/
 # OS
 Thumbs.db
 .DS_Store
+**/.DS_Store
 
 # Temporary files
 *.tmp
@@ -89,6 +90,11 @@ Thumbs.db
 *.backup
 *.cache
 write
+test_files/
+*demo*.py
+feauture_ui_lib/
+claude-code-main/
+lovable-clone-main/
 
 # Testing
 .pytest_cache/

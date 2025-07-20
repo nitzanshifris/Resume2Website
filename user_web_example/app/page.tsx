@@ -21,13 +21,16 @@ import { UGCReelsShowcase } from "@/components/ugc-reels-showcase"
 import ResumeFlowModal from "@/components/resume-flow-modal"
 import UploadResume from "@/components/upload-resume"
 import ResumeBuilder from "@/components/resume-builder"
+import InteractiveCVPile from "@/components/interactive-cv-pile"
 import ProcessingPage from "@/components/processing-page"
 import PricingModal from "@/components/pricing-modal"
 import SimpleDashboard from "@/components/simple-dashboard"
+import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import { RoughNotation } from 'react-rough-notation'
+import DragDropUpload from "@/components/drag-drop-upload"
 
 const renderColoredTypewriterText = (text: string, colorSegments: { text: string; color: string }[]) => {
   let result = text
@@ -486,11 +489,14 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
   const [isMobile, setIsMobile] = useState(false)
   const [showStrikeThrough, setShowStrikeThrough] = useState(false)
   const [showCVCard, setShowCVCard] = useState(true)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [hasScrolledHero, setHasScrolledHero] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showNewTypewriter, setShowNewTypewriter] = useState(false)
   const headlineRef = useRef<HTMLDivElement>(null)
   const [headlineWidth, setHeadlineWidth] = useState<number | undefined>(undefined)
+  const { isAuthenticated } = useAuthContext()
   
   // Loading sequence states for mobile
   const [loadingStep, setLoadingStep] = useState(0) // 0: backgrounds, 1: headline, 2: subheadline, 3: cv image
@@ -624,6 +630,19 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
     setIsPlaying(true)
   }
 
+  const handleFileSelect = (file: File) => {
+    // Set the uploaded file
+    setUploadedFile(file)
+    
+    // Don't start the demo automatically - wait for click
+  }
+  
+  const handleFileClick = (file: File) => {
+    // This is called when user clicks on their uploaded file card
+    // Now we start the demo animation
+    handleStartDemo()
+  }
+
   // Mobile-First Layout
   if (isMobile) {
     // Boxed block rendered only once, inside main content flow, left-aligned, mobile only
@@ -677,18 +696,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                     onAnimationComplete={() => handleLoadingComplete(1)}
                   >
                     <span className="text-gray-800">
-                      Turn your <RoughNotation 
-                        type="crossed-off" 
-                        show={showStrikeThrough}
-                        color="#dc2626"
-                        strokeWidth={3}
-                        animationDuration={800}
-                        animationDelay={0}
-                        iterations={2}
-                        padding={0}
-                      >
-                        <span className="text-gray-800 italic inline-block">PDF résumé</span>
-                      </RoughNotation> into a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">Web&nbsp;Portfolio</span> in <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">One&nbsp;click</span>.
+                      Take control of your <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">career</span>, <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">stand out</span>, get&nbsp;<span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">interviews</span>
                     </span>
                   </motion.div>
                 )}
@@ -705,26 +713,70 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                       y: { duration: 1.4, ease: [0.34, 1.56, 0.64, 1] },
                       scale: { duration: 1.6, ease: [0.25, 0.46, 0.45, 0.94] }
                     }}
-                    className="text-black font-bold mb-12 text-left"
+                    className="text-black font-bold mb-6 text-left"
                     style={{ fontSize: 'clamp(1.5rem, 5vw, 1.8rem)', fontWeight: 600 }}
                     onAnimationComplete={() => handleLoadingComplete(2)}
                   >
-                    Take control of your career, stand out, get&nbsp;interviews
+                    Turn your <RoughNotation 
+                      type="crossed-off" 
+                      show={showStrikeThrough}
+                      color="#dc2626"
+                      strokeWidth={3}
+                      animationDuration={800}
+                      animationDelay={0}
+                      iterations={2}
+                      padding={0}
+                    >
+                      <span className="text-gray-600 italic inline-block">PDF résumé</span>
+                    </RoughNotation> into a Web&nbsp;Portfolio in One&nbsp;click.
+                  </motion.div>
+                )}
+                
+                {/* Primary CTA Button for Mobile - shows after subheadline */}
+                {loadingStep >= 2 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ 
+                      duration: 0.8, 
+                      delay: 0.3,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                    className="mb-8"
+                  >
+                    <Button
+                      onClick={onOpenModal}
+                      className="group relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-8 py-5 rounded-full text-lg font-bold shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer overflow-hidden w-full max-w-[320px]"
+                      style={{
+                        minHeight: '60px'
+                      }}
+                    >
+                      <span className="relative z-10 flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          />
+                        </svg>
+                        Upload your CV now
+                      </span>
+                      {/* Animated gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      {/* Shine effect */}
+                      <div className="absolute inset-0 -top-2 h-full w-1/2 bg-white/30 skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700" />
+                    </Button>
                   </motion.div>
                 )}
               </div>
             </div>
-          )}
-          {/* Progress bar */}
-          {isPlaying && (
-            <motion.div
-              className="absolute top-0 left-0 right-0 h-1 bg-muted z-50"
-              initial={{ width: "0%" }}
-              animate={{ width: `${progress}%` }}
-              transition={{ ease: "easeOut", duration: 0.3 }}
-            >
-              <div className="h-full bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600"></div>
-            </motion.div>
           )}
           {/* Transformation sequence: CV image, particle effect, website (mobile) */}
           <div className="w-full flex flex-col items-center justify-start mt-4 min-h-[485px]">
@@ -742,10 +794,12 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                 }}
                 className="relative w-full max-w-[340px] h-[485px]"
               >
-                <CVCard 
+                <InteractiveCVPile 
                   className="w-full h-full" 
-                  withMacOSEffects 
-                  onClick={!isPlaying ? handleStartDemo : undefined}
+                  onFileSelect={handleFileSelect}
+                  onFileClick={handleFileClick}
+                  uploadedFile={uploadedFile}
+                  isProcessing={isPlaying}
                 />
               </motion.div>
             )}
@@ -853,18 +907,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                       >
                         <div className={`${isTransformationStage() ? "mb-6" : "mb-8"}`} style={{ fontWeight: 700 }}>
                           <span className="text-gray-800 font-bold">
-                            Turn your <RoughNotation 
-                              type="crossed-off" 
-                              show={showStrikeThrough}
-                              color="#dc2626"
-                              strokeWidth={3}
-                              animationDuration={800}
-                              animationDelay={0}
-                              iterations={2}
-                              padding={0}
-                            >
-                              <span className="text-gray-800 italic inline-block">PDF résumé</span>
-                            </RoughNotation> into a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">Web&nbsp;Portfolio</span> in <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">One&nbsp;click</span>.
+                            Take control of your <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">career</span>, <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">stand out</span>, get&nbsp;<span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">interviews</span>
                           </span>
                         </div>
                         <motion.div 
@@ -874,33 +917,61 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                           animate={{ opacity: 1 }}
                           transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
                         >
-                          Take control of your career, stand out, get&nbsp;interviews
+                          Turn your <RoughNotation 
+                            type="crossed-off" 
+                            show={showStrikeThrough}
+                            color="#dc2626"
+                            strokeWidth={3}
+                            animationDuration={800}
+                            animationDelay={0}
+                            iterations={2}
+                            padding={0}
+                          >
+                            <span className="text-gray-600 italic inline-block">PDF résumé</span>
+                          </RoughNotation> into a Web Portfolio in One click.
                         </motion.div>
                         
-                        {/* Watch how it works button - Enhanced with better click area and effects */}
-                        <div style={{ minHeight: '80px', marginTop: '32px' }}>
-                          {!isPlaying && (
-                            <button
-                            onClick={() => {
-                              console.log('🎬 Starting demo animation!');
-                              handleStartDemo();
-                            }}
-                            className="group px-10 py-4 bg-black border-2 border-black rounded-full font-semibold text-base md:text-lg shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
-                            style={{
-                              minWidth: '200px',
-                              minHeight: '56px'
-                            }}
+                        {/* Primary CTA Section */}
+                        <div className="flex flex-col gap-6" style={{ marginTop: '32px' }}>
+                          {/* Primary Upload CTA - Most prominent */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 1.0, ease: "easeOut" }}
                           >
-                            <span className="relative z-10 flex items-center justify-center">
-                              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white group-hover:from-emerald-500 group-hover:via-sky-400 group-hover:to-blue-600 transition-all duration-300">
-                                Watch how it works
+                            <Button
+                              onClick={onOpenModal}
+                              className="group relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-12 py-6 rounded-full text-xl md:text-2xl font-bold shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_40px_rgba(16,185,129,0.3)] cursor-pointer overflow-hidden"
+                              style={{
+                                minWidth: '320px',
+                                minHeight: '72px'
+                              }}
+                            >
+                              <span className="relative z-10 flex items-center justify-center">
+                                <svg
+                                  className="w-6 h-6 mr-3"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                  />
+                                </svg>
+                                Upload your CV now
                               </span>
-                              <ArrowRight className="ml-3 w-5 h-5 text-white group-hover:text-emerald-400 transition-colors duration-300" />
-                            </span>
-                            {/* Hover effect background */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-                            </button>
-                          )}
+                              {/* Animated gradient overlay */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              {/* Shine effect */}
+                              <div className="absolute inset-0 -top-2 h-full w-1/2 bg-white/30 skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700" />
+                            </Button>
+                          </motion.div>
+
+                          
                         </div>
                       </motion.span>
                     </motion.div>
@@ -914,11 +985,11 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                       style={{ lineHeight: '0.9' }}
                     >
                       <div className="space-y-2">
-                        <div className="text-foreground">Take</div>
-                        <div className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Control</div>
+                        <div className="text-foreground">Transform Your</div>
+                        <div className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Portfolio</div>
                       </div>
                       <div className="text-2xl md:text-3xl lg:text-4xl text-gray-600 font-semibold mt-6 leading-tight">
-                        Stand Out, Get Interviews
+                        From PDF to Professional Website
                       </div>
                     </motion.div>
                   )}
@@ -992,7 +1063,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
         </div>
 
         {/* Right Side - Dynamic width based on stage (desktop only, keep MacBookFrame) */}
-        <div className={`${isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full flex items-center ${(stage === "materializing" || stage === "complete") ? "justify-start" : "justify-center"} relative ${(stage === "materializing" || stage === "complete") ? "pl-2 pr-4 md:pr-6 lg:pr-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`} style={{ pointerEvents: 'none' }}>
+        <div className={`${isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full flex items-center ${(stage === "materializing" || stage === "complete") ? "justify-start" : "justify-center"} relative ${(stage === "materializing" || stage === "complete") ? "pl-2 pr-4 md:pr-6 lg:pr-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
             <div className="absolute inset-0" style={{ pointerEvents: 'none', zIndex: 1 }}>
               <ParticleSystem
                 isActive={stage === "morphing" || stage === "dissolving"}
@@ -1009,22 +1080,24 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
               {(stage === "initial" || stage === "intro" || stage === "typewriter") && !showNewTypewriter && (
                 <motion.div
                   key="initial"
-                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                  initial={{ opacity: 0, scale: 0.95, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{
                     opacity: 0,
                     x: 100,
                     transition: { duration: 0.6, ease: "easeInOut" },
                   }}
-                transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 1.0 }}
-                className="relative flex justify-start pl-8"
-              >
-                {/* CV Card - 80% of original size, positioned to the left - CLICKABLE */}
-                <CVCard 
-                  className="relative z-5 w-[268px] xs:w-[308px] sm:w-[344px] md:w-[384px] lg:w-[424px] xl:w-[460px] 2xl:w-[500px] h-[344px] xs:h-[384px] sm:h-[460px] md:h-[500px] lg:h-[540px] xl:h-[576px]" 
-                  withMacOSEffects 
-                  onClick={!isPlaying ? handleStartDemo : undefined}
-                />
+                  transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 1.0 }}
+                  className="relative flex justify-start pl-8"
+                >
+                  {/* Interactive CV Pile - Upload area */}
+                  <InteractiveCVPile 
+                    className="relative z-5 w-[268px] xs:w-[308px] sm:w-[344px] md:w-[384px] lg:w-[424px] xl:w-[460px] 2xl:w-[500px] h-[344px] xs:h-[384px] sm:h-[460px] md:h-[500px] lg:h-[540px] xl:h-[576px]" 
+                    onFileSelect={handleFileSelect}
+                    onFileClick={handleFileClick}
+                    uploadedFile={uploadedFile}
+                    isProcessing={isPlaying}
+                  />
                 </motion.div>
               )}
 
@@ -1070,19 +1143,31 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                 className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative"
                 >
                   <MacBookFrame isComplete={stage === "complete"}>
-                    <iframe
-                      ref={iframeRef}
-                    src="https://dmfmjqvp.manus.space/#"
-                      className="w-full h-full border-0"
-                    title="Alex Morgan Portfolio"
-                      style={{
-                        transform: stage === "complete" ? "scale(1)" : "scale(0.98)",
-                        transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                      }}
-                    />
+                    {uploadedFile ? (
+                      <PortfolioHeroPreview 
+                        file={uploadedFile}
+                        onScrollAttempt={() => {
+                          if (!isAuthenticated) {
+                            onOpenModal() // Show auth modal for non-authenticated users
+                          } else {
+                            setHasScrolledHero(true) // Mark as scrolled for authenticated users
+                          }
+                        }}
+                      />
+                    ) : (
+                      <iframe
+                        ref={iframeRef}
+                        src="https://dmfmjqvp.manus.space/#"
+                        className="w-full h-full border-0"
+                        title="Alex Morgan Portfolio"
+                        style={{
+                          transform: stage === "complete" ? "scale(1)" : "scale(0.98)",
+                          transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                        }}
+                      />
+                    )}
                   </MacBookFrame>
                   
-
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1218,11 +1303,20 @@ const AppleNavbar = ({
           {/* Right Section - Auth and Upload CV */}
           <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {isAuthenticated ? (
-              // Logged in - show user info and logout
+              // Logged in - show user info, dashboard button and logout
               <>
                 <span className="text-sm text-gray-700">
                   Welcome, {user?.name || 'User'}
                 </span>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={onShowDashboard}
+                    variant="outline"
+                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
+                  >
+                    Dashboard
+                  </Button>
+                </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     onClick={onLogout}
@@ -1354,6 +1448,16 @@ const AppleNavbar = ({
                       Welcome, {user?.name || 'User'}
                     </div>
                     <Button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false)
+                        onShowDashboard()
+                      }}
+                      className="w-full mt-2 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
+                      variant="outline"
+                    >
+                      Dashboard
+                    </Button>
+                    <Button
                       onClick={onLogout}
                       variant="outline"
                       className="w-full mt-2"
@@ -1393,6 +1497,7 @@ export default function Home() {
   const [isPostPayment, setIsPostPayment] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [droppedFile, setDroppedFile] = useState<File | null>(null)
   
   // Use the real authentication system
   const { isAuthenticated, user, signIn, signOut } = useAuthContext()
@@ -1446,8 +1551,15 @@ export default function Home() {
     // Use the real auth system to sign in
     await signIn(data.session_id, data.user)
     setShowAuthModal(false)
-    // After successful auth, go to dashboard
-    setShowDashboard(true)
+    
+    // Check if there's a dropped file waiting
+    if (droppedFile) {
+      // Go directly to upload with the file
+      setShowUpload(true)
+    } else {
+      // Normal flow - go to dashboard
+      setShowDashboard(true)
+    }
   }
 
   const handleAuthClose = () => {
@@ -1718,6 +1830,7 @@ export default function Home() {
         onClose={handleUploadClose}
         onBack={handleUploadBack}
         onSuccess={handleUploadSuccess}
+        initialFile={droppedFile}
       />
 
       {/* Resume Builder Modal */}
