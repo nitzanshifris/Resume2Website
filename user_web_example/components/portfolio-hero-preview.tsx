@@ -27,33 +27,45 @@ export default function PortfolioHeroPreview({ file, onScrollAttempt }: Portfoli
     setIsProcessing(true)
     setError('')
     
-    // For the landing page demo, we'll use smart filename parsing
-    // to avoid backend dependency and provide instant feedback
-    const fileName = file.name.replace(/\.[^/.]+$/, '')
-    
-    // Pattern: "Name - Title.pdf"
-    if (fileName.includes(' - ')) {
-      const parts = fileName.split(' - ')
-      const name = parts[0].trim()
-      const title = parts[1].replace(/CV|Resume|cv|resume|\d+|\./g, '').trim()
+    try {
+      // Try to extract hero data from backend API
+      const { extractDemoHero } = await import('@/lib/api')
+      const data = await extractDemoHero(file)
       
       setHeroData({
-        name: name,
-        professionalTitle: title || 'Professional'
+        name: data.name || 'Your Name',
+        professionalTitle: data.professionalTitle || 'Professional'
       })
-    } else if (fileName.toLowerCase().includes('resume') || fileName.toLowerCase().includes('cv')) {
-      // Extract name from "Name Resume" or "Name_CV" patterns
-      const name = fileName.replace(/[_-]?(Resume|CV|resume|cv).*/i, '').trim()
-      setHeroData({
-        name: name || 'Your Name',
-        professionalTitle: 'Professional'
-      })
-    } else {
-      // Simple pattern
-      setHeroData({
-        name: fileName.split(/[-_]/)[0].trim(),
-        professionalTitle: 'Professional'
-      })
+    } catch (error) {
+      console.log('Backend extraction failed, falling back to filename parsing:', error)
+      
+      // Fallback to smart filename parsing for offline/error scenarios
+      const fileName = file.name.replace(/\.[^/.]+$/, '')
+      
+      // Pattern: "Name - Title.pdf"
+      if (fileName.includes(' - ')) {
+        const parts = fileName.split(' - ')
+        const name = parts[0].trim()
+        const title = parts[1].replace(/CV|Resume|cv|resume|\d+|\./g, '').trim()
+        
+        setHeroData({
+          name: name,
+          professionalTitle: title || 'Professional'
+        })
+      } else if (fileName.toLowerCase().includes('resume') || fileName.toLowerCase().includes('cv')) {
+        // Extract name from "Name Resume" or "Name_CV" patterns
+        const name = fileName.replace(/[_-]?(Resume|CV|resume|cv).*/i, '').trim()
+        setHeroData({
+          name: name || 'Your Name',
+          professionalTitle: 'Professional'
+        })
+      } else {
+        // Simple pattern
+        setHeroData({
+          name: fileName.split(/[-_]/)[0].trim(),
+          professionalTitle: 'Professional'
+        })
+      }
     }
     
     setIsProcessing(false)

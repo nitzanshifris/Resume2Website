@@ -13,7 +13,7 @@ load_dotenv()
 
 # Import our routes
 from src.api.routes import cv, portfolio, sse, workflows, cv_enhanced, portfolio_generator
-from src.api.routes import portfolio_generator_v2
+from src.api.routes import portfolio_generator_v2, demo_preview
 
 # Configure logging
 logging.basicConfig(
@@ -47,6 +47,8 @@ app.include_router(portfolio_generator_v2.router, prefix="/api/v2")  # Enhanced 
 app.include_router(sse.router, prefix="/api/v1")
 app.include_router(workflows.router, prefix="/api/v1")
 app.include_router(cv_enhanced.router)  # Enhanced CV with real-time tracking
+app.include_router(demo_preview.router, prefix="/api/v1")  # Demo preview for non-authenticated users
+
 
 # Root endpoint
 @app.get("/")
