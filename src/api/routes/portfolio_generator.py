@@ -16,6 +16,7 @@ import socket
 import time
 import threading
 import requests
+import re
 from datetime import datetime
 from typing import Dict, Optional
 
@@ -144,12 +145,22 @@ class NextJSServerManager:
         """Get appropriate development command - use direct Next.js for reliability"""
         project_path = Path(project_path)
         
+        # Validate that project_path is within expected directory
+        try:
+            project_path = project_path.resolve()
+            base_dir = PORTFOLIOS_DIR.resolve()
+            if not str(project_path).startswith(str(base_dir)):
+                raise ValueError("Invalid project path")
+        except Exception:
+            raise ValueError("Invalid project path")
+        
         # Try to use next directly from node_modules for more reliability
         next_bin = project_path / "node_modules" / ".bin" / "next"
         if next_bin.exists():
-            return [str(next_bin), 'dev']
+            # Return as list to ensure shell=False works properly
+            return [str(next_bin.resolve()), 'dev']
         
-        # Fallback to package manager commands
+        # Fallback to package manager commands (all safe, no user input)
         if (project_path / 'pnpm-lock.yaml').exists() and shutil.which('pnpm'):
             return ['pnpm', 'run', 'dev']
         elif (project_path / 'yarn.lock').exists() and shutil.which('yarn'):
@@ -322,7 +333,23 @@ async def generate_portfolio(
         
         # === 2. CREATE PORTFOLIO INSTANCE ===
         portfolio_id = str(uuid.uuid4())
+        
+        # Validate user_id and portfolio_id to prevent path injection
+        if not re.match(r'^[a-zA-Z0-9_\-]+$', current_user_id):
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        if not re.match(r'^[a-f0-9\-]+$', portfolio_id):
+            raise HTTPException(status_code=400, detail="Invalid portfolio ID format")
+        
         portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
+        
+        # Ensure the portfolio directory is within the expected base directory
+        try:
+            portfolio_dir = portfolio_dir.resolve()
+            base_dir = PORTFOLIOS_DIR.resolve()
+            if not str(portfolio_dir).startswith(str(base_dir)):
+                raise HTTPException(status_code=403, detail="Invalid portfolio path")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid portfolio path")
         
         # Copy template to portfolio directory (excluding node_modules and lock files)
         logger.info(f"📁 Creating clean portfolio directory: {portfolio_dir}")
