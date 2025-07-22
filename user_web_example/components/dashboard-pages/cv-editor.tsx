@@ -103,26 +103,6 @@ export default function CVEditor({ userName }: CVEditorProps) {
     fetchLatestCV()
   }, [])
 
-  // Listen for CV upload completion to refresh data
-  useEffect(() => {
-    const handleCVUploadComplete = () => {
-      console.log('🔄 CV upload completed, refreshing CV editor data...')
-      // Reset states to show loading while fetching new data
-      setIsLoading(true)
-      setCvData(null)
-      setCurrentJobId(null)
-      setSaveStatus('idle')
-      // Fetch the new data
-      fetchLatestCV()
-    }
-
-    window.addEventListener('cvUploadComplete', handleCVUploadComplete)
-
-    return () => {
-      window.removeEventListener('cvUploadComplete', handleCVUploadComplete)
-    }
-  }, [])
-
   const fetchLatestCV = async () => {
     try {
       const sessionId = localStorage.getItem('cv2web_session_id')
@@ -447,29 +427,6 @@ export default function CVEditor({ userName }: CVEditorProps) {
                     <svg className="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                  </span>
-                </div>
-              </button>
-              <div className="h-16 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent" />
-              <button
-                onClick={() => {
-                  setIsLoading(true)
-                  setCvData(null)
-                  setCurrentJobId(null)
-                  setSaveStatus('idle')
-                  fetchLatestCV()
-                }}
-                className="group relative px-4 py-2"
-                title="Refresh CV data"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-500 rounded-lg blur-sm opacity-20 group-hover:opacity-30 transition-opacity" />
-                <div className="relative bg-white rounded-lg px-4 py-2 shadow-sm group-hover:shadow-md transition-all flex items-center gap-2">
-                  <RefreshCw className={cn(
-                    "w-4 h-4 text-gray-600 group-hover:text-gray-800 transition-colors",
-                    isLoading && "animate-spin"
-                  )} />
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors">
-                    Refresh
                   </span>
                 </div>
               </button>
