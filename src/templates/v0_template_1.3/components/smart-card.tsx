@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { Settings, FileText, Image, Code, Github, Link, Video, Twitter, Maximize2, ExternalLink, Edit2 } from 'lucide-react'
+import { Settings, FileText, Image, Code, Github, Link, Video, Twitter, Maximize2, ExternalLink, Edit2, Plus, X, MoveHorizontal, GripVertical } from 'lucide-react'
+import { Safari } from '@/components/ui/safari'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog'
@@ -10,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Import view components
 import { BentoGridItem } from '@/components/ui/bento-grid-item'
@@ -25,6 +27,13 @@ import { TransformedImage } from './ui/transformed-image'
 import type { BaseViewItem } from '@/lib/data'
 
 export type ViewMode = 'text' | 'images' | 'code' | 'github' | 'uri' | 'video' | 'tweet'
+
+export interface CodeTab {
+  name: string
+  code: string
+  language: string
+  highlightLines?: number[]
+}
 
 interface SmartCardProps {
   item: BaseViewItem & any // Allow additional properties from specific item types
@@ -49,6 +58,7 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
   // Local state for editing
   const [codeContent, setCodeContent] = useState(item.codeSnippet || '')
   const [codeLanguage, setCodeLanguage] = useState(item.codeLanguage || 'typescript')
+  const [codeTabs, setCodeTabs] = useState<CodeTab[]>(item.codeTabs || [])
   const [githubUrl, setGithubUrl] = useState(item.githubUrl || '')
   const [images, setImages] = useState<string[]>(item.images || [])
   const [imageTransform, setImageTransform] = useState<ImageTransform>(
@@ -64,6 +74,7 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
     setViewMode(item.viewMode || 'text')
     setCodeContent(item.codeSnippet || '')
     setCodeLanguage(item.codeLanguage || 'typescript')
+    setCodeTabs(item.codeTabs || [])
     setGithubUrl(item.githubUrl || '')
     setImages(item.images || [])
     setImageTransform(item.imageTransform || { crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
@@ -71,6 +82,7 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
     setTweetId(item.tweetId || '')
     setLinkUrl(item.linkUrl || '')
     setTweetVariant(item.tweetVariant || 'default')
+    setImageVariant(item.imageVariant || 'tilted')
   }, [item])
   const [videoUrl, setVideoUrl] = useState(item.videoUrl || '')
   const [tweetId, setTweetId] = useState(item.tweetId || '')
@@ -78,6 +90,10 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
   const [tweetVariant, setTweetVariant] = useState<'default' | 'shadow' | 'minimal'>(item.tweetVariant || 'default')
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [isEditingImage, setIsEditingImage] = useState(false)
+  const [sheetSide, setSheetSide] = useState<'right' | 'left'>('right')
+  const [sheetWidth, setSheetWidth] = useState(540)
+  const [isResizing, setIsResizing] = useState(false)
+  const [imageVariant, setImageVariant] = useState<'standard' | 'tilted'>(item.imageVariant || 'tilted')
 
   const extractTweetId = (input: string): string => {
     const tweetUrlMatch = input.match(/twitter\.com\/\w+\/status\/(\d+)/)
@@ -125,13 +141,14 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
     switch (viewMode) {
       case 'code':
         return contentWrapper(
-          codeContent ? (
+          codeContent || codeTabs.length > 0 ? (
             <div className="flex-1 overflow-hidden flex flex-col p-6">
               <div className="flex-1 overflow-auto">
                 <CodeBlock
                   language={codeLanguage}
                   code={codeContent}
-                  filename={item.title}
+                  filename={item.title || 'code.tsx'}
+                  tabs={codeTabs.length > 0 ? codeTabs : undefined}
                 />
               </div>
             </div>
@@ -157,12 +174,17 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
                   >
                     {item.title}
                   </CardItem>
-                  <CardItem translateZ="100" className="w-full flex-1">
+                  <CardItem 
+                    translateZ="100" 
+                    rotateX={imageVariant === 'tilted' ? 20 : 0}
+                    rotateZ={imageVariant === 'tilted' ? -10 : 0}
+                    className="w-full flex-1"
+                  >
                     <TransformedImage
                       src={images[0]}
                       transform={imageTransform}
                       alt={item.title || 'Image'}
-                      className="w-full h-full rounded-xl group-hover/card:shadow-xl"
+                      className="h-full w-full rounded-xl group-hover/card:shadow-xl"
                     />
                   </CardItem>
                 </CardBody>
@@ -237,14 +259,32 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
         return contentWrapper(
           linkUrl ? (
             <div className="flex-1 p-6">
-              <LinkPreview url={linkUrl}>
-                <div className="h-full flex items-center justify-center">
-                  <div className="border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
-                    <h3 className="font-semibold mb-2">{item.title}</h3>
-                    <p className="text-sm text-blue-600 hover:underline">{linkUrl}</p>
-                  </div>
+              <div className="h-full flex items-center justify-center">
+                <div className="relative w-full h-full max-w-4xl max-h-[500px]">
+                  <Safari 
+                    url={(() => {
+                      try {
+                        return new URL(linkUrl).hostname.replace('www.', '')
+                      } catch {
+                        return linkUrl
+                      }
+                    })()}
+                    className="w-full h-full"
+                  />
+                  {/* Iframe to show actual website */}
+                  <iframe
+                    src={linkUrl}
+                    className="absolute inset-0 w-full h-full rounded-b-xl"
+                    style={{
+                      top: '52px',
+                      height: 'calc(100% - 52px)',
+                      border: 'none'
+                    }}
+                    title={item.title}
+                    sandbox="allow-same-origin allow-scripts"
+                  />
                 </div>
-              </LinkPreview>
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
@@ -295,7 +335,32 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
             <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
               <DialogTitle className="sr-only">Full View</DialogTitle>
               <div className="w-full h-[85vh] flex items-center justify-center bg-background p-8">
-                {viewMode === 'images' && images.length > 0 && images[0] ? (
+                {viewMode === 'uri' && linkUrl ? (
+                  <div className="relative w-full h-full">
+                    <Safari 
+                      url={(() => {
+                        try {
+                          return new URL(linkUrl).hostname.replace('www.', '')
+                        } catch {
+                          return linkUrl
+                        }
+                      })()}
+                      className="w-full h-full"
+                    />
+                    {/* Iframe to show actual website */}
+                    <iframe
+                      src={linkUrl}
+                      className="absolute inset-0 w-full h-full rounded-b-xl"
+                      style={{
+                        top: '52px',
+                        height: 'calc(100% - 52px)',
+                        border: 'none'
+                      }}
+                      title={item.title}
+                      sandbox="allow-same-origin allow-scripts"
+                    />
+                  </div>
+                ) : viewMode === 'images' && images.length > 0 && images[0] ? (
                   <div className="w-full h-full max-w-4xl">
                     <CardContainer containerClassName="h-full" className="h-full">
                       <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-8 border flex flex-col">
@@ -305,12 +370,17 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
                         >
                           {item.title}
                         </CardItem>
-                        <CardItem translateZ="100" className="w-full flex-1">
+                        <CardItem 
+                          translateZ="100" 
+                          rotateX={imageVariant === 'tilted' ? 20 : 0}
+                          rotateZ={imageVariant === 'tilted' ? -10 : 0}
+                          className="w-full flex-1"
+                        >
                           <TransformedImage
                             src={images[0]}
                             transform={imageTransform}
                             alt={item.title || 'Image'}
-                            className="w-full h-full rounded-xl group-hover/card:shadow-xl"
+                            className="h-full w-full rounded-xl group-hover/card:shadow-xl"
                           />
                         </CardItem>
                       </CardBody>
@@ -333,9 +403,80 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
               <Settings className="h-4 w-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+          <SheetContent 
+            side={sheetSide} 
+            className="overflow-y-auto p-0"
+            style={{ width: `${sheetWidth}px` }}
+          >
+            {/* Resize Handle */}
+            <div
+              className={cn(
+                "absolute top-0 w-2 h-full cursor-ew-resize group/resize transition-colors",
+                sheetSide === 'right' ? 'left-0' : 'right-0',
+                isResizing && 'bg-primary/30'
+              )}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                setIsResizing(true)
+                
+                const startX = e.clientX
+                const startWidth = sheetWidth
+                
+                const handleMouseMove = (e: MouseEvent) => {
+                  const deltaX = e.clientX - startX
+                  const newWidth = sheetSide === 'right' 
+                    ? startWidth - deltaX 
+                    : startWidth + deltaX
+                  
+                  // Constrain width between 400px and 80% of viewport
+                  const minWidth = 400
+                  const maxWidth = window.innerWidth * 0.8
+                  setSheetWidth(Math.max(minWidth, Math.min(maxWidth, newWidth)))
+                }
+                
+                const handleMouseUp = () => {
+                  setIsResizing(false)
+                  document.removeEventListener('mousemove', handleMouseMove)
+                  document.removeEventListener('mouseup', handleMouseUp)
+                  document.body.style.cursor = ''
+                  document.body.style.userSelect = ''
+                }
+                
+                document.addEventListener('mousemove', handleMouseMove)
+                document.addEventListener('mouseup', handleMouseUp)
+                document.body.style.cursor = 'ew-resize'
+                document.body.style.userSelect = 'none'
+              }}
+            >
+              <div className={cn(
+                "absolute top-0 w-0.5 h-full bg-border transition-all",
+                sheetSide === 'right' ? 'left-0' : 'right-0',
+                "group-hover/resize:bg-primary/20",
+                isResizing && "bg-primary/40"
+              )} />
+              <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-0 group-hover/resize:opacity-100 transition-opacity">
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+            
+            <div className="p-6">
             <SheetHeader>
-              <SheetTitle>Component Settings</SheetTitle>
+              <div className="flex items-center justify-between">
+                <SheetTitle>Component Settings</SheetTitle>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{sheetWidth}px</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setSheetSide(sheetSide === 'right' ? 'left' : 'right')}
+                    className="h-8 px-2 hover:bg-secondary"
+                    title={`Move sidebar to ${sheetSide === 'right' ? 'left' : 'right'} side`}
+                  >
+                    <MoveHorizontal className="h-4 w-4 mr-1" />
+                    {sheetSide === 'right' ? 'Left' : 'Right'}
+                  </Button>
+                </div>
+              </div>
             </SheetHeader>
             
             <div className="mt-6 space-y-6">
@@ -363,44 +504,207 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
               {viewMode === 'code' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Programming Language</Label>
-                    <Select value={codeLanguage} onValueChange={(v) => {
-                      setCodeLanguage(v)
-                      onUpdate?.('codeLanguage', v)
-                    }}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="typescript">TypeScript</SelectItem>
-                        <SelectItem value="javascript">JavaScript</SelectItem>
-                        <SelectItem value="python">Python</SelectItem>
-                        <SelectItem value="java">Java</SelectItem>
-                        <SelectItem value="go">Go</SelectItem>
-                        <SelectItem value="rust">Rust</SelectItem>
-                        <SelectItem value="cpp">C++</SelectItem>
-                        <SelectItem value="jsx">JSX</SelectItem>
-                        <SelectItem value="tsx">TSX</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center justify-between">
+                      <Label>Code Display</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const useTabs = codeTabs.length === 0
+                            if (useTabs) {
+                              // Convert single code to tabs
+                              const newTabs: CodeTab[] = [
+                                {
+                                  name: item.title || 'main.tsx',
+                                  code: codeContent || '',
+                                  language: codeLanguage
+                                }
+                              ]
+                              setCodeTabs(newTabs)
+                              onUpdate?.('codeTabs', newTabs)
+                              setCodeContent('')
+                              onUpdate?.('codeSnippet', '')
+                            } else {
+                              // Convert tabs to single code
+                              if (codeTabs.length > 0) {
+                                setCodeContent(codeTabs[0].code)
+                                setCodeLanguage(codeTabs[0].language)
+                                onUpdate?.('codeSnippet', codeTabs[0].code)
+                                onUpdate?.('codeLanguage', codeTabs[0].language)
+                              }
+                              setCodeTabs([])
+                              onUpdate?.('codeTabs', [])
+                            }
+                          }}
+                        >
+                          {codeTabs.length > 0 ? 'Single File' : 'Multiple Tabs'}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Code</Label>
-                    <Textarea
-                      value={codeContent}
-                      onChange={(e) => {
-                        setCodeContent(e.target.value)
-                        onUpdate?.('codeSnippet', e.target.value)
-                      }}
-                      placeholder="Paste your code here..."
-                      className="font-mono min-h-[200px]"
-                    />
-                  </div>
+                  
+                  {codeTabs.length > 0 ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label>Code Tabs</Label>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const newTab: CodeTab = {
+                              name: `file${codeTabs.length + 1}.tsx`,
+                              code: '',
+                              language: 'typescript'
+                            }
+                            const updatedTabs = [...codeTabs, newTab]
+                            setCodeTabs(updatedTabs)
+                            onUpdate?.('codeTabs', updatedTabs)
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Tab
+                        </Button>
+                      </div>
+                      
+                      <Tabs defaultValue="0" className="w-full">
+                        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${codeTabs.length}, 1fr)` }}>
+                          {codeTabs.map((tab, index) => (
+                            <TabsTrigger key={index} value={index.toString()}>
+                              {tab.name}
+                            </TabsTrigger>
+                          ))}
+                        </TabsList>
+                        
+                        {codeTabs.map((tab, index) => (
+                          <TabsContent key={index} value={index.toString()} className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Input
+                                value={tab.name}
+                                onChange={(e) => {
+                                  const updatedTabs = [...codeTabs]
+                                  updatedTabs[index].name = e.target.value
+                                  setCodeTabs(updatedTabs)
+                                  onUpdate?.('codeTabs', updatedTabs)
+                                }}
+                                placeholder="Filename"
+                                className="flex-1"
+                              />
+                              <Select 
+                                value={tab.language} 
+                                onValueChange={(v) => {
+                                  const updatedTabs = [...codeTabs]
+                                  updatedTabs[index].language = v
+                                  setCodeTabs(updatedTabs)
+                                  onUpdate?.('codeTabs', updatedTabs)
+                                }}
+                              >
+                                <SelectTrigger className="w-[120px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="typescript">TypeScript</SelectItem>
+                                  <SelectItem value="javascript">JavaScript</SelectItem>
+                                  <SelectItem value="jsx">JSX</SelectItem>
+                                  <SelectItem value="tsx">TSX</SelectItem>
+                                  <SelectItem value="html">HTML</SelectItem>
+                                  <SelectItem value="css">CSS</SelectItem>
+                                  <SelectItem value="python">Python</SelectItem>
+                                  <SelectItem value="java">Java</SelectItem>
+                                  <SelectItem value="go">Go</SelectItem>
+                                  <SelectItem value="rust">Rust</SelectItem>
+                                  <SelectItem value="cpp">C++</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => {
+                                  const updatedTabs = codeTabs.filter((_, i) => i !== index)
+                                  setCodeTabs(updatedTabs)
+                                  onUpdate?.('codeTabs', updatedTabs)
+                                }}
+                                disabled={codeTabs.length === 1}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <Textarea
+                              value={tab.code}
+                              onChange={(e) => {
+                                const updatedTabs = [...codeTabs]
+                                updatedTabs[index].code = e.target.value
+                                setCodeTabs(updatedTabs)
+                                onUpdate?.('codeTabs', updatedTabs)
+                              }}
+                              placeholder="Paste your code here..."
+                              className="font-mono min-h-[200px]"
+                            />
+                          </TabsContent>
+                        ))}
+                      </Tabs>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Programming Language</Label>
+                        <Select value={codeLanguage} onValueChange={(v) => {
+                          setCodeLanguage(v)
+                          onUpdate?.('codeLanguage', v)
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="typescript">TypeScript</SelectItem>
+                            <SelectItem value="javascript">JavaScript</SelectItem>
+                            <SelectItem value="jsx">JSX</SelectItem>
+                            <SelectItem value="tsx">TSX</SelectItem>
+                            <SelectItem value="html">HTML</SelectItem>
+                            <SelectItem value="css">CSS</SelectItem>
+                            <SelectItem value="python">Python</SelectItem>
+                            <SelectItem value="java">Java</SelectItem>
+                            <SelectItem value="go">Go</SelectItem>
+                            <SelectItem value="rust">Rust</SelectItem>
+                            <SelectItem value="cpp">C++</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Code</Label>
+                        <Textarea
+                          value={codeContent}
+                          onChange={(e) => {
+                            setCodeContent(e.target.value)
+                            onUpdate?.('codeSnippet', e.target.value)
+                          }}
+                          placeholder="Paste your code here..."
+                          className="font-mono min-h-[200px]"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
               {viewMode === 'images' && (
                 <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>3D Effect Style</Label>
+                    <Select value={imageVariant} onValueChange={(v: 'standard' | 'tilted') => {
+                      setImageVariant(v)
+                      onUpdate?.('imageVariant', v)
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard">Standard (No Tilt)</SelectItem>
+                        <SelectItem value="tilted">Tilted Perspective</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
                   <div className="space-y-2">
                     <Label>Image Source</Label>
                     <div className="space-y-4">
@@ -579,6 +883,7 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
                   />
                 </div>
               )}
+            </div>
             </div>
           </SheetContent>
         </Sheet>

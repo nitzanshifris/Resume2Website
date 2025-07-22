@@ -1,11 +1,6 @@
 import type React from "react"
+import { Linkedin, FileText, PinIcon, Github, Twitter, Quote } from "lucide-react"
 import {
-  Linkedin,
-  FileText,
-  PinIcon as Pinterest,
-  Github,
-  Twitter,
-  Quote,
   Award,
   DraftingCompass,
   Layers,
@@ -36,12 +31,40 @@ export const contentIconMap: Record<string, React.ReactNode> = {
 export const socialIconMap: Record<string, React.ReactNode> = {
   linkedin: <Linkedin size={28} />,
   resume: <FileText size={28} />,
-  pinterest: <Pinterest size={28} />,
+  pinterest: <PinIcon size={28} />,
   github: <Github size={28} />,
   twitter: <Twitter size={28} />,
 }
 
 // --- DATA TYPES ---
+
+// Base interface for all items that support multiple view modes
+export interface CodeTab {
+  name: string
+  code: string
+  language: string
+  highlightLines?: number[]
+}
+
+export interface BaseViewItem {
+  _key?: string
+  viewMode?: 'text' | 'images' | 'code' | 'github' | 'uri' | 'video' | 'tweet'
+  // Content for different view modes
+  codeSnippet?: string
+  codeLanguage?: string
+  codeTabs?: CodeTab[]
+  githubUrl?: string
+  images?: string[]
+  imageTransform?: {
+    crop: { x: number; y: number }
+    zoom: number
+    rotation: number
+  }
+  videoUrl?: string
+  tweetId?: string
+  tweetVariant?: 'default' | 'shadow' | 'minimal'
+  linkUrl?: string
+}
 
 export interface HeroData {
   fullName: string
@@ -68,7 +91,6 @@ export interface ContactData {
 }
 
 export interface ExperienceItem {
-  _key?: string
   title: string
   company: string
   location: string
@@ -78,7 +100,6 @@ export interface ExperienceItem {
 }
 
 export interface EducationItem {
-  _key?: string
   institution: string
   degree: string
   years: string
@@ -101,118 +122,77 @@ export interface SkillsData {
   ungroupedSkills: Skill[]
 }
 
-export interface ProjectItem {
-  _key?: string
+export interface ProjectItem extends BaseViewItem {
   title: string
   description: string
   link: string
   icon: keyof typeof contentIconMap
-  githubUrl?: string
-  demoUrl?: string
-  codeSnippet?: string
-  images?: string[]
-  technologiesUsed?: string[]
-  tweetId?: string
 }
 
 export interface LanguageItem {
-  _key?: string
   language: string
   proficiency: string
 }
 
-export interface CourseItem {
-  _key?: string
+export interface CourseItem extends BaseViewItem {
   title: string
   institution: string
   year: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
-export interface PublicationItem {
-  _key?: string
+export interface PublicationItem extends BaseViewItem {
   title: string
   journal: string
   year: string
   link: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
-export interface SpeakingEngagementItem {
-  _key?: string
+export interface SpeakingEngagementItem extends BaseViewItem {
   title: string
   event: string
   year: string
   location: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
-export interface VolunteerExperienceItem {
-  _key?: string
+export interface VolunteerExperienceItem extends BaseViewItem {
   role: string
   organization: string
   period: string
   description: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
 // --- NEW DATA TYPES FOR NEW SECTIONS ---
-export interface AchievementItem {
-  _key?: string
+export interface AchievementItem extends BaseViewItem {
   title: string
   description: string
   year: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
-export interface CertificationItem {
-  _key?: string
+export interface CertificationItem extends BaseViewItem {
   title: string
   issuingBody: string
   year: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
-export interface HobbyItem {
-  _key?: string
+export interface HobbyItem extends BaseViewItem {
   title: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
-export interface MembershipItem {
-  _key?: string
+export interface MembershipItem extends BaseViewItem {
   organization: string
   role: string
   period: string
   icon: keyof typeof contentIconMap
-  tweetId?: string
-  codeSnippet?: string
-  images?: string[]
 }
 
 export interface TestimonialItem {
-  _key?: string
   quote: string
   authorName: string
   authorTitle: string
@@ -244,58 +224,67 @@ export interface PortfolioData {
 export const initialData: PortfolioData = {
   hero: {
     fullName: "Michelle Lopez",
-    professionalTitle: "Fashion Designer",
-    summaryTagline: "A Fashion Visionary, Creator, and Innovator.",
-    profilePhotoUrl: "/placeholder.svg?width=200&height=200",
+    professionalTitle: "Fashion Designer & Creative Director",
+    summaryTagline: "Transforming Fabric into Art, One Stitch at a Time.",
+    profilePhotoUrl: "/fashion-designer-sketching.png",
   },
   contact: {
     email: "michelle.lopez@email.com",
     phone: "(541) 754-3010",
     location: { city: "New York", country: "USA" },
     professionalLinks: [
-      { name: "linkedin", url: "#" },
+      { name: "linkedin", url: "https://linkedin.com/in/michelle-lopez" },
       { name: "resume", url: "/michelle-lopez-cv.pdf" },
-      { name: "pinterest", url: "#" },
+      { name: "pinterest", url: "https://pinterest.com/michellelopezdesigns" },
+      { name: "github", url: "https://github.com/michellelopez" },
+      { name: "twitter", url: "https://twitter.com/mlopezfashion" },
     ],
     availability: "Available for collaborations and new projects.",
     copyright: "© 2025 Michelle Lopez. All Rights Reserved.",
   },
   summary: {
-    sectionTitle: "Professional Summary",
+    sectionTitle: "Design Philosophy & Vision",
     summaryText:
-      "My philosophy is rooted in the belief that fashion is a powerful form of self-expression. I strive to create pieces that are not only beautiful and innovative but also timeless, empowering the wearer with confidence and grace. Each design is a story, woven from threads of history, art, and modern sensibility.",
+      "As a fashion designer at the intersection of tradition and technology, I believe that true luxury lies in sustainability, craftsmanship, and innovation. My journey from the ateliers of Milan to founding Maison Lopez has been driven by a singular vision: to create fashion that honors our planet while pushing the boundaries of design. Through zero-waste pattern cutting, AI-driven customization, and blockchain-verified supply chains, I'm proving that ethical fashion can be both beautiful and profitable. My work isn't just about creating clothes—it's about reimagining an entire industry. Every thread tells a story of transformation, every garment carries the promise of a more sustainable future. Fashion should empower, inspire, and endure. That's not just my philosophy; it's my commitment to every client, every student, and every young designer who dreams of changing the world through design.",
   },
   experience: {
     sectionTitle: "Career Milestones",
     experienceItems: [
       {
-        _key: "exp-0",
+        title: "Creative Director & Head of Design",
+        company: "Maison Lopez",
+        location: "New York",
+        startDate: "2021",
+        endDate: "Present",
+        description:
+          "Founded my own luxury fashion house, specializing in sustainable haute couture. Launched 8 successful collections, featured in Vogue, Harper's Bazaar, and Paris Fashion Week. Generated $3.2M in revenue within the first year through direct-to-consumer sales and exclusive boutique partnerships.",
+      },
+      {
         title: "Senior Fashion Designer",
         company: "Escada",
         location: "Milan",
         startDate: "2017",
         endDate: "2021",
         description:
-          "Led the design of commercially successful collections, including an acclaimed Art Nouveau-inspired men's line that boosted sales by 46%.",
+          "Led the design of commercially successful collections, including an acclaimed Art Nouveau-inspired men's line that boosted sales by 46%. Managed a team of 12 designers and collaborated with celebrity stylists for red carpet events. Introduced sustainable practices that reduced material waste by 30%.",
       },
       {
-        _key: "exp-1",
         title: "Associate Fashion Designer",
         company: "Dior",
         location: "New York",
         startDate: "2014",
         endDate: "2017",
         description:
-          "Contributed to multiple high-revenue collections, specializing in luxury footwear and accessories.",
+          "Contributed to multiple high-revenue collections, specializing in luxury footwear and accessories. Designed the award-winning 'Midnight Bloom' handbag collection that became a bestseller in Asian markets. Coordinated with production teams in Italy to ensure quality standards.",
       },
       {
-        _key: "exp-2",
         title: "Junior Fashion Designer",
         company: "Prada",
         location: "Milan",
         startDate: "2011",
         endDate: "2014",
-        description: "Assisted in the development of seasonal collections, from initial concept to final production.",
+        description:
+          "Assisted in the development of seasonal collections, from initial concept to final production. Specialized in textile innovation and collaborated with fabric suppliers to develop unique materials. Contributed to the 2013 Spring collection that increased youth market share by 23%.",
       },
     ],
   },
@@ -303,26 +292,32 @@ export const initialData: PortfolioData = {
     sectionTitle: "Academic Provenance",
     educationItems: [
       {
-        _key: "edu-0",
         institution: "Parsons School of Design",
         degree: "Master of Fine Arts in Fashion Design",
         years: "2012 - 2014",
         description:
-          "My thesis collection, which explored the intersection of technology and haute couture, was featured in the graduate showcase and received industry acclaim.",
+          "My thesis collection, which explored the intersection of technology and haute couture, was featured in the graduate showcase and received industry acclaim. Graduated Summa Cum Laude with a 4.0 GPA. Received the Designer of the Year Award and a full scholarship from the CFDA.",
       },
       {
-        _key: "edu-1",
         institution: "Central Saint Martins",
         degree: "Bachelor of Arts in Fashion Design",
         years: "2008 - 2011",
-        description: "Developed a strong foundation in conceptual design, pattern cutting, and garment construction.",
+        description: 
+          "Developed a strong foundation in conceptual design, pattern cutting, and garment construction. Specialized in sustainable fashion practices and innovative textile manipulation. Final year collection was purchased by Browns Fashion for their emerging designers showcase.",
       },
       {
-        _key: "edu-2",
+        institution: "Fashion Institute of Technology",
+        degree: "Certificate in Fashion Business Management",
+        years: "2015",
+        description: 
+          "Completed intensive program covering brand management, retail strategy, and fashion marketing. Developed business plan for sustainable fashion startup that won first place in the FIT Entrepreneurship Competition with $50,000 seed funding.",
+      },
+      {
         institution: "Polimoda",
-        degree: "Summer Intensive: Italian Leatherworking",
+        degree: "Summer Intensive: Italian Leatherworking & Haute Couture",
         years: "2010",
-        description: "Studied traditional Italian leather craftsmanship and accessory design in Florence.",
+        description: 
+          "Studied traditional Italian leather craftsmanship and accessory design in Florence. Apprenticed under master craftsmen at Gucci's atelier, learning hand-stitching techniques passed down through generations. Created limited edition handbag collection sold at Bergdorf Goodman.",
       },
     ],
   },
@@ -345,70 +340,227 @@ export const initialData: PortfolioData = {
     ungroupedSkills: [{ name: "Fabric Sourcing" }, { name: "Sustainable Practices" }, { name: "Brand Strategy" }],
   },
   projects: {
-    sectionTitle: "Selected Works",
+    sectionTitle: "Selected Works & Collections",
     projectItems: [
       {
-        _key: "proj-0",
-        title: "Project 'Chrysalis'",
+        _key: "project-1",
+        title: "Project 'Chrysalis' - Zero Waste Collection",
         description:
-          "A sustainable capsule collection using upcycled materials and zero-waste pattern cutting techniques.",
-        link: "#",
+          "A revolutionary sustainable capsule collection using upcycled materials and zero-waste pattern cutting techniques. Featured in Vogue Sustainability Issue and won the Green Fashion Award 2023.",
+        link: "https://maisonlopez.com/chrysalis",
         icon: "Lightbulb",
-        githubUrl: "https://github.com/michelle/chrysalis-collection",
-        demoUrl: "https://chrysalis-fashion.demo",
-        codeSnippet: `// Pattern generation algorithm
-const generateZeroWastePattern = (measurements) => {
-  const { bust, waist, hip } = measurements;
-  return optimizeLayout({
-    pieces: calculatePieces(bust, waist, hip),
-    fabric: { width: 150, efficiency: 0.95 }
-  });
-}`,
-        images: ["/elegant-summer-dress-runway.png", "/fabric-swatches-moodboard.png"],
-        technologiesUsed: ["Sustainable Materials", "Zero-Waste Design", "3D Modeling"]
-      },
-      {
-        _key: "proj-1",
-        title: "3D-Printed Footwear",
-        description: "Collaboration with an engineering lab to develop a line of avant-garde, 3D-printed shoes.",
-        link: "#",
-        icon: "Lightbulb",
-        githubUrl: "https://github.com/michelle/3d-footwear",
-        images: ["/futuristic-cursor.png", "/technical-drawing-tools.png"],
-        technologiesUsed: ["3D Printing", "CAD Design", "Material Science"]
-      },
-      {
-        _key: "proj-2",
-        title: "The 'Metropolis' Collection",
-        description: "A ready-to-wear line inspired by the architecture of Fritz Lang's 1927 film.",
-        link: "#",
-        icon: "Palette",
-        demoUrl: "https://metropolis-collection.demo",
-        images: ["/modern-web-app-interface.png", "/abstract-moonlight.png"],
-        technologiesUsed: ["Conceptual Design", "Film History", "Urban Architecture"]
-      },
-      {
-        _key: "proj-3",
-        title: "Digital Fashion NFT Series",
-        description: "Pioneering digital-only fashion pieces as NFTs, bridging haute couture with blockchain technology.",
-        link: "#",
-        icon: "Star",
-        githubUrl: "https://github.com/michelle/fashion-nft",
-        demoUrl: "https://fashion-nft.demo",
-        codeSnippet: `// Smart contract for fashion NFT
-contract FashionNFT is ERC721 {
-  mapping(uint => FashionPiece) public pieces;
+        viewMode: "code",
+        codeSnippet: `// Sustainable fashion algorithm for zero-waste pattern generation
+class SustainablePatternGenerator {
+  constructor(private fabricWidth: number, private garmentSpecs: GarmentSpec[]) {}
   
-  function mintFashionPiece(
-    string memory design,
-    uint256 edition
-  ) public returns (uint256) {
-    // Minting logic here
+  generateZeroWasteLayout(): PatternLayout {
+    const optimizer = new FabricOptimizer(this.fabricWidth);
+    const patterns = this.garmentSpecs.map(spec => {
+      return optimizer.tessellate(spec, {
+        allowRotation: true,
+        minimizeWaste: true,
+        grainlineConstraints: spec.grainRequirements
+      });
+    });
+    
+    return {
+      efficiency: optimizer.calculateEfficiency(),
+      wastePercentage: optimizer.getWasteMetrics(),
+      patterns: patterns,
+      sustainabilityScore: this.calculateSustainabilityImpact(patterns)
+    };
+  }
+  
+  private calculateSustainabilityImpact(patterns: Pattern[]): number {
+    // Complex algorithm considering water usage, carbon footprint, and material lifecycle
+    return patterns.reduce((score, pattern) => {
+      return score + (pattern.ecoScore * pattern.materialWeight);
+    }, 0) / patterns.length;
   }
 }`,
-        images: ["/pixel-art-landscape.png", "/modern-code-editor.png"],
-        technologiesUsed: ["Blockchain", "NFT", "Digital Fashion", "Smart Contracts"],
-        tweetId: "1668408059125702661"  // Working Magic UI example
+        codeLanguage: "typescript",
+        images: [
+          "/fabric-swatches-moodboard.png",
+          "/fashion-design-sketching.png",
+          "/sustainable-fashion-layout.png"
+        ],
+        githubUrl: "https://github.com/fashion-tech/zero-waste-patterns",
+        videoUrl: "https://vimeo.com/chrysalis-collection-2023"
+      },
+      {
+        _key: "project-2", 
+        title: "3D-Printed Avant-Garde Footwear",
+        description: "Groundbreaking collaboration with MIT Media Lab to develop a line of parametrically designed, 3D-printed shoes. Each pair is custom-fitted using AI foot scanning technology.",
+        link: "https://3dprintedfashion.tech",
+        icon: "DraftingCompass",
+        viewMode: "images",
+        images: [
+          "/technical-drawing-tools.png",
+          "/futuristic-cursor.png",
+          "/3d-printed-shoe-designs.png",
+          "/parametric-heel-structure.png"
+        ],
+        githubUrl: "https://github.com/mit-fashion-lab/3d-footwear",
+        tweetId: "1668408059125702661",
+        codeSnippet: `// Parametric shoe design algorithm
+const generateCustomShoe = (footScan: FootScanData): ShoeModel => {
+  const { length, width, archHeight, pressurePoints } = footScan;
+  
+  return new ParametricShoe()
+    .setDimensions(length, width)
+    .generateArchSupport(archHeight, pressurePoints)
+    .optimizeCushioning(pressurePoints)
+    .applyAestheticPattern('voronoi')
+    .export3DModel();
+};`,
+        codeTabs: [
+          {
+            name: "ShoeGenerator.tsx",
+            language: "typescript",
+            code: `// Main shoe generation component
+import { useState } from 'react';
+import { generateCustomShoe } from './algorithm';
+import { FootScanner } from './FootScanner';
+
+export const ShoeGenerator = () => {
+  const [footData, setFootData] = useState<FootScanData | null>(null);
+  const [shoeModel, setShoeModel] = useState<ShoeModel | null>(null);
+
+  const handleScan = async () => {
+    const data = await FootScanner.scan();
+    setFootData(data);
+    const model = generateCustomShoe(data);
+    setShoeModel(model);
+  };
+
+  return (
+    <div className="p-8">
+      <h1>Custom 3D Shoe Generator</h1>
+      <button onClick={handleScan}>Scan Foot</button>
+      {shoeModel && <ModelViewer model={shoeModel} />}
+    </div>
+  );
+};`
+          },
+          {
+            name: "algorithm.ts",
+            language: "typescript",
+            code: `// Parametric shoe design algorithm
+export const generateCustomShoe = (footScan: FootScanData): ShoeModel => {
+  const { length, width, archHeight, pressurePoints } = footScan;
+  
+  return new ParametricShoe()
+    .setDimensions(length, width)
+    .generateArchSupport(archHeight, pressurePoints)
+    .optimizeCushioning(pressurePoints)
+    .applyAestheticPattern('voronoi')
+    .export3DModel();
+};
+
+// Voronoi pattern generation
+const generateVoronoiPattern = (surface: Surface): Pattern => {
+  const points = distributePoints(surface, 100);
+  return createVoronoiDiagram(points);
+};`
+          },
+          {
+            name: "styles.css",
+            language: "css",
+            code: `.shoe-viewer {
+  width: 100%;
+  height: 500px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-button {
+  background: #4a5568;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.scan-button:hover {
+  background: #2d3748;
+  transform: translateY(-2px);
+}`,
+            highlightLines: [1, 2, 3]
+          }
+        ]
+      },
+      {
+        _key: "project-3",
+        title: "The 'Metropolis' Collection",
+        description: "A ready-to-wear line inspired by Fritz Lang's 1927 film architecture. Features structured silhouettes with Art Deco influences, combining metallic fabrics with geometric cutouts.",
+        link: "https://metropolis-fashion.com",
+        icon: "Palette",
+        viewMode: "video",
+        videoUrl: "https://www.youtube.com/watch?v=metropolis-runway-2024",
+        images: [
+          "/art-deco-fashion.png",
+          "/geometric-patterns.png",
+          "/metallic-fabrics.png"
+        ],
+        linkUrl: "https://www.vogue.com/article/metropolis-collection-review"
+      },
+      {
+        _key: "project-4",
+        title: "Digital Couture NFT Collection",
+        description: "Pioneering digital-only haute couture pieces sold as NFTs. Collaborated with digital artists to create wearable art for the metaverse, generating $500K in sales within 48 hours.",
+        link: "https://digitalcouture.io",
+        icon: "Star",
+        viewMode: "github",
+        githubUrl: "https://github.com/digital-fashion/nft-couture",
+        tweetId: "1734567890123456789",
+        codeSnippet: `// Smart contract for digital fashion NFTs
+pragma solidity ^0.8.0;
+
+contract DigitalCouture is ERC721 {
+    struct Garment {
+        string designHash;
+        uint256 edition;
+        bool isExclusive;
+        mapping(address => bool) wearableIn;
+    }
+    
+    function mintCouture(string memory design, uint256 editions) public {
+        // Minting logic for limited edition digital garments
+    }
+}`
+      },
+      {
+        _key: "project-5",
+        title: "Tweet: Fashion Tech Innovation",
+        description: "Showcasing our latest fashion technology innovations through social media. This tweet features our AI-powered design process with multiple images.",
+        link: "https://twitter.com/fashiontech",
+        icon: "Twitter",
+        viewMode: "tweet",
+        tweetId: "1678577280489234432", // Tweet with image carousel
+      },
+      {
+        _key: "project-6",
+        title: "Tweet: Sustainable Fashion Article",
+        description: "Featured article about our sustainable fashion practices and zero-waste methodology. This tweet includes a rich media preview of our Vogue feature.",
+        link: "https://twitter.com/sustainablefashion",
+        icon: "Twitter",
+        viewMode: "tweet",
+        tweetId: "1675849118445436929", // Tweet with meta URL preview
+      },
+      {
+        _key: "project-7",
+        title: "Social Media Campaign",
+        description: "Our viral social media campaign showcasing the intersection of technology and haute couture reached over 5M impressions.",
+        link: "https://twitter.com/maisonlopez",
+        icon: "Twitter",
+        viewMode: "tweet",
+        tweetId: "1441032681968212480", // Regular tweet
       },
     ],
   },
@@ -421,357 +573,529 @@ contract FashionNFT is ERC721 {
     ],
   },
   courses: {
-    sectionTitle: "Courses & Certifications",
+    sectionTitle: "Professional Development & Training",
     courseItems: [
       { 
-        _key: "course-0",
-        title: "Advanced Draping Techniques", 
-        institution: "The Fashion Institute", 
+        _key: "course-1",
+        title: "Advanced Draping & Couture Techniques Masterclass", 
+        institution: "Chambre Syndicale de la Haute Couture", 
         year: "2022", 
         icon: "Award",
-        tweetId: "1729918708385640757",  // Tech tweet
-        codeSnippet: `// Calculate fabric draping physics\nfunction calculateDrape(fabric) {\n  const { weight, stiffness } = fabric;\n  return weight * Math.sin(stiffness * 0.5);\n}`,
-        images: ["/elegant-summer-dress-runway.png"]
-      },
-      { 
-        _key: "course-1",
-        title: "Sustainable Textile Science", 
-        institution: "FutureLearn", 
-        year: "2021", 
-        icon: "Award",
-        tweetId: "1737870334136082861",  // Web dev tweet
-        images: ["/fabric-swatches-moodboard.png"]
+        viewMode: "text",
+        codeSnippet: `// 3D draping simulation algorithm
+const simulateDrape = (fabric: FabricProperties, form: DressForm) => {
+  const gravity = new Vector3(0, -9.81, 0);
+  const particles = fabric.generateParticleGrid();
+  
+  return physicsEngine.simulate({
+    particles,
+    constraints: fabric.stretchConstraints,
+    forces: [gravity, fabric.windResistance],
+    iterations: 1000
+  });
+};`,
+        images: ["/draping-technique.png", "/couture-process.png"]
       },
       { 
         _key: "course-2",
-        title: "Digital Fashion Pro", 
-        institution: "Udemy", 
-        year: "2020", 
-        icon: "Award",
-        tweetId: "1728110928389484866",  // AI tweet
-        codeSnippet: `// 3D garment modeling\nconst garment = new Garment3D({\n  type: 'dress',\n  material: 'silk',\n  physics: true\n});`
+        title: "Sustainable Textile Science & Circular Economy", 
+        institution: "Copenhagen Fashion Summit Academy", 
+        year: "2021", 
+        icon: "ShieldCheck",
+        viewMode: "text",
+        linkUrl: "https://sustainablefashion.academy/certifications",
+        videoUrl: "https://vimeo.com/sustainable-textiles-course"
       },
+      { 
+        _key: "course-3",
+        title: "Digital Fashion Design in CLO3D & Browzwear", 
+        institution: "Digital Fashion Academy", 
+        year: "2020", 
+        icon: "DraftingCompass",
+        viewMode: "text",
+        githubUrl: "https://github.com/digital-fashion/3d-design-patterns"
+      },
+      {
+        _key: "course-4",
+        title: "Fashion Tech: AI & Machine Learning for Designers",
+        institution: "MIT Professional Education",
+        year: "2023",
+        icon: "Lightbulb",
+        viewMode: "text",
+        codeSnippet: `# AI trend prediction model
+import tensorflow as tf
+from fashion_dataset import FashionTrends
+
+model = tf.keras.Sequential([
+    tf.keras.layers.LSTM(128, return_sequences=True),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.LSTM(64),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(num_trends, activation='softmax')
+])
+
+# Predict next season's trending colors and patterns
+predictions = model.predict(current_season_data)`,
+        codeLanguage: "python"
+      }
     ],
   },
   publications: {
-    sectionTitle: "Publications",
+    sectionTitle: "Publications & Media Features",
     publicationItems: [
       {
-        _key: "pub-0",
-        title: "The Future of Digital Fashion",
+        _key: "pub-1",
+        title: "The Future of Digital Fashion: NFTs Meet Haute Couture",
         journal: "Vogue Business",
         year: "2023",
-        link: "#",
+        link: "https://voguebusiness.com/digital-fashion-nfts",
         icon: "DraftingCompass",
-        tweetId: "1724493237271478617",  // Real tweet ID - Design
-        images: ["/modern-web-app-interface.png"]
-      },
-      {
-        _key: "pub-1",
-        title: "Zero-Waste Pattern Cutting: A Manifesto",
-        journal: "The Design Journal",
-        year: "2022",
-        link: "#",
-        icon: "DraftingCompass",
-        tweetId: "1722673916815769927",  // Real tweet ID - Tech
-        codeSnippet: `// Zero-waste pattern algorithm\nfunction optimizePattern(dimensions) {\n  return dimensions.reduce((waste, cut) => \n    waste - cut.area, totalFabric);\n}`
+        viewMode: "text",
+        linkUrl: "https://voguebusiness.com/technology/digital-fashion-nfts-haute-couture",
+        images: ["/vogue-business-cover.png", "/digital-fashion-spread.png"]
       },
       {
         _key: "pub-2",
-        title: "Interview: On Craftsmanship",
+        title: "Zero-Waste Pattern Cutting: A Revolutionary Manifesto",
+        journal: "The International Journal of Fashion Design",
+        year: "2022",
+        link: "https://fashionjournal.org/zero-waste-manifesto",
+        icon: "Layers",
+        viewMode: "text",
+        codeSnippet: `// Extract from the published algorithm
+function optimizePatternLayout(pieces: PatternPiece[]): Layout {
+  // Recursive tessellation algorithm that achieved 
+  // 98.7% fabric utilization in production tests
+  return pieces.reduce((layout, piece) => {
+    const bestFit = findOptimalPosition(layout, piece);
+    return insertPiece(layout, piece, bestFit);
+  }, emptyLayout);
+}`,
+        codeLanguage: "typescript"
+      },
+      {
+        _key: "pub-3",
+        title: "Exclusive Interview: Redefining Luxury Through Sustainability",
         journal: "Business of Fashion",
         year: "2021",
-        link: "#",
-        icon: "DraftingCompass",
-        tweetId: "1731000000000000000"  // Example interview tweet
+        link: "https://businessoffashion.com/michelle-lopez-interview",
+        icon: "Quote",
+        viewMode: "text",
+        videoUrl: "https://www.youtube.com/watch?v=bof-interview-2021",
+        tweetId: "1456789012345678901"
+      },
+      {
+        _key: "pub-4",
+        title: "Fashion's Digital Revolution: From Sketches to Algorithms",
+        journal: "MIT Technology Review",
+        year: "2024",
+        link: "https://technologyreview.com/fashion-algorithms",
+        icon: "Star",
+        viewMode: "text",
+        githubUrl: "https://github.com/fashion-tech/algorithmic-design",
+        images: ["/mit-tech-review-cover.png", "/algorithmic-patterns.png"]
       },
     ],
   },
   speakingEngagements: {
-    sectionTitle: "Speaking Engagements",
+    sectionTitle: "Speaking Engagements & Keynotes",
     engagementItems: [
       {
-        _key: "speak-0",
-        title: "Keynote: 'Technology in Haute Couture'",
-        event: "Global Fashion Summit",
+        _key: "speak-1",
+        title: "Keynote: 'The Intersection of AI and Haute Couture'",
+        event: "Global Fashion Summit 2024",
         year: "2024",
         location: "Copenhagen",
         icon: "Layers",
-        tweetId: "1730000000000000000",  // Example conference tweet
-        images: ["/abstract-moonlight.png"]
-      },
-      {
-        _key: "speak-1",
-        title: "Panelist: 'The Circular Economy in Fashion'",
-        event: "Sustainable Brands Conference",
-        year: "2023",
-        location: "Paris",
-        icon: "Layers",
-        tweetId: "1729000000000000000",  // Example panel tweet
-        codeSnippet: `// Circular design principles\nconst circularDesign = {\n  reduce: minimizeWaste,\n  reuse: extendLifecycle,\n  recycle: enableDisassembly\n};`
+        viewMode: "text",
+        videoUrl: "https://globalfashionsummit.com/keynote-michelle-lopez",
+        images: ["/fashion-summit-stage.png", "/keynote-presentation.png"],
+        linkUrl: "https://fashionsummit.com/speakers/michelle-lopez"
       },
       {
         _key: "speak-2",
-        title: "Guest Lecturer",
+        title: "Panelist: 'Circular Economy - Fashion's Future'",
+        event: "Sustainable Brands Conference",
+        year: "2023",
+        location: "Paris",
+        icon: "ShieldCheck",
+        viewMode: "text",
+        tweetId: "1623456789012345678",
+        codeSnippet: `// Live coding demo from the panel
+// Calculating fashion's carbon footprint
+const calculateGarmentFootprint = (garment) => {
+  const materialImpact = garment.materials.reduce((total, mat) => 
+    total + (mat.weight * mat.carbonPerKg), 0);
+  
+  const productionImpact = garment.productionSteps.reduce((total, step) =>
+    total + step.energyUsage * CARBON_PER_KWH, 0);
+    
+  const transportImpact = calculateShippingCarbon(garment.origin, garment.destination);
+  
+  return { materialImpact, productionImpact, transportImpact };
+};`,
+        codeLanguage: "javascript"
+      },
+      {
+        _key: "speak-3",
+        title: "Masterclass: 'Digital Pattern Making Revolution'",
         event: "Parsons School of Design",
         year: "2022",
         location: "New York",
-        icon: "Layers",
-        tweetId: "1728000000000000000"  // Example education tweet
+        icon: "Award",
+        viewMode: "text",
+        githubUrl: "https://github.com/parsons-masterclass/digital-patterns",
+        videoUrl: "https://parsons.edu/masterclass-recordings/lopez-2022"
+      },
+      {
+        _key: "speak-4",
+        title: "TEDx Talk: 'Fashion Without Waste Is Possible'",
+        event: "TEDxMilano",
+        year: "2023",
+        location: "Milan",
+        icon: "Star",
+        viewMode: "text",
+        videoUrl: "https://ted.com/talks/michelle_lopez_fashion_without_waste",
+        images: ["/tedx-milano-stage.png", "/zero-waste-demonstration.png"],
+        linkUrl: "https://www.ted.com/talks/michelle_lopez_fashion_without_waste"
       },
     ],
   },
   volunteer: {
-    sectionTitle: "Volunteer Experience",
+    sectionTitle: "Community Impact & Volunteer Work",
     volunteerItems: [
       {
-        _key: "vol-0",
-        role: "Design Mentor",
-        organization: "Fashion Forward Foundation",
-        period: "2020 - Present",
-        description: "Mentoring underprivileged youth interested in fashion careers, providing portfolio reviews and career guidance.",
-        icon: "Heart",
-        tweetId: "1727000000000000000",  // Example mentorship tweet
-        images: ["/futuristic-cursor.png"]
-      },
-      {
         _key: "vol-1",
-        role: "Workshop Leader",
-        organization: "Sustainable Fashion Initiative",
-        period: "2019 - 2021",
-        description: "Leading monthly workshops on sustainable design practices and upcycling techniques.",
-        icon: "Users",
-        tweetId: "1726000000000000000",  // Example workshop tweet
-        codeSnippet: `// Upcycling calculator\nfunction calculateUpcycleValue(item) {\n  return item.quality * item.rarity + \n         item.sentimentalValue;\n}`
+        role: "Lead Mentor & Board Member",
+        organization: "Fashion Forward Initiative",
+        period: "2020 - Present",
+        description: "Mentoring 25+ emerging designers annually in collection development, brand strategy, and sustainable practices. Established scholarship program that has awarded $150,000 to underrepresented students. Leading workshops on entrepreneurship and digital fashion innovation.",
+        icon: "Heart",
+        viewMode: "text",
+        images: ["/mentorship-program.png", "/fashion-forward-workshop.png"],
+        linkUrl: "https://fashionforward.org/mentors/michelle-lopez"
       },
       {
         _key: "vol-2",
-        role: "Creative Director",
-        organization: "Charity Fashion Show NYC",
-        period: "2018",
-        description: "Organized and directed annual charity fashion show raising funds for textile waste reduction.",
-        icon: "Star",
-        tweetId: "1725000000000000000",  // Example charity tweet
-        images: ["/elegant-summer-dress-runway.png"]
+        role: "Creative Director (Pro Bono)",
+        organization: "Dress for Success Worldwide",
+        period: "2019 - Present",
+        description: "Redesigned the organization's professional wardrobe program, impacting 10,000+ women globally. Created capsule wardrobe guidelines and led styling workshops for job seekers. Developed partnerships with luxury brands for clothing donations worth $500,000 annually.",
+        icon: "Users",
+        viewMode: "text",
+        videoUrl: "https://dressforsuccess.org/impact-stories/michelle-lopez",
+        githubUrl: "https://github.com/dress-for-success/wardrobe-algorithm"
       },
       {
         _key: "vol-3",
-        role: "Mentor for Young Designers",
-        organization: "Fashion Forward Initiative",
-        period: "2020 - Present",
-        description: "Guiding emerging talent in collection development and brand strategy.",
-        icon: "Lightbulb",
-        tweetId: "1724000000000000000"  // Example mentorship tweet
+        role: "Costume Designer & Arts Advocate",
+        organization: "Broadway Cares/Equity Fights AIDS",
+        period: "2018 - 2021",
+        description: "Designed costumes for charity galas raising over $2M for AIDS research. Created the iconic 'Red Ribbon Gown' auctioned for $75,000. Collaborated with Broadway stars on fashion shows combining theatre and haute couture.",
+        icon: "Palette",
+        viewMode: "text",
+        images: ["/broadway-cares-gala.png", "/red-ribbon-gown.png"],
+        tweetId: "1234567890123456789"
       },
       {
         _key: "vol-4",
-        role: "Workshop Facilitator",
-        organization: "Dress for Success",
-        period: "2019",
-        description: "Led workshops on personal styling and professional wardrobing.",
-        icon: "Lightbulb",
-        tweetId: "1723000000000000000",  // Example workshop tweet
-        codeSnippet: `// Style recommendation engine\nfunction recommendStyle(bodyType, occasion) {\n  return styleDB.filter(s => \n    s.fits.includes(bodyType) && \n    s.occasions.includes(occasion)\n  );\n}`
-      },
-      {
-        _key: "vol-5",
-        role: "Costume Designer",
-        organization: "Local Community Theatre",
-        period: "2018",
-        description: "Designed and created costumes for a local production of 'A Midsummer Night's Dream'.",
-        icon: "Palette",
-        tweetId: "1722000000000000000",  // Example theatre tweet
-        images: ["/pixel-art-landscape.png"]
+        role: "Founder - Fashion Skills Program",
+        organization: "NYC Youth Empowerment Center",
+        period: "2022 - Present",
+        description: "Founded and teach free fashion design program for at-risk youth. 85% of graduates have entered fashion school or industry jobs. Program includes pattern making, sewing, digital design, and entrepreneurship. Secured sponsorships from major fashion houses for equipment and materials.",
+        icon: "Star",
+        viewMode: "text",
+        codeSnippet: `// Student project: Fashion design app
+class FashionSketchApp {
+  constructor() {
+    this.canvas = new FabricCanvas();
+    this.tools = ['pencil', 'brush', 'patterns', 'colors'];
+    this.templates = this.loadCroquis();
+  }
+  
+  // Teaching students to code their designs
+  generateTechPack() {
+    return {
+      sketches: this.canvas.exportSketches(),
+      measurements: this.calculateProportions(),
+      materials: this.selectedFabrics,
+      costEstimate: this.calculateProduction()
+    };
+  }
+}`,
+        codeLanguage: "javascript"
       },
     ],
   },
   achievements: {
-    sectionTitle: "Achievements",
+    sectionTitle: "Awards & Recognition",
     achievementItems: [
       {
-        _key: "ach-0",
-        title: "CFDA/Vogue Fashion Fund Finalist",
-        description: "Recognized as one of the top emerging designers in the nation.",
+        _key: "achieve-1",
+        title: "CFDA/Vogue Fashion Fund Winner",
+        description: "Won the prestigious CFDA/Vogue Fashion Fund with a $400,000 grant and year-long mentorship. Selected from over 500 applicants for revolutionary sustainable design approach and innovative business model. Mentored by Diane von Furstenberg and Tom Ford.",
         year: "2023",
         icon: "Star",
-        tweetId: "1721000000000000000",  // Example award tweet
-        images: ["/abstract-moonlight.png"]
+        viewMode: "text",
+        images: ["/cfda-award-ceremony.png", "/vogue-fund-trophy.png"],
+        linkUrl: "https://cfda.com/programs/designer-programs/fashion-fund/2023-winner",
+        videoUrl: "https://vogue.com/video/cfda-fashion-fund-2023-winner"
       },
       {
-        _key: "ach-1",
-        title: "International Woolmark Prize",
-        description: "Winner of the prestigious award for innovation in wool.",
+        _key: "achieve-2",
+        title: "International Woolmark Prize - Global Winner",
+        description: "First American designer to win the global Woolmark Prize in a decade. Awarded €200,000 for groundbreaking biodegradable wool innovations. Collection showcased at Paris Fashion Week and stocked in 150+ luxury retailers worldwide.",
         year: "2022",
-        icon: "Star",
-        tweetId: "1720000000000000000"  // Example woolmark tweet
-      },
-      {
-        _key: "ach-2",
-        title: "LVMH Prize for Young Fashion Designers",
-        description: "Shortlisted for the coveted LVMH Prize.",
-        year: "2021",
-        icon: "Star",
-        tweetId: "1719000000000000000",  // Example LVMH tweet
-        codeSnippet: `// Award-winning collection algorithm\nconst collection = designs\n  .filter(d => d.innovation > 0.8)\n  .sort((a, b) => b.impact - a.impact);`
-      },
-      {
-        _key: "ach-3",
-        title: "Parsons Designer of the Year",
-        description: "Awarded for outstanding innovation in sustainable fashion.",
-        year: "2020",
         icon: "Award",
-        tweetId: "1718000000000000000"  // Example parsons tweet
+        viewMode: "text",
+        githubUrl: "https://github.com/woolmark/innovation-lab",
+        tweetId: "1567890123456789012"
+      },
+      {
+        _key: "achieve-3",
+        title: "LVMH Prize for Young Fashion Designers - Grand Prize",
+        description: "Awarded the LVMH Prize grand prize of €300,000 and mentorship from LVMH executives. Recognized for merging traditional craftsmanship with cutting-edge technology. Led to collaboration opportunities with Louis Vuitton and Dior.",
+        year: "2021",
+        icon: "ShieldCheck",
+        viewMode: "text",
+        images: ["/lvmh-prize-ceremony.png", "/bernard-arnault-presentation.png"],
+        linkUrl: "https://lvmhprize.com/designers/2021/michelle-lopez"
+      },
+      {
+        _key: "achieve-4",
+        title: "UNESCO Creative Cities Award for Sustainable Fashion",
+        description: "Honored by UNESCO for contributions to sustainable fashion education and innovation. Established fashion incubator supporting 50+ emerging sustainable designers. Program model adopted by fashion schools in 12 countries.",
+        year: "2024",
+        icon: "Heart",
+        viewMode: "text",
+        codeSnippet: `// Open-sourced sustainability tracking system
+const SustainabilityIndex = {
+  calculateScore: (brand) => {
+    const metrics = {
+      materials: assessMaterialSustainability(brand.materials),
+      production: evaluateProductionMethods(brand.factories),
+      labor: auditLaborPractices(brand.suppliers),
+      transparency: measureSupplyChainVisibility(brand.data),
+      circularity: assessEndOfLifeOptions(brand.products)
+    };
+    
+    return generateComprehensiveReport(metrics);
+  }
+};`,
+        codeLanguage: "javascript"
       },
     ],
   },
   certifications: {
-    sectionTitle: "Certifications",
+    sectionTitle: "Professional Certifications & Accreditations",
     certificationItems: [
       {
-        _key: "cert-0",
-        title: "Certified Sustainable Fashion Practitioner",
-        issuingBody: "Council for Sustainable Fashion",
+        _key: "cert-1",
+        title: "Certified Sustainable Fashion Practitioner - Level 5 (Expert)",
+        issuingBody: "International Council for Sustainable Fashion",
         year: "2022",
         icon: "ShieldCheck",
-        tweetId: "1717000000000000000",  // Example certification tweet
-        images: ["/fabric-swatches-moodboard.png"]
-      },
-      {
-        _key: "cert-1",
-        title: "Global Organic Textile Standard (GOTS)",
-        issuingBody: "GOTS Organization",
-        year: "2021",
-        icon: "ShieldCheck",
-        tweetId: "1716000000000000000"  // Example GOTS tweet
+        viewMode: "text",
+        linkUrl: "https://sustainablefashion.org/certified-practitioners/michelle-lopez",
+        images: ["/sustainable-fashion-cert.png", "/certification-badge.png"],
+        codeSnippet: `// Certification project: LCA calculator
+function calculateLifecycleAssessment(garment) {
+  const phases = {
+    rawMaterials: calculateExtractionImpact(garment.materials),
+    manufacturing: calculateProductionImpact(garment.processes),
+    distribution: calculateTransportImpact(garment.logistics),
+    use: calculateWearAndCareImpact(garment.careInstructions),
+    endOfLife: calculateDisposalImpact(garment.recyclability)
+  };
+  
+  return generateLCAReport(phases);
+}`,
+        codeLanguage: "javascript"
       },
       {
         _key: "cert-2",
-        title: "Leather Working Group (LWG) Certified",
-        issuingBody: "LWG",
-        year: "2020",
-        icon: "ShieldCheck",
-        tweetId: "1715000000000000000",  // Example LWG tweet
-        codeSnippet: `// Leather sustainability score\nfunction calculateLeatherScore(source) {\n  return source.traceability * 0.4 +\n         source.environmental * 0.6;\n}`
+        title: "Global Organic Textile Standard (GOTS) - Approved Designer",
+        issuingBody: "GOTS International Organization",
+        year: "2021",
+        icon: "Layers",
+        viewMode: "text",
+        githubUrl: "https://github.com/gots-certified/organic-textile-standards",
+        videoUrl: "https://global-standard.org/certified-designers/michelle-lopez"
       },
       {
         _key: "cert-3",
-        title: "Digital Fashion Innovation Certificate",
-        issuingBody: "Fashion Institute of Technology",
-        year: "2019",
+        title: "Cradle to Cradle Certified™ Product Designer",
+        issuingBody: "Cradle to Cradle Products Innovation Institute",
+        year: "2023",
         icon: "Award",
-        tweetId: "1714000000000000000"  // Example FIT tweet
+        viewMode: "text",
+        images: ["/c2c-certification.png", "/circular-design-principles.png"],
+        linkUrl: "https://c2ccertified.org/certified-designers"
+      },
+      {
+        _key: "cert-4",
+        title: "B Corporation Certified Fashion Business",
+        issuingBody: "B Lab Global",
+        year: "2024",
+        icon: "Star",
+        viewMode: "text",
+        tweetId: "1789012345678901234",
+        linkUrl: "https://bcorporation.net/directory/maison-lopez",
+        codeSnippet: `// B Corp impact assessment tool
+const BCorpAssessment = {
+  governance: 18.7,  // Accountability & Transparency
+  workers: 22.3,     // Fair wages & benefits
+  community: 31.2,   // Supply chain & giving
+  environment: 48.6, // Sustainable practices
+  customers: 15.4,   // Product impact
+  
+  totalScore: 136.2, // Minimum required: 80
+  certification: 'CERTIFIED B CORPORATION™'
+};`
       },
     ],
   },
   hobbies: {
-    sectionTitle: "Hobbies & Interests",
+    sectionTitle: "Passions & Personal Interests",
     hobbyItems: [
       { 
-        _key: "hobby-0",
-        title: "Vintage Textile Restoration", 
-        icon: "Heart",
-        tweetId: "1760000000000000000",
-        images: ["/fabric-swatches-moodboard.png"]
-      },
-      { 
         _key: "hobby-1",
-        title: "Argentine Tango", 
+        title: "Vintage Textile Restoration & Collection", 
         icon: "Heart",
-        tweetId: "1711000000000000000",
-        images: ["/placeholder.jpg"]
+        viewMode: "text",
+        images: ["/vintage-textile-collection.png", "/restoration-process.png"],
+        linkUrl: "https://instagram.com/michellesvintage"
       },
       { 
         _key: "hobby-2",
-        title: "Ikebana (Japanese Flower Arranging)", 
+        title: "Argentine Tango Competition Dancing", 
         icon: "Heart",
-        tweetId: "1760000000000000000",
-        images: ["/placeholder.jpg"]
+        viewMode: "text",
+        videoUrl: "https://youtube.com/tango-championship-2023",
+        images: ["/tango-performance.png"]
       },
       { 
         _key: "hobby-3",
-        title: "Sketching Urban Landscapes", 
-        icon: "DraftingCompass",
-        tweetId: "1711000000000000000",
-        images: ["/technical-drawing-tools.png"]
+        title: "Ikebana Master - Japanese Flower Arranging", 
+        icon: "Palette",
+        viewMode: "text",
+        images: ["/ikebana-arrangements.png", "/japanese-aesthetics.png"],
+        codeSnippet: `// Ikebana principles in fashion design
+const IkebanaDesign = {
+  principles: {
+    asymmetry: 'Creating balance through inequality',
+    simplicity: 'Maximum impact with minimal elements',
+    seasonality: 'Honoring natural cycles',
+    space: 'Celebrating negative space as design element'
+  },
+  
+  applyToFashion: (garment) => {
+    return incorporateJapaneseAesthetics(garment);
+  }
+};`,
+        codeLanguage: "javascript"
       },
       { 
         _key: "hobby-4",
-        title: "Pottery and Ceramics", 
-        icon: "Palette",
-        tweetId: "1760000000000000000",
-        images: ["/placeholder.jpg"]
-      },
-      { 
-        _key: "hobby-5",
-        title: "French New Wave Cinema", 
-        icon: "Star",
-        tweetId: "1711000000000000000",
-        images: ["/placeholder.jpg"]
+        title: "Urban Sketching & Fashion Illustration", 
+        icon: "DraftingCompass",
+        viewMode: "text",
+        githubUrl: "https://github.com/urban-sketchers/fashion-illustrations",
+        images: ["/urban-sketches.png", "/fashion-illustrations.png"]
       },
     ],
   },
   memberships: {
-    sectionTitle: "Professional Memberships",
+    sectionTitle: "Professional Affiliations & Leadership",
     membershipItems: [
       {
-        _key: "mem-0",
+        _key: "member-1",
         organization: "Council of Fashion Designers of America (CFDA)",
-        role: "Member",
+        role: "Board Member & Sustainability Committee Chair",
         period: "2023 - Present",
         icon: "Users",
-        tweetId: "1713000000000000000",  // Example CFDA tweet
-        images: ["/modern-web-app-interface.png"]
+        viewMode: "text",
+        linkUrl: "https://cfda.com/members/michelle-lopez",
+        images: ["/cfda-board-meeting.png", "/sustainability-summit.png"]
       },
       {
-        _key: "mem-1",
-        organization: "The Costume Society",
-        role: "Member",
+        _key: "member-2",
+        organization: "United Nations Fashion Industry Charter",
+        role: "Founding Signatory & Advisory Board",
+        period: "2022 - Present",
+        icon: "ShieldCheck",
+        viewMode: "text",
+        videoUrl: "https://unfashioncharter.org/signatories/maison-lopez",
+        githubUrl: "https://github.com/un-fashion-charter/climate-action"
+      },
+      {
+        _key: "member-3",
+        organization: "Ellen MacArthur Foundation - Make Fashion Circular",
+        role: "Innovation Partner & Thought Leader",
+        period: "2021 - Present",
+        icon: "Award",
+        viewMode: "text",
+        codeSnippet: `// Circular fashion tracking system
+interface CircularFashionMetrics {
+  design: {
+    durability: number;      // Years of expected use
+    recyclability: number;   // % of recyclable materials
+    modularity: boolean;     // Can be disassembled
+  };
+  production: {
+    wasteReduction: number;  // % waste eliminated
+    renewableEnergy: number; // % renewable energy used
+  };
+  endOfLife: {
+    takeBackProgram: boolean;
+    upcyclingOptions: string[];
+    biodegradability: number; // % biodegradable
+  };
+}`,
+        codeLanguage: "typescript"
+      },
+      {
+        _key: "member-4",
+        organization: "Fashion Revolution Global Advisory Committee",
+        role: "Strategic Advisor & Transparency Advocate",
         period: "2020 - Present",
-        icon: "Users",
-        tweetId: "1712000000000000000"  // Example costume society tweet
-      },
-      {
-        _key: "mem-2",
-        organization: "American Sewing Guild",
-        role: "Member",
-        period: "2018 - Present",
-        icon: "Users",
-        tweetId: "1711000000000000000",  // Example sewing guild tweet
-        codeSnippet: `// Sewing pattern optimizer\nfunction optimizeStitching(pattern) {\n  return pattern.paths\n    .reduce((opt, path) => \n      opt.concat(shortestPath(path)), []\n    );\n}`
-      },
-      {
-        _key: "mem-3",
-        organization: "Sustainable Fashion Alliance",
-        role: "Advisory Board Member",
-        period: "2019 - Present",
         icon: "Star",
-        tweetId: "1710000000000000000"  // Example sustainability tweet
+        viewMode: "text",
+        tweetId: "1890123456789012345",
+        linkUrl: "https://fashionrevolution.org/advisors/michelle-lopez"
       },
     ],
   },
   testimonials: {
-    sectionTitle: "What Others Say",
+    sectionTitle: "Industry Testimonials & Endorsements",
     testimonialItems: [
       {
         quote:
-          "Michelle's vision is unparalleled. Her ability to blend classic silhouettes with modern sensibilities is what makes her a true artist in the fashion world.",
+          "Michelle's revolutionary approach to sustainable luxury has redefined what haute couture means in the 21st century. Her vision is unparalleled - she doesn't just follow trends, she creates movements. Working with her on the CFDA initiatives has been transformative for the entire American fashion industry.",
         authorName: "Anna Wintour",
-        authorTitle: "Editor-in-Chief, Vogue",
-        authorImage: "/placeholder.svg?width=100&height=100",
+        authorTitle: "Editor-in-Chief, Vogue & Artistic Director, Condé Nast",
+        authorImage: "/anna-wintour-portrait.png",
       },
       {
         quote:
-          "Working with Michelle was a transformative experience. Her attention to detail and commitment to quality are evident in every single stitch.",
-        authorName: "Tom Ford",
-        authorTitle: "Fashion Designer & Filmmaker",
-        authorImage: "/placeholder.svg?width=100&height=100",
+          "In my 40 years in fashion, I've rarely encountered a designer with Michelle's unique combination of technical mastery and visionary creativity. Her zero-waste techniques should be taught in every fashion school. She's not just designing clothes; she's architecting the future of our industry.",
+        authorName: "Giorgio Armani",
+        authorTitle: "Founder & CEO, Giorgio Armani S.p.A.",
+        authorImage: "/giorgio-armani-portrait.png",
       },
       {
         quote:
-          "She possesses a rare combination of raw creativity and commercial acumen. Her collections don't just inspire; they sell.",
-        authorName: "Marco Bizzarri",
-        authorTitle: "CEO, Gucci",
-        authorImage: "/placeholder.svg?width=100&height=100",
+          "Michelle Lopez represents everything we look for at LVMH - innovation, craftsmanship, and an unwavering commitment to excellence. Her digital fashion NFT project opened our eyes to entirely new revenue streams. She's a visionary who delivers results. Her brand has exceeded all growth projections.",
+        authorName: "Bernard Arnault",
+        authorTitle: "Chairman & CEO, LVMH",
+        authorImage: "/bernard-arnault-portrait.png",
+      },
+      {
+        quote:
+          "As her former professor at Parsons, I knew Michelle would change fashion. But she's exceeded even my highest expectations. Her ability to merge technology with traditional craftsmanship while maintaining sustainability is genius. She's become the role model for our students - the future of fashion design.",
+        authorName: "Tim Gunn",
+        authorTitle: "Former Chair of Fashion Design, Parsons School of Design",
+        authorImage: "/tim-gunn-portrait.png",
       },
     ],
   },
