@@ -659,7 +659,11 @@ export default function FashionPortfolioPage() {
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`achievements.achievementItems.${i}.${field}`, value)}
-                className={cn("h-full w-full aspect-[5/3] shadow-lg overflow-hidden", cardBgClasses[i % cardBgClasses.length])}
+                className={cn(
+                  "h-full w-full shadow-lg overflow-hidden",
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                  cardBgClasses[i % cardBgClasses.length]
+                )}
               >
                 {/* Default text view content */}
                 <BentoGridItem
@@ -707,7 +711,11 @@ export default function FashionPortfolioPage() {
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`certifications.certificationItems.${i}.${field}`, value)}
-                className={cn("h-full w-full aspect-[5/3] shadow-lg overflow-hidden", cardBgClasses[i % cardBgClasses.length])}
+                className={cn(
+                  "h-full w-full shadow-lg overflow-hidden",
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                  cardBgClasses[i % cardBgClasses.length]
+                )}
               >
                 {/* Default text view content */}
                 <BentoGridItem
@@ -754,7 +762,11 @@ export default function FashionPortfolioPage() {
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`volunteer.volunteerItems.${i}.${field}`, value)}
-                className={cn("h-full w-full aspect-[5/3] shadow-lg overflow-hidden", cardBgClasses[i % cardBgClasses.length])}
+                className={cn(
+                  "h-full w-full shadow-lg overflow-hidden",
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                  cardBgClasses[i % cardBgClasses.length]
+                )}
               >
                 {/* Default text view content */}
                 <BentoGridItem
@@ -868,7 +880,11 @@ export default function FashionPortfolioPage() {
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`courses.courseItems.${i}.${field}`, value)}
-                className={cn("h-full w-full aspect-[5/3] shadow-lg overflow-hidden", cardBgClasses[i % cardBgClasses.length])}
+                className={cn(
+                  "h-full w-full shadow-lg overflow-hidden",
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                  cardBgClasses[i % cardBgClasses.length]
+                )}
               >
                 {/* Default text view content */}
                 <BentoGridItem
@@ -916,7 +932,11 @@ export default function FashionPortfolioPage() {
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`publications.publicationItems.${i}.${field}`, value)}
-                className={cn("h-full w-full aspect-[5/3] shadow-lg overflow-hidden", cardBgClasses[i % cardBgClasses.length])}
+                className={cn(
+                  "h-full w-full shadow-lg overflow-hidden",
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                  cardBgClasses[i % cardBgClasses.length]
+                )}
               >
                 {/* Default text view content */}
                 <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
@@ -965,7 +985,11 @@ export default function FashionPortfolioPage() {
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`speakingEngagements.engagementItems.${i}.${field}`, value)}
-                className={cn("h-full w-full aspect-[5/3] shadow-lg overflow-hidden", cardBgClasses[i % cardBgClasses.length])}
+                className={cn(
+                  "h-full w-full shadow-lg overflow-hidden",
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                  cardBgClasses[i % cardBgClasses.length]
+                )}
               >
                 {/* Default text view content */}
                 <BentoGridItem
