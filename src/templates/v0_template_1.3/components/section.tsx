@@ -27,12 +27,14 @@ export function Section({ id, title, onSaveTitle, isVisible, className, children
       {isVisible && (
         <motion.section id={id} {...sectionAnimation} className={cn("py-12 sm:py-16", className)}>
           <div className={cn(!fullWidth && "max-w-5xl mx-auto px-4")}>
-            <EditableText
-              as="h2"
-              initialValue={title}
-              onSave={onSaveTitle}
-              className="text-[2.5rem] sm:text-5xl md:text-6xl font-bold text-center mb-10 sm:mb-12 font-serif text-glow max-w-5xl mx-auto px-4"
-            />
+            <div className="max-w-5xl mx-auto px-4">
+              <EditableText
+                as="h2"
+                initialValue={title}
+                onSave={onSaveTitle}
+                className="text-[2.5rem] sm:text-5xl md:text-6xl font-bold text-center mb-10 sm:mb-12 font-serif text-glow"
+              />
+            </div>
             {children}
           </div>
         </motion.section>
