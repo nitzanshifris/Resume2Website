@@ -9,8 +9,7 @@ export const API_ENDPOINTS = {
   TEMPLATES: '/api/v1/templates',
   GENERATE_PORTFOLIO: '/api/v1/generate-portfolio',
   SSE_PROGRESS: '/api/v1/sse/cv/extract-streaming',
-  HEALTH: '/health',
-  DEMO_PREVIEW: '/api/v1/demo-preview/extract-hero'
+  HEALTH: '/health'
 }
 
 // Types
@@ -241,23 +240,6 @@ export function createSSEConnection(
 // Health check function
 export async function healthCheck(): Promise<{ status: string }> {
   return apiRequest<{ status: string }>(API_ENDPOINTS.HEALTH)
-}
-
-// Demo preview extraction (for non-authenticated users)
-export async function extractDemoHero(file: File): Promise<{ name: string; professionalTitle: string }> {
-  const formData = new FormData()
-  formData.append('file', file)
-  
-  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.DEMO_PREVIEW}`, {
-    method: 'POST',
-    body: formData
-  })
-  
-  if (!response.ok) {
-    throw new Error('Failed to extract hero data')
-  }
-  
-  return await response.json()
 }
 
 // Session management

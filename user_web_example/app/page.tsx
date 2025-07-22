@@ -634,41 +634,13 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
     // Set the uploaded file
     setUploadedFile(file)
     
-    // For non-authenticated users, just wait for click to show demo
-    // For authenticated users, we'll handle full upload after click
-    // This ensures consistent behavior for both upload methods (dropbox and button)
+    // Don't start the demo automatically - wait for click
   }
   
-  const handleFileClick = async (file: File) => {
+  const handleFileClick = (file: File) => {
     // This is called when user clicks on their uploaded file card
-    if (isAuthenticated) {
-      // For authenticated users, upload the file and redirect to CV editor
-      try {
-        const { uploadFile } = await import('@/lib/api')
-        const result = await uploadFile(file)
-        
-        if (result.job_id) {
-          // Redirect to CV editor with the uploaded CV
-          router.push(`/dashboard/cv-editor?jobId=${result.job_id}`)
-        }
-      } catch (error) {
-        console.error('Upload failed:', error)
-        // Fallback to showing upload modal on error
-        setShowUpload(true)
-      }
-    } else {
-      // For non-authenticated users, show the demo preview in MacBook UI
-      handleStartDemo()
-    }
-  }
-  
-  const handleUploadButtonClick = () => {
-    // For both signed in and signed out users, trigger file upload
-    // The file input will be handled by the InteractiveCVPile component
-    const cvPileInput = document.querySelector('input[type="file"][accept*=".pdf"]') as HTMLInputElement
-    if (cvPileInput) {
-      cvPileInput.click()
-    }
+    // Now we start the demo animation
+    handleStartDemo()
   }
 
   // Mobile-First Layout
@@ -773,7 +745,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                     className="mb-8"
                   >
                     <Button
-                      onClick={handleUploadButtonClick}
+                      onClick={onOpenModal}
                       className="group relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-8 py-5 rounded-full text-lg font-bold shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer overflow-hidden w-full max-w-[320px]"
                       style={{
                         minHeight: '60px'
@@ -968,7 +940,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                             transition={{ duration: 0.8, delay: 1.0, ease: "easeOut" }}
                           >
                             <Button
-                              onClick={handleUploadButtonClick}
+                              onClick={onOpenModal}
                               className="group relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-12 py-6 rounded-full text-xl md:text-2xl font-bold shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_40px_rgba(16,185,129,0.3)] cursor-pointer overflow-hidden"
                               style={{
                                 minWidth: '320px',
@@ -1339,32 +1311,10 @@ const AppleNavbar = ({
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     onClick={onShowDashboard}
-                    className="relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all duration-300 transform hover:shadow-xl hover:-translate-y-0.5 overflow-hidden group"
+                    variant="outline"
+                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
                   >
-                    {/* Animated background gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    {/* Button content */}
-                    <span className="relative flex items-center">
-                      <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                        />
-                      </svg>
-                      Dashboard
-                    </span>
-                    
-                    {/* Shine effect */}
-                    <div className="absolute inset-0 -top-2 h-full w-1/2 bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700" />
+                    Dashboard
                   </Button>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -1391,6 +1341,41 @@ const AppleNavbar = ({
               </motion.div>
             )}
             
+            {/* Upload CV Button */}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                onClick={handleUploadClick}
+                className="relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg transition-all duration-300 transform hover:shadow-xl hover:-translate-y-0.5 overflow-hidden group"
+              >
+                {/* Animated background gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                
+                {/* Button content */}
+                <span className="relative flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  Upload your CV now
+                </span>
+                
+                {/* Shine effect */}
+                <div className="absolute inset-0 -top-2 h-full w-1/2 bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700" />
+              </Button>
+            </motion.div>
           </div>
 
           {/* Mobile menu button */}
@@ -1432,48 +1417,54 @@ const AppleNavbar = ({
                   </motion.button>
                 ))}
                 
+                {/* Upload CV Button for Mobile */}
+                <motion.div className="pt-4 pb-2" whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={handleUploadClick}
+                    className="w-full bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white px-6 py-3 rounded-full text-base font-semibold shadow-lg transition-all duration-300"
+                  >
+                    <svg
+                      className="w-5 h-5 mr-2 inline-block"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    Upload your CV now
+                  </Button>
+                </motion.div>
                 
                 {/* Auth buttons */}
                 {isAuthenticated ? (
-                  <>
-                    <motion.div className="pt-4 pb-2" whileTap={{ scale: 0.95 }}>
-                      <Button
-                        onClick={() => {
-                          setIsMobileMenuOpen(false)
-                          onShowDashboard()
-                        }}
-                        className="w-full bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white px-6 py-3 rounded-full text-base font-semibold shadow-lg transition-all duration-300"
-                      >
-                        <svg
-                          className="w-5 h-5 mr-2 inline-block"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                          />
-                        </svg>
-                        Dashboard
-                      </Button>
-                    </motion.div>
-                    <motion.div className="pt-2 border-t border-gray-200" whileTap={{ scale: 0.95 }}>
-                      <div className="px-3 py-2 text-sm text-gray-600">
-                        Welcome, {user?.name || 'User'}
-                      </div>
-                      <Button
-                        onClick={onLogout}
-                        variant="outline"
-                        className="w-full mt-2"
-                      >
-                        Logout
-                      </Button>
-                    </motion.div>
-                  </>
+                  <motion.div className="pt-2 border-t border-gray-200" whileTap={{ scale: 0.95 }}>
+                    <div className="px-3 py-2 text-sm text-gray-600">
+                      Welcome, {user?.name || 'User'}
+                    </div>
+                    <Button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false)
+                        onShowDashboard()
+                      }}
+                      className="w-full mt-2 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
+                      variant="outline"
+                    >
+                      Dashboard
+                    </Button>
+                    <Button
+                      onClick={onLogout}
+                      variant="outline"
+                      className="w-full mt-2"
+                    >
+                      Logout
+                    </Button>
+                  </motion.div>
                 ) : (
                   <motion.div className="pt-2" whileTap={{ scale: 0.95 }}>
                     <Button
@@ -1561,10 +1552,8 @@ export default function Home() {
     await signIn(data.session_id, data.user)
     setShowAuthModal(false)
     
-    // Check if there's a file waiting (either dropped or uploaded through CV pile)
-    if (droppedFile || uploadedFile) {
-      // Set the file for upload modal
-      setDroppedFile(droppedFile || uploadedFile)
+    // Check if there's a dropped file waiting
+    if (droppedFile) {
       // Go directly to upload with the file
       setShowUpload(true)
     } else {

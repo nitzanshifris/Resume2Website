@@ -258,23 +258,15 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
           style={{
             background: isDragging 
               ? "conic-gradient(from 180deg at 50% 50%, #10f981 0deg, #38bdf8 120deg, #8b5cf6 240deg, #10f981 360deg)"
-              : currentFile
-              ? "conic-gradient(from 180deg at 50% 50%, #a855f7 0deg, #ec4899 120deg, #3b82f6 240deg, #a855f7 360deg)"
               : "conic-gradient(from 180deg at 50% 50%, #10b981 0deg, #0ea5e9 120deg, #7c3aed 240deg, #10b981 360deg)",
           }}
           animate={{
             rotate: [0, 360],
-            scale: currentFile ? [1, 1.1, 1] : 1,
           }}
           transition={{
-            duration: currentFile ? 3 : 20,
+            duration: 20,
             repeat: Infinity,
             ease: "linear",
-            scale: {
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }
           }}
         />
         <motion.div
@@ -282,26 +274,21 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
           style={{
             background: isDragging 
               ? "linear-gradient(135deg, rgba(16, 249, 129, 0.8), rgba(56, 189, 248, 0.8), rgba(139, 92, 246, 0.8))"
-              : currentFile
-              ? "linear-gradient(135deg, rgba(168, 85, 247, 0.8), rgba(236, 72, 153, 0.8), rgba(59, 130, 246, 0.8))"
               : "linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(14, 165, 233, 0.5), rgba(124, 58, 237, 0.5))",
             zIndex: -1,
           }}
           animate={{
-            opacity: currentFile ? [0.6, 1, 0.6] : isDragging ? [0.8, 1, 0.8] : [0.4, 0.7, 0.4],
-            scale: currentFile ? [1, 1.08, 1] : [1, 1.05, 1],
+            opacity: isDragging ? [0.8, 1, 0.8] : [0.4, 0.7, 0.4],
+            scale: [1, 1.05, 1],
           }}
           transition={{
-            duration: currentFile ? 1.5 : 3,
+            duration: 3,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         />
 
-        <div className={cn(
-          "w-full h-full rounded-xl shadow-2xl overflow-hidden relative",
-          !currentFile && "bg-gradient-to-br from-white via-white to-gray-50"
-        )}>
+        <div className="w-full h-full bg-gradient-to-br from-white via-white to-gray-50 rounded-xl shadow-2xl overflow-hidden relative">
           {/* Animated background pattern */}
           <motion.div
             className="absolute inset-0 opacity-5"
@@ -529,92 +516,42 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
             </div>
           ) : (
             /* Uploaded File State - Show actual file */
-            <motion.div 
-              className="w-full h-full relative rounded-xl overflow-hidden cursor-pointer"
-              onClick={handleClick}
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-            >
+            <div className="w-full h-full relative bg-white rounded-xl overflow-hidden group cursor-pointer">
               {currentFile && (
                 <>
-                  {/* Layer 1: Base white background - always visible */}
-                  <div className="absolute inset-0 bg-white rounded-xl" />
-                  
-                  {/* Layer 2: Animated gradient background - behind content */}
-                  <motion.div
-                    className="absolute inset-0 rounded-xl"
+                  {/* Click to transform overlay */}
+                  <motion.div 
+                    className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 z-10 flex items-center justify-center"
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
                   >
-                    <div 
-                      className="absolute inset-0 rounded-xl"
-                      style={{
-                        background: "linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)"
-                      }}
-                    />
+                    <motion.div
+                      className="bg-white/95 backdrop-blur-sm rounded-xl p-6 shadow-2xl"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      whileHover={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                        className="flex flex-col items-center"
+                      >
+                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-3">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </div>
+                        <p className="text-lg font-bold text-gray-800">Click to Transform</p>
+                        <p className="text-sm text-gray-600 mt-1">Generate your portfolio</p>
+                      </motion.div>
+                    </motion.div>
                   </motion.div>
-                  
-                  {/* Layer 3: Border glow effect */}
-                  <motion.div
-                    className="absolute inset-0 rounded-xl"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div 
-                      className="absolute inset-[2px] rounded-xl"
-                      style={{
-                        background: "white",
-                        boxShadow: "inset 0 0 0 2px rgba(168, 85, 247, 0.3)"
-                      }}
-                    />
-                  </motion.div>
-                  
-                  {/* Floating hint that appears after upload */}
-                  <motion.div
-                    className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: [0, 1, 1, 0], y: [20, 0, 0, -10] }}
-                    transition={{ 
-                      duration: 4,
-                      times: [0, 0.2, 0.8, 1],
-                      ease: "easeOut"
-                    }}
-                  >
-                    <div className="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Click your CV to start
-                    </div>
-                  </motion.div>
-                  
-                  {/* Animated cursor hint */}
-                  <motion.div
-                    className="absolute bottom-8 right-8 z-20 pointer-events-none"
-                    initial={{ opacity: 0 }}
-                    animate={{ 
-                      opacity: [0, 0, 1, 1, 0],
-                      scale: [0.8, 0.8, 1, 0.9, 0.8],
-                    }}
-                    transition={{ 
-                      duration: 5,
-                      times: [0, 0.6, 0.7, 0.9, 1],
-                      repeat: Infinity,
-                      repeatDelay: 3,
-                      ease: "easeInOut"
-                    }}
-                  >
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-xl">
-                      <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
-                        <path fill="currentColor" d="M13 13l6 6-2 2-6-6 2-2z" />
-                      </svg>
-                    </div>
-                  </motion.div>
-                  
                   {/* File type indicator and navigation */}
                   {displayFiles.length > 1 && (
                     <div className="absolute top-2 right-2 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
@@ -648,50 +585,32 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
                     </div>
                   )}
                   
-                  {/* Layer 4: Shadow effect on hover */}
-                  <motion.div
-                    className="absolute inset-0 rounded-xl pointer-events-none"
-                    initial={{ boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" }}
-                    whileHover={{ 
-                      boxShadow: "0 20px 25px -5px rgba(168, 85, 247, 0.2), 0 10px 10px -5px rgba(236, 72, 153, 0.04)" 
-                    }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  
-                  {/* Layer 5: Content display - always on top */}
+                  {/* Display file based on type */}
                   {currentFile.type === 'application/pdf' || currentFile.name.endsWith('.pdf') ? (
-                    <div className="absolute inset-0 z-10 rounded-xl overflow-hidden">
-                      <iframe
-                        src={URL.createObjectURL(currentFile)}
-                        className="w-full border-0"
-                        style={{ 
-                          position: 'absolute',
-                          top: '-80px',
-                          height: 'calc(100% + 80px)',
-                          width: '100%',
-                          backgroundColor: 'white',
-                          pointerEvents: 'none' // Prevent iframe from capturing clicks
-                        }}
-                        title={currentFile.name}
-                      />
+                    <div className="w-full h-full relative overflow-hidden">
+                      <div className="absolute inset-0 -top-[10%]">
+                        <iframe
+                          src={URL.createObjectURL(currentFile)}
+                          className="w-full h-[110%]"
+                          title={currentFile.name}
+                        />
+                      </div>
                     </div>
                   ) : currentFile.type.startsWith('image/') || 
                       ['.png', '.jpg', '.jpeg'].some(ext => currentFile.name.toLowerCase().endsWith(ext)) ? (
-                    <div className="absolute inset-0 z-10 rounded-xl overflow-hidden">
-                      <Image
-                        src={URL.createObjectURL(currentFile)}
-                        alt={currentFile.name}
-                        fill
-                        className="object-cover object-top"
-                        style={{ 
-                          objectPosition: '0 -10%',
-                          pointerEvents: 'none' // Prevent image from capturing clicks
-                        }}
-                        onLoad={(e) => {
-                          // Clean up object URL after image loads
-                          URL.revokeObjectURL(e.currentTarget.src)
-                        }}
-                      />
+                    <div className="w-full h-full relative overflow-hidden">
+                      <div className="absolute inset-0 -top-[10%]">
+                        <Image
+                          src={URL.createObjectURL(currentFile)}
+                          alt={currentFile.name}
+                          fill
+                          className="object-cover object-top"
+                          onLoad={(e) => {
+                            // Clean up object URL after image loads
+                            URL.revokeObjectURL(e.currentTarget.src)
+                          }}
+                        />
+                      </div>
                     </div>
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-8">
@@ -704,12 +623,13 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
                     </div>
                   )}
                   
-                  {/* Layer 6: Clickable overlay - topmost layer */}
-                  <div className="absolute inset-0 z-20 cursor-pointer" />
-                  
+                  {/* File name overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <p className="text-white text-sm font-medium truncate">{currentFile.name}</p>
+                  </div>
                 </>
               )}
-            </motion.div>
+            </div>
           )}
           
           {/* Upload state indicators */}
