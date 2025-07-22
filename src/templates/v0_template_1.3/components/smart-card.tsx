@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Settings, FileText, Image, Code, Github, Link, Video, Twitter } from 'lucide-react'
+import { Settings, FileText, Image, Code, Github, Link, Video, Twitter, Maximize2, ExternalLink, Edit2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,6 +19,9 @@ import { GitHubCard } from './ui/github-card'
 import { ImageCarousel } from './ui/image-carousel'
 import { VideoPlayer } from './ui/video-player'
 import { LinkPreview } from './ui/link-preview'
+import { ClientTweetCard } from './ui/client-tweet-card'
+import { ImageTransformEditor, type ImageTransform } from './ui/image-transform-editor'
+import { TransformedImage } from './ui/transformed-image'
 import type { BaseViewItem } from '@/lib/data'
 
 export type ViewMode = 'text' | 'images' | 'code' | 'github' | 'uri' | 'video' | 'tweet'
@@ -47,9 +51,33 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
   const [codeLanguage, setCodeLanguage] = useState(item.codeLanguage || 'typescript')
   const [githubUrl, setGithubUrl] = useState(item.githubUrl || '')
   const [images, setImages] = useState<string[]>(item.images || [])
+  const [imageTransform, setImageTransform] = useState<ImageTransform>(
+    item.imageTransform || {
+      crop: { x: 0, y: 0 },
+      zoom: 1,
+      rotation: 0
+    }
+  )
+  
+  // Update local state when item prop changes
+  React.useEffect(() => {
+    setViewMode(item.viewMode || 'text')
+    setCodeContent(item.codeSnippet || '')
+    setCodeLanguage(item.codeLanguage || 'typescript')
+    setGithubUrl(item.githubUrl || '')
+    setImages(item.images || [])
+    setImageTransform(item.imageTransform || { crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+    setVideoUrl(item.videoUrl || '')
+    setTweetId(item.tweetId || '')
+    setLinkUrl(item.linkUrl || '')
+    setTweetVariant(item.tweetVariant || 'default')
+  }, [item])
   const [videoUrl, setVideoUrl] = useState(item.videoUrl || '')
   const [tweetId, setTweetId] = useState(item.tweetId || '')
   const [linkUrl, setLinkUrl] = useState(item.linkUrl || '')
+  const [tweetVariant, setTweetVariant] = useState<'default' | 'shadow' | 'minimal'>(item.tweetVariant || 'default')
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
+  const [isEditingImage, setIsEditingImage] = useState(false)
 
   const extractTweetId = (input: string): string => {
     const tweetUrlMatch = input.match(/twitter\.com\/\w+\/status\/(\d+)/)
@@ -66,6 +94,22 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
     setViewMode(mode)
     onUpdate?.('viewMode', mode)
   }
+
+  const getViewModeLink = () => {
+    switch (viewMode) {
+      case 'github':
+        return githubUrl
+      case 'tweet':
+        return tweetId ? `https://twitter.com/i/status/${tweetId}` : ''
+      case 'uri':
+        return linkUrl
+      case 'video':
+        return videoUrl
+      default:
+        return item.link || ''
+    }
+  }
+
 
   const renderContent = () => {
     // Wrap all content in a consistent container to maintain aspect ratio
@@ -100,15 +144,23 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
       
       case 'images':
         return contentWrapper(
-          images.length > 0 ? (
-            <div className="flex-1 p-6">
-              <CardContainer className="w-full h-full">
-                <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-4 border">
-                  <CardItem translateZ="50" className="text-xl font-bold text-neutral-600 dark:text-white mb-4">
+          images.length > 0 && images[0] ? (
+            <div className="flex-1 p-4">
+              <CardContainer containerClassName="h-full" className="h-full">
+                <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
+                  <CardItem
+                    translateZ="50"
+                    className="text-xl font-bold text-neutral-600 dark:text-white mb-4"
+                  >
                     {item.title}
                   </CardItem>
                   <CardItem translateZ="100" className="w-full flex-1">
-                    <ImageCarousel images={images} className="h-full" />
+                    <TransformedImage
+                      src={images[0]}
+                      transform={imageTransform}
+                      alt={item.title || 'Image'}
+                      className="w-full h-full rounded-xl group-hover/card:shadow-xl"
+                    />
                   </CardItem>
                 </CardBody>
               </CardContainer>
@@ -117,7 +169,7 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
             <div className="flex-1 flex items-center justify-center p-6">
               <div className="text-center text-gray-500">
                 <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Click settings to add images</p>
+                <p>Click settings to add an image</p>
               </div>
             </div>
           )
@@ -158,14 +210,13 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
       case 'tweet':
         return contentWrapper(
           tweetId ? (
-            <div className="flex-1 p-6">
-              <div className="h-full flex items-center justify-center">
+            <div className={tweetVariant === 'default' ? "flex-1 p-6 overflow-y-auto" : "flex-1 p-6"}>
+              <div className={tweetVariant === 'default' ? "flex justify-center" : "h-full flex items-center justify-center"}>
                 <div className="w-full max-w-lg">
-                  <div className="border rounded-lg p-4 bg-blue-50">
-                    <Twitter className="w-6 h-6 text-blue-500 mb-2" />
-                    <p className="text-sm text-gray-600">Tweet ID: {tweetId}</p>
-                    <p className="text-xs text-gray-500 mt-2">Tweet card will be implemented with proper API</p>
-                  </div>
+                  <ClientTweetCard 
+                    id={tweetId} 
+                    className={tweetVariant === 'shadow' ? 'shadow-2xl' : tweetVariant === 'minimal' ? '' : undefined}
+                  />
                 </div>
               </div>
             </div>
@@ -210,8 +261,45 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
 
   return (
     <div className={cn("group relative h-full", className)}>
-      {/* Settings Button - visible on hover */}
-      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      {/* Action Buttons - visible on hover */}
+      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+        {/* Open in New Tab Button */}
+        {getViewModeLink() && (
+          <Button 
+            size="icon" 
+            variant="secondary" 
+            className="h-8 w-8 shadow-md"
+            onClick={() => {
+              const link = getViewModeLink()
+              if (link) {
+                window.open(link, '_blank')
+              }
+            }}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+        )}
+        
+        {/* Full View Button - only for non-text view modes */}
+        {viewMode !== 'text' && (
+          <Dialog open={isFullscreenOpen} onOpenChange={setIsFullscreenOpen}>
+            <DialogTrigger asChild>
+              <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md">
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[80vw] max-h-[80vh] p-0 overflow-hidden">
+              <DialogTitle className="sr-only">Full View</DialogTitle>
+              <div className="w-full h-[80vh] overflow-auto bg-background">
+                <div className="min-h-full">
+                  {renderContent()}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+        
+        {/* Settings Button */}
         <Sheet>
           <SheetTrigger asChild>
             <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md">
@@ -286,42 +374,107 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
 
               {viewMode === 'images' && (
                 <div className="space-y-4">
-                  <Label>Image URLs</Label>
-                  {images.map((url, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input
-                        value={url}
-                        onChange={(e) => {
-                          const newImages = [...images]
-                          newImages[i] = e.target.value
-                          setImages(newImages)
-                          onUpdate?.('images', newImages)
-                        }}
-                        placeholder="Image URL"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const newImages = images.filter((_, index) => index !== i)
-                          setImages(newImages)
-                          onUpdate?.('images', newImages)
-                        }}
-                      >
-                        Remove
-                      </Button>
+                  <div className="space-y-2">
+                    <Label>Image Source</Label>
+                    <div className="space-y-4">
+                      {/* URL Input */}
+                      <div className="space-y-2">
+                        <Label className="text-sm">Image URL</Label>
+                        <Input
+                          value={images[0]?.startsWith('data:') ? '' : images[0] || ''}
+                          onChange={(e) => {
+                            const newImages = [e.target.value]
+                            setImages(newImages)
+                            setImageTransform({ crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+                            onUpdate?.('images', newImages)
+                            onUpdate?.('imageTransform', { crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+                          }}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                        {images[0]?.startsWith('data:') && (
+                          <p className="text-xs text-muted-foreground">Currently showing uploaded image</p>
+                        )}
+                      </div>
+                      
+                      {/* OR Divider */}
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">Or</span>
+                        </div>
+                      </div>
+                      
+                      {/* File Upload */}
+                      <div className="space-y-2">
+                        <Label className="text-sm">Upload Image</Label>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              const reader = new FileReader()
+                              reader.onloadend = () => {
+                                const base64String = reader.result as string
+                                const newImages = [base64String]
+                                setImages(newImages)
+                                setImageTransform({ crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+                                onUpdate?.('images', newImages)
+                                onUpdate?.('imageTransform', { crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+                              }
+                              reader.readAsDataURL(file)
+                            }
+                          }}
+                        />
+                        {images[0] && images[0].startsWith('data:') && (
+                          <p className="text-xs text-muted-foreground">Image uploaded successfully</p>
+                        )}
+                      </div>
+                      
+                      {/* Image Preview */}
+                      {images[0] && (
+                        <div className="space-y-2">
+                          <Label className="text-sm">Preview (as shown in card)</Label>
+                          <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
+                            <TransformedImage
+                              src={images[0]}
+                              transform={imageTransform}
+                              alt="Preview"
+                              className="w-full h-full"
+                            />
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="absolute bottom-2 right-2 h-7 text-xs"
+                              onClick={() => setIsEditingImage(true)}
+                            >
+                              <Edit2 className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Clear Button */}
+                      {images[0] && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => {
+                            setImages([])
+                            setImageTransform({ crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+                            onUpdate?.('images', [])
+                            onUpdate?.('imageTransform', { crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+                          }}
+                        >
+                          Clear Image
+                        </Button>
+                      )}
                     </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const newImages = [...images, '']
-                      setImages(newImages)
-                      onUpdate?.('images', newImages)
-                    }}
-                  >
-                    Add Image
-                  </Button>
+                  </div>
                 </div>
               )}
 
@@ -354,17 +507,35 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
               )}
 
               {viewMode === 'tweet' && (
-                <div className="space-y-2">
-                  <Label>Tweet ID or URL</Label>
-                  <Input
-                    value={tweetId}
-                    onChange={(e) => {
-                      const id = extractTweetId(e.target.value)
-                      setTweetId(id)
-                      onUpdate?.('tweetId', id)
-                    }}
-                    placeholder="Tweet ID or full Twitter/X URL"
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Tweet ID or URL</Label>
+                    <Input
+                      value={tweetId}
+                      onChange={(e) => {
+                        const id = extractTweetId(e.target.value)
+                        setTweetId(id)
+                        onUpdate?.('tweetId', id)
+                      }}
+                      placeholder="Tweet ID or full Twitter/X URL"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tweet Style</Label>
+                    <Select value={tweetVariant} onValueChange={(v: 'default' | 'shadow' | 'minimal') => {
+                      setTweetVariant(v)
+                      onUpdate?.('tweetVariant', v)
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Default</SelectItem>
+                        <SelectItem value="shadow">With Shadow (shadow-2xl)</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
 
@@ -390,6 +561,25 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
       <div className="h-full w-full overflow-hidden">
         {renderContent()}
       </div>
+
+      {/* Image Editor Dialog */}
+      <Dialog open={isEditingImage} onOpenChange={setIsEditingImage}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-6">
+          <DialogTitle className="sr-only">Edit Image</DialogTitle>
+          {images[0] && (
+            <ImageTransformEditor
+              image={images[0]}
+              initialTransform={imageTransform}
+              aspectRatio={4 / 3}
+              onSave={(transform) => {
+                setImageTransform(transform)
+                onUpdate?.('imageTransform', transform)
+                setIsEditingImage(false)
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
