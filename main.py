@@ -12,8 +12,9 @@ import config
 load_dotenv()
 
 # Import our routes
-from src.api.routes import cv, portfolio, sse, workflows, cv_enhanced, portfolio_generator
-from src.api.routes import portfolio_generator_v2, demo_preview
+from src.api.routes import cv, sse, workflows, cv_enhanced, portfolio_generator
+from src.api.routes.future_use import portfolio_generator_v2, demo_preview
+# from src.api.routes.archived import portfolio  # Archived - replaced by portfolio_generator
 
 # Configure logging
 logging.basicConfig(
@@ -40,14 +41,13 @@ app.add_middleware(
 
 # Include routers
 app.include_router(cv.router, prefix="/api/v1")
-app.include_router(portfolio.router, prefix="/api/v1")
-app.include_router(portfolio_generator.router, prefix="/api/v1")  # Original portfolio generator
-app.include_router(portfolio_generator_v2.router, prefix="/api/v2")  # Enhanced with template selection
-# app.include_router(cv_to_portfolio.router, prefix="/api/v1")  # Deprecated - moved to legacy
+# app.include_router(portfolio.router, prefix="/api/v1")  # Archived - deprecated, replaced by portfolio_generator
+app.include_router(portfolio_generator.router, prefix="/api/v1")  # Main portfolio generation
+app.include_router(portfolio_generator_v2.router, prefix="/api/v2")  # V2 API - ready for future use
 app.include_router(sse.router, prefix="/api/v1")
 app.include_router(workflows.router, prefix="/api/v1")
 app.include_router(cv_enhanced.router)  # Enhanced CV with real-time tracking
-app.include_router(demo_preview.router, prefix="/api/v1")  # Demo preview for non-authenticated users
+app.include_router(demo_preview.router, prefix="/api/v1")  # Demo preview - future use
 
 
 # Root endpoint
