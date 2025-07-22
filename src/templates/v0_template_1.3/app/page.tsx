@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useMemo, useState, useEffect } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import type { DragEndEvent } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
 import { toast } from "sonner"
@@ -482,10 +480,11 @@ export default function FashionPortfolioPage() {
           title={data.summary.sectionTitle}
           onSaveTitle={(v) => handleSave("summary.sectionTitle", v)}
           isVisible
+          fullWidth={true}
         >
-          <div className="min-h-[150px] flex items-center justify-center max-w-4xl mx-auto">
+          <div className="min-h-[150px] flex items-center justify-center max-w-7xl mx-auto px-6 lg:px-8">
             <FlipText
-              className="text-lg sm:text-2xl md:text-3xl font-serif font-light text-foreground/90 leading-relaxed"
+              className="text-lg sm:text-2xl md:text-3xl font-serif font-light text-foreground/90"
               duration={0.3}
               delayMultiple={0.03}
             >
@@ -530,7 +529,11 @@ export default function FashionPortfolioPage() {
                 <SmartCard
                   item={item}
                   onUpdate={(field, value) => handleSave(`projects.projectItems.${i}.${field}`, value)}
-                  className={cn("h-full w-full aspect-[5/3] shadow-lg overflow-hidden", cardBgClasses[i % cardBgClasses.length])}
+                  className={cn(
+                    "h-full w-full shadow-lg overflow-hidden", 
+                    item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                    cardBgClasses[i % cardBgClasses.length]
+                  )}
                 >
                   {/* Default text view content */}
                   <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
