@@ -2,6 +2,8 @@
 
 Hey Reef! Here's everything you need to get both the main website and portfolio template running on your Mac.
 
+**Last Updated**: January 22, 2025 | **Version**: 4.6
+
 ## 📋 Prerequisites
 
 Before you start, make sure you have these installed on your Mac:
@@ -88,6 +90,17 @@ These files contain sensitive data or are user-specific, so they're not in the r
 ### 4. Example CV Files
 ⚠️ **IMPORTANT**: The `data/cv_examples/` directory contains example CVs for testing. Ask Nitzan if you need these files, or you can use your own test CVs.
 
+## 🔒 Security Configuration (NEW!)
+
+Before running any services, be aware of the recent security updates:
+
+### Security Best Practices
+- All file uploads are validated with strict regex patterns
+- Path traversal protection is enforced on all file operations
+- User IDs and portfolio IDs have strict format validation
+- Database operations use parameterized queries
+- Subprocess operations are secured with shell=False
+
 ## 🌐 Running the User Website (user_web_example)
 
 ### Step 1: Navigate to the user website directory
@@ -127,13 +140,19 @@ The website should now be running at: **http://localhost:3000** 🎉
 
 ## 🎨 Running the Portfolio Template (v0_template_1.3)
 
+**Note**: We now have multiple template versions. The latest is v0_template_1.3 which includes:
+- Enhanced animations and UI components
+- Better CV data integration
+- Theme customization support
+- Improved mobile responsiveness
+
 ### Step 1: Open a new terminal tab/window
 Keep the user website running in the first terminal.
 
 ### Step 2: Navigate to the template directory
 ```bash
 cd ~/Desktop/cv2web-v4  # Go back to root
-cd src/templates/v0_template_1.3
+cd src/templates/v0_template_1.3  # Latest template version
 ```
 
 ### Step 3: Install template dependencies
@@ -213,6 +232,21 @@ After following all steps, you should have:
 2. **Portfolio Template**: http://localhost:3001 (or another port)
 3. **Backend API** (optional): http://localhost:2000
 
+## 🏗️ API Route Structure (Updated!)
+
+The API routes have been reorganized for better clarity:
+
+### Active Routes
+- `/api/v1/portfolio/*` - Main portfolio generation endpoints (NOT `/api/v1/portfolios/*`)
+- `/api/v1/cv/*` - CV upload and management
+- `/api/v1/download/*` - File download endpoints
+- `/api/v1/my-cvs` - List user's CVs
+
+### Future Use Routes (not mounted yet)
+- Portfolio Expert API - AI-powered portfolio guidance
+- Portfolio Generator V2 - Enhanced template selection
+- Demo Preview - For non-authenticated users
+
 ## 🛠️ Troubleshooting
 
 ### Common Issues:
@@ -240,6 +274,15 @@ After following all steps, you should have:
    - Run `pnpm run typecheck` to see all TypeScript errors
    - Most can be ignored for development
 
+6. **Backend API not connecting**
+   - Make sure backend is running on port 2000 (NOT 8000)
+   - Check that NEXT_PUBLIC_API_URL is set to http://localhost:2000
+
+7. **File upload errors**
+   - Check that upload directories exist (run the mkdir commands)
+   - Ensure files are under 10MB limit
+   - Only allowed extensions: PDF, DOCX, PNG, JPG, JPEG, WEBP
+
 ## 🎯 Quick Commands Reference
 
 ```bash
@@ -260,6 +303,12 @@ pip install -r requirements.txt  # For backend
 curl http://localhost:3000  # User website
 curl http://localhost:3001  # Portfolio template
 curl http://localhost:2000/health  # Backend API
+
+# TypeScript checking (IMPORTANT!)
+pnpm run typecheck  # Run before committing
+
+# View API documentation
+open http://localhost:2000/docs  # Interactive API docs (backend must be running)
 ```
 
 ## 📞 Need Help?
@@ -274,5 +323,19 @@ If you run into any issues:
 
 Good luck! 🚀 Let me know if you need any clarification or run into issues.
 
+## 🆕 Recent Changes
+
+### Version 4.6 (January 22, 2025)
+- Added critical security fixes for path traversal and input validation
+- Reorganized API routes into active/archived/future_use directories
+- Fixed API paths from `/api/v1/portfolios/*` to `/api/v1/portfolio/*`
+- Added new portfolio template v0_template_1.3 with enhanced features
+
+### What's Coming Next
+- Payment system integration (Stripe/PayPal)
+- Portfolio Expert AI guidance (currently in future_use)
+- Enhanced template selection system
+- Vercel deployment automation
+
 ---
-*Created with ❤️ by Nitzan for Reef*
+*Created with ❤️ by Nitzan for Reef | Updated: January 22, 2025*
