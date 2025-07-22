@@ -50,9 +50,15 @@ cd cv2web-v4
 Some directories are in .gitignore, so you need to create them:
 ```bash
 mkdir -p data/uploads
+mkdir -p data/test_outputs
 mkdir -p data/generated_portfolios
 mkdir -p sandboxes/portfolios
 mkdir -p logs
+mkdir -p tests/outputs
+mkdir -p tests/results
+mkdir -p .taskmaster/tasks
+mkdir -p .taskmaster/research
+mkdir -p credentials
 ```
 
 ### 3. Install Frontend Dependencies
@@ -60,6 +66,27 @@ mkdir -p logs
 # Install all dependencies using pnpm
 pnpm install
 ```
+
+## 📁 Important Files NOT in GitHub
+
+These files contain sensitive data or are user-specific, so they're not in the repository. You'll need to create them:
+
+### 1. Environment Files
+- `.env` (for backend)
+- `.env.local` (for frontend)
+- Any Google service account JSON files
+
+### 2. Database Files
+- The SQLite database will be created automatically when you run the backend
+- Location: `cv2web.db` in the root directory
+
+### 3. User Data Directories (already created above)
+- `data/uploads/` - Where uploaded CVs are stored
+- `data/generated_portfolios/` - Where generated portfolios are saved
+- `logs/` - Application logs
+
+### 4. Example CV Files
+⚠️ **IMPORTANT**: The `data/cv_examples/` directory contains example CVs for testing. Ask Nitzan if you need these files, or you can use your own test CVs.
 
 ## 🌐 Running the User Website (user_web_example)
 
