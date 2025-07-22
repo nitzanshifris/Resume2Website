@@ -105,6 +105,9 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
         return linkUrl
       case 'video':
         return videoUrl
+      case 'images':
+        // For images, check if there's an external link or if it's a URL (not base64)
+        return item.link || (images[0] && !images[0].startsWith('data:') ? images[0] : '')
       default:
         return item.link || ''
     }
@@ -150,7 +153,7 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
                 <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
                   <CardItem
                     translateZ="50"
-                    className="text-xl font-bold text-neutral-600 dark:text-white mb-4"
+                    className="text-xl font-bold text-neutral-600 dark:text-white mb-4 text-center w-full"
                   >
                     {item.title}
                   </CardItem>
@@ -263,8 +266,8 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
     <div className={cn("group relative h-full", className)}>
       {/* Action Buttons - visible on hover */}
       <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-        {/* Open in New Tab Button */}
-        {getViewModeLink() && (
+        {/* Open in New Tab Button - show for all non-text modes */}
+        {viewMode !== 'text' && (
           <Button 
             size="icon" 
             variant="secondary" 
@@ -275,6 +278,7 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
                 window.open(link, '_blank')
               }
             }}
+            disabled={!getViewModeLink()}
           >
             <ExternalLink className="h-4 w-4" />
           </Button>
@@ -288,12 +292,35 @@ export function SmartCard({ item, children, className, onUpdate }: SmartCardProp
                 <Maximize2 className="h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[80vw] max-h-[80vh] p-0 overflow-hidden">
+            <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
               <DialogTitle className="sr-only">Full View</DialogTitle>
-              <div className="w-full h-[80vh] overflow-auto bg-background">
-                <div className="min-h-full">
-                  {renderContent()}
-                </div>
+              <div className="w-full h-[85vh] flex items-center justify-center bg-background p-8">
+                {viewMode === 'images' && images.length > 0 && images[0] ? (
+                  <div className="w-full h-full max-w-4xl">
+                    <CardContainer containerClassName="h-full" className="h-full">
+                      <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-8 border flex flex-col">
+                        <CardItem
+                          translateZ="50"
+                          className="text-2xl font-bold text-neutral-600 dark:text-white mb-6 text-center w-full"
+                        >
+                          {item.title}
+                        </CardItem>
+                        <CardItem translateZ="100" className="w-full flex-1">
+                          <TransformedImage
+                            src={images[0]}
+                            transform={imageTransform}
+                            alt={item.title || 'Image'}
+                            className="w-full h-full rounded-xl group-hover/card:shadow-xl"
+                          />
+                        </CardItem>
+                      </CardBody>
+                    </CardContainer>
+                  </div>
+                ) : (
+                  <div className="w-full h-full">
+                    {renderContent()}
+                  </div>
+                )}
               </div>
             </DialogContent>
           </Dialog>

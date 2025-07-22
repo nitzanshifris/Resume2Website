@@ -55,32 +55,25 @@ export function GenericItem({ item, sectionKey, index, handleSave, cardBgClass, 
     case 'image':
       // 3D Card view
       return item.images && item.images[0] ? (
-        <CardContainer className="h-full">
-          <CardBody className={cn("bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-[20rem] rounded-xl p-6 border", cardBgClass)}>
-            <CardItem
-              translateZ="50"
-              className="text-xl font-bold text-neutral-600 dark:text-white"
-            >
-              {item.title || item.role || item.institution || item.organization}
-            </CardItem>
-            <CardItem
-              as="p"
-              translateZ="60"
-              className="text-neutral-500 text-sm max-w-sm mt-2 dark:text-neutral-300"
-            >
-              {item.description || item.period || item.year || ""}
-            </CardItem>
-            <CardItem translateZ="100" className="w-full mt-4">
-              <img
-                src={item.images[0]}
-                height="1000"
-                width="1000"
-                className="h-60 w-full object-cover rounded-xl group-hover/card:shadow-xl"
-                alt={item.title || item.role || ""}
-              />
-            </CardItem>
-          </CardBody>
-        </CardContainer>
+        <div className="w-full h-full p-4">
+          <CardContainer containerClassName="h-full" className="h-full">
+            <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
+              <CardItem
+                translateZ="50"
+                className="text-xl font-bold text-neutral-600 dark:text-white mb-4 text-center w-full"
+              >
+                {item.title || item.role || item.institution || item.organization}
+              </CardItem>
+              <CardItem translateZ="100" className="w-full flex-1">
+                <img
+                  src={item.images[0]}
+                  className="w-full h-full object-cover rounded-xl group-hover/card:shadow-xl"
+                  alt={item.title || item.role || ""}
+                />
+              </CardItem>
+            </CardBody>
+          </CardContainer>
+        </div>
       ) : null
 
     default:
