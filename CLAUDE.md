@@ -114,9 +114,11 @@ CV2WEB-V4/
 ├── src/                    # Backend (FastAPI)
 │   ├── api/               # API routes and endpoints
 │   │   └── routes/        # Individual route modules
-│   │       ├── portfolio_expert.py    # AI portfolio guidance
-│   │       ├── portfolio_generator.py # Portfolio creation & management
-│   │       └── cv.py                  # CV CRUD operations
+│   │       ├── portfolio_generator.py # Main portfolio creation & management
+│   │       ├── cv.py                  # CV CRUD operations
+│   │       ├── archived/              # Deprecated/unused routes
+│   │       └── future_use/            # Ready but not yet active
+│   │           └── portfolio_expert.py # AI portfolio guidance (not mounted)
 │   ├── core/              # Business logic
 │   │   ├── cv_extraction/ # AI-powered CV parsing (Claude 4)
 │   │   ├── generators/    # Portfolio generation system
@@ -372,10 +374,12 @@ app.include_router(analytics.router, prefix="/api/v1")
 # http://localhost:2000/docs
 ```
 
-### Working with Portfolio Expert System
+### Working with Portfolio Expert System (Currently in future_use - not mounted)
 ```python
+# NOTE: Portfolio Expert is implemented but not currently mounted in main.py
+# To enable: import and mount portfolio_expert.py from src/api/routes/future_use/
 # Using the Portfolio Expert API
-# src/api/routes/portfolio_expert.py
+# src/api/routes/future_use/portfolio_expert.py
 
 # 1. Start expert session
 POST /api/v1/portfolio-expert/start-session
@@ -402,11 +406,12 @@ POST /api/v1/portfolio-expert/generate
 
 ### Managing Portfolio Instances
 ```python
-# Portfolio Generation and Management
+# Portfolio Generation and Management (PRIMARY GENERATION SCRIPT)
 # src/api/routes/portfolio_generator.py
+# Mounted at: /api/v1/portfolio/* (not /api/v1/portfolios/*)
 
 # 1. Create new portfolio
-POST /api/v1/portfolios/generate
+POST /api/v1/portfolio/generate/{job_id}
 {
     "job_id": "user_cv_id",
     "template": "v0_template_1",
@@ -414,16 +419,16 @@ POST /api/v1/portfolios/generate
 }
 
 # 2. List user's portfolios
-GET /api/v1/portfolios
+GET /api/v1/portfolio/list
 
 # 3. Get portfolio status
-GET /api/v1/portfolios/{portfolio_id}/status
+GET /api/v1/portfolio/{portfolio_id}/status
 
 # 4. Restart portfolio server
-POST /api/v1/portfolios/{portfolio_id}/restart
+POST /api/v1/portfolio/{portfolio_id}/restart
 
 # 5. Stop portfolio server
-POST /api/v1/portfolios/{portfolio_id}/stop
+POST /api/v1/portfolio/{portfolio_id}/stop
 ```
 
 ## 🐛 Troubleshooting
@@ -454,8 +459,8 @@ curl http://localhost:2000/health    # Backend health
 curl http://localhost:3000/api/health # Frontend health
 
 # Portfolio management
-curl http://localhost:2000/api/v1/portfolios        # List user portfolios
-curl http://localhost:2000/api/v1/portfolios/status # Check all portfolio status
+curl http://localhost:2000/api/v1/portfolio/list     # List user portfolios
+curl http://localhost:2000/api/v1/portfolio/status   # Check all portfolio status
 
 # Portfolio Expert debugging
 curl -X POST http://localhost:2000/api/v1/portfolio-expert/start-session \
@@ -754,8 +759,9 @@ PUT /api/v1/cv/{job_id}
 GET /api/v1/download/{job_id}
 ```
 
-### Portfolio Expert API Endpoints
+### Portfolio Expert API Endpoints (Currently in future_use - not active)
 ```python
+# NOTE: These endpoints are implemented but not currently mounted
 # Start new expert session
 POST /api/v1/portfolio-expert/start-session
 {
@@ -782,36 +788,26 @@ POST /api/v1/portfolio-expert/generate
 GET /api/v1/portfolio-expert/session/{session_id}
 ```
 
-### Portfolio Generation & Management API
+### Portfolio Generation & Management API (PRIMARY - portfolio_generator.py)
 ```python
 # Generate new portfolio
-POST /api/v1/portfolios/generate
-{
-    "job_id": str,
-    "template": str,
-    "config": Optional[Dict]
-}
+POST /api/v1/portfolio/generate/{job_id}
+# Request body: template selection and config
 
 # List user's portfolios
-GET /api/v1/portfolios
+GET /api/v1/portfolio/list
 
-# Get portfolio status
-GET /api/v1/portfolios/{portfolio_id}/status
+# Get portfolio CV data
+GET /api/v1/portfolio/{portfolio_id}/cv-data
 
-# Start portfolio server
-POST /api/v1/portfolios/{portfolio_id}/start
-
-# Stop portfolio server
-POST /api/v1/portfolios/{portfolio_id}/stop
+# Update portfolio CV data
+PUT /api/v1/portfolio/{portfolio_id}/cv-data
 
 # Restart portfolio server
-POST /api/v1/portfolios/{portfolio_id}/restart
+POST /api/v1/portfolio/{portfolio_id}/restart
 
-# Delete portfolio
-DELETE /api/v1/portfolios/{portfolio_id}
-
-# Get portfolio preview URL
-GET /api/v1/portfolios/{portfolio_id}/preview
+# Note: Additional endpoints like start/stop/delete may be available
+# Check http://localhost:2000/docs for complete API documentation
 ```
 
 ### Payment System & Pricing API (TODO - Backend Implementation)
@@ -849,6 +845,14 @@ POST /api/v1/payments/refund
 - Currently using simulated progress for better UX
 
 ## Recent Updates
+
+### API Route Reorganization (2025-01-22)
+- **🏗️ Restructured API Routes**: Organized routes into active, archived, and future_use directories
+- **📁 Archived Routes**: Moved unused `cv_processing.py` and deprecated `portfolio.py` to archived folder
+- **🔮 Future Use Routes**: Moved `portfolio_expert.py`, `portfolio_generator_v2.py`, and `demo_preview.py` to future_use
+- **✅ Clarified Primary Scripts**: Documented `portfolio_generator.py` as the main portfolio generation script
+- **📝 Updated Documentation**: Added API_ROUTES_ANALYSIS.md with comprehensive route analysis
+- **🔧 Fixed API Paths**: Corrected portfolio endpoints from `/api/v1/portfolios/*` to `/api/v1/portfolio/*`
 
 ### Critical Fixes & Enhancements (2025-01-18)
 - **🐛 Fixed CV Extraction Error**: Resolved issue with `johnathan_Resume.pdf` causing extraction failures due to None education items in date validator
@@ -901,4 +905,4 @@ POST /api/v1/payments/refund
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-01-17 | Version: 4.5*
+*Last updated: 2025-01-22 | Version: 4.6*

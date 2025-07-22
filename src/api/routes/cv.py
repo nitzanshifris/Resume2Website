@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import aiofiles
 import hashlib  # For file hash calculation
 import os  # For environment variables
+import re  # For filename validation
 from dotenv import load_dotenv  # For loading .env file
 from passlib.context import CryptContext  # For secure password hashing
 import sys
@@ -1008,6 +1009,14 @@ async def download_specific_file(
     
     if not cv_upload:
         raise HTTPException(status_code=404, detail="CV not found")
+    
+    # Validate filename - prevent path traversal attempts
+    if not filename or '..' in filename or '/' in filename or '\\' in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
+    # Additional validation: ensure filename contains only safe characters
+    if not re.match(r'^[a-zA-Z0-9_\-\.]+$', filename):
+        raise HTTPException(status_code=400, detail="Invalid filename format")
     
     # Construct file path
     BASE_DIR = Path(__file__).parent.parent.parent.parent
