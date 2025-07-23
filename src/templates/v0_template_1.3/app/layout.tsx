@@ -4,6 +4,7 @@ import { Playfair_Display, Inter } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme/theme-provider"
+import { EditModeProvider } from "@/contexts/edit-mode-context"
 import { Toaster } from "@/components/ui/sonner"
 import { Watermark } from "@/components/watermark"
 
@@ -31,9 +32,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn("bg-background", inter.variable, playfair.variable)}>
         <ThemeProvider>
-          <Watermark />
-          {children}
-          <Toaster />
+          <EditModeProvider>
+            <Watermark />
+            {children}
+            <Toaster />
+          </EditModeProvider>
         </ThemeProvider>
       </body>
     </html>

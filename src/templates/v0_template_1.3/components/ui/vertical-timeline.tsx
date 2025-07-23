@@ -1,21 +1,27 @@
 "use client"
 import type React from "react"
 import { cn } from "@/lib/utils"
-import { GraduationCap } from "lucide-react"
+import { GraduationCap, Edit2, Trash2 } from "lucide-react"
 import { motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
 
 interface TimelineItemData {
   title: React.ReactNode
   degree: React.ReactNode
   years: React.ReactNode
   description: React.ReactNode
+  imageUrl?: string
+  imageAlt?: string
 }
 
 interface VerticalTimelineProps {
   items: TimelineItemData[]
+  onEdit?: (index: number) => void
+  onDelete?: (index: number) => void
+  isEditMode?: boolean
 }
 
-export const VerticalTimeline: React.FC<VerticalTimelineProps> = ({ items }) => {
+export const VerticalTimeline: React.FC<VerticalTimelineProps> = ({ items, onEdit, onDelete, isEditMode = false }) => {
   return (
     <div className="relative max-w-5xl mx-auto px-2 sm:px-4">
       {/* Central vertical line - ALWAYS centered */}
@@ -53,10 +59,35 @@ export const VerticalTimeline: React.FC<VerticalTimelineProps> = ({ items }) => 
                 {/* Card Content with static border */}
                 <div
                   className={cn(
-                    "bg-card p-4 sm:p-6 rounded-xl border-2 border-accent shadow-lg",
+                    "bg-card p-4 sm:p-6 rounded-xl border-2 border-accent shadow-lg relative group",
                     alignLeft ? "text-right" : "text-left",
                   )}
                 >
+                  {/* Edit/Delete buttons */}
+                  {isEditMode && (
+                    <div className={cn(
+                      "absolute top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                      alignLeft ? "left-2" : "right-2"
+                    )}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 hover:bg-accent/20"
+                        onClick={() => onEdit?.(i)}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
+                        onClick={() => onDelete?.(i)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  
                   <div className="space-y-1">
                     {item.title}
                     {item.degree}
