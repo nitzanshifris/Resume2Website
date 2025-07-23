@@ -30,6 +30,10 @@ import { HobbyCard } from "@/components/hobby-card"
 import { MembershipCard } from "@/components/membership-card"
 import { TestimonialCard } from "@/components/testimonial-card"
 import { SmartCard } from "@/components/smart-card"
+import { SettingsButton } from "@/components/settings-button"
+import { EditModeToggle } from "@/components/edit-mode-toggle"
+import { EditableSection } from "@/components/editable-section"
+import { useEditMode } from "@/contexts/edit-mode-context"
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 const formatLabel = (key: string) => {
@@ -77,6 +81,7 @@ export default function FashionPortfolioPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { theme, setTheme, themes } = useTheme()
+  const { isEditMode } = useEditMode()
 
   /* Load CV Data */ /* ------------------------------------------- */
   useEffect(() => {
@@ -614,7 +619,25 @@ export default function FashionPortfolioPage() {
           onSaveTitle={(v) => handleSave("education.sectionTitle", v)}
           isVisible
         >
-          <VerticalTimeline items={educationTimelineItems} />
+          <VerticalTimeline 
+            items={educationTimelineItems} 
+            isEditMode={isEditMode}
+            onEdit={(index) => {
+              // Handle edit functionality
+              console.log('Edit education item:', index)
+            }}
+            onDelete={(index) => {
+              const newItems = [...data.education.educationItems]
+              newItems.splice(index, 1)
+              setData(prev => ({
+                ...prev,
+                education: {
+                  ...prev.education,
+                  educationItems: newItems
+                }
+              }))
+            }}
+          />
         </Section>
       ) : null,
 
@@ -1123,6 +1146,7 @@ export default function FashionPortfolioPage() {
   return (
     <main className="bg-background text-foreground antialiased w-full max-w-full overflow-x-hidden">
       <FloatingNav navItems={navItems} maxVisibleItems={6} />
+      <EditModeToggle />
 
       {/* Hero */}
       <HeroSection data={data.hero} onSave={(field, v) => handleSave(`hero.${field}`, v)} showPhoto={showPhoto} />

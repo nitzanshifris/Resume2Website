@@ -90,6 +90,13 @@ export interface ContactData {
   copyright: string
 }
 
+export interface Achievement {
+  id: string
+  title: string
+  description: string
+  icon: 'award' | 'users' | 'target' | 'trending-up'
+}
+
 export interface ExperienceItem {
   title: string
   company: string
@@ -97,6 +104,8 @@ export interface ExperienceItem {
   startDate: string
   endDate: string
   description: string
+  technologies?: string[]
+  achievements?: Achievement[]
 }
 
 export interface EducationItem {

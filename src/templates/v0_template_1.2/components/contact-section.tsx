@@ -1,0 +1,150 @@
+"use client"
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { toast } from "sonner"
+import { EditableText } from "@/components/ui/editable-text"
+import { Button } from "@/components/ui/button"
+import { Mail, Phone, MapPin, Download, Send } from "lucide-react"
+import { socialIconMap, type ContactData } from "@/lib/data"
+import { ContactForm } from "@/components/contact-form"
+
+interface ContactSectionProps {
+  data: ContactData
+  onSave: (field: keyof Omit<ContactData, "professionalLinks" | "location">, value: string) => void
+  onSaveLocation: (field: keyof ContactData["location"], value: string) => void
+}
+
+export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionProps) {
+  const [isFormVisible, setIsFormVisible] = useState(false)
+
+  const handleCopyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text)
+    toast.success(`${type} copied to clipboard!`)
+  }
+
+  return (
+    <footer id="contact" className="relative bg-secondary/30">
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="w-full max-w-7xl mx-auto flex flex-col items-center text-center py-24 px-4"
+      >
+        <h2 className="text-7xl font-bold font-serif mb-4">Let's Create Together</h2>
+        <EditableText
+          as="p"
+          initialValue={data.availability ?? ""}
+          onSave={(value) => onSave("availability", value)}
+          className="text-lg font-sans font-light mb-20 text-muted-foreground max-w-3xl"
+        />
+
+        <div className="grid grid-cols-2 gap-y-16 lg:gap-x-24 w-full">
+          {/* Left Column: Contact Info & Buttons */}
+          <div className="flex flex-col items-center lg:items-start text-left">
+            <h3 className="text-3xl font-serif font-bold mb-8">Reach Out Directly</h3>
+            <div className="flex flex-col items-start gap-6 text-xl mb-12">
+              {/* Phone, Email, Location */}
+              {data.phone && (
+                <button
+                  onClick={() => handleCopyToClipboard(data.phone, "Phone number")}
+                  className="flex items-center gap-4 text-foreground hover:text-accent transition-colors group"
+                >
+                  <Phone className="h-7 w-7 text-accent/80 group-hover:text-accent transition-colors" />
+                  <EditableText as="span" initialValue={data.phone ?? ""} onSave={(value) => onSave("phone", value)} />
+                </button>
+              )}
+              {data.email && (
+                <button
+                  onClick={() => handleCopyToClipboard(data.email, "Email address")}
+                  className="flex items-center gap-4 text-foreground hover:text-accent transition-colors group"
+                >
+                  <Mail className="h-7 w-7 text-accent/80 group-hover:text-accent transition-colors" />
+                  <EditableText as="span" initialValue={data.email ?? ""} onSave={(value) => onSave("email", value)} />
+                </button>
+              )}
+              {data.location?.city && data.location?.country && (
+                <div className="flex items-center gap-4 text-foreground">
+                  <MapPin className="h-7 w-7 text-accent/80" />
+                  <span>
+                    <EditableText
+                      as="span"
+                      initialValue={data.location.city}
+                      onSave={(value) => onSaveLocation("city", value)}
+                    />
+                    {", "}
+                    <EditableText
+                      as="span"
+                      initialValue={data.location.country}
+                      onSave={(value) => onSaveLocation("country", value)}
+                    />
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col items-center lg:items-start gap-6 mb-12">
+              <Button
+                onClick={() => setIsFormVisible(true)}
+                className="px-10 py-8 text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <Send className="mr-3 h-6 w-6" />
+                Send a Message
+              </Button>
+              <Button
+                asChild
+                className="px-10 py-8 text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <a href="/michelle-lopez-cv.pdf" download="michelle-lopez-cv.pdf">
+                  <Download className="mr-3 h-6 w-6" />
+                  Download CV
+                </a>
+              </Button>
+            </div>
+
+            <div className="flex justify-start gap-4">
+              {data.professionalLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-card/50 rounded-full text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300 ease-in-out transform hover:scale-110 backdrop-blur-sm border border-border/20"
+                  aria-label={link.name}
+                >
+                  {socialIconMap[link.name]}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Form */}
+          <div className="flex flex-col items-center lg:items-start text-left min-h-[450px]">
+            <AnimatePresence mode="wait">
+              {isFormVisible && (
+                <motion.div
+                  key="contact-form"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="w-full"
+                >
+                  <ContactForm />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
+      <div className="bg-background/80 backdrop-blur-sm py-4">
+        <EditableText
+          as="p"
+          initialValue={data.copyright ?? ""}
+          onSave={(value) => onSave("copyright", value)}
+          className="text-base text-muted-foreground text-center"
+        />
+      </div>
+    </footer>
+  )
+}

@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 39 56% 95%; /* cream */
+    --foreground: 20 14% 4%; /* near-black */
+
+    --card: 39 56% 95%;
+    --card-foreground: 20 14% 4%;
+
+    --popover: 39 56% 95%;
+    --popover-foreground: 20 14% 4%;
+
+    --primary: 20 14% 4%;
+    --primary-foreground: 39 56% 95%;
+
+    --secondary: 39 10% 90%;
+    --secondary-foreground: 20 14% 4%;
+
+    --muted: 39 10% 90%;
+    --muted-foreground: 20 5% 45%;
+
+    --accent: 45 86% 62%; /* gold */
+    --accent-foreground: 20 14% 4%;
+
+    --accent-glow: hsla(var(--accent), 0.2);
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 39 56% 95%;
+
+    --border: 39 10% 85%;
+    --input: 39 10% 85%;
+    --ring: 45 86% 62%;
+
+    --radius: 0.5rem;
+  }
+
+  html {
+    @apply scroll-smooth;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+  
+  body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    max-width: 100vw; /* Ensure body never exceeds viewport width */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter);
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    max-width: 100vw; /* Ensure body never exceeds viewport width */
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-playfair);
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px hsla(var(--accent), 0.4), 0 0 25px hsla(var(--accent), 0.2);
+  }
+  
+  /* Responsive utilities to prevent horizontal overflow */
+  .no-horizontal-overflow {
+    overflow-x: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .responsive-container {
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+}
