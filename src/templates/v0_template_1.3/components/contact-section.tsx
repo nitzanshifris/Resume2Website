@@ -24,7 +24,7 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
   }
 
   return (
-    <footer id="contact" className="relative bg-secondary/30 overflow-hidden">
+    <footer id="contact" className="relative bg-background overflow-hidden">
       {/* Fluid Blob Background */}
       <div className="absolute inset-0 z-0">
         <LavaLamp />
@@ -54,24 +54,24 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
               {data.phone && (
                 <button
                   onClick={() => handleCopyToClipboard(data.phone, "Phone number")}
-                  className="flex items-center gap-4 text-foreground hover:text-black transition-colors group"
+                  className="flex items-center gap-4 text-foreground hover:text-accent transition-colors group"
                 >
-                  <Phone className="h-7 w-7 text-gray-600 group-hover:text-black transition-colors" />
+                  <Phone className="h-7 w-7 text-accent/80 group-hover:text-accent transition-colors" />
                   <EditableText as="span" initialValue={data.phone ?? ""} onSave={(value) => onSave("phone", value)} />
                 </button>
               )}
               {data.email && (
                 <button
                   onClick={() => handleCopyToClipboard(data.email, "Email address")}
-                  className="flex items-center gap-4 text-foreground hover:text-black transition-colors group"
+                  className="flex items-center gap-4 text-foreground hover:text-accent transition-colors group"
                 >
-                  <Mail className="h-7 w-7 text-gray-600 group-hover:text-black transition-colors" />
+                  <Mail className="h-7 w-7 text-accent/80 group-hover:text-accent transition-colors" />
                   <EditableText as="span" initialValue={data.email ?? ""} onSave={(value) => onSave("email", value)} />
                 </button>
               )}
               {data.location?.city && data.location?.country && (
                 <div className="flex items-center gap-4 text-foreground">
-                  <MapPin className="h-7 w-7 text-gray-600" />
+                  <MapPin className="h-7 w-7 text-accent/80" />
                   <span>
                     <EditableText
                       as="span"
@@ -108,7 +108,7 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
               >
                 <Button
                   onClick={() => setIsFormVisible(true)}
-                  className="px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-black text-white hover:bg-gray-800 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  className="px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                   <Send className="mr-3 h-6 w-6" />
                   Send a Message
@@ -116,7 +116,7 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
               </motion.div>
               <Button
                 asChild
-                className="px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-black text-white hover:bg-gray-800 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 <a href="/michelle-lopez-cv.pdf" download="michelle-lopez-cv.pdf">
                   <Download className="mr-3 h-6 w-6" />
