@@ -1,0 +1,12 @@
+{
+  "portfolio_id": "8041742a-1467-4722-b056-8f2367362e9d",
+  "user_id": "d045f1de-2f9e-4f80-9168-a4194f5714a5",
+  "job_id": "56c21334-3984-4dbc-98cb-0185e6ad7828",
+  "created_at": "2025-07-23T23:22:33.112752",
+  "port": 4008,
+  "url": "http://localhost:4008",
+  "directory": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/data/generated_portfolios/d045f1de-2f9e-4f80-9168-a4194f5714a5_8041742a-1467-4722-b056-8f2367362e9d",
+  "status": "active",
+  "template": "v0_template_1",
+  "cv_filename": "Lisbon-Resume-Template-Creative.pdf"
+}
