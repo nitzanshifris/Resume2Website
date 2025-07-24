@@ -193,7 +193,10 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
           images.length > 0 && images[0] ? (
             <div className="flex-1 p-4">
               <CardContainer containerClassName="h-full" className="h-full">
-                <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col">
+                <CardBody 
+                  className="relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col"
+                  style={{ backgroundColor: 'hsl(39, 56%, 95%)' }}
+                >
                   <CardItem
                     translateZ="50"
                     className="text-xl font-bold text-neutral-600 dark:text-white mb-4 text-center w-full"
@@ -204,14 +207,16 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                     translateZ="100" 
                     rotateX={imageVariant === 'tilted' ? 20 : 0}
                     rotateZ={imageVariant === 'tilted' ? -10 : 0}
-                    className="w-full flex-1"
+                    className="w-full flex-1 flex items-center justify-center p-8"
                   >
-                    <TransformedImage
-                      src={images[0]}
-                      transform={imageTransform}
-                      alt={item.title || 'Image'}
-                      className="h-full w-full rounded-xl group-hover/card:shadow-xl"
-                    />
+                    <div className="w-3/5 h-3/5 max-w-sm max-h-64">
+                      <TransformedImage
+                        src={images[0]}
+                        transform={imageTransform}
+                        alt={item.title || 'Image'}
+                        className="h-full w-full rounded-xl group-hover/card:shadow-xl object-cover"
+                      />
+                    </div>
                   </CardItem>
                 </CardBody>
               </CardContainer>
@@ -562,12 +567,18 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                     />
                   </div>
                 ) : viewMode === 'images' && images.length > 0 && images[0] ? (
-                  <div className="w-full max-w-5xl transform scale-125">
+                  <div className="w-full">
                     <CardContainer containerClassName="w-full" className="w-full">
-                      <CardBody className="bg-gray-50 relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full aspect-[4/3] rounded-xl p-8 border flex flex-col">
+                      <CardBody 
+                        className="relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full aspect-[3/2] rounded-xl p-6 border flex flex-col will-change-transform"
+                        style={{ 
+                          backgroundColor: 'hsl(39, 56%, 95%)',
+                          transformStyle: 'preserve-3d'
+                        }}
+                      >
                         <CardItem
                           translateZ="50"
-                          className="text-3xl font-bold text-neutral-600 dark:text-white mb-6 text-center w-full"
+                          className="text-xl font-bold text-neutral-600 dark:text-white mb-4 text-center w-full"
                         >
                           {item.title}
                         </CardItem>
@@ -575,20 +586,20 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                           translateZ="100" 
                           rotateX={imageVariant === 'tilted' ? 20 : 0}
                           rotateZ={imageVariant === 'tilted' ? -10 : 0}
-                          className="w-full flex-1"
+                          className="w-full flex-1 px-6 py-4"
                         >
                           <TransformedImage
                             src={images[0]}
                             transform={imageTransform}
                             alt={item.title || 'Image'}
-                            className="h-full w-full rounded-xl group-hover/card:shadow-xl"
+                            className="h-full w-full rounded-xl group-hover/card:shadow-xl object-cover"
                           />
                         </CardItem>
                       </CardBody>
                     </CardContainer>
                   </div>
                 ) : viewMode === 'multi-images' && multiImages.length > 0 ? (
-                  <div className="transform scale-110">
+                  <div className="w-full">
                     <AnimatedTestimonials 
                       testimonials={multiImages.map(img => ({
                         quote: img.quote || '',
@@ -597,7 +608,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                         src: img.src || ''
                       }))}
                       autoplay={false}
-                      className="w-full max-w-7xl px-8 py-8 md:px-16 lg:px-20"
+                      className="w-full px-2 py-4"
                     />
                   </div>
                 ) : viewMode === 'compare' && compareImages.first && compareImages.second ? (
