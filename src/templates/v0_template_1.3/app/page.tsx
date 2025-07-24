@@ -577,14 +577,22 @@ export default function FashionPortfolioPage() {
             isVisible
             fullWidth={true}
           >
-            <div className="min-h-[150px] flex items-center justify-center max-w-7xl mx-auto px-6 lg:px-8">
-              <FlipText
-                className="text-lg sm:text-2xl md:text-3xl font-serif font-light text-foreground/90"
-                duration={0.3}
-                delayMultiple={0.03}
-              >
-                {data.summary.summaryText ?? ""}
-              </FlipText>
+            <div className="min-h-[150px] flex items-center justify-center max-w-5xl mx-auto px-6 lg:px-8">
+              <div className="prose prose-lg prose-slate dark:prose-invert max-w-none">
+                <FlipText
+                  className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-serif font-light text-foreground/90 leading-relaxed hyphens-auto text-balance"
+                  duration={0.3}
+                  delayMultiple={0.03}
+                  style={{
+                    textWrap: 'balance',
+                    hyphens: 'auto',
+                    wordBreak: 'normal',
+                    lineHeight: '1.7'
+                  }}
+                >
+                  {data.summary.summaryText ?? ""}
+                </FlipText>
+              </div>
             </div>
           </Section>
         </EditableSection>

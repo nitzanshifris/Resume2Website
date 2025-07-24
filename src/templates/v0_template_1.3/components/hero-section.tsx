@@ -1,6 +1,7 @@
 "use client"
 import { motion } from "framer-motion"
 import { EditableText } from "@/components/ui/editable-text"
+import { LampUnderline } from "@/components/ui/lamp-underline"
 import { Sparkles } from "@/components/ui/sparkles"
 import { Button } from "@/components/ui/button"
 import { ArrowDown, Camera, Upload, X, Circle, Square, RectangleHorizontal } from "lucide-react"
@@ -114,67 +115,25 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center justify-center overflow-hidden rounded-md py-24 px-4">
-      {/* Name with animation */}
+      {/* Name with lamp underline animation */}
       <motion.div
         initial={{ y: "200%", opacity: 0, rotateZ: 10 }}
         animate={{ y: 0, opacity: 1, rotateZ: 0 }}
         transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1] }}
-        className="overflow-hidden"
+        className="mb-16"
       >
-        <EditableText
-          as="h1"
-          initialValue={data.fullName ?? "Your Name"}
-          onSave={(value) => onSave("fullName", value)}
-          className="text-7xl sm:text-8xl md:text-[10rem] lg:text-[12rem] xl:text-[14rem] font-bold text-center text-foreground relative z-20 font-serif text-glow leading-[0.9]"
-        />
-      </motion.div>
-      {/* Animated divider line */}
-      <motion.div 
-        className="w-full h-16 relative -mt-2 mb-2"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-      >
-        <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[3px] w-full max-w-[90vw] blur-sm"
-          style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-        />
-        <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[1px] w-full max-w-[90vw]"
-          style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-        />
-        <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[8px] w-3/4 max-w-[70vw] blur-md"
-          style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
-        />
-        <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[2px] w-3/4 max-w-[70vw]"
-          style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
-        />
-        <Sparkles
-          background="transparent"
-          minSize={0.6}
-          maxSize={1.5}
-          particleDensity={800}
-          className="w-full h-full"
-          particleColor="hsl(var(--accent))"
-        />
+        <LampUnderline>
+          <EditableText
+            as="h1"
+            initialValue={data.fullName ?? "Your Name"}
+            onSave={(value) => onSave("fullName", value)}
+            className="text-7xl sm:text-8xl md:text-[10rem] lg:text-[12rem] xl:text-[14rem] font-bold text-center text-foreground relative z-20 font-serif leading-[0.9]"
+          />
+        </LampUnderline>
       </motion.div>
       {/* Professional title with animation */}
       <motion.div 
-        className="mx-auto font-normal text-foreground font-serif text-center -mt-2"
+        className="mx-auto font-normal text-foreground font-serif text-center mb-8"
         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ delay: 0.8, duration: 0.8, ease: [0.215, 0.61, 0.355, 1] }}
