@@ -97,10 +97,10 @@ void main() {
         vec3 p = cameraPos + ray * t;
         vec3 normal = getNormal(p);
         float fresnel = pow(1.0 + dot(ray, normal), 3.0);
-        // Gold/yellow blob matching accent color
-        vec3 goldColor = vec3(0.866, 0.749, 0.384); // #DDB362 in RGB
-        vec3 color = mix(goldColor * 0.6, goldColor, fresnel);
-        gl_FragColor = vec4(color, 0.4); // 40% opacity for more visible gold
+        // Exact accent color from CSS: hsl(45, 86%, 62%) = rgb(234, 197, 81)
+        vec3 accentColor = vec3(0.918, 0.773, 0.318); // #EAC551 in normalized RGB
+        vec3 color = accentColor;
+        gl_FragColor = vec4(color, 0.3); // 30% opacity
     } else {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0); // Fully transparent background
     }
