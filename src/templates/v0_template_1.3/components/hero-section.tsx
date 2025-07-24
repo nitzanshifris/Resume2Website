@@ -130,34 +130,34 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
       </motion.div>
       {/* Animated divider line */}
       <motion.div 
-        className="w-full max-w-[80rem] h-24 relative my-12"
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
+        className="w-full h-24 relative mt-4 mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
       >
         <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[3px] w-4/5 blur-sm"
+          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[3px] w-full max-w-[90vw] blur-sm"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
         />
         <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[1px] w-4/5"
+          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[1px] w-full max-w-[90vw]"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
         />
         <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[8px] w-2/5 blur-md"
+          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[8px] w-3/4 max-w-[70vw] blur-md"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
         />
         <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[2px] w-2/5"
+          className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-[2px] w-3/4 max-w-[70vw]"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
@@ -167,11 +167,10 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
           background="transparent"
           minSize={0.6}
           maxSize={1.5}
-          particleDensity={1800}
+          particleDensity={800}
           className="w-full h-full"
           particleColor="hsl(var(--accent))"
         />
-        <div className="absolute inset-0 w-full h-full bg-transparent"></div>
       </motion.div>
       {/* Professional title with animation */}
       <motion.div 
