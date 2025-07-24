@@ -130,7 +130,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
       </motion.div>
       {/* Animated divider line */}
       <motion.div 
-        className="w-full h-24 relative mt-4 mb-8"
+        className="w-full h-16 relative -mt-2 mb-2"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
@@ -174,7 +174,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
       </motion.div>
       {/* Professional title with animation */}
       <motion.div 
-        className="mx-auto font-normal text-foreground font-serif text-center mt-6"
+        className="mx-auto font-normal text-foreground font-serif text-center -mt-2"
         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ delay: 0.8, duration: 0.8, ease: [0.215, 0.61, 0.355, 1] }}
