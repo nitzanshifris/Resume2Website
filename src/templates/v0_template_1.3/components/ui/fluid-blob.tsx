@@ -97,9 +97,10 @@ void main() {
         vec3 p = cameraPos + ray * t;
         vec3 normal = getNormal(p);
         float fresnel = pow(1.0 + dot(ray, normal), 3.0);
-        // Semi-transparent dark blob
-        vec3 color = vec3(0.1 - fresnel * 0.1);
-        gl_FragColor = vec4(color, 0.3); // 30% opacity
+        // Gold/yellow blob matching accent color
+        vec3 goldColor = vec3(0.866, 0.749, 0.384); // #DDB362 in RGB
+        vec3 color = goldColor * (0.8 + fresnel * 0.2);
+        gl_FragColor = vec4(color, 0.2); // 20% opacity for subtle effect
     } else {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0); // Fully transparent background
     }
