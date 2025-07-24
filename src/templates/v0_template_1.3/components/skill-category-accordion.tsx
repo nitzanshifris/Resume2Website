@@ -20,7 +20,18 @@ export function SkillCategoryAccordion({ category, onSave }: SkillCategoryAccord
             <ul className="space-y-3 pt-2 pb-4">
               {category.skills.map((skill, skillIndex) => (
                 <li key={skillIndex} className="text-sm sm:text-base text-muted-foreground">
-                  <EditableText initialValue={skill.name} onSave={(value) => onSave(skillIndex, value)} />
+                  {skill.detailedDisplayText ? (
+                    <EditableText 
+                      initialValue={skill.detailedDisplayText} 
+                      onSave={(value) => onSave(skillIndex, value)} 
+                      className="block"
+                    />
+                  ) : (
+                    <EditableText 
+                      initialValue={skill.name} 
+                      onSave={(value) => onSave(skillIndex, value)} 
+                    />
+                  )}
                 </li>
               ))}
             </ul>

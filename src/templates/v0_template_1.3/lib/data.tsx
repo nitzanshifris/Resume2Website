@@ -138,6 +138,7 @@ export interface EducationItem {
 export interface Skill {
   name: string
   level?: number // Optional: 1-5 for proficiency
+  detailedDisplayText?: string // Optional: detailed description for the skill
 }
 
 export interface SkillCategory {
