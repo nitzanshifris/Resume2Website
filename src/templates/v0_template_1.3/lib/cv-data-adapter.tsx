@@ -308,9 +308,30 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
       sectionTitle: cv2webData.skills?.sectionTitle || "Skills",
       skillCategories: (cv2webData.skills?.skillCategories || []).map(category => ({
         categoryName: category?.categoryName || "Skills",
-        skills: (category?.skills || []).map(skill => ({ name: skill || "Skill" }))
+        skills: (category?.skills || []).map(skill => {
+          // Check if the skill string contains detailed text (e.g., "Python - Expert level with 5+ years experience")
+          const skillStr = skill || "Skill"
+          const dashIndex = skillStr.indexOf(' - ')
+          if (dashIndex > -1) {
+            return {
+              name: skillStr.substring(0, dashIndex).trim(),
+              detailedDisplayText: skillStr
+            }
+          }
+          return { name: skillStr }
+        })
       })),
-      ungroupedSkills: (cv2webData.skills?.ungroupedSkills || []).map(skill => ({ name: skill || "Skill" }))
+      ungroupedSkills: (cv2webData.skills?.ungroupedSkills || []).map(skill => {
+        const skillStr = skill || "Skill"
+        const dashIndex = skillStr.indexOf(' - ')
+        if (dashIndex > -1) {
+          return {
+            name: skillStr.substring(0, dashIndex).trim(),
+            detailedDisplayText: skillStr
+          }
+        }
+        return { name: skillStr }
+      })
     },
 
     projects: {
