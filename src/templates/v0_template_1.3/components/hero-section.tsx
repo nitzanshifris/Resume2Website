@@ -171,7 +171,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
           className="w-full h-full"
           particleColor="hsl(var(--accent))"
         />
-        <div className="absolute inset-0 w-full h-full bg-background [mask-image:radial-gradient(500px_300px_at_top,transparent_20%,white)]"></div>
+        <div className="absolute inset-0 w-full h-full bg-transparent"></div>
       </motion.div>
       {/* Professional title with animation */}
       <motion.div 
