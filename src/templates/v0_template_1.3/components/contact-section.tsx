@@ -26,7 +26,7 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
   return (
     <footer id="contact" className="relative bg-secondary/30 overflow-hidden">
       {/* Fluid Blob Background */}
-      <div className="absolute inset-0 z-0 opacity-20">
+      <div className="absolute inset-0 z-0 opacity-10">
         <LavaLamp />
       </div>
       
