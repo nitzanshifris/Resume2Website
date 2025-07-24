@@ -25,17 +25,20 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
   }
 
   const calculateDuration = (startDate: string, endDate: string) => {
-    // Simple duration calculation (can be enhanced)
+    // Enhanced duration calculation with clearer formatting
     const start = new Date(startDate)
     const end = isCurrentRole(endDate) ? new Date() : new Date(endDate)
     const months = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30))
     const years = Math.floor(months / 12)
     const remainingMonths = months % 12
     
-    if (years > 0) {
-      return `${years}y ${remainingMonths}m`
+    if (years > 0 && remainingMonths > 0) {
+      return `${years} ${years === 1 ? 'year' : 'years'}, ${remainingMonths} ${remainingMonths === 1 ? 'month' : 'months'}`
+    } else if (years > 0) {
+      return `${years} ${years === 1 ? 'year' : 'years'}`
+    } else {
+      return `${months} ${months === 1 ? 'month' : 'months'}`
     }
-    return `${months}m`
   }
 
   return (
@@ -133,35 +136,39 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     )}
                   </motion.div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <EditableText
-                        as="h3"
-                        className="font-serif text-2xl sm:text-4xl font-bold text-slate-900 group-hover:text-blue-600 transition-all duration-300"
-                        initialValue={item.title}
-                        onSave={(v) => onSave(i, "title", v)}
-                      />
+                    <div className="flex items-start gap-3 flex-wrap mb-4">
+                      <div className="flex-1">
+                        <EditableText
+                          as="h3"
+                          className="font-serif text-3xl sm:text-5xl font-black text-slate-900 group-hover:text-blue-600 transition-all duration-300 leading-tight mb-2"
+                          initialValue={item.title}
+                          onSave={(v) => onSave(i, "title", v)}
+                        />
+                        <EditableText
+                          as="p"
+                          className="font-sans text-base sm:text-lg font-medium text-slate-500 uppercase tracking-wider"
+                          initialValue={item.company}
+                          onSave={(v) => onSave(i, "company", v)}
+                        />
+                      </div>
                       {isCurrentRole(item.endDate) && (
                         <motion.span
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200"
+                          className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200"
                         >
                           <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse" />
                           Active
                         </motion.span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 mt-2">
-                      <EditableText
-                        as="p"
-                        className="font-sans text-xl sm:text-2xl font-semibold text-slate-800"
-                        initialValue={item.company}
-                        onSave={(v) => onSave(i, "company", v)}
-                      />
-                      <span className="text-slate-400">•</span>
-                      <span className="text-sm font-medium text-slate-600 bg-slate-100/80 px-2 py-1 rounded-md">
-                        {calculateDuration(item.startDate, item.endDate)}
-                      </span>
+                    <div className="flex items-center gap-3 mt-1">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-slate-500 font-medium">Duration:</span>
+                        <span className="text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                          {calculateDuration(item.startDate, item.endDate)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -257,11 +264,14 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 }}
-                      className="p-4 bg-gradient-to-br from-purple-50 to-purple-25 rounded-lg border border-purple-200/50 shadow-sm"
+                      className="relative p-5 bg-gradient-to-br from-purple-50 to-white rounded-xl border-2 border-purple-200/60 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
                     >
-                      <Target className="h-5 w-5 text-purple-600 mb-2" />
-                      <h4 className="font-semibold text-sm mb-1 text-slate-800">Business Impact</h4>
-                      <p className="text-xs text-slate-600">Increased revenue by 40%</p>
+                      <div className="absolute top-3 right-3 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <Target className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <h4 className="font-bold text-base mb-2 text-slate-900 pr-10">Business Impact</h4>
+                      <p className="text-sm text-slate-600 leading-relaxed">Increased revenue by 40%</p>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-b-xl"></div>
                     </motion.div>
                   </div>
                   
