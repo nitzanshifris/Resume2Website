@@ -113,7 +113,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
   }
 
   return (
-    <div className="min-h-screen w-full bg-background flex flex-col items-center justify-center overflow-hidden rounded-md pt-24">
+    <div className="min-h-screen w-full bg-background flex flex-col items-center justify-center overflow-hidden rounded-md py-24 px-4">
       {/* Name with animation */}
       <motion.div
         initial={{ y: "200%", opacity: 0, rotateZ: 10 }}
@@ -125,39 +125,39 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
           as="h1"
           initialValue={data.fullName ?? "Your Name"}
           onSave={(value) => onSave("fullName", value)}
-          className="text-5xl sm:text-7xl md:text-9xl lg:text-[11rem] font-bold text-center text-foreground relative z-20 font-serif text-glow"
+          className="text-7xl sm:text-8xl md:text-[10rem] lg:text-[12rem] xl:text-[14rem] font-bold text-center text-foreground relative z-20 font-serif text-glow leading-[0.9]"
         />
       </motion.div>
       {/* Animated divider line */}
       <motion.div 
-        className="w-[40rem] h-12 relative"
+        className="w-full max-w-[80rem] h-24 relative my-12"
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
       >
         <motion.div
-          className="absolute inset-x-20 top-0 h-[2px] w-3/4 blur-sm"
+          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[3px] w-4/5 blur-sm"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
         />
         <motion.div
-          className="absolute inset-x-20 top-0 h-px w-3/4"
+          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[1px] w-4/5"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
         />
         <motion.div
-          className="absolute inset-x-60 top-0 h-[5px] w-1/4 blur-sm"
+          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[8px] w-2/5 blur-md"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
         />
         <motion.div
-          className="absolute inset-x-60 top-0 h-px w-1/4"
+          className="absolute left-1/2 transform -translate-x-1/2 top-0 h-[2px] w-2/5"
           style={{ backgroundImage: "linear-gradient(to right, transparent, hsl(var(--accent)), transparent)" }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
@@ -165,17 +165,17 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
         />
         <Sparkles
           background="transparent"
-          minSize={0.4}
-          maxSize={1}
-          particleDensity={1200}
+          minSize={0.6}
+          maxSize={1.5}
+          particleDensity={1800}
           className="w-full h-full"
           particleColor="hsl(var(--accent))"
         />
-        <div className="absolute inset-0 w-full h-full bg-background [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]"></div>
+        <div className="absolute inset-0 w-full h-full bg-background [mask-image:radial-gradient(500px_300px_at_top,transparent_20%,white)]"></div>
       </motion.div>
       {/* Professional title with animation */}
       <motion.div 
-        className="text-2xl sm:text-5xl md:text-7xl mx-auto font-normal text-foreground font-serif text-center"
+        className="mx-auto font-normal text-foreground font-serif text-center mt-6"
         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ delay: 0.8, duration: 0.8, ease: [0.215, 0.61, 0.355, 1] }}
@@ -184,7 +184,22 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
           as="h2"
           initialValue={data.professionalTitle ?? "Professional Title"}
           onSave={(value) => onSave("professionalTitle", value)}
-          className="text-2xl sm:text-5xl md:text-7xl font-normal text-foreground font-serif text-center"
+          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-normal text-foreground/90 font-serif text-center tracking-tight"
+        />
+      </motion.div>
+
+      {/* Summary tagline with animation */}
+      <motion.div 
+        className="mx-auto max-w-4xl px-6 mt-8 mb-8"
+        initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ delay: 1, duration: 0.8, ease: [0.215, 0.61, 0.355, 1] }}
+      >
+        <EditableText
+          as="p"
+          initialValue={data.summaryTagline ?? "Creating amazing experiences through innovation and dedication"}
+          onSave={(value) => onSave("summaryTagline", value)}
+          className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-foreground/70 text-center leading-relaxed"
         />
       </motion.div>
 
@@ -204,21 +219,21 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
               scale: { type: "spring", stiffness: 200, damping: 15 }
             }
           }}
-          className="mt-12 relative"
+          className="mt-16 relative"
         >
           <div className="relative group">
             {/* Glow effect behind photo */}
             <motion.div
               className={cn(
-                "absolute inset-0 bg-accent/30 blur-xl",
+                "absolute inset-0 bg-accent/40 blur-2xl scale-110",
                 getShapeClasses()
               )}
               animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 0.8, 0.5],
+                scale: [1.1, 1.3, 1.1],
+                opacity: [0.4, 0.7, 0.4],
               }}
               transition={{
-                duration: 3,
+                duration: 4,
                 repeat: Infinity,
                 repeatType: "loop",
                 ease: "easeInOut",
@@ -229,7 +244,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
             <div 
               ref={imageContainerRef}
               className={cn(
-                "relative w-64 h-64 overflow-hidden ring-4 ring-offset-8 ring-offset-background ring-accent shadow-2xl z-10 transition-all duration-200",
+                "relative w-80 h-80 md:w-96 md:h-96 overflow-hidden ring-4 ring-offset-8 ring-offset-background ring-accent shadow-2xl z-10 transition-all duration-200",
                 getShapeClasses(),
                 isEditMode && "group-hover:ring-blue-500 group-hover:ring-offset-4"
               )}
@@ -247,8 +262,8 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
                 <Image
                   src={data.profilePhotoUrl || "/placeholder.svg"}
                   alt={data.fullName ?? "Profile Photo"}
-                  width={320}
-                  height={320}
+                  width={400}
+                  height={400}
                   className="object-cover w-full h-full"
                   priority
                   draggable={false}
@@ -293,7 +308,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
             
             {/* Shape selector - visible in edit mode */}
             {isEditMode && (
-              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-20">
+              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-20">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -351,9 +366,9 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-sm text-muted-foreground whitespace-nowrap"
+              className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-lg text-muted-foreground whitespace-nowrap"
             >
-              <Upload className="h-4 w-4 inline mr-1" />
+              <Upload className="h-5 w-5 inline mr-2" />
               Click to upload photo
             </motion.div>
           )}
@@ -379,7 +394,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
           transition: { duration: 0.2 }
         }}
         whileTap={{ scale: 0.95 }}
-        className="mt-16"
+        className="mt-20"
       >
         <motion.div
           animate={{
@@ -395,7 +410,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
         >
           <Button
             asChild
-            className="relative px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-2xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl overflow-hidden group"
+            className="relative px-8 py-6 text-xl sm:px-12 sm:py-10 sm:text-3xl md:text-4xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl overflow-hidden group"
           >
             <a href="#contact" className="relative">
               {/* Shimmer effect on hover */}
@@ -411,7 +426,7 @@ export function HeroSection({ data, onSave, showPhoto }: HeroSectionProps) {
                     ease: "linear",
                   }}
                 >
-                  <ArrowDown className="mr-3 h-6 w-6" />
+                  <ArrowDown className="mr-4 h-8 w-8 md:h-10 md:w-10" />
                 </motion.div>
                 Contact Me
               </span>
