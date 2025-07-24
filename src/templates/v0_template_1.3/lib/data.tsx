@@ -219,6 +219,7 @@ export interface MembershipItem extends BaseViewItem {
   organization: string
   role: string
   period: string
+  description?: string
   icon: keyof typeof contentIconMap
 }
 
@@ -1064,8 +1065,10 @@ const DesignPrinciples = {
         organization: "Professional Excellence Association",
         role: "Board Member & Innovation Committee Chair",
         period: "2023 - Present",
+        description: "Leading strategic initiatives as Board Member and Chair of the Innovation Committee. Driving organizational transformation through cutting-edge innovation programs and fostering collaboration among industry leaders.",
         icon: "Users",
         viewMode: "text",
+        textVariant: "detailed",
         linkUrl: "https://professionalexcellence.org/members/featured",
         images: ["/placeholder-board-meeting.png", "/placeholder-summit.png"]
       },
@@ -1074,8 +1077,10 @@ const DesignPrinciples = {
         organization: "United Nations Sustainable Business Charter",
         role: "Founding Signatory & Advisory Board",
         period: "2022 - Present",
+        description: "Founding signatory of the UN Sustainable Business Charter, serving on the Advisory Board to shape global sustainability policies and practices. Contributing to climate action initiatives and sustainable business frameworks.",
         icon: "ShieldCheck",
         viewMode: "text",
+        textVariant: "detailed",
         videoUrl: "https://sustainablebusinesscharter.org/signatories/featured",
         githubUrl: "https://github.com/un-business-charter/climate-action"
       },
@@ -1084,8 +1089,10 @@ const DesignPrinciples = {
         organization: "Circular Economy Foundation - Make Business Circular",
         role: "Innovation Partner & Thought Leader",
         period: "2021 - Present",
+        description: "Innovation Partner driving circular economy initiatives and sustainable business models. Developing frameworks and tools for businesses to transition to circular practices and reduce environmental impact.",
         icon: "Award",
         viewMode: "text",
+        textVariant: "detailed",
         codeSnippet: `// Circular business tracking system
 interface CircularBusinessMetrics {
   design: {
@@ -1110,8 +1117,10 @@ interface CircularBusinessMetrics {
         organization: "Innovation Revolution Global Advisory Committee",
         role: "Strategic Advisor & Transparency Advocate",
         period: "2020 - Present",
+        description: "Strategic Advisor championing transparency and ethical innovation in global business practices. Working with international organizations to establish standards for responsible innovation and corporate accountability.",
         icon: "Star",
         viewMode: "text",
+        textVariant: "detailed",
         tweetId: "1890123456789012345",
         linkUrl: "https://innovationrevolution.org/advisors/featured"
       },

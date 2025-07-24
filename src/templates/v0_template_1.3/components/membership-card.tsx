@@ -10,9 +10,12 @@ interface MembershipCardProps {
   organization: string
   role: string
   period: string
+  description?: string
+  textVariant?: 'simple' | 'detailed'
   onSaveOrganization: (value: string) => void
   onSaveRole: (value: string) => void
   onSavePeriod: (value: string) => void
+  onSaveDescription?: (value: string) => void
   onDelete?: () => void
   style?: React.CSSProperties
 }
@@ -21,9 +24,12 @@ export function MembershipCard({
   organization,
   role,
   period,
+  description,
+  textVariant = 'simple',
   onSaveOrganization,
   onSaveRole,
   onSavePeriod,
+  onSaveDescription,
   onDelete,
   style,
 }: MembershipCardProps) {
@@ -75,6 +81,14 @@ export function MembershipCard({
           onSave={onSavePeriod}
           className="text-sm font-sans text-card-foreground/60 [text-shadow:_0_1px_2px_hsl(var(--background)_/_40%)] hover:bg-transparent focus:bg-black/20 focus:ring-accent"
         />
+        {textVariant === 'detailed' && description && (
+          <EditableText
+            as="p"
+            initialValue={description}
+            onSave={onSaveDescription || (() => {})}
+            className="text-sm font-sans text-card-foreground/70 [text-shadow:_0_1px_2px_hsl(var(--background)_/_40%)] hover:bg-transparent focus:bg-black/20 focus:ring-accent mt-3"
+          />
+        )}
       </div>
     </div>
   )

@@ -435,7 +435,10 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
         organization: item?.organization || "Organization",
         role: item?.role || "Member",
         period: formatDateRange(item?.dateRange),
-        icon: getRandomIcon()
+        description: item?.membershipType || undefined,
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: item?.membershipType ? "detailed" as const : "simple" as const
       }))
     },
 
