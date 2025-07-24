@@ -90,30 +90,24 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
             </div>
 
             <div className="flex flex-col items-center lg:items-start gap-6 mb-12">
-              <motion.div
-                animate={!isFormVisible ? {
-                  scale: [1, 1.05, 1],
-                  boxShadow: [
-                    "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                    "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                    "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-                  ]
-                } : {}}
-                transition={{
-                  duration: 2,
-                  repeat: !isFormVisible ? Infinity : 0,
-                  repeatType: "loop",
-                  ease: "easeInOut"
-                }}
+              <Button
+                onClick={() => setIsFormVisible(true)}
+                className="relative px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out transform hover:-translate-y-1 group overflow-hidden"
               >
-                <Button
-                  onClick={() => setIsFormVisible(true)}
-                  className="px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                >
+                {/* Glow effect */}
+                <div className="absolute inset-0 rounded-full bg-accent/20 blur-xl group-hover:bg-accent/30 transition-all duration-300" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent/0 via-accent/20 to-accent/0 blur-2xl animate-pulse" />
+                
+                {/* Border glow */}
+                <div className="absolute inset-0 rounded-full ring-2 ring-accent/50 group-hover:ring-accent/80 transition-all duration-300" />
+                <div className="absolute inset-0 rounded-full ring-4 ring-accent/20 group-hover:ring-accent/40 animate-pulse transition-all duration-300" />
+                
+                {/* Content */}
+                <span className="relative z-10 flex items-center">
                   <Send className="mr-3 h-6 w-6" />
                   Send a Message
-                </Button>
-              </motion.div>
+                </span>
+              </Button>
               <Button
                 asChild
                 className="px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
