@@ -225,10 +225,6 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                 <div className="absolute -left-6 -top-6 bottom-6 w-0.5 bg-gradient-to-b from-blue-400 via-slate-300 to-blue-300" />
                 <div className="absolute -left-6.5 -top-6 bottom-6 w-2 bg-gradient-to-b from-blue-200/40 via-slate-200/30 to-blue-200/40 blur-sm" />
                 
-                {/* Connection nodes */}
-                <div className="absolute -left-7.5 top-4 w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm"></div>
-                <div className="absolute -left-7.5 bottom-4 w-3 h-3 bg-slate-300 rounded-full border-2 border-white shadow-sm"></div>
-                
                 <div className="space-y-6">
                   {/* Main description */}
                   <EditableText
