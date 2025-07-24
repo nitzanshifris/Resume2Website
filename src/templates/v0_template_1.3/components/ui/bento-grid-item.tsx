@@ -1,5 +1,6 @@
 import type React from "react"
 import { cn } from "@/lib/utils"
+import { useEditMode } from "@/contexts/edit-mode-context"
 
 export const BentoGridItem = ({
   className,
@@ -14,11 +15,14 @@ export const BentoGridItem = ({
   header?: React.ReactNode
   icon?: React.ReactNode
 }) => {
+  const { isEditMode } = useEditMode()
+  
   return (
     <div
       className={cn(
-        "rounded-xl h-full transition-transform duration-200 hover:-translate-y-1",
-        "p-6 flex flex-col space-y-4 justify-between", // Removed hardcoded bg-card
+        "rounded-xl h-full transition-transform duration-200",
+        !isEditMode && "hover:-translate-y-1", // Only apply hover effect in non-edit mode
+        "p-6 flex flex-col space-y-4 justify-between",
         "border-2 border-accent",
         "shadow-lg",
         className,

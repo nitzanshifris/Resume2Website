@@ -48,7 +48,8 @@ export interface CodeTab {
 
 export interface BaseViewItem {
   _key?: string
-  viewMode?: 'text' | 'images' | 'code' | 'github' | 'uri' | 'video' | 'tweet'
+  viewMode?: 'text' | 'images' | 'code' | 'github' | 'uri' | 'video' | 'tweet' | 'multi-images' | 'compare'
+  textVariant?: 'simple' | 'detailed'
   // Content for different view modes
   codeSnippet?: string
   codeLanguage?: string
@@ -64,6 +65,18 @@ export interface BaseViewItem {
   tweetId?: string
   tweetVariant?: 'default' | 'shadow' | 'minimal'
   linkUrl?: string
+  // Multi-images mode
+  multiImages?: Array<{
+    src: string
+    quote: string
+    name: string
+    designation: string
+  }>
+  // Compare mode
+  compareFirstImage?: string
+  compareSecondImage?: string
+  compareSlideMode?: 'hover' | 'drag'
+  compareVariant?: 'standard' | '3d'
 }
 
 export interface HeroData {
@@ -113,6 +126,13 @@ export interface EducationItem {
   degree: string
   years: string
   description: string
+  imageUrl?: string
+  imageAlt?: string
+  imageTransform?: {
+    crop: { x: number; y: number }
+    zoom: number
+    rotation: number
+  }
 }
 
 export interface Skill {
@@ -267,6 +287,27 @@ export const initialData: PortfolioData = {
         endDate: "Present",
         description:
           "Founded my own luxury fashion house, specializing in sustainable haute couture. Launched 8 successful collections, featured in Vogue, Harper's Bazaar, and Paris Fashion Week. Generated $3.2M in revenue within the first year through direct-to-consumer sales and exclusive boutique partnerships.",
+        technologies: ["Adobe Creative Suite", "CLO 3D", "Browzwear", "Lectra", "SAP Fashion Management"],
+        achievements: [
+          {
+            id: "1",
+            title: "Key Achievement",
+            description: "Featured in Vogue and Harper's Bazaar",
+            icon: "award"
+          },
+          {
+            id: "2",
+            title: "Team Impact",
+            description: "Built and led a team of 15 designers",
+            icon: "users"
+          },
+          {
+            id: "3",
+            title: "Business Impact",
+            description: "Generated $3.2M in first year revenue",
+            icon: "target"
+          }
+        ]
       },
       {
         title: "Senior Fashion Designer",
