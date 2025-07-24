@@ -427,14 +427,14 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="absolute -top-2 -right-2 h-4 w-4 p-0 opacity-0 group-hover/tech:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full"
+                                  className="ml-1 h-4 w-4 p-0 opacity-0 group-hover/tech:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full flex-shrink-0"
                                   onClick={() => {
                                     const newTechs = [...(item.technologies || [])]
                                     newTechs.splice(idx, 1)
                                     onSave(i, "technologies", newTechs)
                                   }}
                                 >
-                                  <X className="h-2.5 w-2.5" />
+                                  <X className="h-2 w-2" />
                                 </Button>
                               )}
                             </motion.span>
