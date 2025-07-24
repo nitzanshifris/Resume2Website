@@ -24,9 +24,9 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
   }
 
   return (
-    <footer id="contact" className="relative bg-secondary/30 overflow-hidden">
-      {/* Fluid Blob Background with subtle effect */}
-      <div className="absolute inset-0 z-0 opacity-30">
+    <footer id="contact" className="relative overflow-hidden">
+      {/* Fluid Blob Background */}
+      <div className="absolute inset-0 z-0">
         <LavaLamp />
       </div>
       
@@ -35,20 +35,20 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center text-center py-24 px-4"
+        className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center text-center py-24 px-4 mix-blend-exclusion"
       >
-        <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold font-serif mb-4">Let's Create Together</h2>
+        <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold font-serif mb-4 mix-blend-exclusion">Let's Create Together</h2>
         <EditableText
           as="p"
           initialValue={data.availability ?? ""}
           onSave={(value) => onSave("availability", value)}
-          className="text-sm sm:text-lg font-sans font-light mb-10 sm:mb-20 text-muted-foreground max-w-3xl"
+          className="text-sm sm:text-lg font-sans font-light mb-10 sm:mb-20 text-muted-foreground max-w-3xl mix-blend-exclusion"
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-16 lg:gap-x-24 w-full">
           {/* Left Column: Contact Info & Buttons */}
           <div className="flex flex-col items-center lg:items-start text-left lg:pl-32">
-            <h3 className="text-2xl sm:text-3xl font-serif font-bold mb-8">Reach Out Directly</h3>
+            <h3 className="text-2xl sm:text-3xl font-serif font-bold mb-8 mix-blend-exclusion">Reach Out Directly</h3>
             <div className="flex flex-col items-start gap-4 sm:gap-6 text-base sm:text-xl mb-12">
               {/* Phone, Email, Location */}
               {data.phone && (
@@ -160,12 +160,12 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
           </div>
         </div>
       </motion.div>
-      <div className="bg-background/80 backdrop-blur-sm py-4">
+      <div className="relative z-10 bg-black py-4">
         <EditableText
           as="p"
           initialValue={data.copyright ?? ""}
           onSave={(value) => onSave("copyright", value)}
-          className="text-base text-muted-foreground text-center"
+          className="text-base text-white text-center mix-blend-exclusion"
         />
       </div>
     </footer>

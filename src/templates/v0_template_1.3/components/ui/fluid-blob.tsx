@@ -91,22 +91,17 @@ void main() {
     vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
     vec3 cameraPos = vec3(0.0, 0.0, 5.0);
     vec3 ray = normalize(vec3((vUv - vec2(0.5)) * resolution.zw, -1));
-    
-    // Cream/beige background color to match the site
-    vec3 backgroundColor = vec3(0.96, 0.94, 0.90); // Soft cream
-    vec3 blobColor = vec3(0.1, 0.1, 0.1); // Dark blob for contrast
+    vec3 color = vec3(1.0);
     
     float t = rayMarch(cameraPos, ray);
     if (t > 0.0) {
         vec3 p = cameraPos + ray * t;
         vec3 normal = getNormal(p);
-        float fresnel = pow(1.0 + dot(ray, normal), 2.0);
-        
-        // Mix between blob color and a slightly darker cream
-        vec3 color = mix(blobColor, vec3(0.85, 0.82, 0.78), fresnel * 0.5);
+        float fresnel = pow(1.0 + dot(ray, normal), 3.0);
+        color = vec3(fresnel);
         gl_FragColor = vec4(color, 1.0);
     } else {
-        gl_FragColor = vec4(backgroundColor, 1.0);
+        gl_FragColor = vec4(1.0);
     }
 }
 `;
@@ -157,7 +152,7 @@ function LavaLampShader() {
 
 export const LavaLamp = () => {
   return (
-    <div style={{ width: '100%', height: '100%', position: "absolute" }}>
+    <div style={{ width: '100%', height: '100%', background: '#000', position: "absolute" }}>
       <Canvas
         camera={{
           left: -0.5,
