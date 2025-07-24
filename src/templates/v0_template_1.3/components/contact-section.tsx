@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Mail, Phone, MapPin, Download, Send } from "lucide-react"
 import { socialIconMap, type ContactData } from "@/lib/data"
 import { ContactForm } from "@/components/contact-form"
+import { LavaLamp } from "@/components/ui/fluid-blob"
 
 interface ContactSectionProps {
   data: ContactData
@@ -23,13 +24,18 @@ export function ContactSection({ data, onSave, onSaveLocation }: ContactSectionP
   }
 
   return (
-    <footer id="contact" className="relative bg-secondary/30">
+    <footer id="contact" className="relative bg-secondary/30 overflow-hidden">
+      {/* Fluid Blob Background with subtle effect */}
+      <div className="absolute inset-0 z-0 opacity-30">
+        <LavaLamp />
+      </div>
+      
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full max-w-7xl mx-auto flex flex-col items-center text-center py-24 px-4"
+        className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center text-center py-24 px-4"
       >
         <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold font-serif mb-4">Let's Create Together</h2>
         <EditableText
