@@ -1512,9 +1512,12 @@ export default function FashionPortfolioPage() {
                     organization={item.organization}
                     role={item.role}
                     period={item.period}
+                    description={item.description}
+                    textVariant={item.textVariant || 'simple'}
                     onSaveOrganization={(v) => handleSave(`memberships.membershipItems.${i}.organization`, v)}
                     onSaveRole={(v) => handleSave(`memberships.membershipItems.${i}.role`, v)}
                     onSavePeriod={(v) => handleSave(`memberships.membershipItems.${i}.period`, v)}
+                    onSaveDescription={(v) => handleSave(`memberships.membershipItems.${i}.description`, v)}
                     onDelete={() => removeItem('memberships', i)}
                     style={{
                       backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
