@@ -97,12 +97,11 @@ void main() {
         vec3 p = cameraPos + ray * t;
         vec3 normal = getNormal(p);
         float fresnel = pow(1.0 + dot(ray, normal), 3.0);
-        // Exact accent color from CSS: hsl(45, 86%, 62%) = rgb(234, 197, 81)
-        vec3 accentColor = vec3(0.918, 0.773, 0.318); // #EAC551 in normalized RGB
-        vec3 color = accentColor;
-        gl_FragColor = vec4(color, 0.3); // 30% opacity
+        // Dark blob with fresnel effect
+        vec3 color = vec3(fresnel * 0.2); // Dark gray/black blob
+        gl_FragColor = vec4(color, 1.0);
     } else {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0); // Fully transparent background
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0); // Transparent background
     }
 }
 `;
