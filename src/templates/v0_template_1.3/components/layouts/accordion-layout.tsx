@@ -234,7 +234,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                   <EditableText
                     textarea
                     as="p"
-                    className="font-sans text-lg sm:text-xl text-slate-700 leading-relaxed"
+                    className="font-sans text-lg sm:text-xl text-slate-700 leading-relaxed list-none"
                     initialValue={item.description}
                     onSave={(v) => onSave(i, "description", v)}
                   />

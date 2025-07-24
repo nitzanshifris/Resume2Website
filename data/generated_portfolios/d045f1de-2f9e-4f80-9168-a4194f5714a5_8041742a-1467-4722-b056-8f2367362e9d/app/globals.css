@@ -48,29 +48,6 @@
   }
 }
 
-/* Tweet Card Styles */
-@layer components {
-  /* Ensure tweet cards integrate with the theme */
-  .react-tweet-theme {
-    @apply !bg-background !text-foreground;
-  }
-  
-  /* Tweet card link colors */
-  .react-tweet-theme a {
-    @apply !text-primary hover:!text-primary/80;
-  }
-  
-  /* Tweet card borders */
-  .react-tweet-theme [data-tweet] {
-    @apply !border-border;
-  }
-  
-  /* Dark mode support */
-  .dark .react-tweet-theme {
-    @apply !bg-background !text-foreground;
-  }
-}
-
 @layer base {
   * {
     @apply border-border;
@@ -94,15 +71,6 @@
 @layer utilities {
   .text-glow {
     text-shadow: 0 0 10px hsla(var(--accent), 0.4), 0 0 25px hsla(var(--accent), 0.2);
-  }
-  
-  /* Remove any list styling and bullet points */
-  .list-none, 
-  .list-none::before,
-  .list-none::after {
-    list-style: none !important;
-    list-style-type: none !important;
-    content: none !important;
   }
   
   /* Responsive utilities to prevent horizontal overflow */
