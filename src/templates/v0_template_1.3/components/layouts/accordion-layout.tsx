@@ -68,29 +68,40 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
           <AccordionItem 
             value={`item-${i}`} 
             className={`
-              relative border rounded-xl overflow-hidden transition-all duration-300
+              relative border rounded-2xl overflow-hidden transition-all duration-300
               ${openItem === `item-${i}` 
-                ? 'border-slate-200 bg-gradient-to-br from-slate-50/80 to-white/60 shadow-2xl shadow-slate-900/10 scale-[1.02] backdrop-blur-sm' 
-                : 'border-slate-200/60 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5 bg-white/40 backdrop-blur-sm'
+                ? 'border-slate-300/80 bg-gradient-to-br from-white/90 to-slate-50/70 shadow-2xl shadow-slate-900/15 scale-[1.01] backdrop-blur-md ring-1 ring-slate-200/50' 
+                : 'border-slate-200/70 hover:border-slate-300/80 hover:shadow-xl hover:shadow-slate-900/8 bg-white/60 backdrop-blur-sm hover:backdrop-blur-md'
               }
-              ${hoveredIndex === i ? 'z-10' : 'z-0'}
+              ${hoveredIndex === i ? 'z-10 shadow-lg shadow-slate-900/10' : 'z-0'}
             `}
           >
-            {/* Modern subtle background pattern */}
-            <div className="absolute inset-0 opacity-30">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 via-transparent to-blue-50/30" />
+            {/* Enhanced background pattern with depth */}
+            <div className="absolute inset-0 opacity-40">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-100/60 via-white/20 to-blue-50/40" />
               {openItem === `item-${i}` && (
                 <motion.div
                   className="absolute inset-0"
                   animate={{
                     backgroundImage: [
-                      'radial-gradient(circle at 20% 80%, rgb(148 163 184 / 0.08) 0%, transparent 50%)',
-                      'radial-gradient(circle at 80% 20%, rgb(59 130 246 / 0.05) 0%, transparent 50%)',
-                      'radial-gradient(circle at 20% 80%, rgb(148 163 184 / 0.08) 0%, transparent 50%)',
+                      'radial-gradient(circle at 20% 80%, rgb(148 163 184 / 0.12) 0%, transparent 60%)',
+                      'radial-gradient(circle at 80% 20%, rgb(59 130 246 / 0.08) 0%, transparent 60%)',
+                      'radial-gradient(circle at 20% 80%, rgb(148 163 184 / 0.12) 0%, transparent 60%)',
                     ],
                   }}
-                  transition={{ duration: 10, repeat: Infinity }}
+                  transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
                 />
+              )}
+              {hoveredIndex === i && (
+                <motion.div
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-transparent to-slate-50/20"></div>
+                </motion.div>
               )}
             </div>
             
@@ -223,8 +234,13 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
             >
               {/* Enhanced content with gradient border */}
               <div className="relative">
-                <div className="absolute -left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 via-slate-300 to-transparent" />
-                <div className="absolute -left-6.5 top-0 bottom-0 w-2 bg-gradient-to-b from-blue-200/40 via-slate-200/30 to-transparent blur-sm" />
+                {/* Extended visual flow line */}
+                <div className="absolute -left-6 -top-6 bottom-6 w-0.5 bg-gradient-to-b from-blue-400 via-slate-300 to-blue-300" />
+                <div className="absolute -left-6.5 -top-6 bottom-6 w-2 bg-gradient-to-b from-blue-200/40 via-slate-200/30 to-blue-200/40 blur-sm" />
+                
+                {/* Connection nodes */}
+                <div className="absolute -left-7.5 top-4 w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm"></div>
+                <div className="absolute -left-7.5 bottom-4 w-3 h-3 bg-slate-300 rounded-full border-2 border-white shadow-sm"></div>
                 
                 <div className="space-y-6">
                   {/* Main description */}
@@ -236,107 +252,232 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     onSave={(v) => onSave(i, "description", v)}
                   />
                   
-                  {/* Key achievements section */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="p-4 bg-gradient-to-br from-blue-50 to-blue-25 rounded-lg border border-blue-200/50 shadow-sm"
-                    >
-                      <Award className="h-5 w-5 text-blue-600 mb-2" />
-                      <h4 className="font-semibold text-sm mb-1 text-slate-800">Key Achievement</h4>
-                      <p className="text-xs text-slate-600">Led successful product launch</p>
-                    </motion.div>
+                  {/* Connected achievements section */}
+                  <div className="mt-8 mb-4">
+                    <h5 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <div className="w-8 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400"></div>
+                      Key Achievements & Impact
+                      <div className="flex-1 h-0.5 bg-gradient-to-r from-purple-400 to-green-400"></div>
+                    </h5>
+                    <div className="bg-gradient-to-br from-slate-50/80 to-white/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="relative group"
+                        >
+                          <div className="h-full bg-white rounded-xl border border-blue-200/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-5">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                                <Award className="h-5 w-5 text-white" />
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-slate-500 font-medium">Success Rate</div>
+                                <div className="text-lg font-bold text-blue-600">98%</div>
+                              </div>
+                            </div>
+                            <h4 className="font-bold text-base mb-2 text-slate-900">Key Achievement</h4>
+                            <p className="text-sm text-slate-600 leading-relaxed mb-3">Led successful product launch</p>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs text-slate-500">
+                                <span>Impact</span>
+                                <span>98%</span>
+                              </div>
+                              <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <motion.div 
+                                  className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: "98%" }}
+                                  transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl"></div>
+                        </motion.div>
                     
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="p-4 bg-gradient-to-br from-green-50 to-green-25 rounded-lg border border-green-200/50 shadow-sm"
-                    >
-                      <Users className="h-5 w-5 text-green-600 mb-2" />
-                      <h4 className="font-semibold text-sm mb-1 text-slate-800">Team Impact</h4>
-                      <p className="text-xs text-slate-600">Managed cross-functional team</p>
-                    </motion.div>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          className="relative group"
+                        >
+                          <div className="h-full bg-white rounded-xl border border-green-200/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-5">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                                <Users className="h-5 w-5 text-white" />
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-slate-500 font-medium">Team Size</div>
+                                <div className="text-lg font-bold text-green-600">12</div>
+                              </div>
+                            </div>
+                            <h4 className="font-bold text-base mb-2 text-slate-900">Team Impact</h4>
+                            <p className="text-sm text-slate-600 leading-relaxed mb-3">Managed cross-functional team</p>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs text-slate-500">
+                                <span>Leadership Score</span>
+                                <span>95%</span>
+                              </div>
+                              <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <motion.div 
+                                  className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: "95%" }}
+                                  transition={{ delay: 0.6, duration: 1, ease: "easeOut" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-green-600/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl"></div>
+                        </motion.div>
                     
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className="relative p-5 bg-gradient-to-br from-purple-50 to-white rounded-xl border-2 border-purple-200/60 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-                    >
-                      <div className="absolute top-3 right-3 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <Target className="h-4 w-4 text-purple-600" />
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="relative group"
+                        >
+                          <div className="h-full bg-white rounded-xl border border-purple-200/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-5">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                                <Target className="h-5 w-5 text-white" />
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-slate-500 font-medium">Growth</div>
+                                <div className="text-lg font-bold text-purple-600">+40%</div>
+                              </div>
+                            </div>
+                            <h4 className="font-bold text-base mb-2 text-slate-900">Business Impact</h4>
+                            <p className="text-sm text-slate-600 leading-relaxed mb-3">Increased revenue by 40%</p>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs text-slate-500">
+                                <span>Revenue Growth</span>
+                                <span>40%</span>
+                              </div>
+                              <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <motion.div 
+                                  className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: "40%" }}
+                                  transition={{ delay: 0.7, duration: 1, ease: "easeOut" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-purple-600/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl"></div>
+                        </motion.div>
                       </div>
-                      <h4 className="font-bold text-base mb-2 text-slate-900 pr-10">Business Impact</h4>
-                      <p className="text-sm text-slate-600 leading-relaxed">Increased revenue by 40%</p>
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-purple-600 rounded-b-xl"></div>
-                    </motion.div>
+                    </div>
                   </div>
                   
-                  {/* Skills used */}
+                  {/* Enhanced technologies section */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex flex-wrap gap-2 pt-4 border-t border-slate-200/60"
+                    transition={{ delay: 0.8 }}
+                    className="mt-6"
                   >
-                    <span className="text-xs font-medium text-slate-700 mr-2">Technologies:</span>
-                    {(item.technologies || []).map((tech, idx) => (
-                      <span
-                        key={idx}
-                        className="group/tech relative px-2 py-1 text-xs bg-black/10 text-black font-medium rounded-md border border-black/20"
-                      >
-                        {tech}
+                    <div className="flex items-center gap-3 mb-4">
+                      <h6 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <div className="w-6 h-0.5 bg-gradient-to-r from-slate-400 to-slate-600"></div>
+                        Technologies & Tools
+                      </h6>
+                      <div className="flex-1 h-px bg-gradient-to-r from-slate-300 to-transparent"></div>
+                    </div>
+                    <div className="bg-gradient-to-br from-slate-50/60 to-white/40 backdrop-blur-sm rounded-xl p-4 border border-slate-200/40">
+                      <div className="flex flex-wrap gap-2">
+                        {(item.technologies || []).map((tech, idx) => {
+                          // Determine tech category and proficiency for visual hierarchy
+                          const getTeachCategory = (techName: string) => {
+                            const frameworks = ['React', 'Next.js', 'Vue', 'Angular', 'Svelte']
+                            const languages = ['JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'Go']
+                            const tools = ['Docker', 'AWS', 'Git', 'Figma', 'Photoshop']
+                            
+                            if (frameworks.some(f => techName.toLowerCase().includes(f.toLowerCase()))) return 'framework'
+                            if (languages.some(l => techName.toLowerCase().includes(l.toLowerCase()))) return 'language'
+                            if (tools.some(t => techName.toLowerCase().includes(t.toLowerCase()))) return 'tool'
+                            return 'other'
+                          }
+                          
+                          const category = getTeachCategory(tech)
+                          const categoryStyles = {
+                            framework: 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border-blue-200/60 hover:from-blue-100 hover:to-blue-200',
+                            language: 'bg-gradient-to-r from-green-50 to-green-100 text-green-800 border-green-200/60 hover:from-green-100 hover:to-green-200',
+                            tool: 'bg-gradient-to-r from-purple-50 to-purple-100 text-purple-800 border-purple-200/60 hover:from-purple-100 hover:to-purple-200',
+                            other: 'bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 border-slate-200/60 hover:from-slate-100 hover:to-slate-200'
+                          }
+                          
+                          return (
+                            <motion.span
+                              key={idx}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: 0.9 + idx * 0.05 }}
+                              className={`group/tech relative inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full border transition-all duration-200 hover:shadow-sm hover:scale-105 ${categoryStyles[category]}`}
+                            >
+                              <div className={`w-1.5 h-1.5 rounded-full ${
+                                category === 'framework' ? 'bg-blue-400' :
+                                category === 'language' ? 'bg-green-400' :
+                                category === 'tool' ? 'bg-purple-400' : 'bg-slate-400'
+                              }`}></div>
+                              {tech}
+                              {isEditMode && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="absolute -top-2 -right-2 h-4 w-4 p-0 opacity-0 group-hover/tech:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full"
+                                  onClick={() => {
+                                    const newTechs = [...(item.technologies || [])]
+                                    newTechs.splice(idx, 1)
+                                    onSave(i, "technologies", newTechs)
+                                  }}
+                                >
+                                  <X className="h-2.5 w-2.5" />
+                                </Button>
+                              )}
+                            </motion.span>
+                          )
+                        })}
                         {isEditMode && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="absolute -top-2 -right-2 h-4 w-4 p-0 opacity-0 group-hover/tech:opacity-100 transition-opacity"
-                            onClick={() => {
-                              const newTechs = [...(item.technologies || [])]
-                              newTechs.splice(idx, 1)
-                              onSave(i, "technologies", newTechs)
-                            }}
+                          <motion.div 
+                            className="flex items-center gap-2 mt-2"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1.2 }}
                           >
-                            <X className="h-3 w-3" />
-                          </Button>
+                            <Input
+                              type="text"
+                              placeholder="Add technology..."
+                              value={newTechnology[i] || ''}
+                              onChange={(e) => setNewTechnology({ ...newTechnology, [i]: e.target.value })}
+                              className="h-8 w-32 text-xs bg-white border-slate-300 rounded-full px-3"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter' && newTechnology[i]) {
+                                  const newTechs = [...(item.technologies || []), newTechnology[i]]
+                                  onSave(i, "technologies", newTechs)
+                                  setNewTechnology({ ...newTechnology, [i]: '' })
+                                }
+                              }}
+                            />
+                            <Button
+                              size="sm"
+                              className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-sm"
+                              onClick={() => {
+                                if (newTechnology[i]) {
+                                  const newTechs = [...(item.technologies || []), newTechnology[i]]
+                                  onSave(i, "technologies", newTechs)
+                                  setNewTechnology({ ...newTechnology, [i]: '' })
+                                }
+                              }}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </motion.div>
                         )}
-                      </span>
-                    ))}
-                    {isEditMode && (
-                      <div className="flex items-center gap-1">
-                        <Input
-                          type="text"
-                          placeholder="Add tech"
-                          value={newTechnology[i] || ''}
-                          onChange={(e) => setNewTechnology({ ...newTechnology, [i]: e.target.value })}
-                          className="h-6 w-24 text-xs"
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && newTechnology[i]) {
-                              const newTechs = [...(item.technologies || []), newTechnology[i]]
-                              onSave(i, "technologies", newTechs)
-                              setNewTechnology({ ...newTechnology, [i]: '' })
-                            }
-                          }}
-                        />
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0"
-                          onClick={() => {
-                            if (newTechnology[i]) {
-                              const newTechs = [...(item.technologies || []), newTechnology[i]]
-                              onSave(i, "technologies", newTechs)
-                              setNewTechnology({ ...newTechnology, [i]: '' })
-                            }
-                          }}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
                       </div>
-                    )}
+                    </div>
                   </motion.div>
                 </div>
               </div>
