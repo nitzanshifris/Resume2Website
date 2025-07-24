@@ -43,12 +43,6 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
 
   return (
     <div className="relative">
-      {/* Modern career progression line */}
-      <div className="absolute left-[35px] top-0 bottom-0 hidden sm:block">
-        <div className="absolute inset-0 w-0.5 bg-gradient-to-b from-blue-400 via-slate-300 to-transparent" />
-        <div className="absolute inset-0 w-2 bg-gradient-to-b from-blue-200/40 via-slate-200/30 to-transparent blur-sm" />
-      </div>
-      
       <Accordion 
         type="single" 
         collapsible 
@@ -221,10 +215,6 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
             >
               {/* Enhanced content with gradient border */}
               <div className="relative">
-                {/* Extended visual flow line */}
-                <div className="absolute -left-6 -top-6 bottom-6 w-0.5 bg-gradient-to-b from-blue-400 via-slate-300 to-blue-300" />
-                <div className="absolute -left-6.5 -top-6 bottom-6 w-2 bg-gradient-to-b from-blue-200/40 via-slate-200/30 to-blue-200/40 blur-sm" />
-                
                 <div className="space-y-6">
                   {/* Main description */}
                   <EditableText
