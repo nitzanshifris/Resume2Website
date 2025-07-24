@@ -23,10 +23,27 @@ export const FloatingNav = ({
 }) => {
   const { scrollYProgress } = useScroll()
   const [visible, setVisible] = useState(true)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null)
 
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     if (typeof current === "number") {
       const direction = current - scrollYProgress.getPrevious()
+      
+      // Set scrolling state
+      setIsScrolling(true)
+      
+      // Clear previous timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout)
+      }
+      
+      // Set new timeout to reset scrolling state
+      const timeout = setTimeout(() => {
+        setIsScrolling(false)
+      }, 1000)
+      setScrollTimeout(timeout)
+      
       if (scrollYProgress.get() < 0.05) {
         setVisible(true)
       } else {
@@ -46,18 +63,22 @@ export const FloatingNav = ({
     <AnimatePresence mode="wait">
       <motion.div
         initial={{
-          opacity: 1,
+          opacity: 0.8,
           y: -100,
         }}
         animate={{
           y: visible ? 0 : -100,
-          opacity: visible ? 1 : 0,
+          opacity: visible ? (isScrolling ? 0.3 : 0.8) : 0,
+        }}
+        whileHover={{
+          opacity: 1,
         }}
         transition={{
           duration: 0.2,
+          opacity: { duration: 0.3 }
         }}
         className={cn(
-          "flex max-w-fit fixed top-10 inset-x-0 mx-auto border border-black/[0.2] rounded-full bg-background/80 shadow-lg z-[5000] pl-4 pr-2 py-2 items-center justify-center space-x-4 backdrop-blur-sm",
+          "flex max-w-fit fixed top-4 inset-x-0 mx-auto border border-border/30 rounded-full bg-background/50 shadow-sm z-[5000] px-2 py-1 items-center justify-center gap-0.5 backdrop-blur-md",
           className,
         )}
       >
@@ -66,26 +87,26 @@ export const FloatingNav = ({
             key={`link=${idx}`}
             href={navItem.link}
             className={cn(
-              "relative text-neutral-700 items-center flex space-x-1 hover:text-gold transition-colors font-serif",
+              "relative text-muted-foreground items-center flex space-x-1 hover:text-foreground transition-all duration-200 px-2 py-0.5 rounded-full hover:bg-accent/10 text-xs",
             )}
           >
             <span className="block sm:hidden">{navItem.icon}</span>
-            <span className="hidden sm:block text-xl md:text-2xl">{navItem.name}</span>
+            <span className="hidden sm:block text-xs font-medium">{navItem.name}</span>
           </Link>
         ))}
 
         {hiddenItems.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-1 text-xl md:text-2xl font-serif rounded-full">
+              <Button variant="ghost" size="sm" className="flex items-center gap-0.5 text-xs font-medium rounded-full px-2 py-0.5 h-auto">
                 More
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-2.5 w-2.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-popover border-border">
               {hiddenItems.map((navItem, idx) => (
                 <DropdownMenuItem key={`hidden-link-${idx}`} asChild>
-                  <Link href={navItem.link} className="text-xl md:text-2xl font-serif">
+                  <Link href={navItem.link} className="text-xs font-medium">
                     {navItem.name}
                   </Link>
                 </DropdownMenuItem>

@@ -3,6 +3,7 @@ import type React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { EditableText } from "@/components/ui/editable-text"
 import { cn } from "@/lib/utils"
+import { useEditMode } from "@/contexts/edit-mode-context"
 
 interface SectionProps {
   id: string
@@ -22,10 +23,19 @@ const sectionAnimation = {
 }
 
 export function Section({ id, title, onSaveTitle, isVisible, className, children, fullWidth = false }: SectionProps) {
+  const { isEditMode } = useEditMode()
+  
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.section id={id} {...sectionAnimation} className={cn("py-12 sm:py-16", className)}>
+        <motion.section 
+          id={id} 
+          {...sectionAnimation} 
+          className={cn(
+            "py-12 sm:py-16 relative transition-all duration-300",
+            className
+          )}
+        >
           <div className={cn(!fullWidth && "max-w-5xl mx-auto px-4")}>
             <div className="max-w-5xl mx-auto px-4">
               <EditableText

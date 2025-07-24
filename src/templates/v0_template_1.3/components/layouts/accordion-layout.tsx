@@ -136,7 +136,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     <div className="flex items-center gap-2 flex-wrap">
                       <EditableText
                         as="h3"
-                        className="font-serif text-2xl sm:text-4xl font-bold bg-gradient-to-r from-card-foreground to-accent bg-clip-text text-transparent group-hover:from-accent group-hover:to-accent/80 transition-all duration-300"
+                        className="font-serif text-2xl sm:text-4xl font-bold text-card-foreground group-hover:text-[#3b82f6] transition-all duration-300"
                         initialValue={item.title}
                         onSave={(v) => onSave(i, "title", v)}
                       />
@@ -154,7 +154,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     <div className="flex items-center gap-3 mt-2">
                       <EditableText
                         as="p"
-                        className="font-sans text-xl sm:text-2xl font-semibold text-card-foreground/80"
+                        className="font-sans text-xl sm:text-2xl font-semibold text-card-foreground"
                         initialValue={item.company}
                         onSave={(v) => onSave(i, "company", v)}
                       />
@@ -171,7 +171,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                   <Calendar className="h-4 w-4 opacity-60" />
                   <EditableText
                     as="p"
-                    className="font-sans text-base sm:text-lg"
+                    className="font-sans text-base sm:text-lg text-card-foreground font-medium"
                     initialValue={`${item.startDate} - ${item.endDate}`}
                     onSave={(v) => {
                       const [start = "", end = ""] = v.split(" - ")
@@ -224,7 +224,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                   <EditableText
                     textarea
                     as="p"
-                    className="font-sans text-lg sm:text-xl text-card-foreground/90 leading-relaxed"
+                    className="font-sans text-lg sm:text-xl text-card-foreground leading-relaxed"
                     initialValue={item.description}
                     onSave={(v) => onSave(i, "description", v)}
                   />
@@ -272,11 +272,11 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     transition={{ delay: 0.5 }}
                     className="flex flex-wrap gap-2 pt-4 border-t border-accent/10"
                   >
-                    <span className="text-xs font-medium text-card-foreground/70 mr-2">Technologies:</span>
+                    <span className="text-xs font-medium text-card-foreground mr-2">Technologies:</span>
                     {(item.technologies || []).map((tech, idx) => (
                       <span
                         key={idx}
-                        className="group/tech relative px-2 py-1 text-xs bg-muted text-card-foreground font-medium rounded-md"
+                        className="group/tech relative px-2 py-1 text-xs bg-accent/10 text-accent font-medium rounded-md border border-accent/20"
                       >
                         {tech}
                         {isEditMode && (

@@ -43,8 +43,7 @@ export function EditableItem({
             {isDraggable && (
               <Button
                 size="icon"
-                variant="secondary"
-                className="h-8 w-8 cursor-move shadow-md"
+                className="h-8 w-8 cursor-move shadow-md bg-blue-500 hover:bg-blue-600 text-white"
               >
                 <GripVertical className="h-4 w-4" />
               </Button>
@@ -54,8 +53,7 @@ export function EditableItem({
               <Button
                 onClick={onSettings}
                 size="icon"
-                variant="secondary"
-                className="h-8 w-8 shadow-md"
+                className="h-8 w-8 shadow-md bg-blue-500 hover:bg-blue-600 text-white"
               >
                 <Settings className="h-4 w-4" />
               </Button>
@@ -65,8 +63,7 @@ export function EditableItem({
               <Button
                 onClick={onRemove}
                 size="icon"
-                variant="destructive"
-                className="h-8 w-8 shadow-md"
+                className="h-8 w-8 shadow-md bg-blue-500 hover:bg-blue-600 text-white"
               >
                 <X className="h-4 w-4" />
               </Button>

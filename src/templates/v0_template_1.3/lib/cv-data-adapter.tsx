@@ -315,11 +315,13 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     projects: {
       sectionTitle: cv2webData.projects?.sectionTitle || "Projects",
-      projectItems: (cv2webData.projects?.projectItems || []).map(item => ({
+      projectItems: (cv2webData.projects?.projectItems || []).map((item, index) => ({
         title: item?.title || "Project",
         description: item?.description || "Project description.",
         link: item?.projectUrl || "#",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const
       }))
     },
 
@@ -333,64 +335,76 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     certifications: {
       sectionTitle: cv2webData.certifications?.sectionTitle || "Certifications",
-      certificationItems: (cv2webData.certifications?.certificationItems || []).map(item => ({
+      certificationItems: (cv2webData.certifications?.certificationItems || []).map((item, index) => ({
         title: item?.title || "Certification",
         issuingBody: item?.issuingOrganization || "Issuing Body",
         year: item?.issueDate || "",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const
       }))
     },
 
     achievements: {
       sectionTitle: cv2webData.achievements?.sectionTitle || "Achievements",
-      achievementItems: (cv2webData.achievements?.achievements || []).map(item => ({
+      achievementItems: (cv2webData.achievements?.achievements || []).map((item, index) => ({
         title: item?.label || "Achievement",
         description: `${item?.value || ""} ${item?.contextOrDetail || ""}`.trim() || "Professional achievement.",
         year: item?.timeframe || "",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const
       }))
     },
 
     volunteer: {
       sectionTitle: cv2webData.volunteer?.sectionTitle || "Volunteer Experience",
-      volunteerItems: (cv2webData.volunteer?.volunteerItems || []).map(item => ({
+      volunteerItems: (cv2webData.volunteer?.volunteerItems || []).map((item, index) => ({
         role: item?.role || "Volunteer Role",
         organization: item?.organization || "Organization",
         period: formatDateRange(item?.dateRange),
         description: item?.description || "Volunteer experience description.",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const
       }))
     },
 
     courses: {
       sectionTitle: cv2webData.courses?.sectionTitle || "Courses",
-      courseItems: (cv2webData.courses?.courseItems || []).map(item => ({
+      courseItems: (cv2webData.courses?.courseItems || []).map((item, index) => ({
         title: item?.title || "Course",
         institution: item?.institution || "Institution",
         year: item?.completionDate || "",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const
       }))
     },
 
     publications: {
       sectionTitle: cv2webData.publications?.sectionTitle || "Publications",
-      publicationItems: (cv2webData.publications?.publications || []).map(item => ({
+      publicationItems: (cv2webData.publications?.publications || []).map((item, index) => ({
         title: item?.title || "Publication",
         journal: item?.publicationVenue || "Publication Venue",
         year: item?.publicationDate || "",
         link: item?.url || "#",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const
       }))
     },
 
     speakingEngagements: {
       sectionTitle: cv2webData.speaking?.sectionTitle || "Speaking Engagements",
-      engagementItems: (cv2webData.speaking?.speakingEngagements || []).map(item => ({
+      engagementItems: (cv2webData.speaking?.speakingEngagements || []).map((item, index) => ({
         title: item?.topic || "Speaking Engagement",
         event: item?.eventName || "Event",
         year: item?.date || "",
         location: item?.venue || "Venue",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const
       }))
     },
 
@@ -406,9 +420,12 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     hobbies: {
       sectionTitle: cv2webData.hobbies?.sectionTitle || "Hobbies & Interests",
-      hobbyItems: (cv2webData.hobbies?.hobbies || []).map(hobby => ({
+      hobbyItems: (cv2webData.hobbies?.hobbies || []).map((hobby, index) => ({
         title: hobby || "Interest",
-        icon: getRandomIcon()
+        icon: getRandomIcon(),
+        viewMode: "text" as const,
+        textVariant: "detailed" as const,
+        description: "Add a description for this hobby"
       }))
     },
 

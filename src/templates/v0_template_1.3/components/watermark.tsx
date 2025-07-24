@@ -1,15 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useWatermark } from "@/contexts/watermark-context"
 
 export function Watermark() {
   const [mounted, setMounted] = useState(false)
+  const { isWatermarkVisible } = useWatermark()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  if (!mounted) return null
+  if (!mounted || !isWatermarkVisible) return null
 
   return (
     <>

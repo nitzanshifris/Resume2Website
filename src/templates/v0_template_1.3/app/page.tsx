@@ -1,14 +1,15 @@
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
-import type { DragEndEvent } from "@dnd-kit/core"
-import { arrayMove } from "@dnd-kit/sortable"
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { toast } from "sonner"
 
 import { initialData, contentIconMap, type PortfolioData } from "@/lib/data"
 import { fetchLatestCVData, adaptCV2WebToTemplate } from "@/lib/cv-data-adapter"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme/theme-provider"
+import { useEditMode } from "@/contexts/edit-mode-context"
 
 /* ── UI primitives ──────────────────────────────────────────────── */
 import { VerticalTimeline } from "@/components/ui/vertical-timeline"
@@ -17,9 +18,12 @@ import { EditableText } from "@/components/ui/editable-text"
 import { FloatingNav } from "@/components/ui/floating-nav"
 import { GlowingButton } from "@/components/ui/glowing-button"
 import { FlipText } from "@/components/ui/flip-text"
+import { Button } from "@/components/ui/button"
+import { Trash2 } from "lucide-react"
 
 /* ── Custom components & layouts ────────────────────────────────── */
 import { Section } from "@/components/section"
+import { DraggableSection } from "@/components/draggable-section-simple"
 import { CardCarousel } from "@/components/card-carousel"
 import { HeroSection } from "@/components/hero-section"
 import { SkillsSection } from "@/components/skills-section"
@@ -30,10 +34,10 @@ import { HobbyCard } from "@/components/hobby-card"
 import { MembershipCard } from "@/components/membership-card"
 import { TestimonialCard } from "@/components/testimonial-card"
 import { SmartCard } from "@/components/smart-card"
-import { SettingsButton } from "@/components/settings-button"
 import { EditModeToggle } from "@/components/edit-mode-toggle"
 import { EditableSection } from "@/components/editable-section"
-import { useEditMode } from "@/contexts/edit-mode-context"
+import { WatermarkToggle } from "@/components/watermark-toggle"
+import { useWatermark } from "@/contexts/watermark-context"
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 const formatLabel = (key: string) => {
@@ -82,6 +86,15 @@ export default function FashionPortfolioPage() {
   const [error, setError] = useState<string | null>(null)
   const { theme, setTheme, themes } = useTheme()
   const { isEditMode } = useEditMode()
+  const { isWatermarkVisible, toggleWatermark } = useWatermark()
+  
+  /* DnD sensors */
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   /* Load CV Data */ /* ------------------------------------------- */
   useEffect(() => {
@@ -423,6 +436,65 @@ export default function FashionPortfolioPage() {
 
   const toggleSection = (s: SectionKey) => setSectionVisibility((p) => ({ ...p, [s]: !p[s] }))
 
+  /* Helper function for moving sections */
+  const moveSection = (section: SectionKey, direction: 'up' | 'down') => {
+    setOrderedSections((current) => {
+      const index = current.indexOf(section)
+      if (index === -1) return current
+      
+      const newIndex = direction === 'up' ? index - 1 : index + 1
+      
+      // Check bounds
+      if (newIndex < 0 || newIndex >= current.length) return current
+      
+      const newOrder = [...current]
+      // Swap positions
+      ;[newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]]
+      
+      toast.success(`Moved ${formatLabel((data as any)[section]?.sectionTitle ?? section)} ${direction}`)
+      return newOrder
+    })
+  }
+
+  /* Helper functions for adding/removing items */
+  const addItem = (section: string, newItem: any) => {
+    setData(prev => {
+      const sectionData = (prev as any)[section]
+      const itemsKey = Object.keys(sectionData).find(k => k.endsWith('Items'))
+      if (itemsKey) {
+        return {
+          ...prev,
+          [section]: {
+            ...sectionData,
+            [itemsKey]: [...sectionData[itemsKey], newItem]
+          }
+        }
+      }
+      return prev
+    })
+    toast.success("Item added!")
+  }
+
+  const removeItem = (section: string, index: number) => {
+    setData(prev => {
+      const sectionData = (prev as any)[section]
+      const itemsKey = Object.keys(sectionData).find(k => k.endsWith('Items'))
+      if (itemsKey) {
+        const newItems = [...sectionData[itemsKey]]
+        newItems.splice(index, 1)
+        return {
+          ...prev,
+          [section]: {
+            ...sectionData,
+            [itemsKey]: newItems
+          }
+        }
+      }
+      return prev
+    })
+    toast.success("Item removed!")
+  }
+
   /* Navigation items */ /* --------------------------------------- */
   const navItems = useMemo(
     () =>
@@ -473,95 +545,162 @@ export default function FashionPortfolioPage() {
           onSave={(v) => handleSave(`education.educationItems.${i}.description`, v)}
         />
       ),
+      imageUrl: item.imageUrl,
+      imageAlt: item.imageAlt,
+      imageTransform: item.imageTransform,
     })) ?? []
+
+  /* Get visible sections for determining first/last */
+  const visibleSectionKeys = useMemo(() => 
+    orderedSections.filter(key => sectionVisibility[key] && hasContent(data[key])),
+    [orderedSections, sectionVisibility, data]
+  )
 
   /* Section components map */ /* --------------------------------- */
   const sectionComponents: Record<SectionKey, React.ReactNode> = {
     /* 1. Summary --------------------------------------------------- */
     summary:
       sectionVisibility.summary && data.summary.summaryText ? (
-        <Section
-          id="summary"
-          title={data.summary.sectionTitle}
-          onSaveTitle={(v) => handleSave("summary.sectionTitle", v)}
-          isVisible
-          fullWidth={true}
+        <EditableSection
+          sectionTitle="Summary"
+          onMoveUp={() => moveSection('summary', 'up')}
+          onMoveDown={() => moveSection('summary', 'down')}
+          showMoveButtons={true}
+          showAddButton={false}
+          isFirst={visibleSectionKeys[0] === 'summary'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'summary'}
         >
-          <div className="min-h-[150px] flex items-center justify-center max-w-7xl mx-auto px-6 lg:px-8">
-            <FlipText
-              className="text-lg sm:text-2xl md:text-3xl font-serif font-light text-foreground/90"
-              duration={0.3}
-              delayMultiple={0.03}
-            >
-              {data.summary.summaryText ?? ""}
-            </FlipText>
-          </div>
-        </Section>
+          <Section
+            id="summary"
+            title={data.summary.sectionTitle}
+            onSaveTitle={(v) => handleSave("summary.sectionTitle", v)}
+            isVisible
+            fullWidth={true}
+          >
+            <div className="min-h-[150px] flex items-center justify-center max-w-7xl mx-auto px-6 lg:px-8">
+              <FlipText
+                className="text-lg sm:text-2xl md:text-3xl font-serif font-light text-foreground/90"
+                duration={0.3}
+                delayMultiple={0.03}
+              >
+                {data.summary.summaryText ?? ""}
+              </FlipText>
+            </div>
+          </Section>
+        </EditableSection>
       ) : null,
 
     /* 2. Experience (Accordion) ------------------------------------ */
     experience:
       sectionVisibility.experience && data.experience.experienceItems.length ? (
-        <Section
-          id="experience"
-          title={data.experience.sectionTitle}
-          onSaveTitle={(v) => handleSave("experience.sectionTitle", v)}
-          isVisible
-          className="bg-secondary/30"
+        <EditableSection
+          onAddItem={() => addItem('experience', {
+            company: 'New Company',
+            position: 'New Position',
+            location: 'Location',
+            duration: '2024 - Present',
+            responsibilities: []
+          })}
+          sectionTitle="Experience"
+          onMoveUp={() => moveSection('experience', 'up')}
+          onMoveDown={() => moveSection('experience', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'experience'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'experience'}
         >
-          <AccordionLayout
-            items={data.experience.experienceItems}
-            onSave={(i, field, v) => handleSave(`experience.experienceItems.${i}.${field}`, v)}
-          />
-        </Section>
+          <Section
+            id="experience"
+            title={data.experience.sectionTitle}
+            onSaveTitle={(v) => handleSave("experience.sectionTitle", v)}
+            isVisible
+            className="bg-secondary/30"
+          >
+            <AccordionLayout
+              items={data.experience.experienceItems}
+              onSave={(i, field, v) => handleSave(`experience.experienceItems.${i}.${field}`, v)}
+            />
+          </Section>
+        </EditableSection>
       ) : null,
 
     /* 3. Projects (carousel) --------------------------------------- */
     projects:
       sectionVisibility.projects ? (
-        <Section
-          id="projects"
-          title={data.projects.sectionTitle}
-          onSaveTitle={(v) => handleSave("projects.sectionTitle", v)}
-          isVisible
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('projects', {
+            title: 'New Project',
+            description: 'Project description',
+            icon: 'IconBrandGithub',
+            link: '#',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Projects"
+          onMoveUp={() => moveSection('projects', 'up')}
+          onMoveDown={() => moveSection('projects', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'projects'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'projects'}
         >
+          <Section
+            id="projects"
+            title={data.projects.sectionTitle}
+            onSaveTitle={(v) => handleSave("projects.sectionTitle", v)}
+            isVisible
+            fullWidth
+          >
           {data.projects.projectItems.length > 0 ? (
             <CardCarousel
               items={data.projects.projectItems}
               itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
-              renderItem={(item, i) => (
+              renderItem={(item, i) => {
+                const selectedGradient = getGradientForIndex(i)
+                return (
                 <SmartCard
                   item={item}
                   onUpdate={(field, value) => handleSave(`projects.projectItems.${i}.${field}`, value)}
+                  onDelete={() => removeItem('projects', i)}
                   className={cn(
                     "h-full w-full shadow-lg overflow-hidden", 
                     item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
                     cardBgClasses[i % cardBgClasses.length]
                   )}
                 >
-                  {/* Default text view content */}
-                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
-                    <BentoGridItem
-                      className="h-full"
-                      icon={contentIconMap[item.icon]}
-                      title={
-                        <EditableText
-                          initialValue={item.title}
-                          onSave={(v) => handleSave(`projects.projectItems.${i}.title`, v)}
-                        />
-                      }
-                      description={
-                        <EditableText
-                          textarea
-                          initialValue={item.description}
-                          onSave={(v) => handleSave(`projects.projectItems.${i}.description`, v)}
-                        />
-                      }
+                  {/* Render based on text variant */}
+                  {item.textVariant === 'simple' ? (
+                    <HobbyCard
+                      title={item.title}
+                      onSave={(v) => handleSave(`projects.projectItems.${i}.title`, v)}
+                      onDelete={() => removeItem('projects', i)}
+                      style={{
+                        backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                      }}
                     />
-                  </a>
+                  ) : (
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                      <BentoGridItem
+                        className="h-full"
+                        icon={contentIconMap[item.icon]}
+                        title={
+                          <EditableText
+                            initialValue={item.title}
+                            onSave={(v) => handleSave(`projects.projectItems.${i}.title`, v)}
+                          />
+                        }
+                        description={
+                          <EditableText
+                            textarea
+                            initialValue={item.description}
+                            onSave={(v) => handleSave(`projects.projectItems.${i}.description`, v)}
+                          />
+                        }
+                      />
+                    </a>
+                  )}
                 </SmartCard>
-              )}
+                )
+              }}
             />
           ) : (
             <div className="flex items-center justify-center min-h-[200px]">
@@ -588,37 +727,62 @@ export default function FashionPortfolioPage() {
             </div>
           )}
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 4. Skills (unchanged) ---------------------------------------- */
     skills:
       sectionVisibility.skills && hasContent(data.skills) ? (
-        <Section
-          id="skills"
-          title={data.skills.sectionTitle}
-          onSaveTitle={(v) => handleSave("skills.sectionTitle", v)}
-          isVisible
-          className="bg-secondary/30"
+        <EditableSection
+          sectionTitle="Skills"
+          onMoveUp={() => moveSection('skills', 'up')}
+          onMoveDown={() => moveSection('skills', 'down')}
+          showMoveButtons={true}
+          showAddButton={false}
+          isFirst={visibleSectionKeys[0] === 'skills'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'skills'}
         >
-          <SkillsSection
-            data={data.skills}
-            onSaveSkill={(catIdx, skillIdx, v) =>
-              handleSave(`skills.skillCategories.${catIdx}.skills.${skillIdx}.name`, v)
-            }
-            onSaveUngroupedSkill={(idx, v) => handleSave(`skills.ungroupedSkills.${idx}.name`, v)}
-          />
-        </Section>
+          <Section
+            id="skills"
+            title={data.skills.sectionTitle}
+            onSaveTitle={(v) => handleSave("skills.sectionTitle", v)}
+            isVisible
+            className="bg-secondary/30"
+          >
+            <SkillsSection
+              data={data.skills}
+              onSaveSkill={(catIdx, skillIdx, v) =>
+                handleSave(`skills.skillCategories.${catIdx}.skills.${skillIdx}.name`, v)
+              }
+              onSaveUngroupedSkill={(idx, v) => handleSave(`skills.ungroupedSkills.${idx}.name`, v)}
+            />
+          </Section>
+        </EditableSection>
       ) : null,
 
     /* 5. Education (timeline) -------------------------------------- */
     education:
       sectionVisibility.education && data.education.educationItems.length ? (
-        <Section
-          id="education"
-          title={data.education.sectionTitle}
-          onSaveTitle={(v) => handleSave("education.sectionTitle", v)}
-          isVisible
+        <EditableSection
+          onAddItem={() => addItem('education', {
+            institution: 'New Institution',
+            degree: 'New Degree',
+            years: '2024',
+            description: 'Description of education'
+          })}
+          sectionTitle="Education"
+          onMoveUp={() => moveSection('education', 'up')}
+          onMoveDown={() => moveSection('education', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'education'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'education'}
         >
+          <Section
+            id="education"
+            title={data.education.sectionTitle}
+            onSaveTitle={(v) => handleSave("education.sectionTitle", v)}
+            isVisible
+          >
           <VerticalTimeline 
             items={educationTimelineItems} 
             isEditMode={isEditMode}
@@ -626,9 +790,15 @@ export default function FashionPortfolioPage() {
               // Handle edit functionality
               console.log('Edit education item:', index)
             }}
-            onDelete={(index) => {
+            onDelete={(index) => removeItem('education', index)}
+            onUpdateImage={(index, imageUrl, imageAlt, imageTransform) => {
               const newItems = [...data.education.educationItems]
-              newItems.splice(index, 1)
+              newItems[index] = {
+                ...newItems[index],
+                imageUrl,
+                imageAlt,
+                imageTransform
+              }
               setData(prev => ({
                 ...prev,
                 education: {
@@ -639,19 +809,34 @@ export default function FashionPortfolioPage() {
             }}
           />
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 6. Testimonials (carousel) ----------------------------------- */
     testimonials:
       sectionVisibility.testimonials && data.testimonials.testimonialItems.length ? (
-        <Section
-          id="testimonials"
-          title={data.testimonials.sectionTitle}
-          onSaveTitle={(v) => handleSave("testimonials.sectionTitle", v)}
-          isVisible
-          className="bg-secondary/30"
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('testimonials', {
+            quote: 'New testimonial quote',
+            authorName: 'Author Name',
+            authorTitle: 'Author Title',
+            authorImage: ''
+          })}
+          sectionTitle="Testimonials"
+          onMoveUp={() => moveSection('testimonials', 'up')}
+          onMoveDown={() => moveSection('testimonials', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'testimonials'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'testimonials'}
         >
+          <Section
+            id="testimonials"
+            title={data.testimonials.sectionTitle}
+            onSaveTitle={(v) => handleSave("testimonials.sectionTitle", v)}
+            isVisible
+            className="bg-secondary/30"
+            fullWidth
+          >
           <CardCarousel
             items={data.testimonials.testimonialItems}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
@@ -659,184 +844,302 @@ export default function FashionPortfolioPage() {
               <TestimonialCard
                 item={item}
                 onSave={(field, v) => handleSave(`testimonials.testimonialItems.${i}.${field}`, v)}
+                onDelete={() => removeItem('testimonials', i)}
               />
             )}
           />
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 7. Achievements (carousel) --------------------------------------- */
     achievements:
       sectionVisibility.achievements && data.achievements.achievementItems.length ? (
-        <Section
-          id="achievements"
-          title={data.achievements.sectionTitle}
-          onSaveTitle={(v) => handleSave("achievements.sectionTitle", v)}
-          isVisible
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('achievements', {
+            title: 'New Achievement',
+            description: 'Achievement description',
+            year: '2024',
+            icon: 'IconTrophy',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Achievements"
+          onMoveUp={() => moveSection('achievements', 'up')}
+          onMoveDown={() => moveSection('achievements', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'achievements'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'achievements'}
         >
+          <Section
+            id="achievements"
+            title={data.achievements.sectionTitle}
+            onSaveTitle={(v) => handleSave("achievements.sectionTitle", v)}
+            isVisible
+            fullWidth
+          >
           <CardCarousel
             items={data.achievements.achievementItems}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
-            renderItem={(item, i) => (
+            renderItem={(item, i) => {
+              const selectedGradient = getGradientForIndex(i)
+              return (
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`achievements.achievementItems.${i}.${field}`, value)}
+                onDelete={() => removeItem('achievements', i)}
                 className={cn(
                   "h-full w-full shadow-lg overflow-hidden",
                   item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
                   cardBgClasses[i % cardBgClasses.length]
                 )}
               >
-                {/* Default text view content */}
-                <BentoGridItem
-                  className="h-full"
-                  icon={contentIconMap[item.icon]}
-                  title={
-                    <EditableText
-                      initialValue={item.title}
-                      onSave={(v) => handleSave(`achievements.achievementItems.${i}.title`, v)}
-                    />
-                  }
-                  description={
-                    <EditableText
-                      as="p"
-                      initialValue={`${item.description}${item.year ? `, ${item.year}` : ""}`}
-                      onSave={(v) => {
-                        const [desc = "", yr = ""] = v.split(",")
-                        handleSave(`achievements.achievementItems.${i}.description`, desc.trim())
-                        handleSave(`achievements.achievementItems.${i}.year`, yr.trim())
-                      }}
-                    />
-                  }
-                />
+                {/* Render based on text variant */}
+                {item.textVariant === 'simple' ? (
+                  <HobbyCard
+                    title={item.title}
+                    onSave={(v) => handleSave(`achievements.achievementItems.${i}.title`, v)}
+                    onDelete={() => removeItem('achievements', i)}
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                    }}
+                  />
+                ) : (
+                  <BentoGridItem
+                    className="h-full"
+                    icon={contentIconMap[item.icon]}
+                    title={
+                      <EditableText
+                        initialValue={item.title}
+                        onSave={(v) => handleSave(`achievements.achievementItems.${i}.title`, v)}
+                      />
+                    }
+                    description={
+                      <EditableText
+                        as="p"
+                        initialValue={`${item.description}${item.year ? `, ${item.year}` : ""}`}
+                        onSave={(v) => {
+                          const [desc = "", yr = ""] = v.split(",")
+                          handleSave(`achievements.achievementItems.${i}.description`, desc.trim())
+                          handleSave(`achievements.achievementItems.${i}.year`, yr.trim())
+                        }}
+                      />
+                    }
+                  />
+                )}
               </SmartCard>
-            )}
+              )
+            }}
           />
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 8. Certifications (carousel) ------------------------------------- */
     certifications:
       sectionVisibility.certifications && data.certifications.certificationItems.length ? (
-        <Section
-          id="certifications"
-          title={data.certifications.sectionTitle}
-          onSaveTitle={(v) => handleSave("certifications.sectionTitle", v)}
-          isVisible
-          className="bg-secondary/30"
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('certifications', {
+            title: 'New Certification',
+            issuingBody: 'Issuing Organization',
+            year: '2024',
+            icon: 'IconCertificate',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Certifications"
+          onMoveUp={() => moveSection('certifications', 'up')}
+          onMoveDown={() => moveSection('certifications', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'certifications'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'certifications'}
         >
+          <Section
+            id="certifications"
+            title={data.certifications.sectionTitle}
+            onSaveTitle={(v) => handleSave("certifications.sectionTitle", v)}
+            isVisible
+            className="bg-secondary/30"
+            fullWidth
+          >
           <CardCarousel
             items={data.certifications.certificationItems}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
-            renderItem={(item, i) => (
+            renderItem={(item, i) => {
+              const selectedGradient = getGradientForIndex(i)
+              return (
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`certifications.certificationItems.${i}.${field}`, value)}
+                onDelete={() => removeItem('certifications', i)}
                 className={cn(
                   "h-full w-full shadow-lg overflow-hidden",
                   item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
                   cardBgClasses[i % cardBgClasses.length]
                 )}
               >
-                {/* Default text view content */}
-                <BentoGridItem
-                  className="h-full"
-                  icon={contentIconMap[item.icon]}
-                  title={
-                    <EditableText
-                      initialValue={item.title}
-                      onSave={(v) => handleSave(`certifications.certificationItems.${i}.title`, v)}
-                    />
-                  }
-                  description={
-                    <EditableText
-                      as="p"
-                      initialValue={`${item.issuingBody}${item.year ? `, ${item.year}` : ""}`}
-                      onSave={(v) => {
-                        const [body = "", yr = ""] = v.split(",")
-                        handleSave(`certifications.certificationItems.${i}.issuingBody`, body.trim())
-                        handleSave(`certifications.certificationItems.${i}.year`, yr.trim())
-                      }}
-                    />
-                  }
-                />
+                {/* Render based on text variant */}
+                {item.textVariant === 'simple' ? (
+                  <HobbyCard
+                    title={item.title}
+                    onSave={(v) => handleSave(`certifications.certificationItems.${i}.title`, v)}
+                    onDelete={() => removeItem('certifications', i)}
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                    }}
+                  />
+                ) : (
+                  <BentoGridItem
+                    className="h-full"
+                    icon={contentIconMap[item.icon]}
+                    title={
+                      <EditableText
+                        initialValue={item.title}
+                        onSave={(v) => handleSave(`certifications.certificationItems.${i}.title`, v)}
+                      />
+                    }
+                    description={
+                      <EditableText
+                        as="p"
+                        initialValue={`${item.issuingBody}${item.year ? `, ${item.year}` : ""}`}
+                        onSave={(v) => {
+                          const [body = "", yr = ""] = v.split(",")
+                          handleSave(`certifications.certificationItems.${i}.issuingBody`, body.trim())
+                          handleSave(`certifications.certificationItems.${i}.year`, yr.trim())
+                        }}
+                      />
+                    }
+                  />
+                )}
               </SmartCard>
-            )}
+              )
+            }}
           />
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 9. Volunteer (carousel) ------------------------------------------ */
     volunteer:
       sectionVisibility.volunteer && data.volunteer.volunteerItems.length ? (
-        <Section
-          id="volunteer"
-          title={data.volunteer.sectionTitle}
-          onSaveTitle={(v) => handleSave("volunteer.sectionTitle", v)}
-          isVisible
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('volunteer', {
+            role: 'Volunteer Role',
+            organization: 'Organization Name',
+            duration: '2024 - Present',
+            description: 'Volunteer work description',
+            icon: 'IconHeart',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Volunteer Experience"
+          onMoveUp={() => moveSection('volunteer', 'up')}
+          onMoveDown={() => moveSection('volunteer', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'volunteer'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'volunteer'}
         >
+          <Section
+            id="volunteer"
+            title={data.volunteer.sectionTitle}
+            onSaveTitle={(v) => handleSave("volunteer.sectionTitle", v)}
+            isVisible
+            fullWidth
+          >
           <CardCarousel
             items={data.volunteer.volunteerItems}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
-            renderItem={(item, i) => (
+            renderItem={(item, i) => {
+              const selectedGradient = getGradientForIndex(i)
+              return (
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`volunteer.volunteerItems.${i}.${field}`, value)}
+                onDelete={() => removeItem('volunteer', i)}
                 className={cn(
                   "h-full w-full shadow-lg overflow-hidden",
                   item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
                   cardBgClasses[i % cardBgClasses.length]
                 )}
               >
-                {/* Default text view content */}
-                <BentoGridItem
-                  className="h-full"
-                  icon={contentIconMap[item.icon]}
-                  title={
-                    <EditableText
-                      initialValue={item.role}
-                      onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.role`, v)}
-                    />
-                  }
-                  description={
-                    <>
-                      <p className="font-semibold text-card-foreground text-lg">
-                        <EditableText
-                          as="span"
-                          initialValue={item.organization}
-                          onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.organization`, v)}
-                        />
-                      </p>
+                {/* Render based on text variant */}
+                {item.textVariant === 'simple' ? (
+                  <HobbyCard
+                    title={item.role}
+                    onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.role`, v)}
+                    onDelete={() => removeItem('volunteer', i)}
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                    }}
+                  />
+                ) : (
+                  <BentoGridItem
+                    className="h-full"
+                    icon={contentIconMap[item.icon]}
+                    title={
                       <EditableText
-                        textarea
-                        as="p"
-                        initialValue={item.description}
-                        onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.description`, v)}
-                        className="mt-2 text-xl"
+                        initialValue={item.role}
+                        onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.role`, v)}
                       />
-                    </>
-                  }
-                />
+                    }
+                    description={
+                      <>
+                        <p className="font-semibold text-card-foreground">
+                          <EditableText
+                            as="span"
+                            initialValue={item.organization}
+                            onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.organization`, v)}
+                          />
+                        </p>
+                        <EditableText
+                          textarea
+                          as="p"
+                          initialValue={item.description}
+                          onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.description`, v)}
+                          className="mt-2"
+                        />
+                      </>
+                    }
+                  />
+                )}
               </SmartCard>
-            )}
+              )
+            }}
           />
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 10. Hobbies (carousel with HobbyCard) -------------------------------------------- */
     hobbies:
       sectionVisibility.hobbies ? (
-        <Section
-          id="hobbies"
-          title={data.hobbies.sectionTitle}
-          onSaveTitle={(v) => handleSave("hobbies.sectionTitle", v)}
-          isVisible
-          className="bg-secondary/30"
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('hobbies', {
+            title: 'New Hobby',
+            description: 'Describe your hobby',
+            icon: 'IconStar',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Hobbies"
+          onMoveUp={() => moveSection('hobbies', 'up')}
+          onMoveDown={() => moveSection('hobbies', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'hobbies'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'hobbies'}
         >
+          <Section
+            id="hobbies"
+            title={data.hobbies.sectionTitle}
+            onSaveTitle={(v) => handleSave("hobbies.sectionTitle", v)}
+            isVisible
+            className="bg-secondary/30"
+            fullWidth
+          >
           {data.hobbies.hobbyItems.length > 0 ? (
             <CardCarousel
               items={data.hobbies.hobbyItems}
@@ -848,16 +1151,39 @@ export default function FashionPortfolioPage() {
                   <SmartCard
                     item={item}
                     onUpdate={(field, value) => handleSave(`hobbies.hobbyItems.${i}.${field}`, value)}
+                    onDelete={() => removeItem('hobbies', i)}
                     className="h-full shadow-lg"
                   >
-                    {/* Default text view content */}
-                    <HobbyCard
-                      title={item.title}
-                      onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.title`, v)}
-                      style={{
-                        backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
-                      }}
-                    />
+                    {/* Render based on text variant */}
+                    {item.textVariant === 'detailed' ? (
+                      <BentoGridItem
+                        className="h-full"
+                        icon={contentIconMap[item.icon || 'IconStar']}
+                        title={
+                          <EditableText
+                            initialValue={item.title}
+                            onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.title`, v)}
+                          />
+                        }
+                        description={
+                          <EditableText
+                            textarea
+                            as="p"
+                            initialValue={item.description || 'Add a description for this hobby'}
+                            onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.description`, v)}
+                          />
+                        }
+                      />
+                    ) : (
+                      <HobbyCard
+                        title={item.title}
+                        onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.title`, v)}
+                        onDelete={() => removeItem('hobbies', i)}
+                        style={{
+                          backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                        }}
+                      />
+                    )}
                   </SmartCard>
                 )
               }}
@@ -884,171 +1210,290 @@ export default function FashionPortfolioPage() {
             </div>
           )}
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 11. Courses (carousel) --------------------------------------- */
     courses:
       sectionVisibility.courses && data.courses.courseItems.length ? (
-        <Section
-          id="courses"
-          title={data.courses.sectionTitle}
-          onSaveTitle={(v) => handleSave("courses.sectionTitle", v)}
-          isVisible
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('courses', {
+            title: 'New Course',
+            institution: 'Institution Name',
+            year: '2024',
+            icon: 'IconBook',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Courses"
+          onMoveUp={() => moveSection('courses', 'up')}
+          onMoveDown={() => moveSection('courses', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'courses'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'courses'}
         >
+          <Section
+            id="courses"
+            title={data.courses.sectionTitle}
+            onSaveTitle={(v) => handleSave("courses.sectionTitle", v)}
+            isVisible
+            fullWidth
+          >
           <CardCarousel
             items={data.courses.courseItems}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
-            renderItem={(item, i) => (
+            renderItem={(item, i) => {
+              const selectedGradient = getGradientForIndex(i)
+              return (
               <SmartCard
                 item={item}
                 onUpdate={(field, value) => handleSave(`courses.courseItems.${i}.${field}`, value)}
+                onDelete={() => removeItem('courses', i)}
                 className={cn(
                   "h-full w-full shadow-lg overflow-hidden",
                   item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
                   cardBgClasses[i % cardBgClasses.length]
                 )}
               >
-                {/* Default text view content */}
-                <BentoGridItem
-                  className="h-full"
-                  icon={contentIconMap[item.icon]}
-                  title={
-                    <EditableText
-                      initialValue={item.title}
-                      onSave={(v) => handleSave(`courses.courseItems.${i}.title`, v)}
-                    />
-                  }
-                  description={
-                    <EditableText
-                      as="p"
-                      initialValue={`${item.institution}${item.year ? `, ${item.year}` : ""}`}
-                      onSave={(v) => {
-                        const [inst = "", yr = ""] = v.split(",")
-                        handleSave(`courses.courseItems.${i}.institution`, inst.trim())
-                        handleSave(`courses.courseItems.${i}.year`, yr.trim())
-                      }}
-                    />
-                  }
-                />
-              </SmartCard>
-            )}
-          />
-        </Section>
-      ) : null,
-
-    /* 12. Publications (carousel) ---------------------------------- */
-    publications:
-      sectionVisibility.publications && data.publications.publicationItems.length ? (
-        <Section
-          id="publications"
-          title={data.publications.sectionTitle}
-          onSaveTitle={(v) => handleSave("publications.sectionTitle", v)}
-          isVisible
-          className="bg-secondary/30"
-          fullWidth
-        >
-          <CardCarousel
-            items={data.publications.publicationItems}
-            itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
-            renderItem={(item, i) => (
-              <SmartCard
-                item={item}
-                onUpdate={(field, value) => handleSave(`publications.publicationItems.${i}.${field}`, value)}
-                className={cn(
-                  "h-full w-full shadow-lg overflow-hidden",
-                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
-                  cardBgClasses[i % cardBgClasses.length]
-                )}
-              >
-                {/* Default text view content */}
-                <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                {/* Render based on text variant */}
+                {item.textVariant === 'simple' ? (
+                  <HobbyCard
+                    title={item.title}
+                    onSave={(v) => handleSave(`courses.courseItems.${i}.title`, v)}
+                    onDelete={() => removeItem('courses', i)}
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                    }}
+                  />
+                ) : (
                   <BentoGridItem
                     className="h-full"
                     icon={contentIconMap[item.icon]}
                     title={
                       <EditableText
                         initialValue={item.title}
-                        onSave={(v) => handleSave(`publications.publicationItems.${i}.title`, v)}
+                        onSave={(v) => handleSave(`courses.courseItems.${i}.title`, v)}
                       />
                     }
                     description={
                       <EditableText
                         as="p"
-                        initialValue={`${item.journal}${item.year ? `, ${item.year}` : ""}`}
+                        initialValue={`${item.institution}${item.year ? `, ${item.year}` : ""}`}
                         onSave={(v) => {
-                          const [jour = "", yr = ""] = v.split(",")
-                          handleSave(`publications.publicationItems.${i}.journal`, jour.trim())
-                          handleSave(`publications.publicationItems.${i}.year`, yr.trim())
+                          const [inst = "", yr = ""] = v.split(",")
+                          handleSave(`courses.courseItems.${i}.institution`, inst.trim())
+                          handleSave(`courses.courseItems.${i}.year`, yr.trim())
                         }}
                       />
                     }
                   />
-                </a>
+                )}
               </SmartCard>
-            )}
+              )
+            }}
           />
         </Section>
+        </EditableSection>
       ) : null,
 
-    /* 13. Speaking engagements (carousel) -------------------------- */
-    speakingEngagements:
-      sectionVisibility.speakingEngagements && data.speakingEngagements.engagementItems.length ? (
-        <Section
-          id="speakingEngagements"
-          title={data.speakingEngagements.sectionTitle}
-          onSaveTitle={(v) => handleSave("speakingEngagements.sectionTitle", v)}
-          isVisible
-          fullWidth
+    /* 12. Publications (carousel) ---------------------------------- */
+    publications:
+      sectionVisibility.publications && data.publications.publicationItems.length ? (
+        <EditableSection
+          onAddItem={() => addItem('publications', {
+            title: 'New Publication',
+            journal: 'Journal Name',
+            year: '2024',
+            link: '#',
+            icon: 'IconBook',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Publications"
+          onMoveUp={() => moveSection('publications', 'up')}
+          onMoveDown={() => moveSection('publications', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'publications'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'publications'}
         >
+          <Section
+            id="publications"
+            title={data.publications.sectionTitle}
+            onSaveTitle={(v) => handleSave("publications.sectionTitle", v)}
+            isVisible
+            className="bg-secondary/30"
+            fullWidth
+          >
           <CardCarousel
-            items={data.speakingEngagements.engagementItems}
+            items={data.publications.publicationItems}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
-            renderItem={(item, i) => (
+            renderItem={(item, i) => {
+              const selectedGradient = getGradientForIndex(i)
+              return (
               <SmartCard
                 item={item}
-                onUpdate={(field, value) => handleSave(`speakingEngagements.engagementItems.${i}.${field}`, value)}
+                onUpdate={(field, value) => handleSave(`publications.publicationItems.${i}.${field}`, value)}
+                onDelete={() => removeItem('publications', i)}
                 className={cn(
                   "h-full w-full shadow-lg overflow-hidden",
                   item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
                   cardBgClasses[i % cardBgClasses.length]
                 )}
               >
-                {/* Default text view content */}
-                <BentoGridItem
-                  className="h-full"
-                  icon={contentIconMap[item.icon]}
-                  title={
-                    <EditableText
-                      initialValue={item.title}
-                      onSave={(v) => handleSave(`speakingEngagements.engagementItems.${i}.title`, v)}
+                {/* Render based on text variant */}
+                {item.textVariant === 'simple' ? (
+                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                    <HobbyCard
+                      title={item.title}
+                      onSave={(v) => handleSave(`publications.publicationItems.${i}.title`, v)}
+                      onDelete={() => removeItem('publications', i)}
+                      style={{
+                        backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                      }}
                     />
-                  }
-                  description={
-                    <EditableText
-                      as="p"
-                      initialValue={`${item.event} - ${item.location}${item.year ? `, ${item.year}` : ""}`}
-                      onSave={(v) => handleSave(`speakingEngagements.engagementItems.${i}.event`, v)}
+                  </a>
+                ) : (
+                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                    <BentoGridItem
+                      className="h-full"
+                      icon={contentIconMap[item.icon]}
+                      title={
+                        <EditableText
+                          initialValue={item.title}
+                          onSave={(v) => handleSave(`publications.publicationItems.${i}.title`, v)}
+                        />
+                      }
+                      description={
+                        <EditableText
+                          as="p"
+                          initialValue={`${item.journal}${item.year ? `, ${item.year}` : ""}`}
+                          onSave={(v) => {
+                            const [jour = "", yr = ""] = v.split(",")
+                            handleSave(`publications.publicationItems.${i}.journal`, jour.trim())
+                            handleSave(`publications.publicationItems.${i}.year`, yr.trim())
+                          }}
+                        />
+                      }
                     />
-                  }
-                />
+                  </a>
+                )}
               </SmartCard>
-            )}
+              )
+            }}
           />
         </Section>
+        </EditableSection>
+      ) : null,
+
+    /* 13. Speaking engagements (carousel) -------------------------- */
+    speakingEngagements:
+      sectionVisibility.speakingEngagements && data.speakingEngagements.engagementItems.length ? (
+        <EditableSection
+          onAddItem={() => addItem('speakingEngagements', {
+            title: 'New Speaking Engagement',
+            event: 'Event Name',
+            location: 'Location',
+            year: '2024',
+            icon: 'IconMicrophone',
+            viewMode: 'text',
+            textVariant: 'detailed',
+            images: []
+          })}
+          sectionTitle="Speaking Engagements"
+          onMoveUp={() => moveSection('speakingEngagements', 'up')}
+          onMoveDown={() => moveSection('speakingEngagements', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'speakingEngagements'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'speakingEngagements'}
+        >
+          <Section
+            id="speakingEngagements"
+            title={data.speakingEngagements.sectionTitle}
+            onSaveTitle={(v) => handleSave("speakingEngagements.sectionTitle", v)}
+            isVisible
+            fullWidth
+          >
+          <CardCarousel
+            items={data.speakingEngagements.engagementItems}
+            itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
+            renderItem={(item, i) => {
+              const selectedGradient = getGradientForIndex(i)
+              return (
+              <SmartCard
+                item={item}
+                onUpdate={(field, value) => handleSave(`speakingEngagements.engagementItems.${i}.${field}`, value)}
+                onDelete={() => removeItem('speakingEngagements', i)}
+                className={cn(
+                  "h-full w-full shadow-lg overflow-hidden",
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]",
+                  cardBgClasses[i % cardBgClasses.length]
+                )}
+              >
+                {/* Render based on text variant */}
+                {item.textVariant === 'simple' ? (
+                  <HobbyCard
+                    title={item.title}
+                    onSave={(v) => handleSave(`speakingEngagements.engagementItems.${i}.title`, v)}
+                    onDelete={() => removeItem('speakingEngagements', i)}
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
+                    }}
+                  />
+                ) : (
+                  <BentoGridItem
+                    className="h-full"
+                    icon={contentIconMap[item.icon]}
+                    title={
+                      <EditableText
+                        initialValue={item.title}
+                        onSave={(v) => handleSave(`speakingEngagements.engagementItems.${i}.title`, v)}
+                      />
+                    }
+                    description={
+                      <EditableText
+                        as="p"
+                        initialValue={`${item.event} - ${item.location}${item.year ? `, ${item.year}` : ""}`}
+                        onSave={(v) => handleSave(`speakingEngagements.engagementItems.${i}.event`, v)}
+                      />
+                    }
+                  />
+                )}
+              </SmartCard>
+              )
+            }}
+          />
+        </Section>
+        </EditableSection>
       ) : null,
 
     /* 14. Memberships (carousel) ----------------------------------- */
     memberships:
       sectionVisibility.memberships && data.memberships.membershipItems.length ? (
-        <Section
-          id="memberships"
-          title={data.memberships.sectionTitle}
-          onSaveTitle={(v) => handleSave("memberships.sectionTitle", v)}
-          isVisible
-          className="bg-secondary/30"
-          fullWidth
+        <EditableSection
+          onAddItem={() => addItem('memberships', {
+            organization: 'New Organization',
+            role: 'Member',
+            period: '2024 - Present',
+            viewMode: 'text',
+            images: []
+          })}
+          sectionTitle="Memberships"
+          onMoveUp={() => moveSection('memberships', 'up')}
+          onMoveDown={() => moveSection('memberships', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'memberships'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'memberships'}
         >
+          <Section
+            id="memberships"
+            title={data.memberships.sectionTitle}
+            onSaveTitle={(v) => handleSave("memberships.sectionTitle", v)}
+            isVisible
+            className="bg-secondary/30"
+            fullWidth
+          >
           <CardCarousel
             items={data.memberships.membershipItems}
             itemClassName="basis-1/3"
@@ -1059,6 +1504,7 @@ export default function FashionPortfolioPage() {
                 <SmartCard
                   item={item}
                   onUpdate={(field, value) => handleSave(`memberships.membershipItems.${i}.${field}`, value)}
+                  onDelete={() => removeItem('memberships', i)}
                   className="h-full shadow-lg"
                 >
                   {/* Default text view content */}
@@ -1069,6 +1515,7 @@ export default function FashionPortfolioPage() {
                     onSaveOrganization={(v) => handleSave(`memberships.membershipItems.${i}.organization`, v)}
                     onSaveRole={(v) => handleSave(`memberships.membershipItems.${i}.role`, v)}
                     onSavePeriod={(v) => handleSave(`memberships.membershipItems.${i}.period`, v)}
+                    onDelete={() => removeItem('memberships', i)}
                     style={{
                       backgroundImage: `linear-gradient(to bottom right, ${selectedGradient.from}33, ${selectedGradient.to}66)`,
                     }}
@@ -1078,21 +1525,45 @@ export default function FashionPortfolioPage() {
             }}
           />
         </Section>
+        </EditableSection>
       ) : null,
 
     /* 15. Languages (chips) --------------------------------------- */
     languages:
       sectionVisibility.languages && data.languages.sectionTitle ? (
-        <Section
-          id="languages"
-          title={data.languages.sectionTitle}
-          onSaveTitle={(v) => handleSave("languages.sectionTitle", v)}
-          isVisible
+        <EditableSection
+          onAddItem={() => addItem('languages', {
+            language: 'New Language',
+            proficiency: 'Proficiency Level'
+          })}
+          sectionTitle="Languages"
+          onMoveUp={() => moveSection('languages', 'up')}
+          onMoveDown={() => moveSection('languages', 'down')}
+          showMoveButtons={true}
+          isFirst={visibleSectionKeys[0] === 'languages'}
+          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'languages'}
         >
-          <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
-            {data.languages.languageItems.map((item, i) => (
-              <GlowingButton key={i}>
-                <div className="text-xl">
+          <Section
+            id="languages"
+            title={data.languages.sectionTitle}
+            onSaveTitle={(v) => handleSave("languages.sectionTitle", v)}
+            isVisible
+          >
+            <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
+              {data.languages.languageItems.map((item, i) => (
+                <div key={i} className="relative group">
+                  {isEditMode && (
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-6 w-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      onClick={() => removeItem('languages', i)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                  <GlowingButton>
+                    <div className="text-xl">
                   <EditableText
                     as="span"
                     initialValue={item.language}
@@ -1106,11 +1577,13 @@ export default function FashionPortfolioPage() {
                     onSave={(v) => handleSave(`languages.languageItems.${i}.proficiency`, v)}
                     className="font-sans text-muted-foreground"
                   />
+                    </div>
+                  </GlowingButton>
                 </div>
-              </GlowingButton>
-            ))}
-          </div>
-        </Section>
+              ))}
+            </div>
+          </Section>
+        </EditableSection>
       ) : null,
   }
 
@@ -1143,18 +1616,42 @@ export default function FashionPortfolioPage() {
     )
   }
 
+  // Prepare sections data for navigator
+  const visibleSections = orderedSections
+    .filter(key => sectionComponents[key] !== null && sectionComponents[key] !== undefined)
+    .map(key => ({
+      id: key,
+      title: (data as any)[key]?.sectionTitle || formatLabel(key)
+    }))
+
   return (
     <main className="bg-background text-foreground antialiased w-full max-w-full overflow-x-hidden">
       <FloatingNav navItems={navItems} maxVisibleItems={6} />
       <EditModeToggle />
+      <WatermarkToggle isVisible={isWatermarkVisible} onToggle={toggleWatermark} />
 
       {/* Hero */}
       <HeroSection data={data.hero} onSave={(field, v) => handleSave(`hero.${field}`, v)} showPhoto={showPhoto} />
 
       {/* Dynamic sections */}
-      {orderedSections.map((key) => (
-        <div key={key}>{sectionComponents[key]}</div>
-      ))}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={orderedSections.filter(key => sectionComponents[key] !== null && sectionComponents[key] !== undefined)}
+          strategy={verticalListSortingStrategy}
+        >
+          {orderedSections
+            .filter((key) => sectionComponents[key] !== null && sectionComponents[key] !== undefined)
+            .map((key) => (
+              <DraggableSection key={key} id={key}>
+                {sectionComponents[key]}
+              </DraggableSection>
+            ))}
+        </SortableContext>
+      </DndContext>
 
       {/* Contact */}
       <ContactSection
