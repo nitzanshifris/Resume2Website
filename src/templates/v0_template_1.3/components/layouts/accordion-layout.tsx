@@ -40,10 +40,10 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
 
   return (
     <div className="relative">
-      {/* Enhanced career progression line with glow */}
+      {/* Modern career progression line */}
       <div className="absolute left-[35px] top-0 bottom-0 hidden sm:block">
-        <div className="absolute inset-0 w-0.5 bg-gradient-to-b from-accent via-accent/50 to-transparent" />
-        <div className="absolute inset-0 w-2 bg-gradient-to-b from-accent/30 via-accent/10 to-transparent blur-sm" />
+        <div className="absolute inset-0 w-0.5 bg-gradient-to-b from-blue-400 via-slate-300 to-transparent" />
+        <div className="absolute inset-0 w-2 bg-gradient-to-b from-blue-200/40 via-slate-200/30 to-transparent blur-sm" />
       </div>
       
       <Accordion 
@@ -67,23 +67,23 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
             className={`
               relative border rounded-xl overflow-hidden transition-all duration-300
               ${openItem === `item-${i}` 
-                ? 'border-accent bg-gradient-to-br from-accent/5 to-accent/10 shadow-2xl shadow-accent/20 scale-[1.02]' 
-                : 'border-accent/20 hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10'
+                ? 'border-slate-200 bg-gradient-to-br from-slate-50/80 to-white/60 shadow-2xl shadow-slate-900/10 scale-[1.02] backdrop-blur-sm' 
+                : 'border-slate-200/60 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5 bg-white/40 backdrop-blur-sm'
               }
               ${hoveredIndex === i ? 'z-10' : 'z-0'}
             `}
           >
-            {/* Animated background pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent via-transparent to-accent" />
+            {/* Modern subtle background pattern */}
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 via-transparent to-blue-50/30" />
               {openItem === `item-${i}` && (
                 <motion.div
                   className="absolute inset-0"
                   animate={{
                     backgroundImage: [
-                      'radial-gradient(circle at 20% 80%, rgba(var(--accent), 0.1) 0%, transparent 50%)',
-                      'radial-gradient(circle at 80% 20%, rgba(var(--accent), 0.1) 0%, transparent 50%)',
-                      'radial-gradient(circle at 20% 80%, rgba(var(--accent), 0.1) 0%, transparent 50%)',
+                      'radial-gradient(circle at 20% 80%, rgb(148 163 184 / 0.08) 0%, transparent 50%)',
+                      'radial-gradient(circle at 80% 20%, rgb(59 130 246 / 0.05) 0%, transparent 50%)',
+                      'radial-gradient(circle at 20% 80%, rgb(148 163 184 / 0.08) 0%, transparent 50%)',
                     ],
                   }}
                   transition={{ duration: 10, repeat: Infinity }}
@@ -103,11 +103,11 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                   >
                     <div className={`relative p-3 rounded-2xl transition-all duration-300 ${
                       isCurrentRole(item.endDate) 
-                        ? 'bg-gradient-to-br from-accent to-accent/80 shadow-lg shadow-accent/30 ring-4 ring-accent/20' 
-                        : 'bg-gradient-to-br from-accent/20 to-accent/10 group-hover:from-accent/30 group-hover:to-accent/20'
+                        ? 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/25 ring-4 ring-blue-200/50' 
+                        : 'bg-gradient-to-br from-slate-100 to-slate-200/80 group-hover:from-slate-200 group-hover:to-slate-300/80 shadow-sm'
                     }`}>
                       <Briefcase className={`h-6 w-6 ${
-                        isCurrentRole(item.endDate) ? 'text-accent-foreground' : 'text-accent'
+                        isCurrentRole(item.endDate) ? 'text-white' : 'text-slate-700'
                       }`} />
                       
                       {/* Sparkle effect for current role */}
@@ -117,7 +117,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                           animate={{ rotate: 360 }}
                           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                         >
-                          <Sparkles className="h-3 w-3 text-accent-foreground absolute -top-1 -right-1" />
+                          <Sparkles className="h-3 w-3 text-white absolute -top-1 -right-1" />
                         </motion.div>
                       )}
                     </div>
@@ -136,7 +136,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     <div className="flex items-center gap-2 flex-wrap">
                       <EditableText
                         as="h3"
-                        className="font-serif text-2xl sm:text-4xl font-bold text-card-foreground group-hover:text-[#3b82f6] transition-all duration-300"
+                        className="font-serif text-2xl sm:text-4xl font-bold text-slate-900 group-hover:text-blue-600 transition-all duration-300"
                         initialValue={item.title}
                         onSave={(v) => onSave(i, "title", v)}
                       />
@@ -144,9 +144,9 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                         <motion.span
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-accent/20 text-accent text-xs font-medium rounded-full border border-accent/30"
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200"
                         >
-                          <div className="h-1.5 w-1.5 bg-accent rounded-full animate-pulse" />
+                          <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse" />
                           Active
                         </motion.span>
                       )}
@@ -154,12 +154,12 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     <div className="flex items-center gap-3 mt-2">
                       <EditableText
                         as="p"
-                        className="font-sans text-xl sm:text-2xl font-semibold text-card-foreground"
+                        className="font-sans text-xl sm:text-2xl font-semibold text-slate-800"
                         initialValue={item.company}
                         onSave={(v) => onSave(i, "company", v)}
                       />
-                      <span className="text-muted-foreground">•</span>
-                      <span className="text-sm font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                      <span className="text-slate-400">•</span>
+                      <span className="text-sm font-medium text-slate-600 bg-slate-100/80 px-2 py-1 rounded-md">
                         {calculateDuration(item.startDate, item.endDate)}
                       </span>
                     </div>
@@ -167,11 +167,11 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2 text-slate-500">
                   <Calendar className="h-4 w-4 opacity-60" />
                   <EditableText
                     as="p"
-                    className="font-sans text-base sm:text-lg text-card-foreground font-medium"
+                    className="font-sans text-base sm:text-lg text-slate-700 font-medium"
                     initialValue={`${item.startDate} - ${item.endDate}`}
                     onSave={(v) => {
                       const [start = "", end = ""] = v.split(" - ")
@@ -184,24 +184,24 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
-                    className="p-1.5 bg-accent/10 rounded-lg"
+                    className="p-1.5 bg-blue-50 rounded-lg"
                     title="Key Achievements"
                   >
-                    <Award className="h-4 w-4 text-accent" />
+                    <Award className="h-4 w-4 text-blue-600" />
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.1 }}
-                    className="p-1.5 bg-accent/10 rounded-lg"
+                    className="p-1.5 bg-green-50 rounded-lg"
                     title="Team Leadership"
                   >
-                    <Users className="h-4 w-4 text-accent" />
+                    <Users className="h-4 w-4 text-green-600" />
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.1 }}
-                    className="p-1.5 bg-accent/10 rounded-lg"
+                    className="p-1.5 bg-purple-50 rounded-lg"
                     title="Growth & Impact"
                   >
-                    <TrendingUp className="h-4 w-4 text-accent" />
+                    <TrendingUp className="h-4 w-4 text-purple-600" />
                   </motion.div>
                 </div>
               </div>
@@ -216,15 +216,15 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
             >
               {/* Enhanced content with gradient border */}
               <div className="relative">
-                <div className="absolute -left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent via-accent/50 to-transparent" />
-                <div className="absolute -left-6.5 top-0 bottom-0 w-2 bg-gradient-to-b from-accent/20 via-accent/10 to-transparent blur-sm" />
+                <div className="absolute -left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 via-slate-300 to-transparent" />
+                <div className="absolute -left-6.5 top-0 bottom-0 w-2 bg-gradient-to-b from-blue-200/40 via-slate-200/30 to-transparent blur-sm" />
                 
                 <div className="space-y-6">
                   {/* Main description */}
                   <EditableText
                     textarea
                     as="p"
-                    className="font-sans text-lg sm:text-xl text-card-foreground leading-relaxed"
+                    className="font-sans text-lg sm:text-xl text-slate-700 leading-relaxed"
                     initialValue={item.description}
                     onSave={(v) => onSave(i, "description", v)}
                   />
@@ -235,33 +235,33 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.2 }}
-                      className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg border border-accent/20"
+                      className="p-4 bg-gradient-to-br from-blue-50 to-blue-25 rounded-lg border border-blue-200/50 shadow-sm"
                     >
-                      <Award className="h-5 w-5 text-accent mb-2" />
-                      <h4 className="font-semibold text-sm mb-1 text-card-foreground">Key Achievement</h4>
-                      <p className="text-xs text-card-foreground/70">Led successful product launch</p>
+                      <Award className="h-5 w-5 text-blue-600 mb-2" />
+                      <h4 className="font-semibold text-sm mb-1 text-slate-800">Key Achievement</h4>
+                      <p className="text-xs text-slate-600">Led successful product launch</p>
                     </motion.div>
                     
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 }}
-                      className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg border border-accent/20"
+                      className="p-4 bg-gradient-to-br from-green-50 to-green-25 rounded-lg border border-green-200/50 shadow-sm"
                     >
-                      <Users className="h-5 w-5 text-accent mb-2" />
-                      <h4 className="font-semibold text-sm mb-1 text-card-foreground">Team Impact</h4>
-                      <p className="text-xs text-card-foreground/70">Managed cross-functional team</p>
+                      <Users className="h-5 w-5 text-green-600 mb-2" />
+                      <h4 className="font-semibold text-sm mb-1 text-slate-800">Team Impact</h4>
+                      <p className="text-xs text-slate-600">Managed cross-functional team</p>
                     </motion.div>
                     
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 }}
-                      className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg border border-accent/20"
+                      className="p-4 bg-gradient-to-br from-purple-50 to-purple-25 rounded-lg border border-purple-200/50 shadow-sm"
                     >
-                      <Target className="h-5 w-5 text-accent mb-2" />
-                      <h4 className="font-semibold text-sm mb-1 text-card-foreground">Business Impact</h4>
-                      <p className="text-xs text-card-foreground/70">Increased revenue by 40%</p>
+                      <Target className="h-5 w-5 text-purple-600 mb-2" />
+                      <h4 className="font-semibold text-sm mb-1 text-slate-800">Business Impact</h4>
+                      <p className="text-xs text-slate-600">Increased revenue by 40%</p>
                     </motion.div>
                   </div>
                   
@@ -270,13 +270,13 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="flex flex-wrap gap-2 pt-4 border-t border-accent/10"
+                    className="flex flex-wrap gap-2 pt-4 border-t border-slate-200/60"
                   >
-                    <span className="text-xs font-medium text-card-foreground mr-2">Technologies:</span>
+                    <span className="text-xs font-medium text-slate-700 mr-2">Technologies:</span>
                     {(item.technologies || []).map((tech, idx) => (
                       <span
                         key={idx}
-                        className="group/tech relative px-2 py-1 text-xs bg-accent/10 text-accent font-medium rounded-md border border-accent/20"
+                        className="group/tech relative px-2 py-1 text-xs bg-black/10 text-black font-medium rounded-md border border-black/20"
                       >
                         {tech}
                         {isEditMode && (
