@@ -53,9 +53,9 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
         {items.map((item, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
+          transition={{ duration: 0.2, delay: i * 0.03, ease: "easeOut" }}
           onHoverStart={() => setHoveredIndex(i)}
           onHoverEnd={() => setHoveredIndex(null)}
         >
@@ -208,9 +208,9 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
           </AccordionTrigger>
           <AccordionContent className="pb-8 px-6 relative overflow-hidden">
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               className="pl-16"
             >
               {/* Enhanced content with gradient border */}
@@ -235,9 +235,9 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                     <div className="bg-gradient-to-br from-slate-50/80 to-white/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 shadow-sm">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.1, duration: 0.25, ease: "easeOut" }}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
                           className="relative group"
                         >
                           <div className="h-full bg-white rounded-xl border border-blue-200/60 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-1 p-5">
@@ -262,7 +262,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                                   className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
                                   initial={{ width: 0 }}
                                   animate={{ width: "98%" }}
-                                  transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+                                  transition={{ duration: 0.4, ease: "easeOut" }}
                                 />
                               </div>
                             </div>
@@ -271,9 +271,9 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                         </motion.div>
                     
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.15, duration: 0.25, ease: "easeOut" }}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
                           className="relative group"
                         >
                           <div className="h-full bg-white rounded-xl border border-green-200/60 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-1 p-5">
@@ -298,7 +298,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                                   className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full"
                                   initial={{ width: 0 }}
                                   animate={{ width: "95%" }}
-                                  transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                                  transition={{ duration: 0.4, ease: "easeOut" }}
                                 />
                               </div>
                             </div>
@@ -307,9 +307,9 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                         </motion.div>
                     
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2, duration: 0.25, ease: "easeOut" }}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
                           className="relative group"
                         >
                           <div className="h-full bg-white rounded-xl border border-purple-200/60 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-1 p-5">
@@ -334,7 +334,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                                   className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"
                                   initial={{ width: 0 }}
                                   animate={{ width: "40%" }}
-                                  transition={{ delay: 0.5, duration: 0.6, ease: "easeOut" }}
+                                  transition={{ duration: 0.4, ease: "easeOut" }}
                                 />
                               </div>
                             </div>
@@ -349,7 +349,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.3, ease: "easeOut" }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
                     className="mt-6"
                   >
                     <div className="flex items-center gap-3 mb-4">
@@ -387,7 +387,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                               key={idx}
                               initial={{ opacity: 0, scale: 0.9 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: 0.4 + idx * 0.02, duration: 0.2, ease: "easeOut" }}
+                              transition={{ duration: 0.15, ease: "easeOut" }}
                               className={`group/tech relative inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full border transition-all duration-150 ease-out hover:shadow-sm hover:scale-105 ${categoryStyles[category]}`}
                             >
                               <div className={`w-1.5 h-1.5 rounded-full ${
@@ -418,7 +418,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
                             className="flex items-center gap-2 mt-2"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.5, duration: 0.25, ease: "easeOut" }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
                           >
                             <Input
                               type="text"
