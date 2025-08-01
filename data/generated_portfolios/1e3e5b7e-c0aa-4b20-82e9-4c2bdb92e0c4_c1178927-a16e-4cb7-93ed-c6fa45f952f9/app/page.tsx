@@ -39,6 +39,7 @@ import { EditModeToggle } from "@/components/edit-mode-toggle"
 import { EditableSection } from "@/components/editable-section"
 import { WatermarkToggle } from "@/components/watermark-toggle"
 import { useWatermark } from "@/contexts/watermark-context"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 const formatLabel = (key: string) => {
@@ -1648,6 +1649,7 @@ export default function FashionPortfolioPage() {
     <main className="bg-background text-foreground antialiased w-full max-w-full overflow-x-hidden">
       <FloatingNav navItems={navItems} maxVisibleItems={6} />
       <EditModeToggle />
+      <ThemeToggle />
       <WatermarkToggle isVisible={isWatermarkVisible} onToggle={toggleWatermark} />
 
       {/* Hero */}

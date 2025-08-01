@@ -44,7 +44,7 @@ export const themes: Theme[] = [
       muted: "39 10% 90%",
       "muted-foreground": "20 5% 45%",
       accent: "45 86% 62%",
-      "accent-foreground": "45 86% 10%", // Dark text on gold accent
+      "accent-foreground": "20 14% 4%",
       destructive: "0 84% 60%",
       "destructive-foreground": "39 56% 95%",
       border: "39 10% 85%",
@@ -61,27 +61,27 @@ export const themes: Theme[] = [
     colors: {
       background: "224 71% 4%", // Deep Navy
       foreground: "210 40% 98%", // Almost White
-      card: "224 71% 8%", // Increased contrast
+      card: "224 71% 6%",
       "card-foreground": "210 40% 98%",
       popover: "224 71% 4%",
       "popover-foreground": "210 40% 98%",
       primary: "210 40% 98%",
       "primary-foreground": "224 71% 4%",
-      secondary: "224 71% 12%", // Better contrast
+      secondary: "224 71% 9%",
       "secondary-foreground": "210 40% 98%",
-      muted: "224 71% 12%",
-      "muted-foreground": "215 20% 70%", // Brighter muted text
+      muted: "224 71% 9%",
+      "muted-foreground": "210 40% 80%",
       accent: "340 82% 70%", // Soft Pink/Blush
-      "accent-foreground": "340 82% 10%", // Dark text on accent
+      "accent-foreground": "224 71% 4%",
       destructive: "0 84% 60%",
       "destructive-foreground": "210 40% 98%",
-      border: "224 60% 20%", // Brighter borders
-      input: "224 60% 18%", // Better input definition
-      ring: "340 82% 75%", // More visible focus ring
-      "gradient-1": "#1E3A8A", // Blue family
-      "gradient-2": "#3B82F6", // Blue family
-      "gradient-3": "#60A5FA", // Blue family
-      "gradient-4": "#1E40AF", // Blue family
+      border: "224 71% 12%",
+      input: "224 71% 12%",
+      ring: "340 82% 70%",
+      "gradient-1": "#E91E63",
+      "gradient-2": "#F48FB1",
+      "gradient-3": "#F8BBD0",
+      "gradient-4": "#C2185B",
     },
   },
   {
@@ -99,17 +99,17 @@ export const themes: Theme[] = [
       "secondary-foreground": "120 27% 15%",
       muted: "48 20% 88%",
       "muted-foreground": "120 10% 45%",
-      accent: "142 70% 45%", // More distinct forest green
-      "accent-foreground": "142 70% 5%", // Dark text on accent
+      accent: "120 39% 31%", // Rich Green
+      "accent-foreground": "48 33% 94%",
       destructive: "0 84% 60%",
       "destructive-foreground": "48 33% 94%",
       border: "48 15% 80%",
       input: "48 15% 80%",
-      ring: "142 70% 50%", // Better focus visibility
-      "gradient-1": "#065F46", // Green family
-      "gradient-2": "#10B981", // Green family
-      "gradient-3": "#86EFAC", // Green family
-      "gradient-4": "#047857", // Green family
+      ring: "120 39% 31%",
+      "gradient-1": "#2E7D32",
+      "gradient-2": "#4CAF50",
+      "gradient-3": "#A5D6A7",
+      "gradient-4": "#1B5E20",
     },
   },
   {
@@ -117,23 +117,23 @@ export const themes: Theme[] = [
     colors: {
       background: "240 20% 5%", // Deep Space Blue
       foreground: "240 10% 95%", // Light Grey
-      card: "240 20% 9%", // Better card contrast
+      card: "240 20% 7%",
       "card-foreground": "240 10% 95%",
       popover: "240 20% 5%",
       "popover-foreground": "240 10% 95%",
       primary: "240 10% 95%",
       "primary-foreground": "240 20% 5%",
-      secondary: "240 20% 13%", // Better contrast
+      secondary: "240 20% 11%",
       "secondary-foreground": "240 10% 95%",
-      muted: "240 20% 13%",
-      "muted-foreground": "240 10% 75%", // Brighter muted text
+      muted: "240 20% 11%",
+      "muted-foreground": "240 5% 65%",
       accent: "300 100% 70%", // Electric Magenta
-      "accent-foreground": "300 100% 10%", // Dark text on accent
+      "accent-foreground": "240 20% 5%",
       destructive: "0 84% 60%",
       "destructive-foreground": "240 10% 95%",
-      border: "240 20% 22%", // Much brighter borders
-      input: "240 20% 20%", // Better input visibility
-      ring: "300 100% 75%", // More visible focus ring
+      border: "240 20% 15%",
+      input: "240 20% 15%",
+      ring: "300 100% 70%",
       "gradient-1": "#9C27B0",
       "gradient-2": "#E040FB",
       "gradient-3": "#F3E5F5",
@@ -155,17 +155,17 @@ export const themes: Theme[] = [
       "secondary-foreground": "215 28% 17%",
       muted: "210 30% 94%",
       "muted-foreground": "215 15% 45%",
-      accent: "199 70% 50%", // Toned down ocean blue
-      "accent-foreground": "199 70% 98%", // Light text on accent
+      accent: "220 85% 65%",
+      "accent-foreground": "210 40% 98%",
       destructive: "0 84% 60%",
       "destructive-foreground": "210 40% 98%",
       border: "210 20% 88%",
       input: "210 20% 88%",
-      ring: "199 70% 55%", // Better focus visibility
-      "gradient-1": "#0891B2", // Ocean blue family
-      "gradient-2": "#06B6D4", // Ocean blue family
-      "gradient-3": "#67E8F9", // Ocean blue family
-      "gradient-4": "#0E7490", // Ocean blue family
+      ring: "220 85% 65%",
+      "gradient-1": "#3B82F6",
+      "gradient-2": "#60A5FA",
+      "gradient-3": "#BFDBFE",
+      "gradient-4": "#2563EB",
     },
   },
   {
@@ -173,23 +173,23 @@ export const themes: Theme[] = [
     colors: {
       background: "0 5% 7%",
       foreground: "0 0% 95%",
-      card: "0 5% 11%", // Better card contrast
+      card: "0 5% 10%",
       "card-foreground": "0 0% 95%",
       popover: "0 5% 7%",
       "popover-foreground": "0 0% 95%",
       primary: "0 0% 95%",
       "primary-foreground": "0 5% 7%",
-      secondary: "0 5% 16%", // Better contrast
+      secondary: "0 5% 15%",
       "secondary-foreground": "0 0% 95%",
-      muted: "0 5% 16%",
-      "muted-foreground": "0 0% 75%", // Brighter muted text
+      muted: "0 5% 15%",
+      "muted-foreground": "0 0% 65%",
       accent: "347 77% 50%",
       "accent-foreground": "0 0% 100%",
       destructive: "10 80% 55%",
       "destructive-foreground": "0 0% 100%",
-      border: "0 5% 25%", // Much brighter borders
-      input: "0 5% 23%", // Better input visibility
-      ring: "347 77% 55%", // More visible focus ring
+      border: "0 5% 20%",
+      input: "0 5% 20%",
+      ring: "347 77% 50%",
       "gradient-1": "#DC2626",
       "gradient-2": "#EF4444",
       "gradient-3": "#FCA5A5",
