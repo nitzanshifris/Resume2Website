@@ -2,6 +2,7 @@
 Portfolio Generation API - Converts CV data to live portfolio websites
 """
 from fastapi import APIRouter, HTTPException, Depends, Request
+from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import logging
 import json
@@ -25,6 +26,9 @@ from src.api.routes.auth import get_current_user
 from src.api.db import get_user_cv_uploads
 
 logger = logging.getLogger(__name__)
+
+class GeneratePortfolioRequest(BaseModel):
+    template: Optional[str] = None
 
 class NextJSServerManager:
     """Enhanced Next.js server manager with proper isolation and health checking"""
@@ -287,8 +291,15 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
 # Base directories
 BASE_DIR = Path(__file__).parent.parent.parent.parent
-TEMPLATE_SOURCE = BASE_DIR / "src" / "templates" / "v0_template_1"
+TEMPLATES_DIR = BASE_DIR / "src" / "templates"
 PORTFOLIOS_DIR = BASE_DIR / "data" / "generated_portfolios"
+
+# Available templates
+AVAILABLE_TEMPLATES = {
+    "v0_template_1.3": "v0_template_1.3",
+    "v0_template_1.4": "v0_template_1.4"
+}
+DEFAULT_TEMPLATE = "v0_template_1.4"
 
 # Ensure portfolios directory exists
 PORTFOLIOS_DIR.mkdir(parents=True, exist_ok=True)
@@ -296,6 +307,7 @@ PORTFOLIOS_DIR.mkdir(parents=True, exist_ok=True)
 @router.post("/generate/{job_id}")
 async def generate_portfolio(
     job_id: str,
+    request: GeneratePortfolioRequest = GeneratePortfolioRequest(),
     current_user_id: str = Depends(get_current_user)
 ):
     """
@@ -366,7 +378,14 @@ async def generate_portfolio(
                     ignore.add(file)
             return ignore
         
-        shutil.copytree(TEMPLATE_SOURCE, portfolio_dir, ignore=ignore_patterns)
+        # Determine which template to use
+        template_name = request.template if request.template in AVAILABLE_TEMPLATES else DEFAULT_TEMPLATE
+        template_source = TEMPLATES_DIR / template_name
+        
+        if not template_source.exists():
+            raise HTTPException(status_code=400, detail=f"Template '{template_name}' not found")
+        
+        shutil.copytree(template_source, portfolio_dir, ignore=ignore_patterns)
         logger.info(f"✅ Clean template copied (excluded node_modules and lock files)")
         
         # === 3. INJECT CV DATA INTO TEMPLATE ===
@@ -549,7 +568,7 @@ import { portfolioData, useRealData } from "@/lib/injected-data"'''
             "url": f"http://localhost:{port}",
             "directory": str(portfolio_dir),
             "status": "active",
-            "template": "v0_template_1",
+            "template": template_name,
             "cv_filename": cv_upload.get('filename', 'Unknown')
         }
         
@@ -568,7 +587,7 @@ import { portfolioData, useRealData } from "@/lib/injected-data"'''
             "url": f"http://localhost:{port}",
             "port": port,
             "created_at": portfolio_metadata["created_at"],
-            "template": "v0_template_1",
+            "template": "v0_template_1.3",
             "cv_filename": cv_upload.get('filename', 'Unknown')
         }
         

@@ -1,0 +1,13 @@
+{
+  "portfolio_id": "c1178927-a16e-4cb7-93ed-c6fa45f952f9",
+  "user_id": "1e3e5b7e-c0aa-4b20-82e9-4c2bdb92e0c4",
+  "job_id": "michelle_enhanced_demo",
+  "created_at": "2025-07-24T23:36:16.103257",
+  "port": 4002,
+  "url": "http://localhost:4002",
+  "directory": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/data/generated_portfolios/1e3e5b7e-c0aa-4b20-82e9-4c2bdb92e0c4_c1178927-a16e-4cb7-93ed-c6fa45f952f9",
+  "status": "active",
+  "template": "v0_template_1.3",
+  "cv_filename": "michelle_enhanced.json",
+  "last_restarted": "2025-07-24T23:41:28.878148"
+}

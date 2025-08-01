@@ -62,10 +62,10 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
           <AccordionItem 
             value={`item-${i}`} 
             className={`
-              relative border rounded-2xl overflow-hidden transition-all duration-200 ease-out
+              relative border-2 rounded-2xl overflow-hidden transition-all duration-200 ease-out
               ${openItem === `item-${i}` 
-                ? 'border-slate-300/80 bg-gradient-to-br from-white/90 to-slate-50/70 shadow-2xl shadow-slate-900/15 scale-[1.01] backdrop-blur-md ring-1 ring-slate-200/50' 
-                : 'border-slate-200/70 hover:border-slate-300/80 hover:shadow-xl hover:shadow-slate-900/8 bg-white/60 backdrop-blur-sm hover:backdrop-blur-md'
+                ? 'border-accent bg-transparent shadow-2xl shadow-slate-900/15 scale-[1.01] backdrop-blur-md' 
+                : 'border-accent hover:border-accent hover:shadow-xl hover:shadow-slate-900/8 bg-transparent backdrop-blur-sm hover:backdrop-blur-md'
               }
               ${hoveredIndex === i ? 'z-10 shadow-lg shadow-slate-900/10' : 'z-0'}
             `}
