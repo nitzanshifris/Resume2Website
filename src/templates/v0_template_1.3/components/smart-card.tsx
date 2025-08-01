@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { Settings, FileText, Image, Code, Github, Link, Video, Twitter, Maximize2, ExternalLink, Edit2, Plus, X, MoveHorizontal, GripVertical, Trash2, BarChart3 } from 'lucide-react'
+import { Settings, FileText, Image, Code, Github, Link, Video, Twitter, Maximize2, ExternalLink, Edit2, Plus, X, MoveHorizontal, GripVertical, Trash2, BarChart3, Type, Layers, PanelLeftOpen, PanelRightOpen } from 'lucide-react'
 import { useEditMode } from '@/contexts/edit-mode-context'
 import { Safari } from '@/components/ui/safari'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 // Import view components
 import { BentoGridItem } from '@/components/ui/bento-grid-item'
 import { CardContainer, CardBody, CardItem } from '@/components/ui/3d-card'
+import { CometCard } from '@/components/ui/comet-card'
 import { CodeBlock } from '@/components/ui/code-block'
 import { GitHubRepoView } from './ui/github-repo-view'
 import { ImageCarousel } from './ui/image-carousel'
@@ -30,6 +31,7 @@ import { AnimatedTestimonials } from './ui/animated-testimonials'
 import { Sparkles } from './ui/sparkles'
 import { Compare } from './ui/compare'
 import type { BaseViewItem } from '@/lib/data'
+import { contentIconMap } from '@/lib/data'
 
 export type ViewMode = 'text' | 'images' | 'code' | 'github' | 'uri' | 'video' | 'tweet' | 'multi-images' | 'compare'
 export type TextVariant = 'detailed' | 'simple'
@@ -64,6 +66,19 @@ const viewModeOptions = [
 export function SmartCard({ item, children, className, onUpdate, onDelete }: SmartCardProps) {
   const { isEditMode } = useEditMode()
   const [viewMode, setViewMode] = useState<ViewMode>(item.viewMode || 'text')
+  
+  // Text size states - Updated defaults to match education timeline
+  const [titleTextSize, setTitleTextSize] = useState(item.titleTextSize || 'text-lg sm:text-2xl')
+  const [descriptionTextSize, setDescriptionTextSize] = useState(item.descriptionTextSize || 'text-sm sm:text-base')
+  
+  // Font and styling states - Updated defaults to match education timeline
+  const [titleFontWeight, setTitleFontWeight] = useState(item.titleFontWeight || 'font-bold')
+  const [descriptionFontWeight, setDescriptionFontWeight] = useState(item.descriptionFontWeight || 'font-normal')
+  const [titleFontFamily, setTitleFontFamily] = useState(item.titleFontFamily || 'font-serif')
+  const [descriptionFontFamily, setDescriptionFontFamily] = useState(item.descriptionFontFamily || 'font-sans')
+  const [titleColor, setTitleColor] = useState(item.titleColor || 'text-card-foreground')
+  const [descriptionColor, setDescriptionColor] = useState(item.descriptionColor || 'text-muted-foreground')
+  const [separateColors, setSeparateColors] = useState(false)
   
   // Local state for editing
   const [codeContent, setCodeContent] = useState(item.codeSnippet || '')
@@ -155,7 +170,6 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
     }
   }
 
-
   const renderContent = () => {
     // Wrap all content in a consistent container to maintain aspect ratio
     const contentWrapper = (content: React.ReactNode) => (
@@ -180,7 +194,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Code className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add code</p>
               </div>
@@ -191,39 +205,31 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
       case 'images':
         return contentWrapper(
           images.length > 0 && images[0] ? (
-            <div className="flex-1 p-4">
-              <CardContainer containerClassName="h-full" className="h-full">
-                <CardBody 
-                  className="relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full h-full rounded-xl p-6 border flex flex-col"
-                  style={{ backgroundColor: 'hsl(39, 56%, 95%)' }}
-                >
-                  <CardItem
-                    translateZ="50"
-                    className="text-xl font-bold text-neutral-600 dark:text-white mb-4 text-center w-full"
-                  >
+            <div className="flex-1 p-4 flex items-center justify-center">
+              <CometCard rotateDepth={10} translateDepth={15}>
+                <div className="bg-cream relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto max-w-4xl h-[600px] rounded-xl p-6 border flex flex-col" style={{ backgroundColor: 'hsl(39, 56%, 95%)' }}>
+                  <h2 className="text-2xl font-bold text-neutral-600 dark:text-white mb-6 text-center">
                     {item.title}
-                  </CardItem>
-                  <CardItem 
-                    translateZ="100" 
-                    rotateX={imageVariant === 'tilted' ? 20 : 0}
-                    rotateZ={imageVariant === 'tilted' ? -10 : 0}
-                    className="w-full flex-1 flex items-center justify-center p-8"
-                  >
-                    <div className="w-3/5 h-3/5 max-w-sm max-h-64">
-                      <TransformedImage
+                  </h2>
+                  <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+                    {images[0] ? (
+                      <img
                         src={images[0]}
-                        transform={imageTransform}
                         alt={item.title || 'Image'}
-                        className="h-full w-full rounded-xl group-hover/card:shadow-xl object-cover"
+                        className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
                       />
-                    </div>
-                  </CardItem>
-                </CardBody>
-              </CardContainer>
+                    ) : (
+                      <div className="aspect-video bg-muted rounded-xl flex items-center justify-center">
+                        <p className="text-muted-foreground">No image uploaded</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CometCard>
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add an image</p>
               </div>
@@ -239,7 +245,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Github className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add GitHub URL</p>
               </div>
@@ -255,7 +261,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Video className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add video URL</p>
               </div>
@@ -278,7 +284,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Twitter className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add tweet URL</p>
               </div>
@@ -319,7 +325,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add link URL</p>
               </div>
@@ -441,7 +447,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add images</p>
               </div>
@@ -485,7 +491,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             )
           ) : (
             <div className="flex-1 flex items-center justify-center p-6">
-              <div className="text-center text-gray-500">
+              <div className="text-center text-muted-foreground">
                 <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Click settings to add images to compare</p>
               </div>
@@ -498,6 +504,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
     }
   }
 
+  // Main component return
   return (
     <div className={cn("group relative h-full", className)}>
       {/* Action Buttons - visible on hover */}
@@ -530,7 +537,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
             </DialogTrigger>
             <DialogPrimitive.Portal>
               <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-              <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full h-full max-w-none translate-x-[-50%] translate-y-[-50%] p-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+              <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-[90vw] h-[90vh] max-w-5xl max-h-[800px] translate-x-[-50%] translate-y-[-50%] p-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-lg overflow-hidden">
                 <DialogTitle className="sr-only">Full View</DialogTitle>
                 
                 {/* Close button */}
@@ -566,11 +573,12 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                       sandbox="allow-same-origin allow-scripts"
                     />
                   </div>
-                ) : viewMode === 'images' && images.length > 0 && images[0] ? (
+                ) : viewMode === 'images' ? (
+                  images.length > 0 && images[0] ? (
                   <div className="w-full">
                     <CardContainer containerClassName="w-full" className="w-full">
                       <CardBody 
-                        className="relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full aspect-[3/2] rounded-xl p-6 border flex flex-col will-change-transform"
+                        className="relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full aspect-[3/2] rounded-xl p-5 border flex flex-col will-change-transform"
                         style={{ 
                           backgroundColor: 'hsl(39, 56%, 95%)',
                           transformStyle: 'preserve-3d'
@@ -586,18 +594,59 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                           translateZ="100" 
                           rotateX={imageVariant === 'tilted' ? 20 : 0}
                           rotateZ={imageVariant === 'tilted' ? -10 : 0}
-                          className="w-full flex-1 px-6 py-4"
+                          className="w-full flex-1 flex items-center justify-center px-4 py-2"
                         >
-                          <TransformedImage
-                            src={images[0]}
-                            transform={imageTransform}
-                            alt={item.title || 'Image'}
-                            className="h-full w-full rounded-xl group-hover/card:shadow-xl object-cover"
-                          />
+                          <div className="w-5/6 h-5/6">
+                            {images[0] ? (
+                              <img
+                                src={images[0]}
+                                alt={item.title || 'Image'}
+                                className="h-full w-full rounded-xl group-hover/card:shadow-xl object-cover"
+                                onError={(e) => {
+                                  console.error('Image failed to load:', images[0]);
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="h-full w-full rounded-xl bg-muted flex items-center justify-center">
+                                <p className="text-muted-foreground">No image</p>
+                              </div>
+                            )}
+                          </div>
                         </CardItem>
                       </CardBody>
                     </CardContainer>
                   </div>
+                  ) : (
+                    <div className="w-full">
+                      <CardContainer containerClassName="w-full" className="w-full">
+                        <CardBody 
+                          className="relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-full aspect-[3/2] rounded-xl p-5 border flex flex-col will-change-transform"
+                          style={{ 
+                            backgroundColor: 'hsl(39, 56%, 95%)',
+                            transformStyle: 'preserve-3d'
+                          }}
+                        >
+                          <CardItem
+                            translateZ="50"
+                            className="text-xl font-bold text-neutral-600 dark:text-white mb-4 text-center w-full"
+                          >
+                            {item.title}
+                          </CardItem>
+                          <CardItem 
+                            translateZ="100" 
+                            className="w-full flex-1 flex items-center justify-center"
+                          >
+                            <div className="text-center text-muted-foreground">
+                              <Image className="w-16 h-16 mx-auto mb-2 opacity-30" />
+                              <p className="text-sm">No image uploaded</p>
+                              <p className="text-xs mt-1">Click settings to add an image</p>
+                            </div>
+                          </CardItem>
+                        </CardBody>
+                      </CardContainer>
+                    </div>
+                  )
                 ) : viewMode === 'multi-images' && multiImages.length > 0 ? (
                   <div className="w-full">
                     <AnimatedTestimonials 
@@ -655,6 +704,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
         )}
         
         {/* Settings Button */}
+        {/*
         <Sheet>
           <SheetTrigger asChild>
             <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md">
@@ -717,70 +767,127 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
               </div>
             </div>
             
-            <div className="p-6">
-            <SheetHeader>
-              <div className="flex items-center justify-between">
-                <SheetTitle>Component Settings</SheetTitle>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{sheetWidth}px</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSheetSide(sheetSide === 'right' ? 'left' : 'right')}
-                    className="h-8 px-2 hover:bg-secondary"
-                    title={`Move sidebar to ${sheetSide === 'right' ? 'left' : 'right'} side`}
-                  >
-                    <MoveHorizontal className="h-4 w-4 mr-1" />
-                    {sheetSide === 'right' ? 'Left' : 'Right'}
-                  </Button>
-                </div>
+            <div className="flex flex-col h-full">
+              {/* Enhanced Header */}
+              <div className="p-6 pb-4 border-b bg-gradient-to-b from-background to-muted/20">
+                <SheetHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
+                        <Settings className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <SheetTitle className="text-xl font-semibold">Card Settings</SheetTitle>
+                        <p className="text-xs text-muted-foreground mt-0.5">Customize appearance and content</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setSheetSide(sheetSide === 'right' ? 'left' : 'right')}
+                        className="h-8 w-8 hover:bg-secondary/80 transition-colors"
+                        title={`Move to ${sheetSide === 'right' ? 'left' : 'right'}`}
+                      >
+                        {sheetSide === 'right' ? (
+                          <PanelLeftOpen className="h-4 w-4" />
+                        ) : (
+                          <PanelRightOpen className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </SheetHeader>
               </div>
-            </SheetHeader>
-            
-            <div className="mt-6 space-y-6">
-              {/* View Mode Selector */}
-              <div className="space-y-2">
-                <Label>Display Mode</Label>
-                <Select value={viewMode} onValueChange={handleViewModeChange}>
-                  <SelectTrigger>
+              
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-6 space-y-4">
+                  {/* View Mode Selector */}
+                  <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 backdrop-blur-sm">
+                          <Layers className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <Label className="font-semibold text-base">Display Mode</Label>
+                          <p className="text-xs text-muted-foreground">Choose how content appears</p>
+                        </div>
+                      </div>
+                      <Select value={viewMode} onValueChange={handleViewModeChange}>
+                        <SelectTrigger className="w-full bg-background/50 hover:bg-background/80 border-muted-foreground/20 transition-all">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {viewModeOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              <div className="flex items-center gap-3">
+                                <option.icon className="h-4 w-4" />
+                                <span>{option.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Text Layout Style - Available for all view modes */}
+                  <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-sm">
+                          <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <Label className="font-semibold text-base">Text Layout</Label>
+                          <p className="text-xs text-muted-foreground">Content arrangement style</p>
+                        </div>
+                      </div>
+                <Select value={textVariant} onValueChange={(v: TextVariant) => {
+                  setTextVariant(v)
+                  onUpdate?.('textVariant', v)
+                }}>
+                  <SelectTrigger className="bg-background/50 hover:bg-background transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {viewModeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          <option.icon className="h-4 w-4" />
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="simple">
+                      <div className="flex flex-col">
+                        <span className="font-medium">Simple Layout</span>
+                        <span className="text-xs text-muted-foreground">Title + Subtitle</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="detailed">
+                      <div className="flex flex-col">
+                        <span className="font-medium">Detailed Layout</span>
+                        <span className="text-xs text-muted-foreground">Title + Organization + Description</span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground bg-background/30 p-2 rounded-lg border">
+                  💡 Choose how text content is displayed in the card
+                </p>
+                    </div>
+                  </div>
+
+              {/* Typography Controls - Available for all view modes */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/10">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <Type className="h-4 w-4 text-primary" />
+                  <Label className="font-medium">Typography Controls</Label>
+                </div>
+                
+                <div className="text-xs text-muted-foreground">
+                  Typography controls are available in all display modes
+                </div>
               </div>
 
               {/* Dynamic content editors based on view mode */}
-              {viewMode === 'text' && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Text Layout Style</Label>
-                    <Select value={textVariant} onValueChange={(v: TextVariant) => {
-                      setTextVariant(v)
-                      onUpdate?.('textVariant', v)
-                    }}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="simple">Simple (Title + Subtitle)</SelectItem>
-                        <SelectItem value="detailed">Detailed (Title + Organization + Description)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Choose how text content is displayed in the card
-                    </p>
-                  </div>
-                </div>
-              )}
               
               {viewMode === 'code' && (
                 <div className="space-y-4">
@@ -1000,6 +1107,14 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                             setImageTransform({ crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
                             onUpdate?.('images', newImages)
                             onUpdate?.('imageTransform', { crop: { x: 0, y: 0 }, zoom: 1, rotation: 0 })
+                          }}
+                          onBlur={(e) => {
+                            // Ensure the image is set on blur as well
+                            if (e.target.value && e.target.value !== images[0]) {
+                              const newImages = [e.target.value]
+                              setImages(newImages)
+                              onUpdate?.('images', newImages)
+                            }
                           }}
                           placeholder="https://example.com/image.jpg"
                         />
@@ -1404,9 +1519,9 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
                 </div>
               )}
             </div>
-            </div>
           </SheetContent>
         </Sheet>
+        */}
         
         {/* Delete Button - only visible in edit mode */}
         {isEditMode && onDelete && (

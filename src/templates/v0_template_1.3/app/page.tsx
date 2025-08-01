@@ -15,6 +15,7 @@ import { useEditMode } from "@/contexts/edit-mode-context"
 import { VerticalTimeline } from "@/components/ui/vertical-timeline"
 import { BentoGridItem } from "@/components/ui/bento-grid-item"
 import { EditableText } from "@/components/ui/editable-text"
+import { EditableTruncatedText } from "@/components/ui/editable-truncated-text"
 import { FloatingNav } from "@/components/ui/floating-nav"
 import { GlowingButton } from "@/components/ui/glowing-button"
 import { FlipText } from "@/components/ui/flip-text"
@@ -112,6 +113,15 @@ export default function FashionPortfolioPage() {
           // Use the demo data from initialData
           // No need to do anything else - initialData is already set
         } else {
+          // Check if backend is available first
+          const backendAvailable = await isBackendAvailable()
+          
+          if (!backendAvailable) {
+            console.log('🔌 Backend not available, using demo data')
+            toast.info('Running in preview mode with demo content')
+            return
+          }
+          
           // Try to get session ID from various sources
           const sessionId = getSessionId()
           
@@ -128,8 +138,13 @@ export default function FashionPortfolioPage() {
         }
       } catch (err) {
         // This is expected when running standalone without backend
-        console.log('ℹ️ Error loading CV data, using demo content')
+        console.log('ℹ️ Error loading CV data, using demo content:', err)
+        // Provide user-friendly message based on error type
+        if (err instanceof TypeError && err.message.includes('fetch')) {
+          console.log('📡 Network error - backend may not be available')
+        }
         // Keep using initialData as fallback
+        toast.info('Using demo content - backend connection unavailable')
       } finally {
         setIsLoading(false)
       }
@@ -383,6 +398,25 @@ export default function FashionPortfolioPage() {
     }
     
     return null
+  }
+
+  /* Helper function to check if backend is available */ /* -------------------- */
+  const isBackendAvailable = async (): Promise<boolean> => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 1000)
+      
+      const response = await fetch(`${apiUrl}/health`, {
+        method: 'HEAD',
+        signal: controller.signal
+      }).catch(() => null)
+      
+      clearTimeout(timeoutId)
+      return response !== null && response.ok
+    } catch {
+      return false
+    }
   }
 
   const [sectionVisibility, setSectionVisibility] = useState<Record<SectionKey, boolean>>(() => {
@@ -692,15 +726,17 @@ export default function FashionPortfolioPage() {
                         icon={contentIconMap[item.icon]}
                         title={
                           <EditableText
+                            className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                             initialValue={item.title}
                             onSave={(v) => handleSave(`projects.projectItems.${i}.title`, v)}
                           />
                         }
                         description={
-                          <EditableText
-                            textarea
+                          <EditableTruncatedText
                             initialValue={item.description}
                             onSave={(v) => handleSave(`projects.projectItems.${i}.description`, v)}
+                            maxLines={3}
+                            modalTitle={`${item.title} - Description`}
                           />
                         }
                       />
@@ -919,6 +955,7 @@ export default function FashionPortfolioPage() {
                     icon={contentIconMap[item.icon]}
                     title={
                       <EditableText
+                        className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                         initialValue={item.title}
                         onSave={(v) => handleSave(`achievements.achievementItems.${i}.title`, v)}
                       />
@@ -926,6 +963,7 @@ export default function FashionPortfolioPage() {
                     description={
                       <EditableText
                         as="p"
+                        className="font-sans text-muted-foreground text-sm sm:text-base"
                         initialValue={`${item.description}${item.year ? `, ${item.year}` : ""}`}
                         onSave={(v) => {
                           const [desc = "", yr = ""] = v.split(",")
@@ -1004,6 +1042,7 @@ export default function FashionPortfolioPage() {
                     icon={contentIconMap[item.icon]}
                     title={
                       <EditableText
+                        className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                         initialValue={item.title}
                         onSave={(v) => handleSave(`certifications.certificationItems.${i}.title`, v)}
                       />
@@ -1011,6 +1050,7 @@ export default function FashionPortfolioPage() {
                     description={
                       <EditableText
                         as="p"
+                        className="font-sans text-muted-foreground text-sm sm:text-base"
                         initialValue={`${item.issuingBody}${item.year ? `, ${item.year}` : ""}`}
                         onSave={(v) => {
                           const [body = "", yr = ""] = v.split(",")
@@ -1089,6 +1129,7 @@ export default function FashionPortfolioPage() {
                     icon={contentIconMap[item.icon]}
                     title={
                       <EditableText
+                        className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                         initialValue={item.role}
                         onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.role`, v)}
                       />
@@ -1102,12 +1143,12 @@ export default function FashionPortfolioPage() {
                             onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.organization`, v)}
                           />
                         </p>
-                        <EditableText
-                          textarea
-                          as="p"
+                        <EditableTruncatedText
                           initialValue={item.description}
                           onSave={(v) => handleSave(`volunteer.volunteerItems.${i}.description`, v)}
                           className="mt-2"
+                          maxLines={2}
+                          modalTitle={`${item.role} - Description`}
                         />
                       </>
                     }
@@ -1169,16 +1210,17 @@ export default function FashionPortfolioPage() {
                         icon={contentIconMap[item.icon || 'IconStar']}
                         title={
                           <EditableText
+                            className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                             initialValue={item.title}
                             onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.title`, v)}
                           />
                         }
                         description={
-                          <EditableText
-                            textarea
-                            as="p"
+                          <EditableTruncatedText
                             initialValue={item.description || 'Add a description for this hobby'}
                             onSave={(v) => handleSave(`hobbies.hobbyItems.${i}.description`, v)}
+                            maxLines={2}
+                            modalTitle={`${item.title} - Description`}
                           />
                         }
                       />
@@ -1280,6 +1322,7 @@ export default function FashionPortfolioPage() {
                     icon={contentIconMap[item.icon]}
                     title={
                       <EditableText
+                        className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                         initialValue={item.title}
                         onSave={(v) => handleSave(`courses.courseItems.${i}.title`, v)}
                       />
@@ -1287,6 +1330,7 @@ export default function FashionPortfolioPage() {
                     description={
                       <EditableText
                         as="p"
+                        className="font-sans text-muted-foreground text-sm sm:text-base"
                         initialValue={`${item.institution}${item.year ? `, ${item.year}` : ""}`}
                         onSave={(v) => {
                           const [inst = "", yr = ""] = v.split(",")
@@ -1369,6 +1413,7 @@ export default function FashionPortfolioPage() {
                       icon={contentIconMap[item.icon]}
                       title={
                         <EditableText
+                          className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                           initialValue={item.title}
                           onSave={(v) => handleSave(`publications.publicationItems.${i}.title`, v)}
                         />
@@ -1376,6 +1421,7 @@ export default function FashionPortfolioPage() {
                       description={
                         <EditableText
                           as="p"
+                          className="font-sans text-muted-foreground text-sm sm:text-base"
                           initialValue={`${item.journal}${item.year ? `, ${item.year}` : ""}`}
                           onSave={(v) => {
                             const [jour = "", yr = ""] = v.split(",")
@@ -1455,6 +1501,7 @@ export default function FashionPortfolioPage() {
                     icon={contentIconMap[item.icon]}
                     title={
                       <EditableText
+                        className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
                         initialValue={item.title}
                         onSave={(v) => handleSave(`speakingEngagements.engagementItems.${i}.title`, v)}
                       />
@@ -1462,6 +1509,7 @@ export default function FashionPortfolioPage() {
                     description={
                       <EditableText
                         as="p"
+                        className="font-sans text-muted-foreground text-sm sm:text-base"
                         initialValue={`${item.event} - ${item.location}${item.year ? `, ${item.year}` : ""}`}
                         onSave={(v) => handleSave(`speakingEngagements.engagementItems.${i}.event`, v)}
                       />

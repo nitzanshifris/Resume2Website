@@ -97,8 +97,9 @@ void main() {
         vec3 p = cameraPos + ray * t;
         vec3 normal = getNormal(p);
         float fresnel = pow(1.0 + dot(ray, normal), 3.0);
-        // Dark blob with fresnel effect
-        vec3 color = vec3(fresnel * 0.2); // Dark gray/black blob
+        // Golden blob with fresnel effect matching accent color
+        vec3 baseColor = vec3(1.0, 0.843, 0.0); // Pure gold color (#FFD700)
+        vec3 color = baseColor * (0.6 + fresnel * 0.4); // Base gold with fresnel enhancement
         gl_FragColor = vec4(color, 1.0);
     } else {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0); // Transparent background
