@@ -32,7 +32,7 @@ export function Section({ id, title, onSaveTitle, isVisible, className, children
           id={id} 
           {...sectionAnimation} 
           className={cn(
-            "py-12 sm:py-16 relative transition-all duration-300",
+            "py-12 sm:py-16 relative",
             className
           )}
         >
