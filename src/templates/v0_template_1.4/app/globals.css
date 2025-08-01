@@ -52,22 +52,28 @@
 @layer components {
   /* Ensure tweet cards integrate with the theme */
   .react-tweet-theme {
-    @apply !bg-background !text-foreground;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
   
   /* Tweet card link colors */
   .react-tweet-theme a {
-    @apply !text-primary hover:!text-primary/80;
+    color: hsl(var(--primary)) !important;
+  }
+  
+  .react-tweet-theme a:hover {
+    opacity: 0.8 !important;
   }
   
   /* Tweet card borders */
   .react-tweet-theme [data-tweet] {
-    @apply !border-border;
+    border-color: hsl(var(--border)) !important;
   }
   
   /* Dark mode support */
   .dark .react-tweet-theme {
-    @apply !bg-background !text-foreground;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 }
 
