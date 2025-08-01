@@ -641,9 +641,36 @@ export async function fetchAndAdaptCVData(jobId: string, sessionId: string): Pro
 /**
  * Fetches the most recent CV for a user and adapts it to template format
  */
+/**
+ * Check if backend is available
+ */
+async function isBackendAvailable(): Promise<boolean> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'
+    
+    // Create a timeout promise for backend check
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Backend check timeout')), 1000)
+    })
+    
+    const fetchPromise = fetch(`${apiUrl}/health`, { method: 'GET' })
+    
+    const response = await Promise.race([fetchPromise, timeoutPromise]) as Response
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 export async function fetchLatestCVData(sessionId: string): Promise<PortfolioData> {
   try {
-    // Check if we're in standalone mode (no backend available)
+    // Check if backend is available first
+    const backendAvailable = await isBackendAvailable()
+    if (!backendAvailable) {
+      console.log('🚫 Backend not available, using fallback data')
+      return adaptCV2WebToTemplate({})
+    }
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'
     
     // Create a timeout promise
@@ -651,11 +678,14 @@ export async function fetchLatestCVData(sessionId: string): Promise<PortfolioDat
       setTimeout(() => reject(new Error('Request timeout')), 3000)
     })
     
-    // Create the fetch promise
+    // Create the fetch promise with error handling
     const fetchPromise = fetch(`${apiUrl}/api/v1/my-cvs`, {
       headers: {
         'X-Session-ID': sessionId
       }
+    }).catch(error => {
+      // Handle network errors
+      throw new Error(`Network error: ${error.message}`)
     })
     
     // Race between fetch and timeout
