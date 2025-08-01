@@ -113,28 +113,13 @@ export default function FashionPortfolioPage() {
           // Use the demo data from initialData
           // No need to do anything else - initialData is already set
         } else {
-          // Check if backend is available first
-          const backendAvailable = await isBackendAvailable()
-          
-          if (!backendAvailable) {
-            console.log('🔌 Backend not available, using demo data')
-            toast.info('Running in preview mode with demo content')
-            return
-          }
-          
-          // Try to get session ID from various sources
-          const sessionId = getSessionId()
-          
-          if (sessionId) {
-            console.log('🔄 Loading CV data from API...')
-            const cvData = await fetchLatestCVData(sessionId)
-            setData(cvData)
-            console.log('✅ CV data loaded successfully')
-            toast.success('Portfolio loaded from your CV data!')
-          } else {
-            console.log('⚠️ No session ID found, using demo data')
-            toast.info('Showing demo portfolio - connect your CV for personalized content')
-          }
+          // For generated portfolios, always fetch CV data (which will use injected data)
+          console.log('🔄 Loading CV data...')
+          const sessionId = getSessionId() || 'generated-portfolio'
+          const cvData = await fetchLatestCVData(sessionId)
+          setData(cvData)
+          console.log('✅ CV data loaded successfully')
+          toast.success('Portfolio loaded successfully!')
         }
       } catch (err) {
         // This is expected when running standalone without backend
@@ -393,25 +378,6 @@ export default function FashionPortfolioPage() {
     }
     
     return null
-  }
-
-  /* Helper function to check if backend is available */ /* -------------------- */
-  const isBackendAvailable = async (): Promise<boolean> => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 1000)
-      
-      const response = await fetch(`${apiUrl}/health`, {
-        method: 'HEAD',
-        signal: controller.signal
-      }).catch(() => null)
-      
-      clearTimeout(timeoutId)
-      return response !== null && response.ok
-    } catch {
-      return false
-    }
   }
 
   const [sectionVisibility, setSectionVisibility] = useState<Record<SectionKey, boolean>>(() => {
