@@ -23,7 +23,13 @@ try {
   const injectedModule = require("@/lib/injected-data")
   injectedPortfolioData = injectedModule.portfolioData
   useRealData = injectedModule.useRealData
+  console.log('✅ Successfully loaded injected data:', {
+    hasData: !!injectedPortfolioData,
+    useRealData,
+    heroName: injectedPortfolioData?.hero?.name
+  })
 } catch (e) {
+  console.log('❌ Failed to load injected data:', e.message)
   // No injected data available, will use API or demo data
 }
 import { FloatingNav } from "@/components/ui/floating-nav"
