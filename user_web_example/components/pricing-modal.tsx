@@ -5,12 +5,13 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Check, Crown, Star, Info } from "lucide-react"
+import { Check, Crown, Star, Info, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface PricingModalProps {
   isOpen: boolean
   onPlanSelected: (planId: string) => void
+  onClose?: () => void
 }
 
 const pricingTiers = [
@@ -63,7 +64,7 @@ const pricingTiers = [
   }
 ]
 
-export default function PricingModal({ isOpen, onPlanSelected }: PricingModalProps) {
+export default function PricingModal({ isOpen, onPlanSelected, onClose }: PricingModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showHostingInfo, setShowHostingInfo] = useState(false)
@@ -95,6 +96,17 @@ export default function PricingModal({ isOpen, onPlanSelected }: PricingModalPro
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
       <div className="relative bg-white rounded-2xl p-8 w-full max-w-6xl mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+        
+        {/* Close Button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+            aria-label="Close modal"
+          >
+            <X className="w-6 h-6 text-gray-600 hover:text-gray-800" />
+          </button>
+        )}
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">

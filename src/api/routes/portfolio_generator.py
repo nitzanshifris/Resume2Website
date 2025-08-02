@@ -297,9 +297,11 @@ PORTFOLIOS_DIR = BASE_DIR / "data" / "generated_portfolios"
 # Available templates
 AVAILABLE_TEMPLATES = {
     "v0_template_1.3": "v0_template_1.3",
-    "v0_template_1.4": "v0_template_1.4"
+    "v0_template_1.4": "v0_template_1.4",
+    "v0_template_v1.5": "v0_template_v1.5",
+    "v0_template_v2.1": "v0_template_v2.1"
 }
-DEFAULT_TEMPLATE = "v0_template_1.4"
+DEFAULT_TEMPLATE = "v0_template_v1.5"
 
 # Ensure portfolios directory exists
 PORTFOLIOS_DIR.mkdir(parents=True, exist_ok=True)

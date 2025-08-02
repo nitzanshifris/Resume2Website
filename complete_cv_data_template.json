@@ -1,0 +1,274 @@
+{
+  "hero": {
+    "fullName": "",
+    "professionalTitle": "",
+    "summaryTagline": "",
+    "profilePhotoUrl": ""
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "location": {
+      "city": "",
+      "state": "",
+      "country": ""
+    },
+    "professionalLinks": [
+      {
+        "platform": "",
+        "url": ""
+      }
+    ],
+    "availability": ""
+  },
+  "summary": {
+    "summaryText": "",
+    "yearsOfExperience": null,
+    "keySpecializations": [],
+    "careerHighlights": []
+  },
+  "experience": {
+    "sectionTitle": "",
+    "experienceItems": [
+      {
+        "jobTitle": "",
+        "companyName": "",
+        "location": {
+          "city": "",
+          "state": "",
+          "country": ""
+        },
+        "dateRange": {
+          "startDate": "",
+          "endDate": "",
+          "duration": ""
+        },
+        "responsibilities": [],
+        "achievements": [],
+        "technologies": [],
+        "companyDescription": "",
+        "teamSize": null,
+        "reportsTo": "",
+        "keyProjects": []
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "",
+    "educationItems": [
+      {
+        "degree": "",
+        "institution": "",
+        "location": {
+          "city": "",
+          "state": "",
+          "country": ""
+        },
+        "dateRange": {
+          "startDate": "",
+          "endDate": ""
+        },
+        "gpa": "",
+        "honors": [],
+        "relevantCoursework": [],
+        "activities": [],
+        "thesis": "",
+        "advisor": "",
+        "fieldOfStudy": ""
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "",
+    "skillCategories": [
+      {
+        "categoryName": "",
+        "skills": [
+          {
+            "skillName": "",
+            "proficiencyLevel": "",
+            "yearsOfExperience": null,
+            "lastUsed": "",
+            "certifications": [],
+            "projectsUsed": []
+          }
+        ]
+      }
+    ]
+  },
+  "projects": {
+    "sectionTitle": "",
+    "projectItems": [
+      {
+        "title": "",
+        "description": "",
+        "technologies": [],
+        "projectUrl": "",
+        "githubUrl": "",
+        "demoUrl": "",
+        "imageUrl": "",
+        "videoUrl": "",
+        "achievements": [],
+        "teamSize": null,
+        "role": "",
+        "duration": "",
+        "keyFeatures": [],
+        "challenges": [],
+        "impact": ""
+      }
+    ]
+  },
+  "certifications": {
+    "sectionTitle": "",
+    "certificationItems": [
+      {
+        "certificationName": "",
+        "issuingOrganization": "",
+        "issueDate": "",
+        "expirationDate": "",
+        "credentialId": "",
+        "credentialUrl": "",
+        "description": "",
+        "skills": [],
+        "score": ""
+      }
+    ]
+  },
+  "languages": {
+    "sectionTitle": "",
+    "languageItems": [
+      {
+        "language": "",
+        "proficiency": "",
+        "certifications": [],
+        "yearsOfExperience": null,
+        "nativeLanguage": false
+      }
+    ]
+  },
+  "hobbies": {
+    "sectionTitle": "",
+    "hobbyItems": [
+      {
+        "hobbyName": "",
+        "description": "",
+        "yearsOfExperience": null,
+        "achievements": [],
+        "relevantSkills": []
+      }
+    ]
+  },
+  "testimonials": {
+    "sectionTitle": "",
+    "testimonialItems": [
+      {
+        "testimonialText": "",
+        "authorName": "",
+        "authorTitle": "",
+        "authorCompany": "",
+        "authorImageUrl": "",
+        "relationshipToCandidate": "",
+        "dateGiven": "",
+        "linkedInProfile": ""
+      }
+    ]
+  },
+  "memberships": {
+    "sectionTitle": "",
+    "membershipItems": [
+      {
+        "organizationName": "",
+        "membershipType": "",
+        "startDate": "",
+        "endDate": "",
+        "description": "",
+        "position": "",
+        "activities": [],
+        "achievements": []
+      }
+    ]
+  },
+  "awards": {
+    "sectionTitle": "",
+    "awardItems": [
+      {
+        "awardName": "",
+        "issuingOrganization": "",
+        "dateReceived": "",
+        "description": "",
+        "category": "",
+        "significance": ""
+      }
+    ]
+  },
+  "publications": {
+    "sectionTitle": "",
+    "publicationItems": [
+      {
+        "title": "",
+        "authors": [],
+        "publication": "",
+        "datePublished": "",
+        "url": "",
+        "doi": "",
+        "abstract": "",
+        "citations": null
+      }
+    ]
+  },
+  "patents": {
+    "sectionTitle": "",
+    "patentItems": [
+      {
+        "title": "",
+        "patentNumber": "",
+        "dateGranted": "",
+        "description": "",
+        "inventors": [],
+        "assignee": "",
+        "url": ""
+      }
+    ]
+  },
+  "conferences": {
+    "sectionTitle": "",
+    "conferenceItems": [
+      {
+        "eventName": "",
+        "role": "",
+        "date": "",
+        "location": "",
+        "description": "",
+        "topicsPresented": []
+      }
+    ]
+  },
+  "courses": {
+    "sectionTitle": "",
+    "courseItems": [
+      {
+        "courseName": "",
+        "provider": "",
+        "completionDate": "",
+        "duration": "",
+        "certificateUrl": "",
+        "skills": [],
+        "grade": ""
+      }
+    ]
+  },
+  "references": {
+    "sectionTitle": "",
+    "referenceItems": [
+      {
+        "name": "",
+        "title": "",
+        "company": "",
+        "email": "",
+        "phone": "",
+        "relationship": "",
+        "yearsKnown": null
+      }
+    ]
+  }
+}

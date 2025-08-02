@@ -243,7 +243,7 @@ const LiquidFaqCard = ({ faq, index, colKey }: { faq: any, index: number, colKey
   )
 }
 
-export default function FAQ({ onOpenModal }: { onOpenModal?: () => void }) {
+export default function FAQ({ onOpenModal, setShowPricing }: { onOpenModal?: () => void; setShowPricing?: (value: boolean) => void }) {
   return (
     <section className="py-20 relative">
       {/* Base background */}
@@ -382,6 +382,24 @@ export default function FAQ({ onOpenModal }: { onOpenModal?: () => void }) {
               ))}
             </Accordion>
           </motion.div>
+        </motion.div>
+
+        {/* Phase 8 Level 4: Final Conviction (Only one button) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="text-center mt-16"
+        >
+          <div className="max-w-lg mx-auto">
+            <Button
+              size="lg"
+              onClick={() => setShowPricing?.(true)}
+              className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 text-lg px-10 py-5 rounded-full transition-all duration-300 hover:scale-105 shadow-2xl w-full max-w-md animate-pulse"
+            >
+              Got it! This is my way to get interviews! Let's start
+            </Button>
+          </div>
         </motion.div>
       </div>
     </section>

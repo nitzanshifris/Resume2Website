@@ -48,7 +48,7 @@ export function MacBookFrame({ children, isComplete }: MacBookFrameProps) {
             </div>
 
             {/* Content */}
-            <div className="bg-gray-900 w-full" style={{ aspectRatio: "20/12" }}>
+            <div className="bg-gray-900 w-full relative" style={{ aspectRatio: "20/12" }}>
               {children}
             </div>
           </div>

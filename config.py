@@ -15,6 +15,7 @@ HOST = "127.0.0.1"
 ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React default
     "http://localhost:3001",  # React alternative
+    "http://localhost:3019",  # Reef's custom port
     "http://localhost:5173",  # Vite default
 ]
 
