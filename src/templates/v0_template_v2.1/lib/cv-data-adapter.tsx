@@ -7,7 +7,29 @@
  * 3. Fallback to existing demo data
  */
 
+import React from 'react'
 import { mapCvDataToSections } from './data-mapper'
+import { Code2, Database, Cloud, GitBranch, Shield, Trophy } from "lucide-react"
+
+// Helper function to get skill category icon
+const getSkillIcon = (categoryName: string) => {
+  const icons: Record<string, any> = {
+    "Programming Languages": Code2,
+    "Backend Development": Database,
+    "Frontend Development": Code2,
+    "Cloud & DevOps": Cloud,
+    "Tools & Version Control": GitBranch,
+    "Security & Testing": Shield,
+    default: Trophy,
+  }
+  const lowerCategory = categoryName.toLowerCase()
+  for (const key of Object.keys(icons)) {
+    if (key !== 'default' && lowerCategory.includes(key.toLowerCase().split(" ")[0])) {
+      return icons[key]
+    }
+  }
+  return icons.default
+}
 
 // CV2WEB API types (matching backend schema)
 interface CV2WebData {
@@ -93,9 +115,107 @@ interface CV2WebData {
       technologiesUsed?: string[] | null
       projectUrl?: string | null
       imageUrl?: string | null
+      githubUrl?: string | null
+      demoUrl?: string | null
+      videoUrl?: string | null
     }> | null
   } | null
-  [key: string]: any // Allow other sections
+  achievements?: {
+    sectionTitle?: string | null
+    achievements?: Array<{
+      value?: string | null
+      label?: string | null
+      contextOrDetail?: string | null
+      timeframe?: string | null
+    }> | null
+  } | null
+  certifications?: {
+    sectionTitle?: string | null
+    certificationItems?: Array<{
+      title?: string | null
+      issuingOrganization?: string | null
+      issueDate?: string | null
+      expirationDate?: string | null
+      credentialId?: string | null
+      verificationUrl?: string | null
+    }> | null
+  } | null
+  languages?: {
+    sectionTitle?: string | null
+    languageItems?: Array<{
+      language?: string | null
+      proficiency?: string | null
+      certification?: string | null
+    }> | null
+  } | null
+  courses?: {
+    sectionTitle?: string | null
+    courseItems?: Array<{
+      title?: string | null
+      institution?: string | null
+      completionDate?: string | null
+    }> | null
+  } | null
+  volunteer?: {
+    sectionTitle?: string | null
+    volunteerItems?: Array<{
+      role?: string | null
+      organization?: string | null
+      dateRange?: {
+        startDate?: string | null
+        endDate?: string | null
+        isCurrent?: boolean | null
+      } | null
+      description?: string | null
+    }> | null
+  } | null
+  publications?: {
+    sectionTitle?: string | null
+    publications?: Array<{
+      title?: string | null
+      publicationType?: string | null
+      publicationVenue?: string | null
+      publicationDate?: string | null
+      url?: string | null
+    }> | null
+  } | null
+  speaking?: {
+    sectionTitle?: string | null
+    speakingEngagements?: Array<{
+      eventName?: string | null
+      topic?: string | null
+      date?: string | null
+      venue?: string | null
+      role?: string | null
+    }> | null
+  } | null
+  patents?: {
+    sectionTitle?: string | null
+    patents?: Array<{
+      title?: string | null
+      patentNumber?: string | null
+      status?: string | null
+      filingDate?: string | null
+      description?: string | null
+    }> | null
+  } | null
+  memberships?: {
+    sectionTitle?: string | null
+    memberships?: Array<{
+      organization?: string | null
+      role?: string | null
+      membershipType?: string | null
+      dateRange?: {
+        startDate?: string | null
+        endDate?: string | null
+        isCurrent?: boolean | null
+      } | null
+    }> | null
+  } | null
+  hobbies?: {
+    sectionTitle?: string | null
+    hobbies?: string[] | null
+  } | null
 }
 
 /**
@@ -134,11 +254,10 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
       type: 'timeline',
       title: cv2webData.experience.sectionTitle || 'Experience',
       data: cv2webData.experience.experienceItems.map(item => ({
-        jobTitle: item?.jobTitle || '',
-        companyName: item?.companyName || '',
-        duration: formatDateRange(item?.dateRange),
-        location: formatLocation(item?.location),
-        description: item?.responsibilitiesAndAchievements?.join(' • ') || item?.summary || ''
+        title: item?.jobTitle || '',
+        subtitle: `${item?.companyName || ''}${item?.location ? ', ' + formatLocation(item.location) : ''}`,
+        period: formatDateRange(item?.dateRange),
+        details: item?.responsibilitiesAndAchievements || []
       }))
     })
   }
@@ -150,11 +269,10 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
       type: 'timeline',
       title: cv2webData.education.sectionTitle || 'Education',
       data: cv2webData.education.educationItems.map(item => ({
-        jobTitle: item?.degree || '',
-        companyName: item?.institution || '',
-        duration: formatDateRange(item?.dateRange),
-        location: formatLocation(item?.location),
-        description: item?.relevantCoursework?.join(', ') || item?.honors?.join(', ') || ''
+        title: `${item?.degree || ''}${item?.fieldOfStudy ? ', ' + item.fieldOfStudy : ''}`,
+        subtitle: `${item?.institution || ''}${item?.location ? ', ' + formatLocation(item.location) : ''}`,
+        period: formatDateRange(item?.dateRange),
+        details: item?.honors || []
       }))
     })
   }
@@ -165,17 +283,21 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
     
     // Add categorized skills
     cv2webData.skills.skillCategories?.forEach(category => {
+      const IconComponent = getSkillIcon(category.categoryName || '')
       skills.push({
-        title: category.categoryName || 'Skills',
-        items: (category.skills || []).map(skill => ({ name: skill }))
+        categoryName: category.categoryName || 'Skills',
+        skills: category.skills || [],
+        icon: <IconComponent className="w-20 h-20 text-foreground transition-colors duration-300" />
       })
     })
     
     // Add ungrouped skills
     if (cv2webData.skills.ungroupedSkills?.length) {
+      const IconComponent = getSkillIcon('Other Skills')
       skills.push({
-        title: 'Other Skills',
-        items: cv2webData.skills.ungroupedSkills.map(skill => ({ name: skill }))
+        categoryName: 'Other Skills',
+        skills: cv2webData.skills.ungroupedSkills,
+        icon: <IconComponent className="w-20 h-20 text-foreground transition-colors duration-300" />
       })
     }
 
@@ -199,6 +321,162 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
         link: item?.projectUrl || '#',
         imageUrl: item?.imageUrl || null
       }))
+    })
+  }
+
+  // Add achievements section
+  if (cv2webData.achievements?.achievements?.length) {
+    adaptedData.sections.push({
+      id: 'accomplishments',
+      type: 'accomplishments',
+      title: cv2webData.achievements.sectionTitle || 'Achievements',
+      data: cv2webData.achievements.achievements.map(item => {
+        // Match the exact format expected by v2.1
+        let title = item?.value || ''
+        let description = item?.label || ''
+        
+        if (item?.contextOrDetail) {
+          description += ` ${item.contextOrDetail}`
+        }
+        if (item?.timeframe) {
+          description += ` (${item.timeframe})`
+        }
+        
+        return {
+          title: title.trim(),
+          description: description.trim()
+        }
+      })
+    })
+  }
+
+  // Add certifications section
+  if (cv2webData.certifications?.certificationItems?.length) {
+    adaptedData.sections.push({
+      id: 'certifications',
+      type: 'certifications',
+      title: cv2webData.certifications.sectionTitle || 'Certifications',
+      data: cv2webData.certifications.certificationItems.map(item => ({
+        name: item?.title || '',
+        issuer: item?.issuingOrganization || '',
+        date: item?.issueDate || '',
+        expiryDate: item?.expirationDate || null,
+        credentialId: item?.credentialId || null,
+        verificationUrl: item?.verificationUrl || null
+      }))
+    })
+  }
+
+  // Add languages section
+  if (cv2webData.languages?.languageItems?.length) {
+    adaptedData.sections.push({
+      id: 'languages',
+      type: 'languages',
+      title: cv2webData.languages.sectionTitle || 'Languages',
+      data: cv2webData.languages.languageItems.map(item => ({
+        name: item?.language || '',
+        proficiency: item?.proficiency || ''
+      }))
+    })
+  }
+
+  // Add courses section
+  if (cv2webData.courses?.courseItems?.length) {
+    adaptedData.sections.push({
+      id: 'courses',
+      type: 'courses',
+      title: cv2webData.courses.sectionTitle || 'Courses',
+      data: cv2webData.courses.courseItems.map(item => ({
+        title: item?.title || '',
+        institution: item?.institution || '',
+        date: item?.completionDate || ''
+      }))
+    })
+  }
+
+  // Add volunteer section
+  if (cv2webData.volunteer?.volunteerItems?.length) {
+    adaptedData.sections.push({
+      id: 'volunteer',
+      type: 'timeline',
+      title: cv2webData.volunteer.sectionTitle || 'Volunteer Experience',
+      data: cv2webData.volunteer.volunteerItems.map(item => ({
+        title: item?.role || '',
+        subtitle: item?.organization || '',
+        period: formatDateRange(item?.dateRange),
+        details: item?.description ? [item.description] : []
+      }))
+    })
+  }
+
+  // Add publications section
+  if (cv2webData.publications?.publications?.length) {
+    adaptedData.sections.push({
+      id: 'publications',
+      type: 'publications',
+      title: cv2webData.publications.sectionTitle || 'Publications',
+      data: cv2webData.publications.publications.map(item => ({
+        title: item?.title || '',
+        journal: item?.publicationType || item?.publicationVenue || '',
+        date: item?.publicationDate || '',
+        link: item?.url || '#'
+      }))
+    })
+  }
+
+  // Add speaking engagements (using timeline since v2.1 doesn't have dedicated speaking section)
+  if (cv2webData.speaking?.speakingEngagements?.length) {
+    adaptedData.sections.push({
+      id: 'speaking',
+      type: 'timeline',
+      title: cv2webData.speaking.sectionTitle || 'Speaking Engagements',
+      data: cv2webData.speaking.speakingEngagements.map(item => ({
+        title: item?.topic || '',
+        subtitle: `${item?.eventName || ''}${item?.venue ? ', ' + item.venue : ''}`,
+        period: item?.date || '',
+        details: item?.role ? [item.role] : []
+      }))
+    })
+  }
+
+  // Add patents section
+  if (cv2webData.patents?.patents?.length) {
+    adaptedData.sections.push({
+      id: 'patents',
+      type: 'patents',
+      title: cv2webData.patents.sectionTitle || 'Patents',
+      data: cv2webData.patents.patents.map(item => ({
+        title: item?.title || '',
+        patentNumber: item?.patentNumber || '',
+        status: item?.status || '',
+        filingDate: item?.filingDate || '',
+        description: item?.description || ''
+      }))
+    })
+  }
+
+  // Add memberships section
+  if (cv2webData.memberships?.memberships?.length) {
+    adaptedData.sections.push({
+      id: 'memberships',
+      type: 'memberships',
+      title: cv2webData.memberships.sectionTitle || 'Professional Memberships',
+      data: cv2webData.memberships.memberships.map(item => ({
+        organization: item?.organization || '',
+        role: item?.role || '',
+        type: item?.membershipType || '',
+        duration: formatDateRange(item?.dateRange)
+      }))
+    })
+  }
+
+  // Add hobbies section
+  if (cv2webData.hobbies?.hobbies?.length) {
+    adaptedData.sections.push({
+      id: 'hobbies',
+      type: 'hobbies',
+      title: cv2webData.hobbies.sectionTitle || 'Hobbies & Interests',
+      data: cv2webData.hobbies.hobbies
     })
   }
 

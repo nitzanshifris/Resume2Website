@@ -703,6 +703,771 @@ export function SmartCard({ item, children, className, onUpdate, onDelete }: Sma
           </Dialog>
         )}
         
+        {/* Settings Button */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button size="icon" variant="secondary" className="h-8 w-8 shadow-md">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent 
+            side={sheetSide} 
+            className="overflow-y-auto p-0"
+            style={{ width: `${sheetWidth}px` }}
+          >
+            {/* Resize Handle */}
+            <div
+              className={cn(
+                "absolute top-0 w-2 h-full cursor-ew-resize group/resize transition-colors",
+                sheetSide === 'right' ? 'left-0' : 'right-0',
+                isResizing && 'bg-primary/30'
+              )}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                setIsResizing(true)
+                
+                const startX = e.clientX
+                const startWidth = sheetWidth
+                
+                const handleMouseMove = (e: MouseEvent) => {
+                  const deltaX = e.clientX - startX
+                  const newWidth = sheetSide === 'right' 
+                    ? startWidth - deltaX 
+                    : startWidth + deltaX
+                  
+                  // Constrain width between 400px and 80% of viewport
+                  const minWidth = 400
+                  const maxWidth = window.innerWidth * 0.8
+                  setSheetWidth(Math.max(minWidth, Math.min(maxWidth, newWidth)))
+                }
+                
+                const handleMouseUp = () => {
+                  setIsResizing(false)
+                  document.removeEventListener('mousemove', handleMouseMove)
+                  document.removeEventListener('mouseup', handleMouseUp)
+                  document.body.style.cursor = ''
+                  document.body.style.userSelect = ''
+                }
+                
+                document.addEventListener('mousemove', handleMouseMove)
+                document.addEventListener('mouseup', handleMouseUp)
+                document.body.style.cursor = 'ew-resize'
+                document.body.style.userSelect = 'none'
+              }}
+            >
+              <div className={cn(
+                "absolute top-0 w-0.5 h-full bg-border transition-all",
+                sheetSide === 'right' ? 'left-0' : 'right-0',
+                "group-hover/resize:bg-primary/20",
+                isResizing && "bg-primary/40"
+              )} />
+              <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-0 group-hover/resize:opacity-100 transition-opacity">
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+            
+            <div className="flex flex-col h-full">
+              {/* Enhanced Header */}
+              <div className="p-6 pb-4 border-b bg-gradient-to-b from-background to-muted/20">
+                <SheetHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
+                        <Settings className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <SheetTitle className="text-xl font-semibold">Card Settings</SheetTitle>
+                        <p className="text-xs text-muted-foreground mt-0.5">Customize appearance and content</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setSheetSide(sheetSide === 'right' ? 'left' : 'right')}
+                        className="h-8 w-8 hover:bg-secondary/80 transition-colors"
+                        title={`Move to ${sheetSide === 'right' ? 'left' : 'right'}`}
+                      >
+                        {sheetSide === 'right' ? (
+                          <PanelLeftOpen className="h-4 w-4" />
+                        ) : (
+                          <PanelRightOpen className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </SheetHeader>
+              </div>
+              
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-6 space-y-4">
+                  {/* View Mode Selector */}
+                  <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 backdrop-blur-sm">
+                          <Layers className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <Label className="font-semibold text-base">Display Mode</Label>
+                          <p className="text-xs text-muted-foreground">Choose how content appears</p>
+                        </div>
+                      </div>
+                      <Select value={viewMode} onValueChange={handleViewModeChange}>
+                        <SelectTrigger className="w-full bg-background/50 hover:bg-background/80 border-muted-foreground/20 transition-all">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {viewModeOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              <div className="flex items-center gap-3">
+                                <option.icon className="h-4 w-4" />
+                                <span>{option.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Text Layout Style - Available for all view modes */}
+                  <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 backdrop-blur-sm">
+                          <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <Label className="font-semibold text-base">Text Layout</Label>
+                          <p className="text-xs text-muted-foreground">Content arrangement style</p>
+                        </div>
+                      </div>
+                      <Select value={textVariant} onValueChange={(v: TextVariant) => {
+                        setTextVariant(v)
+                        onUpdate?.('textVariant', v)
+                      }}>
+                        <SelectTrigger className="bg-background/50 hover:bg-background transition-colors">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="simple">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Simple Layout</span>
+                              <span className="text-xs text-muted-foreground">Title + Subtitle</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="detailed">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Detailed Layout</span>
+                              <span className="text-xs text-muted-foreground">Title + Organization + Description</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground bg-background/30 p-2 rounded-lg border">
+                        💡 Choose how text content is displayed in the card
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Typography Controls - Available for all view modes */}
+                  <div className="space-y-4 p-4 border rounded-lg bg-muted/10">
+                    <div className="flex items-center gap-2 pb-2 border-b">
+                      <Type className="h-4 w-4 text-primary" />
+                      <Label className="font-medium">Typography Controls</Label>
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground">
+                      Typography controls are available in all display modes
+                    </div>
+                  </div>
+
+                  {/* Dynamic content editors based on view mode */}
+                  
+                  {viewMode === 'code' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label>Code Display</Label>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const useTabs = codeTabs.length === 0
+                                if (useTabs) {
+                                  // Convert single code to tabs
+                                  const newTabs: CodeTab[] = [
+                                    {
+                                      name: item.title || 'main.tsx',
+                                      code: codeContent || '',
+                                      language: codeLanguage
+                                    }
+                                  ]
+                                  setCodeTabs(newTabs)
+                                  onUpdate?.('codeTabs', newTabs)
+                                  setCodeContent('')
+                                  onUpdate?.('codeSnippet', '')
+                                } else {
+                                  // Convert tabs to single code
+                                  if (codeTabs.length > 0) {
+                                    setCodeContent(codeTabs[0].code)
+                                    setCodeLanguage(codeTabs[0].language)
+                                    onUpdate?.('codeSnippet', codeTabs[0].code)
+                                    onUpdate?.('codeLanguage', codeTabs[0].language)
+                                  }
+                                  setCodeTabs([])
+                                  onUpdate?.('codeTabs', [])
+                                }
+                              }}
+                            >
+                              {codeTabs.length > 0 ? 'Single File' : 'Multiple Tabs'}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {codeTabs.length === 0 ? (
+                        <div className="space-y-2">
+                          <Select 
+                            value={codeLanguage} 
+                            onValueChange={(v) => {
+                              setCodeLanguage(v)
+                              onUpdate?.('codeLanguage', v)
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="typescript">TypeScript</SelectItem>
+                              <SelectItem value="javascript">JavaScript</SelectItem>
+                              <SelectItem value="jsx">JSX</SelectItem>
+                              <SelectItem value="tsx">TSX</SelectItem>
+                              <SelectItem value="html">HTML</SelectItem>
+                              <SelectItem value="css">CSS</SelectItem>
+                              <SelectItem value="python">Python</SelectItem>
+                              <SelectItem value="java">Java</SelectItem>
+                              <SelectItem value="go">Go</SelectItem>
+                              <SelectItem value="rust">Rust</SelectItem>
+                              <SelectItem value="cpp">C++</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Textarea
+                            value={codeContent}
+                            onChange={(e) => {
+                              setCodeContent(e.target.value)
+                              onUpdate?.('codeSnippet', e.target.value)
+                            }}
+                            placeholder="Enter your code here..."
+                            className="font-mono text-sm min-h-[200px]"
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label>Code Tabs</Label>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const newTab: CodeTab = {
+                                  name: `file${codeTabs.length + 1}.tsx`,
+                                  code: '',
+                                  language: 'typescript'
+                                }
+                                const updatedTabs = [...codeTabs, newTab]
+                                setCodeTabs(updatedTabs)
+                                onUpdate?.('codeTabs', updatedTabs)
+                              }}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add Tab
+                            </Button>
+                          </div>
+                          
+                          <Tabs defaultValue="0" className="w-full">
+                            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${codeTabs.length}, 1fr)` }}>
+                              {codeTabs.map((tab, index) => (
+                                <TabsTrigger key={index} value={index.toString()}>
+                                  {tab.name}
+                                </TabsTrigger>
+                              ))}
+                            </TabsList>
+                            
+                            {codeTabs.map((tab, index) => (
+                              <TabsContent key={index} value={index.toString()} className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    value={tab.name}
+                                    onChange={(e) => {
+                                      const updatedTabs = [...codeTabs]
+                                      updatedTabs[index].name = e.target.value
+                                      setCodeTabs(updatedTabs)
+                                      onUpdate?.('codeTabs', updatedTabs)
+                                    }}
+                                    placeholder="Filename"
+                                    className="flex-1"
+                                  />
+                                  <Select 
+                                    value={tab.language} 
+                                    onValueChange={(v) => {
+                                      const updatedTabs = [...codeTabs]
+                                      updatedTabs[index].language = v
+                                      setCodeTabs(updatedTabs)
+                                      onUpdate?.('codeTabs', updatedTabs)
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-[120px]">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="typescript">TypeScript</SelectItem>
+                                      <SelectItem value="javascript">JavaScript</SelectItem>
+                                      <SelectItem value="jsx">JSX</SelectItem>
+                                      <SelectItem value="tsx">TSX</SelectItem>
+                                      <SelectItem value="html">HTML</SelectItem>
+                                      <SelectItem value="css">CSS</SelectItem>
+                                      <SelectItem value="python">Python</SelectItem>
+                                      <SelectItem value="java">Java</SelectItem>
+                                      <SelectItem value="go">Go</SelectItem>
+                                      <SelectItem value="rust">Rust</SelectItem>
+                                      <SelectItem value="cpp">C++</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  {codeTabs.length > 1 && (
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        const updatedTabs = codeTabs.filter((_, i) => i !== index)
+                                        setCodeTabs(updatedTabs)
+                                        onUpdate?.('codeTabs', updatedTabs)
+                                      }}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                                <Textarea
+                                  value={tab.code}
+                                  onChange={(e) => {
+                                    const updatedTabs = [...codeTabs]
+                                    updatedTabs[index].code = e.target.value
+                                    setCodeTabs(updatedTabs)
+                                    onUpdate?.('codeTabs', updatedTabs)
+                                  }}
+                                  placeholder="Enter code..."
+                                  className="font-mono text-sm min-h-[150px]"
+                                />
+                              </TabsContent>
+                            ))}
+                          </Tabs>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {viewMode === 'images' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Image</Label>
+                        <div className="space-y-2">
+                          <Input
+                            value={images[0]?.startsWith('data:') ? '' : images[0] || ''}
+                            onChange={(e) => {
+                              setImages([e.target.value])
+                              onUpdate?.('images', [e.target.value])
+                            }}
+                            placeholder="Image URL"
+                          />
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                const reader = new FileReader()
+                                reader.onloadend = () => {
+                                  const base64String = reader.result as string
+                                  setImages([base64String])
+                                  onUpdate?.('images', [base64String])
+                                }
+                                reader.readAsDataURL(file)
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                      
+                      {images[0] && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label>Image Options</Label>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setIsEditingImage(true)}
+                              >
+                                <Edit2 className="h-3 w-3 mr-1" />
+                                Transform
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setImages([])
+                                  onUpdate?.('images', [])
+                                }}
+                              >
+                                Clear Image
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="space-y-2">
+                        <Label>Image Style</Label>
+                        <Select value={imageVariant} onValueChange={(v: 'standard' | 'tilted') => {
+                          setImageVariant(v)
+                          onUpdate?.('imageVariant', v)
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="tilted">3D Tilted</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {viewMode === 'github' && (
+                    <div className="space-y-2">
+                      <Label>GitHub Repository URL</Label>
+                      <Input
+                        value={githubUrl}
+                        onChange={(e) => {
+                          setGithubUrl(e.target.value)
+                          onUpdate?.('githubUrl', e.target.value)
+                        }}
+                        placeholder="https://github.com/user/repo"
+                      />
+                    </div>
+                  )}
+
+                  {viewMode === 'video' && (
+                    <div className="space-y-2">
+                      <Label>Video URL</Label>
+                      <Input
+                        value={videoUrl}
+                        onChange={(e) => {
+                          setVideoUrl(e.target.value)
+                          onUpdate?.('videoUrl', e.target.value)
+                        }}
+                        placeholder="YouTube, Vimeo, or direct video URL"
+                      />
+                    </div>
+                  )}
+
+                  {viewMode === 'tweet' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Tweet ID or URL</Label>
+                        <Input
+                          value={tweetId}
+                          onChange={(e) => {
+                            const id = extractTweetId(e.target.value)
+                            setTweetId(id)
+                            onUpdate?.('tweetId', id)
+                          }}
+                          placeholder="Tweet ID or full Twitter/X URL"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Tweet Style</Label>
+                        <Select value={tweetVariant} onValueChange={(v: 'default' | 'shadow' | 'minimal') => {
+                          setTweetVariant(v)
+                          onUpdate?.('tweetVariant', v)
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Default</SelectItem>
+                            <SelectItem value="shadow">With Shadow</SelectItem>
+                            <SelectItem value="minimal">Minimal</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {viewMode === 'uri' && (
+                    <div className="space-y-2">
+                      <Label>Link URL</Label>
+                      <Input
+                        value={linkUrl}
+                        onChange={(e) => {
+                          setLinkUrl(e.target.value)
+                          onUpdate?.('linkUrl', e.target.value)
+                        }}
+                        placeholder="https://example.com"
+                      />
+                    </div>
+                  )}
+
+                  {viewMode === 'multi-images' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label>Images ({multiImages.length})</Label>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const newImage = {
+                              src: '',
+                              name: 'Name',
+                              designation: 'Title',
+                              quote: 'Quote or description'
+                            }
+                            const updated = [...multiImages, newImage]
+                            setMultiImages(updated)
+                            onUpdate?.('multiImages', updated)
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Image
+                        </Button>
+                      </div>
+                      
+                      {multiImages.map((img, index) => (
+                        <div key={index} className="space-y-3 p-4 border rounded-lg relative">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="absolute top-2 right-2 h-6 w-6"
+                            onClick={() => {
+                              const updated = multiImages.filter((_, i) => i !== index)
+                              setMultiImages(updated)
+                              onUpdate?.('multiImages', updated)
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                          
+                          <div className="space-y-2">
+                            <Label className="text-xs">Image {index + 1}</Label>
+                            
+                            {/* Image upload/URL */}
+                            <div className="space-y-2">
+                              <Input
+                                value={img.src?.startsWith('data:') ? '' : img.src || ''}
+                                onChange={(e) => {
+                                  const updated = [...multiImages]
+                                  updated[index].src = e.target.value
+                                  setMultiImages(updated)
+                                  onUpdate?.('multiImages', updated)
+                                }}
+                                placeholder="Image URL"
+                                className="text-sm"
+                              />
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) {
+                                    const reader = new FileReader()
+                                    reader.onloadend = () => {
+                                      const updated = [...multiImages]
+                                      updated[index].src = reader.result as string
+                                      setMultiImages(updated)
+                                      onUpdate?.('multiImages', updated)
+                                    }
+                                    reader.readAsDataURL(file)
+                                  }
+                                }}
+                                className="text-sm"
+                              />
+                            </div>
+                            
+                            {/* Name */}
+                            <Input
+                              value={img.name || ''}
+                              onChange={(e) => {
+                                const updated = [...multiImages]
+                                updated[index].name = e.target.value
+                                setMultiImages(updated)
+                                onUpdate?.('multiImages', updated)
+                              }}
+                              placeholder="Name"
+                              className="text-sm"
+                            />
+                            
+                            {/* Designation */}
+                            <Input
+                              value={img.designation || ''}
+                              onChange={(e) => {
+                                const updated = [...multiImages]
+                                updated[index].designation = e.target.value
+                                setMultiImages(updated)
+                                onUpdate?.('multiImages', updated)
+                              }}
+                              placeholder="Title/Role"
+                              className="text-sm"
+                            />
+                            
+                            {/* Quote */}
+                            <Textarea
+                              value={img.quote || ''}
+                              onChange={(e) => {
+                                const updated = [...multiImages]
+                                updated[index].quote = e.target.value
+                                setMultiImages(updated)
+                                onUpdate?.('multiImages', updated)
+                              }}
+                              placeholder="Quote or description"
+                              className="text-sm min-h-[60px]"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {viewMode === 'compare' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Compare Style</Label>
+                        <Select value={compareVariant} onValueChange={(v: 'standard' | '3d') => {
+                          setCompareVariant(v)
+                          onUpdate?.('compareVariant', v)
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="standard">Standard View</SelectItem>
+                            <SelectItem value="3d">3D Perspective View</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Compare Mode</Label>
+                        <Select value={compareSlideMode} onValueChange={(v: 'hover' | 'drag') => {
+                          setCompareSlideMode(v)
+                          onUpdate?.('compareSlideMode', v)
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hover">Hover to Compare</SelectItem>
+                            <SelectItem value="drag">Drag to Compare</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* First Image */}
+                      <div className="space-y-2">
+                        <Label>First Image (Before)</Label>
+                        <div className="space-y-2">
+                          <Input
+                            value={compareImages.first?.startsWith('data:') ? '' : compareImages.first || ''}
+                            onChange={(e) => {
+                              setCompareImages({ ...compareImages, first: e.target.value })
+                              onUpdate?.('compareFirstImage', e.target.value)
+                            }}
+                            placeholder="Image URL"
+                          />
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                const reader = new FileReader()
+                                reader.onloadend = () => {
+                                  const base64String = reader.result as string
+                                  setCompareImages({ ...compareImages, first: base64String })
+                                  onUpdate?.('compareFirstImage', base64String)
+                                }
+                                reader.readAsDataURL(file)
+                              }
+                            }}
+                          />
+                          {compareImages.first && (
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
+                              <img
+                                src={compareImages.first}
+                                alt="First image"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Second Image */}
+                      <div className="space-y-2">
+                        <Label>Second Image (After)</Label>
+                        <div className="space-y-2">
+                          <Input
+                            value={compareImages.second?.startsWith('data:') ? '' : compareImages.second || ''}
+                            onChange={(e) => {
+                              setCompareImages({ ...compareImages, second: e.target.value })
+                              onUpdate?.('compareSecondImage', e.target.value)
+                            }}
+                            placeholder="Image URL"
+                          />
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                const reader = new FileReader()
+                                reader.onloadend = () => {
+                                  const base64String = reader.result as string
+                                  setCompareImages({ ...compareImages, second: base64String })
+                                  onUpdate?.('compareSecondImage', base64String)
+                                }
+                                reader.readAsDataURL(file)
+                              }
+                            }}
+                          />
+                          {compareImages.second && (
+                            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
+                              <img
+                                src={compareImages.second}
+                                alt="Second image"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground">
+                        Upload two images to create an interactive before/after comparison. Perfect for showcasing transformations, improvements, or different states.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
         
         {/* Delete Button - only visible in edit mode */}
         {isEditMode && onDelete && (
