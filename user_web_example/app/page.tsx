@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef, useLayoutEffect } from "react"
+import { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -29,8 +29,17 @@ import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
-import { RoughNotation } from 'react-rough-notation'
 import DragDropUpload from "@/components/drag-drop-upload"
+import dynamic from 'next/dynamic'
+
+// Client-only RoughNotation to prevent hydration issues
+const ClientRoughNotation = dynamic(
+  () => import('react-rough-notation').then(mod => mod.RoughNotation),
+  { 
+    ssr: false,
+    loading: () => <span className="text-gray-600 italic inline-block">static résumé</span>
+  }
+)
 
 const renderColoredTypewriterText = (text: string, colorSegments: { text: string; color: string }[]) => {
   let result = text
@@ -44,7 +53,7 @@ const renderColoredTypewriterText = (text: string, colorSegments: { text: string
       result = result.replace(segmentText, `<span style="color: ${color}; font-weight: bold;">${segmentText}</span>`)
     }
   })
-  return <span dangerouslySetInnerHTML={{ __html: result }} />
+  return <span suppressHydrationWarning dangerouslySetInnerHTML={{ __html: result }} />
 }
 
 const TypewriterText = ({ text, delay, className }: { text: string; delay: number; className?: string }) => {
@@ -466,7 +475,7 @@ const SimpleTypewriter = ({
         .replace(/Take Control Now/g, '<span class="font-bold">Take Control Now</span>')
       
       return (
-        <div key={index} dangerouslySetInnerHTML={{ __html: styledLine }} />
+        <div key={index} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: styledLine }} />
       )
     })
   }
@@ -479,14 +488,131 @@ const SimpleTypewriter = ({
   )
 }
 
+// Vertical Progress Bar Component - Modern Glassmorphism Design
+const VerticalProgressBar = ({ onProgressChange }: { onProgressChange?: (percentage: number) => void }) => {
+  const [percentage, setPercentage] = useState(0)
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  useEffect(() => {
+    if (!isClient) return
+    
+    const startTime = Date.now()
+    const duration = 60000 // 60 seconds
+    
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min((elapsed / duration) * 60, 60)
+      const newPercentage = Math.floor(progress)
+      setPercentage(newPercentage)
+      onProgressChange?.(newPercentage)
+      
+      if (progress < 60) {
+        requestAnimationFrame(updateProgress)
+      }
+    }
+    
+    requestAnimationFrame(updateProgress)
+  }, [onProgressChange, isClient])
+  
+  return (
+    <div className="relative flex items-center justify-center h-full">
+      {/* Ambient glow */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-emerald-500/30 via-sky-400/30 to-blue-600/30 blur-3xl rounded-full animate-pulse" />
+      </div>
+      
+      {/* Glass container with centered elements */}
+      <div className="relative w-20 h-96">
+        {/* Progress Track - Narrower, centered within container */}
+        <div className="absolute left-1/2 -translate-x-1/2 w-12 h-full rounded-full overflow-hidden">
+          {/* Glass background */}
+          <div className="absolute inset-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full" />
+          
+          {/* Inner shadow for depth */}
+          <div className="absolute inset-[2px] bg-black/10 rounded-full" />
+          
+          {/* Progress Fill - stops where the button center is */}
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 rounded-full overflow-hidden"
+            initial={{ height: 0 }}
+            animate={{ height: `${percentage}%` }} // Direct percentage - 60% means 60% of bar height
+            transition={{ 
+              type: "spring",
+              stiffness: 40,
+              damping: 15
+            }}
+          >
+            {/* Gradient fill */}
+            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500 via-sky-400 to-blue-600">
+              {/* Animated shine effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent"
+                animate={{
+                  y: ["-100%", "100%"]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+            </div>
+          </motion.div>
+          
+          {/* Subtle milestone marks */}
+          {[20, 40, 60].map((milestone) => (
+            <div
+              key={milestone}
+              className="absolute left-1 right-1 h-[1px] bg-white/20"
+              style={{ bottom: `${milestone}%` }} // Direct percentage positions
+            />
+          ))}
+        </div>
+        
+        {/* Traveling Percentage Button - centered on same axis as bar */}
+        <motion.div
+          className="absolute left-1/2 -translate-x-1/2 w-20 h-20 z-30"
+          initial={{ bottom: "-40px" }} // Start with center at bottom
+          animate={{ bottom: `${(percentage * 384) / 100 - 40}px` }} // Direct percentage of bar height (384px)
+          transition={{
+            type: "spring",
+            stiffness: 40,
+            damping: 15
+          }}
+        >
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 blur-xl opacity-70" />
+          
+          {/* Glass button */}
+          <div className="relative w-full h-full rounded-full bg-white/30 backdrop-blur-lg border-2 border-white/40 shadow-2xl flex items-center justify-center">
+            {/* Inner glass layer */}
+            <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/30 to-white/10" />
+            
+            {/* Percentage text */}
+            <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
+              {percentage}%
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  )
+}
+
 // CV2Web Demo Component - Mobile-First WOW Experience
-function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
+function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; setShowPricing: (value: boolean) => void }) {
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
   >("typewriter")
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [progressBarPercentage, setProgressBarPercentage] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
   const [showStrikeThrough, setShowStrikeThrough] = useState(false)
   const [showCVCard, setShowCVCard] = useState(true)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
@@ -508,6 +634,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
 
   // Detect mobile and set initial stage
   useEffect(() => {
+    setIsHydrated(true)
     const checkMobile = () => {
       const mobile = window.innerWidth < 768
       setIsMobile(mobile)
@@ -696,7 +823,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                     onAnimationComplete={() => handleLoadingComplete(1)}
                   >
                     <span className="text-gray-800">
-                      Take control of your <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">career</span>, <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">stand out</span>, get&nbsp;<span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">interviews</span>
+                      You Have One Shot to <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Escape</span> the <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">'No'</span> <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Pile</span>.
                     </span>
                   </motion.div>
                 )}
@@ -717,7 +844,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                     style={{ fontSize: 'clamp(1.5rem, 5vw, 1.8rem)', fontWeight: 600 }}
                     onAnimationComplete={() => handleLoadingComplete(2)}
                   >
-                    Turn your <RoughNotation 
+                    Turn your <ClientRoughNotation 
                       type="crossed-off" 
                       show={showStrikeThrough}
                       color="#dc2626"
@@ -727,54 +854,13 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                       iterations={2}
                       padding={0}
                     >
-                      <span className="text-gray-600 italic inline-block">PDF résumé</span>
-                    </RoughNotation> into a Web&nbsp;Portfolio in One&nbsp;click.
+                      <span className="text-gray-600 italic inline-block">static résumé</span>
+                    </ClientRoughNotation> into a web portfolio that gets a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">'Yes'</span> in one click.
                   </motion.div>
                 )}
                 
-                {/* Primary CTA Button for Mobile - shows after subheadline */}
-                {loadingStep >= 2 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ 
-                      duration: 0.8, 
-                      delay: 0.3,
-                      ease: [0.25, 0.46, 0.45, 0.94]
-                    }}
-                    className="mb-8"
-                  >
-                    <Button
-                      onClick={onOpenModal}
-                      className="group relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-8 py-5 rounded-full text-lg font-bold shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer overflow-hidden w-full max-w-[320px]"
-                      style={{
-                        minHeight: '60px'
-                      }}
-                    >
-                      <span className="relative z-10 flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                          />
-                        </svg>
-                        Upload your CV now
-                      </span>
-                      {/* Animated gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      {/* Shine effect */}
-                      <div className="absolute inset-0 -top-2 h-full w-1/2 bg-white/30 skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700" />
-                    </Button>
-                  </motion.div>
-                )}
+                {/* Primary CTA Button for Mobile - REMOVED as per requirement */}
+                {/* Mobile button removed - users will interact with CV cards instead */}
               </div>
             </div>
           )}
@@ -907,7 +993,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                       >
                         <div className={`${isTransformationStage() ? "mb-6" : "mb-8"}`} style={{ fontWeight: 700 }}>
                           <span className="text-gray-800 font-bold">
-                            Take control of your <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">career</span>, <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">stand out</span>, get&nbsp;<span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">interviews</span>
+                            You Have One Shot to <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Escape</span> the <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">'No'</span> <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Pile</span>.
                           </span>
                         </div>
                         <motion.div 
@@ -917,7 +1003,7 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                           animate={{ opacity: 1 }}
                           transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
                         >
-                          Turn your <RoughNotation 
+                          Turn your <ClientRoughNotation 
                             type="crossed-off" 
                             show={showStrikeThrough}
                             color="#dc2626"
@@ -927,8 +1013,8 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                             iterations={2}
                             padding={0}
                           >
-                            <span className="text-gray-600 italic inline-block">PDF résumé</span>
-                          </RoughNotation> into a Web Portfolio in One click.
+                            <span className="text-gray-600 italic inline-block">static résumé</span>
+                          </ClientRoughNotation> into a web portfolio that gets a <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent font-bold">'Yes'</span> in one click.
                         </motion.div>
                         
                         {/* Primary CTA Section */}
@@ -977,24 +1063,18 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                     </motion.div>
                   ) : (
                     <motion.div
-                      key="new-headline"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 1.5, ease: "easeInOut" }}
-                      className="text-5xl xs:text-5xl sm:text-6xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl 3xl:text-9xl font-bold max-w-[120%] text-left"
-                      style={{ lineHeight: '0.9' }}
+                      key="progress-bar"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 1.2, ease: "easeInOut" }}
+                      className="flex items-center w-full"
+                      style={{ height: "400px", paddingLeft: "120px" }} // Move progress bar to center above both buttons
                     >
-                      <div className="space-y-2">
-                        <div className="text-foreground">Transform Your</div>
-                        <div className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">Portfolio</div>
-                      </div>
-                      <div className="text-2xl md:text-3xl lg:text-4xl text-gray-600 font-semibold mt-6 leading-tight">
-                        From PDF to Professional Website
-                      </div>
+                      <VerticalProgressBar onProgressChange={setProgressBarPercentage} />
                     </motion.div>
                   )}
                 </AnimatePresence>
-                            </motion.div>
+              </motion.div>
 
               {/* Start now button - keep in original position on left side */}
               <AnimatePresence mode="wait">
@@ -1015,16 +1095,31 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                     <div className="flex gap-4">
                       <motion.div
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        animate={{ 
+                          opacity: 1,
+                          scale: progressBarPercentage >= 60 ? [1, 1.05, 1] : 1
+                        }}
                         transition={{
                           duration: 0.8,
                           ease: "easeOut",
+                          scale: {
+                            duration: 2,
+                            repeat: progressBarPercentage >= 60 ? Infinity : 0,
+                            repeatType: "reverse"
+                          }
                         }}
                       >
                         <Button
                           size="lg"
-                          onClick={onOpenModal}
-                          className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 w-auto text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
+                          onClick={() => {
+                            // Phase 7: When progress reaches 60%, Start now opens pricing modal
+                            if (progressBarPercentage >= 60) {
+                              setShowPricing(true)
+                            } else {
+                              onOpenModal()
+                            }
+                          }}
+                          className={`${progressBarPercentage >= 60 ? 'shadow-2xl' : ''} bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 w-auto text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full`}
                         >
                           <span>
                             Start now
@@ -1143,28 +1238,84 @@ function CV2WebDemo({ onOpenModal }: { onOpenModal: () => void }) {
                 className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative"
                 >
                   <MacBookFrame isComplete={stage === "complete"}>
-                    {uploadedFile ? (
-                      <PortfolioHeroPreview 
-                        file={uploadedFile}
-                        onScrollAttempt={() => {
-                          if (!isAuthenticated) {
-                            onOpenModal() // Show auth modal for non-authenticated users
-                          } else {
-                            setHasScrolledHero(true) // Mark as scrolled for authenticated users
-                          }
-                        }}
-                      />
+                    {showNewTypewriter ? (
+                      // Phase 3: Sequential fade-in content during progress bar animation
+                      <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8">
+                        {/* Phase 3A: Main Headline (0-800ms) - split into two lines */}
+                        <motion.div
+                          className="text-center mb-1"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                        >
+                          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
+                            Your <span className="text-gray-500">resume tells</span> people what you did
+                          </h1>
+                          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+                            A <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">portfolio shows</span> them
+                          </h1>
+                        </motion.div>
+
+                        {/* Phase 3B: Subheadline (800-1400ms) - positioned below headline */}
+                        <motion.p
+                          className="text-lg text-center text-black mb-0"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
+                        >
+                          While we're working, watch HOW ↓
+                        </motion.p>
+
+                        {/* Phase 3C/5: Video Carousel OR Gate-kept Website Preview */}
+                        <motion.div
+                          className="w-full max-w-4xl -mt-8"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.8, delay: 1.6, ease: "easeOut" }}
+                        >
+                          {progressBarPercentage >= 60 ? (
+                            // Phase 5: Gate-kept website preview (when progress reaches 60%)
+                            <GateKeptWebsitePreview 
+                              uploadedFile={uploadedFile}
+                              onScrollAttempt={() => {
+                                if (!isAuthenticated) {
+                                  onOpenModal() // Show auth modal for non-authenticated users
+                                } else {
+                                  setHasScrolledHero(true) // Mark as scrolled for authenticated users
+                                }
+                              }}
+                            />
+                          ) : (
+                            // Phase 3C: Video carousel (until progress reaches 60%)
+                            <VideoCarousel />
+                          )}
+                        </motion.div>
+                      </div>
                     ) : (
-                      <iframe
-                        ref={iframeRef}
-                        src="https://dmfmjqvp.manus.space/#"
-                        className="w-full h-full border-0"
-                        title="Alex Morgan Portfolio"
-                        style={{
-                          transform: stage === "complete" ? "scale(1)" : "scale(0.98)",
-                          transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                        }}
-                      />
+                      // Original content when progress bar is not active
+                      uploadedFile ? (
+                        <PortfolioHeroPreview 
+                          file={uploadedFile}
+                          onScrollAttempt={() => {
+                            if (!isAuthenticated) {
+                              onOpenModal() // Show auth modal for non-authenticated users
+                            } else {
+                              setHasScrolledHero(true) // Mark as scrolled for authenticated users
+                            }
+                          }}
+                        />
+                      ) : (
+                        <iframe
+                          ref={iframeRef}
+                          src="https://dmfmjqvp.manus.space/#"
+                          className="w-full h-full border-0"
+                          title="Alex Morgan Portfolio"
+                          style={{
+                            transform: stage === "complete" ? "scale(1)" : "scale(0.98)",
+                            transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                          }}
+                        />
+                      )
                     )}
                   </MacBookFrame>
                   
@@ -1485,6 +1636,257 @@ const AppleNavbar = ({
   )
 }
 
+// Gate-kept Website Preview Component for Phase 5 - Uses actual iframe with smooth fade-in
+const GateKeptWebsitePreview = ({ uploadedFile, onScrollAttempt }: { uploadedFile?: File | null, onScrollAttempt?: () => void }) => {
+  return (
+    <motion.div 
+      className="w-full h-[460px] rounded-lg overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 3, ease: "easeInOut" }}
+    >
+      {uploadedFile ? (
+        <PortfolioHeroPreview 
+          file={uploadedFile}
+          onScrollAttempt={onScrollAttempt}
+        />
+      ) : (
+        <iframe
+          src="https://dmfmjqvp.manus.space/#"
+          className="w-full h-full border-0"
+          title="Portfolio Preview"
+          style={{
+            transform: "scale(1)",
+            transition: "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          }}
+        />
+      )}
+    </motion.div>
+  )
+}
+
+// Video Carousel Component for Phase 3 & 4
+const VideoCarousel = () => {
+  const [currentCard, setCurrentCard] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
+
+  const videos = [
+    {
+      id: 1,
+      headline: "Skills Showcase",
+      thumbnail: "/placeholder-video-1.jpg",
+      description: "Interactive skills visualization"
+    },
+    {
+      id: 2, 
+      headline: "Project Gallery",
+      thumbnail: "/placeholder-video-2.jpg",
+      description: "Stunning project showcases"
+    },
+    {
+      id: 3,
+      headline: "Career Timeline", 
+      thumbnail: "/placeholder-video-3.jpg",
+      description: "Professional journey display"
+    }
+  ]
+
+  const nextCard = useCallback(() => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setCurrentCard((prev) => (prev + 1) % videos.length)
+    setTimeout(() => setIsTransitioning(false), 600)
+  }, [isTransitioning, videos.length])
+
+  const prevCard = useCallback(() => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setHasUserInteracted(true) // Mark user interaction
+    setCurrentCard((prev) => (prev - 1 + videos.length) % videos.length)
+    setTimeout(() => setIsTransitioning(false), 600)
+  }, [isTransitioning, videos.length])
+
+  const goToCard = useCallback((index: number) => {
+    if (index === currentCard || isTransitioning) return
+    setIsTransitioning(true)
+    setHasUserInteracted(true) // Mark user interaction
+    setCurrentCard(index)
+    setTimeout(() => setIsTransitioning(false), 600)
+  }, [currentCard, isTransitioning])
+
+  // Phase 4: Auto-advance logic - every 3.5 seconds unless hovering or user clicked
+  useEffect(() => {
+    if (isHovering || hasUserInteracted || isTransitioning) return
+
+    const autoAdvanceInterval = setInterval(() => {
+      nextCard()
+    }, 3500) // 3.5 seconds
+
+    return () => clearInterval(autoAdvanceInterval)
+  }, [isHovering, hasUserInteracted, isTransitioning, nextCard])
+
+  // Calculate position for each card
+  const getCardPosition = (index: number) => {
+    const diff = (index - currentCard + videos.length) % videos.length
+    const normalizedDiff = diff > videos.length / 2 ? diff - videos.length : diff
+    return normalizedDiff
+  }
+
+  // Get transform values for stacked effect
+  const getCardTransform = (position: number) => {
+    const absPos = Math.abs(position)
+
+    if (absPos === 0) {
+      // Center card - fully visible
+      return {
+        x: "-50%",
+        y: "-50%", 
+        scale: 1,
+        opacity: 1,
+        zIndex: 20,
+        rotateY: 0,
+        filter: "blur(0px)",
+      }
+    } else if (absPos === 1) {
+      // Adjacent cards - partially visible
+      return {
+        x: position > 0 ? "-25%" : "-75%",
+        y: "-50%",
+        scale: 0.85,
+        opacity: 0.7,
+        zIndex: 15,
+        rotateY: position > 0 ? -15 : 15,
+        filter: "blur(1px)",
+      }
+    } else {
+      // Hidden cards
+      return {
+        x: position > 0 ? "10%" : "-110%",
+        y: "-50%",
+        scale: 0.6,
+        opacity: 0,
+        zIndex: 5,
+        rotateY: position > 0 ? -30 : 30,
+        filter: "blur(2px)",
+      }
+    }
+  }
+
+  return (
+    <div 
+      className="w-full"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Cards Container - Even bigger to catch most of screen */}
+      <div 
+        className="relative h-[460px] overflow-visible mb-0"
+        style={{ perspective: "1200px" }}
+      >
+        {videos.map((video, index) => {
+          const position = getCardPosition(index)
+          const isActive = position === 0
+          const transform = getCardTransform(position)
+
+          return (
+            <motion.div
+              key={video.id}
+              className={`absolute w-[580px] h-[360px] bg-white/95 backdrop-blur-[20px] rounded-[20px] border border-white/30 cursor-pointer will-change-transform overflow-hidden ${
+                isActive ? 'shadow-2xl' : 'shadow-lg'
+              }`}
+              style={{
+                left: "50%",
+                top: "50%",
+                transformOrigin: "center center",
+              }}
+              animate={transform}
+              transition={{
+                duration: 0.6,
+                ease: [0.25, 0.1, 0.25, 1],
+                type: "tween",
+              }}
+              onClick={() => {
+                if (!isActive) {
+                  setHasUserInteracted(true)
+                  goToCard(index)
+                }
+              }}
+              whileHover={isActive ? { y: "-52%", scale: 1.02 } : {}}
+            >
+              {/* Video Headline - Above the video area */}
+              <div className="p-6 pb-3">
+                <h3 className="text-2xl font-bold text-gray-800 text-center">
+                  {video.headline}
+                </h3>
+              </div>
+
+              {/* Video Placeholder Area - Even larger */}
+              <div className="relative bg-gray-900 mx-6 mb-6 rounded-xl h-[260px] flex items-center justify-center group">
+                {/* Video Thumbnail Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-xl"></div>
+                
+                {/* Play Button - Larger */}
+                <div className="relative z-10 w-20 h-20 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <svg className="w-10 h-10 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      {/* Navigation - moved much closer to carousel */}
+      <div className="flex justify-center items-center gap-4 -mt-4">
+        <button
+          onClick={() => {
+            setHasUserInteracted(true)
+            prevCard()
+          }}
+          disabled={isTransitioning}
+          className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-white/30 flex items-center justify-center text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-105 transition-all"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <div className="flex gap-2">
+          {videos.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setHasUserInteracted(true)
+                goToCard(index)
+              }}
+              disabled={isTransitioning}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentCard ? 'bg-purple-600 scale-125' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={() => {
+            setHasUserInteracted(true)
+            nextCard()
+          }}
+          disabled={isTransitioning}
+          className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md border border-white/30 flex items-center justify-center text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:scale-105 transition-all"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
   const [currentSection, setCurrentSection] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
@@ -1498,11 +1900,25 @@ export default function Home() {
   const [showDashboard, setShowDashboard] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [droppedFile, setDroppedFile] = useState<File | null>(null)
+  const [hasTriggeredPhase6Modal, setHasTriggeredPhase6Modal] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
   
   // Use the real authentication system
   const { isAuthenticated, user, signIn, signOut } = useAuthContext()
   
   const sections = ['hero', 'demo', 'research', 'ugc-reels', 'faq']
+  
+  // Set hydration state
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+  
+  // Reset Phase 6 modal trigger when authentication state changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setHasTriggeredPhase6Modal(false) // Reset so it can trigger again if user logs out
+    }
+  }, [isAuthenticated])
 
   // Modal handlers
   const handleOpenModal = () => {
@@ -1708,6 +2124,15 @@ export default function Home() {
         const newSection = getCurrentSectionFromScroll()
         if (newSection !== currentSection) {
           setCurrentSection(newSection)
+          
+          // Phase 6: Trigger signup modal after 2 sections (when reaching research section - index 2)
+          if (newSection === 2 && !hasTriggeredPhase6Modal && !isAuthenticated) {
+            setHasTriggeredPhase6Modal(true)
+            // Small delay to ensure smooth transition
+            setTimeout(() => {
+              handleOpenModal()
+            }, 500)
+          }
         }
       }
     }
@@ -1722,7 +2147,7 @@ export default function Home() {
       window.removeEventListener('scroll', handleScroll)
       clearTimeout(scrollTimeout)
     }
-  }, [currentSection, isScrolling, isMobile, sections])
+  }, [currentSection, isScrolling, isMobile, sections, hasTriggeredPhase6Modal, isAuthenticated, handleOpenModal])
 
   // Show dashboard if processing is complete
   if (showDashboard && isAuthenticated) {
@@ -1732,6 +2157,19 @@ export default function Home() {
         onBackToHome={() => setShowDashboard(false)}
         initialPage="resume"
       />
+    )
+  }
+
+  // Prevent hydration errors by not rendering until client-side
+  if (!isHydrated) {
+    return (
+      <main className="min-h-screen bg-background">
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          </div>
+        </div>
+      </main>
     )
   }
 
@@ -1746,10 +2184,10 @@ export default function Home() {
       />
       <section id="hero" className="pt-16 relative min-h-screen">
         <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-white/50 to-gray-100 z-20"></div>
-        <CV2WebDemo onOpenModal={handleOpenModal} />
+        <CV2WebDemo onOpenModal={handleOpenModal} setShowPricing={setShowPricing} />
       </section>
       <section id="demo" className="min-h-screen">
-        <SeeTheDifference onOpenModal={handleOpenModal} />
+        <SeeTheDifference onOpenModal={handleOpenModal} setShowPricing={setShowPricing} />
       </section>
       <section id="research" className="py-20 min-h-screen flex items-center relative">
         {/* Base white background */}
@@ -1775,13 +2213,44 @@ export default function Home() {
         
         <div className="container mx-auto px-4 relative">
           <StackedCardsCarousel />
+          
+          {/* Phase 8 Level 2: Progressive Conviction Flow */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center mt-16"
+          >
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+              <Button
+                size="lg"
+                onClick={() => setShowPricing(true)}
+                className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 text-lg px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 shadow-xl w-full sm:w-auto"
+              >
+                Understood, Let's do it!
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  const element = document.getElementById('ugc-reels')
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' })
+                  }
+                }}
+                className="bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 hover:border-gray-400 text-lg px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+              >
+                I see.. Still not convinced…
+              </Button>
+            </div>
+          </motion.div>
         </div>
       </section>
       <section id="ugc-reels" className="min-h-screen">
-        <UGCReelsShowcase onOpenModal={handleOpenModal} />
+        <UGCReelsShowcase onOpenModal={handleOpenModal} setShowPricing={setShowPricing} />
       </section>
       <section id="faq" className="min-h-screen">
-        <FAQ onOpenModal={handleOpenModal} />
+        <FAQ onOpenModal={handleOpenModal} setShowPricing={setShowPricing} />
       </section>
       <footer className="w-full flex flex-col items-center justify-center py-8 backdrop-blur-md border-t border-gray-200/40 mt-12 relative">
         {/* Base gray background */}
@@ -1854,6 +2323,7 @@ export default function Home() {
       <PricingModal
         isOpen={showPricing}
         onPlanSelected={handlePlanSelected}
+        onClose={() => setShowPricing(false)}
       />
 
       {/* Authentication Modal */}

@@ -451,12 +451,18 @@ POST /api/v1/portfolio/{portfolio_id}/stop
 | CV data not loading in template | Check cv-data-adapter.tsx implementation |
 | Multiple portfolio conflicts | Each portfolio uses unique port (4000+) |
 | File preservation issues | Ensure proper session authentication |
+| **CSS not loading / Broken HTML display** | Ensure `postcss.config.mjs` includes both `tailwindcss` AND `autoprefixer`. Clear `.next` cache and restart dev server |
+| **Hydration errors** | Add `suppressHydrationWarning` to elements with dynamic content. Use `dynamic` imports with `ssr: false` for browser-only components |
 
 ### Debug Commands
 ```bash
 # Check service status
 curl http://localhost:2000/health    # Backend health
 curl http://localhost:3000/api/health # Frontend health
+
+# Validate PostCSS configurations
+python3 src/utils/validate_postcss_config.py  # Check all PostCSS configs
+echo "y" | python3 src/utils/validate_postcss_config.py  # Auto-fix issues
 
 # Portfolio management
 curl http://localhost:2000/api/v1/portfolio/list     # List user portfolios
@@ -532,6 +538,29 @@ def extract_cv_data(file_path):  # Missing type hints
 - Use type hints for all Python functions
 - Use absolute imports: `from src.api.routes import cv`
 - Follow PEP 8 conventions
+
+## 🎨 CSS Configuration Requirements
+
+### PostCSS Configuration (CRITICAL)
+The `postcss.config.mjs` file MUST include both plugins:
+```javascript
+/** @type {import('postcss-load-config').Config} */
+const config = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},  // ⚠️ REQUIRED - Without this, CSS won't load!
+  },
+};
+
+export default config;
+```
+
+### Troubleshooting CSS Issues
+If you encounter broken HTML display (no styling):
+1. Check `postcss.config.mjs` has BOTH `tailwindcss` and `autoprefixer`
+2. Clear build cache: `rm -rf .next`
+3. Restart dev server: `pnpm run dev`
+4. Hard refresh browser: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
 
 ## 🚢 Deployment
 
@@ -616,6 +645,7 @@ python3 src/utils/setup_keychain.py      # Setup credentials
 14. **ALWAYS** implement live readable logging for transparency
 15. **ALWAYS** use CV examples from `data/cv_examples/` directory for testing - NEVER use made-up CV data
 16. **ALWAYS** use existing actual code from the codebase - NEVER create or run demos, tests, or proof-of-concept files
+17. **ALWAYS** ensure `postcss.config.mjs` includes BOTH `tailwindcss` AND `autoprefixer` - without autoprefixer, CSS won't load!
 
 ## Auto-use Context7
 When asked about any of these, **ALWAYS** use Context7 MCP tools:
@@ -845,6 +875,13 @@ POST /api/v1/payments/refund
 - Currently using simulated progress for better UX
 
 ## Recent Updates
+
+### Critical CSS Fix & PostCSS Validation (2025-08-02)
+- **🐛 Fixed CSS Not Loading Issue**: Discovered missing `autoprefixer` in PostCSS configs causing broken HTML display
+- **🔧 Created Validation Script**: Added `src/utils/validate_postcss_config.py` to detect and fix PostCSS issues
+- **✅ Fixed 38 PostCSS Configs**: Automatically fixed all template and generated portfolio configs
+- **📝 Enhanced Documentation**: Added CSS troubleshooting section and debug commands
+- **🛡️ Prevention Measures**: All new templates MUST include both `tailwindcss` AND `autoprefixer` in PostCSS config
 
 ### API Route Reorganization (2025-01-22)
 - **🏗️ Restructured API Routes**: Organized routes into active, archived, and future_use directories

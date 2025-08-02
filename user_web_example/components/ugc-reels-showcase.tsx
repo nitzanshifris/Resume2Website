@@ -27,7 +27,7 @@ const demoReels: UGCReel[] = [
   // Additional reels can be added when video files are available
 ];
 
-export function UGCReelsShowcase({ onOpenModal }: { onOpenModal?: () => void }) {
+export function UGCReelsShowcase({ onOpenModal, setShowPricing }: { onOpenModal?: () => void; setShowPricing?: (value: boolean) => void }) {
   const [activeReel, setActiveReel] = useState<string | null>(null);
   const [thumbnails, setThumbnails] = useState<{ [key: string]: string }>({});
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
@@ -255,6 +255,37 @@ export function UGCReelsShowcase({ onOpenModal }: { onOpenModal?: () => void }) 
           >
             Transform Your Resume Now
           </Button>
+        </motion.div>
+
+        {/* Phase 8 Level 3: Progressive Conviction Flow */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="text-center mt-16"
+        >
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+            <Button
+              size="lg"
+              onClick={() => setShowPricing?.(true)}
+              className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 text-lg px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 shadow-xl w-full sm:w-auto"
+            >
+              Understood, Let's do it!
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                const element = document.getElementById('faq')
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
+              className="bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 hover:border-gray-400 text-lg px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+            >
+              Hmm.. Still have questions…
+            </Button>
+          </div>
         </motion.div>
       </div>
     </section>

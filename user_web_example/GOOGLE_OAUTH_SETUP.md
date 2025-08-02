@@ -23,7 +23,7 @@
    - Application type: "Web application"
    - Name: "CV2WEB Frontend"
    - Authorized redirect URIs:
-     - `http://localhost:3000/auth/google/callback` (development)
+     - `http://localhost:3019/auth/google/callback` (development)
      - `https://yourdomain.com/auth/google/callback` (production)
 
 ## 2. Environment Configuration
@@ -58,7 +58,7 @@ async def google_auth_callback(request: GoogleAuthRequest):
 ## 4. Testing
 
 1. **Development Testing**:
-   - Ensure frontend runs on `http://localhost:3000`
+   - Ensure frontend runs on `http://localhost:3019`
    - Ensure backend runs on `http://localhost:2000`
    - Test Google login flow
 
