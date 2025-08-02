@@ -129,6 +129,12 @@ export default function PortfolioPage() {
   
   // Initialize with demo data immediately (like v1.5 does)
   const [portfolioData, setPortfolioData] = useState(() => {
+    // Check for injected data first
+    if (injectedPortfolioData && useRealData) {
+      console.log('Using injected CV data')
+      return injectedPortfolioData
+    }
+    
     // Load demo data synchronously 
     try {
       const demoData = require("@/app/resume-data.json")
@@ -139,6 +145,11 @@ export default function PortfolioPage() {
   })
   
   const [sectionsOrder, setSectionsOrder] = useState(() => {
+    // Check for injected data first
+    if (injectedPortfolioData && useRealData) {
+      return injectedPortfolioData.sections?.map(s => s.id) || []
+    }
+    
     // Initialize sections order from demo data
     try {
       const demoData = require("@/app/resume-data.json")
@@ -150,6 +161,15 @@ export default function PortfolioPage() {
   })
   
   const [sectionVisibility, setSectionVisibility] = useState(() => {
+    // Check for injected data first
+    if (injectedPortfolioData && useRealData) {
+      const visibility = {}
+      injectedPortfolioData.sections?.forEach(section => {
+        visibility[section.id] = true
+      })
+      return visibility
+    }
+    
     // Initialize section visibility from demo data
     try {
       const demoData = require("@/app/resume-data.json")
@@ -165,6 +185,23 @@ export default function PortfolioPage() {
   })
   
   const [heroData, setHeroData] = useState(() => {
+    // Check for injected data first
+    if (injectedPortfolioData && useRealData) {
+      return injectedPortfolioData.hero || {
+        name: "Your Name",
+        title: "Your Title",
+        tagline: "Your Tagline",
+        availability: "Available for opportunities",
+        profilePhotoUrl: null,
+        profilePhotoSettings: {
+          shape: 'circle' as const,
+          zoom: 1,
+          offsetX: 0,  
+          offsetY: 0
+        }
+      }
+    }
+    
     // Initialize hero data from demo data
     try {
       const demoData = require("@/app/resume-data.json")

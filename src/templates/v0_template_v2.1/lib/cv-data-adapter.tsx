@@ -625,3 +625,11 @@ export function getSessionId(): string | null {
   
   return null
 }
+
+/**
+ * Main adapter function for portfolio generator to use
+ * This is what gets called from injected-data.tsx
+ */
+export function adaptCV2WebToTemplate(cv2webData: CV2WebData) {
+  return adaptCV2WebData(cv2webData)
+}
