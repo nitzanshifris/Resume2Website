@@ -470,6 +470,29 @@ export default function PortfolioPage() {
       console.warn(`No component found for section type: ${section.type}`)
       return null
     }
+    
+    // Debug logging for paragraph sections
+    if (section.type === 'paragraph') {
+      console.log('Rendering paragraph section:', {
+        id: section.id,
+        title: section.title,
+        data: section.data,
+        dataType: typeof section.data,
+        dataKeys: section.data ? Object.keys(section.data) : 'undefined'
+      })
+    }
+    
+    // For paragraph sections, ensure we handle the data correctly
+    if (section.type === 'paragraph' && section.data && typeof section.data === 'object') {
+      const props = {
+        id: section.id,
+        title: section.title,
+        description: section.data.description || ''
+      }
+      return <Component {...props} />
+    }
+    
+    // Default handling for other section types
     const props = { 
       id: section.id, 
       title: section.title, 
