@@ -242,7 +242,7 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
       type: 'paragraph',
       title: 'About Me',
       data: {
-        description: cv2webData.summary.summaryText
+        content: cv2webData.summary.summaryText
       }
     })
   }

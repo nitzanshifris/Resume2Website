@@ -19,7 +19,7 @@ export const ParagraphSection = ({ title, description }: ParagraphSectionProps) 
   const [containerHeight, setContainerHeight] = useState<number | "auto">("auto")
   const measurementRef = useRef<HTMLDivElement>(null)
   const [sectionTitle, setSectionTitle] = useState(title)
-  const [sectionDescription, setSectionDescription] = useState(description || '')
+  const [sectionDescription, setSectionDescription] = useState(description)
 
   const words = sectionDescription.split(" ").map((word) => ({
     text: word,
