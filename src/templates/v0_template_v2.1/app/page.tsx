@@ -2,7 +2,7 @@
 
 import { WavyBackground } from "@/components/ui/wavy-background"
 import { TracingBeam } from "@/components/ui/tracing-beam"
-import { Download, Loader2 } from "lucide-react"
+import { Download, Loader2, Mail, Phone, MapPin, Linkedin, Github, Twitter, Pin, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
@@ -488,6 +488,68 @@ export default function PortfolioPage() {
         id: section.id,
         title: section.title,
         description: section.data.description || ''
+      }
+      return <Component {...props} />
+    }
+    
+    // For contact sections, transform the data to the expected format
+    if (section.type === 'contact' && section.data && typeof section.data === 'object') {
+      const contactData = section.data as any
+      const contactItems = []
+      
+      // Add email if available
+      if (contactData.email) {
+        contactItems.push({
+          label: 'Email',
+          value: contactData.email,
+          icon: Mail,
+          href: `mailto:${contactData.email}`
+        })
+      }
+      
+      // Add phone if available
+      if (contactData.phone) {
+        contactItems.push({
+          label: 'Phone',
+          value: contactData.phone,
+          icon: Phone,
+          href: `tel:${contactData.phone}`
+        })
+      }
+      
+      // Add location if available
+      if (contactData.location) {
+        contactItems.push({
+          label: 'Location',
+          value: contactData.location,
+          icon: MapPin
+        })
+      }
+      
+      // Add social links
+      if (contactData.socialLinks && Array.isArray(contactData.socialLinks)) {
+        contactData.socialLinks.forEach(link => {
+          if (link.platform && link.url) {
+            const iconMap = {
+              'LinkedIn': Linkedin,
+              'GitHub': Github,
+              'Twitter': Twitter,
+              'Pinterest': Pin
+            }
+            contactItems.push({
+              label: link.platform,
+              value: link.url,
+              icon: iconMap[link.platform] || Globe,
+              href: link.url
+            })
+          }
+        })
+      }
+      
+      const props = {
+        id: section.id,
+        title: section.title,
+        items: contactItems
       }
       return <Component {...props} />
     }
