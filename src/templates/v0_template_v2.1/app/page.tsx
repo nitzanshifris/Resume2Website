@@ -137,7 +137,7 @@ export default function PortfolioPage() {
   const [portfolioData, setPortfolioData] = useState(() => {
     // Check for injected data first
     if (injectedPortfolioData && useRealData) {
-      console.log('Using injected CV data')
+      console.log('Using injected CV data from initial state')
       return injectedPortfolioData
     }
     
@@ -309,11 +309,35 @@ export default function PortfolioPage() {
 
   const heroGradientClasses = getHeroGradientClasses()
 
-  // Data loading effect - copy exact pattern from v1.5
+  // Data loading effect - enhanced to check for injected data first
   useEffect(() => {
     const loadCVData = async () => {
       try {
         setIsLoading(true)
+        
+        // First try to load injected data dynamically (like v1.5)
+        if (!injectedPortfolioData) {
+          try {
+            const injectedModule = await import('@/lib/injected-data')
+            if (injectedModule.useRealData && injectedModule.portfolioData) {
+              console.log('✅ Dynamically loaded injected CV data')
+              setPortfolioData(injectedModule.portfolioData)
+              setHeroData(injectedModule.portfolioData.hero || heroData)
+              
+              const visibility = {}
+              const order = []
+              injectedModule.portfolioData.sections?.forEach(section => {
+                visibility[section.id] = true
+                order.push(section.id)
+              })
+              setSectionVisibility(visibility)
+              setSectionsOrder(order)
+              return // Exit early if we loaded injected data
+            }
+          } catch (e) {
+            console.log('No injected data available:', e.message)
+          }
+        }
         
         // Check if we're in standalone mode (same logic as v1.5)
         const isStandalone = window.location.port === '3232' || window.location.port === '3000' || window.location.port === '3001'
@@ -322,8 +346,8 @@ export default function PortfolioPage() {
           console.log('🎨 Running in standalone mode with demo data')
           // Demo data is already loaded in state initialization - no need to do anything
         } else {
-          // For generated portfolios, always fetch CV data
-          console.log('🔄 Loading CV data...')
+          // For generated portfolios, try API if no injected data
+          console.log('🔄 Loading CV data from API...')
           try {
             const response = await fetch('/api/resume')
             const rawData = await response.json()
@@ -341,16 +365,16 @@ export default function PortfolioPage() {
             setSectionVisibility(visibility)
             setSectionsOrder(order)
             
-            console.log('✅ CV data loaded successfully')
-        console.log('📊 All sections data:', mappedData.sections.map(s => ({ 
-          id: s.id, 
-          type: s.type, 
-          title: s.title, 
-          dataLength: Array.isArray(s.data) ? s.data.length : 'not array',
-          firstItem: Array.isArray(s.data) && s.data.length > 0 ? s.data[0] : 'no data'
-        })))
+            console.log('✅ CV data loaded successfully from API')
+            console.log('📊 All sections data:', mappedData.sections.map(s => ({ 
+              id: s.id, 
+              type: s.type, 
+              title: s.title, 
+              dataLength: Array.isArray(s.data) ? s.data.length : 'not array',
+              firstItem: Array.isArray(s.data) && s.data.length > 0 ? s.data[0] : 'no data'
+            })))
           } catch (apiError) {
-            console.log('ℹ️ Error loading CV data, using demo content')
+            console.log('ℹ️ Error loading CV data from API, using demo content')
             // Keep using demo data that's already loaded
           }
         }
