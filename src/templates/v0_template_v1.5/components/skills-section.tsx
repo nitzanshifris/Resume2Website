@@ -7,9 +7,11 @@ interface SkillsSectionProps {
   data: SkillsData
   onSaveSkill: (categoryIndex: number, skillIndex: number, value: string) => void
   onSaveUngroupedSkill: (skillIndex: number, value: string) => void
+  onReorderCategories?: (newCategories: any[]) => void
+  onReorderSkills?: (categoryIndex: number, newSkills: any[]) => void
 }
 
-export function SkillsSection({ data, onSaveSkill, onSaveUngroupedSkill }: SkillsSectionProps) {
+export function SkillsSection({ data, onSaveSkill, onSaveUngroupedSkill, onReorderCategories, onReorderSkills }: SkillsSectionProps) {
   const allCategories = [
     ...data.skillCategories,
     ...(data.ungroupedSkills.length > 0 ? [{ categoryName: "Additional Skills", skills: data.ungroupedSkills }] : []),
@@ -18,9 +20,9 @@ export function SkillsSection({ data, onSaveSkill, onSaveUngroupedSkill }: Skill
   return (
     <CardCarousel
       items={allCategories}
-      itemClassName="basis-full px-2 md:px-4" // Ensure only one item is visible and add some padding
-      carouselOpts={{ loop: true, align: "center" }}
-      containerClassName="max-w-3xl" // Adjust width for a single item view
+      itemClassName="basis-full md:basis-1/2 lg:basis-1/3 px-2 md:px-4" // Show 1 on mobile, 2 on tablet, 3 on desktop
+      carouselOpts={{ loop: true, align: "start" }}
+      containerClassName="max-w-6xl" // Wider container to fit 3 items
       renderItem={(category, index) => (
         <SkillCategoryAccordion
           key={category.categoryName}
@@ -34,6 +36,7 @@ export function SkillsSection({ data, onSaveSkill, onSaveUngroupedSkill }: Skill
               onSaveSkill(index, skillIndex, value)
             }
           }}
+          onReorderSkills={onReorderSkills ? (newSkills) => onReorderSkills(index, newSkills) : undefined}
         />
       )}
     />
