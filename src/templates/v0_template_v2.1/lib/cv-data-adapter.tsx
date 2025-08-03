@@ -357,8 +357,8 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
       type: 'certifications',
       title: cv2webData.certifications.sectionTitle || 'Certifications',
       data: cv2webData.certifications.certificationItems.map(item => ({
-        name: item?.title || '',
-        issuer: item?.issuingOrganization || '',
+        title: item?.title || '',
+        subtitle: item?.issuingOrganization || '',
         date: item?.issueDate || '',
         expiryDate: item?.expirationDate || null,
         credentialId: item?.credentialId || null,
