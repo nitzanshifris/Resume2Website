@@ -588,7 +588,7 @@ export default function PortfolioPage() {
         className="h-full flex flex-col justify-start items-center"
         waveOpacity={1}
       >
-        <motion.div className="text-center pt-12 md:pt-16 lg:pt-20 px-4" variants={heroContainerVariants} initial="hidden" animate="visible">
+        <motion.div className="text-center pt-20 md:pt-28 lg:pt-36 px-4" variants={heroContainerVariants} initial="hidden" animate="visible">
           {isEditMode ? (
             <>
               <EditableText
@@ -656,7 +656,7 @@ export default function PortfolioPage() {
                 },
               },
             }}
-            className="mt-12 md:mt-16"
+            className="mt-16 md:mt-20 lg:mt-24"
           >
             <AdvancedProfileEditor
               initialPhotoUrl={heroData.profilePhotoUrl}
@@ -684,7 +684,7 @@ export default function PortfolioPage() {
                 }
               }
             }}
-            className="mt-12 md:mt-16 lg:mt-20 flex flex-col sm:flex-row gap-6 md:gap-8 items-center justify-center px-4"
+            className="mt-16 md:mt-20 lg:mt-24 flex flex-col sm:flex-row gap-6 md:gap-8 items-center justify-center px-4"
           >
             {/* Download CV Button */}
             <motion.div
