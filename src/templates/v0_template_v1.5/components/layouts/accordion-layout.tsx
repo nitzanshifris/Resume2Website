@@ -8,13 +8,15 @@ import { useState, useEffect } from "react"
 import { useEditMode } from "@/contexts/edit-mode-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DraggableList } from "@/components/draggable-list"
 
 interface AccordionLayoutProps {
   items: ExperienceItem[]
   onSave: (index: number, field: keyof ExperienceItem, value: string | string[]) => void
+  onReorder?: (newItems: ExperienceItem[]) => void
 }
 
-export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
+export function AccordionLayout({ items, onSave, onReorder }: AccordionLayoutProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [openItem, setOpenItem] = useState<string | undefined>()
   const [newTechnology, setNewTechnology] = useState<{ [key: number]: string }>({})
@@ -41,16 +43,7 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
     }
   }
 
-  return (
-    <div className="relative">
-      <Accordion 
-        type="single" 
-        collapsible 
-        className="w-full max-w-4xl mx-auto space-y-6"
-        value={openItem}
-        onValueChange={setOpenItem}
-      >
-        {items.map((item, i) => (
+  const renderAccordionItem = (item: ExperienceItem, i: number) => (
         <motion.div
           key={i}
           initial={{ opacity: 0, y: 5 }}
@@ -458,8 +451,29 @@ export function AccordionLayout({ items, onSave }: AccordionLayoutProps) {
           </AccordionContent>
         </AccordionItem>
         </motion.div>
-      ))}
-    </Accordion>
+  )
+
+  return (
+    <div className="relative">
+      <Accordion 
+        type="single" 
+        collapsible 
+        className="w-full max-w-4xl mx-auto space-y-6"
+        value={openItem}
+        onValueChange={setOpenItem}
+      >
+        {onReorder && isEditMode ? (
+          <DraggableList
+            items={items}
+            onReorder={onReorder}
+            renderItem={renderAccordionItem}
+            keyExtractor={(item, index) => `experience-${index}`}
+            className="w-full"
+          />
+        ) : (
+          items.map((item, i) => renderAccordionItem(item, i))
+        )}
+      </Accordion>
     </div>
   )
 }

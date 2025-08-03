@@ -25,6 +25,7 @@ import { Trash2 } from "lucide-react"
 /* ── Custom components & layouts ────────────────────────────────── */
 import { Section } from "@/components/section"
 import { DraggableSection } from "@/components/draggable-section-simple"
+import { DraggableList } from "@/components/draggable-list"
 import { CardCarousel } from "@/components/card-carousel"
 import { HeroSection } from "@/components/hero-section"
 import { SkillsSection } from "@/components/skills-section"
@@ -69,6 +70,14 @@ const initialSectionKeys: SectionKey[] = [
 
 const hasContent = (data: any): boolean => {
   if (!data || typeof data !== "object") return false
+
+  // Special handling for skills section
+  if (data.skillCategories || data.ungroupedSkills) {
+    return (
+      (Array.isArray(data.skillCategories) && data.skillCategories.length > 0) ||
+      (Array.isArray(data.ungroupedSkills) && data.ungroupedSkills.length > 0)
+    )
+  }
 
   const itemKeys = Object.keys(data).filter((k) => k.endsWith("Items") || k.endsWith("skills"))
   if (itemKeys.length) return itemKeys.some((k) => Array.isArray(data[k]) && data[k].length)
@@ -415,7 +424,7 @@ export default function FashionPortfolioPage() {
   }
 
   /* Generic save helper */ /* ------------------------------------- */
-  const handleSave = (path: string, value: any) => {
+  const handleSave = (path: string, value: any, showToast: boolean = true) => {
     setData((prev) => {
       const keys = path.split(".")
       const next = structuredClone(prev) as any
@@ -425,7 +434,9 @@ export default function FashionPortfolioPage() {
         cur = cur[keys[i]]
       }
       cur[keys.at(-1)!] = value
-      toast.success("Content saved!")
+      if (showToast) {
+        toast.success("Content saved!")
+      }
       return next
     })
   }
@@ -622,6 +633,7 @@ export default function FashionPortfolioPage() {
             <AccordionLayout
               items={data.experience.experienceItems}
               onSave={(i, field, v) => handleSave(`experience.experienceItems.${i}.${field}`, v)}
+              onReorder={(newItems) => handleSave("experience.experienceItems", newItems, false)}
             />
           </Section>
         </EditableSection>
@@ -761,6 +773,8 @@ export default function FashionPortfolioPage() {
                 handleSave(`skills.skillCategories.${catIdx}.skills.${skillIdx}.name`, v)
               }
               onSaveUngroupedSkill={(idx, v) => handleSave(`skills.ungroupedSkills.${idx}.name`, v)}
+              onReorderCategories={(newCategories) => handleSave("skills.skillCategories", newCategories, false)}
+              onReorderSkills={(catIdx, newSkills) => handleSave(`skills.skillCategories.${catIdx}.skills`, newSkills, false)}
             />
           </Section>
         </EditableSection>
@@ -789,31 +803,112 @@ export default function FashionPortfolioPage() {
             onSaveTitle={(v) => handleSave("education.sectionTitle", v)}
             isVisible
           >
-          <VerticalTimeline 
-            items={educationTimelineItems} 
-            isEditMode={isEditMode}
-            onEdit={(index) => {
-              // Handle edit functionality
-              console.log('Edit education item:', index)
-            }}
-            onDelete={(index) => removeItem('education', index)}
-            onUpdateImage={(index, imageUrl, imageAlt, imageTransform) => {
-              const newItems = [...data.education.educationItems]
-              newItems[index] = {
-                ...newItems[index],
-                imageUrl,
-                imageAlt,
-                imageTransform
-              }
-              setData(prev => ({
-                ...prev,
-                education: {
-                  ...prev.education,
-                  educationItems: newItems
+          {isEditMode ? (
+            <DraggableList
+              items={data.education.educationItems}
+              onReorder={(newItems) => {
+                handleSave("education.educationItems", newItems, false)
+              }}
+              renderItem={(educationItem, index) => {
+                const timelineItem = {
+                  title: (
+                    <EditableText
+                      as="h3"
+                      className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
+                      initialValue={educationItem.institution}
+                      onSave={(v) => handleSave(`education.educationItems.${index}.institution`, v)}
+                    />
+                  ),
+                  degree: (
+                    <EditableText
+                      as="p"
+                      className="font-sans text-base sm:text-lg font-semibold text-card-foreground/90 mt-1"
+                      initialValue={educationItem.degree}
+                      onSave={(v) => handleSave(`education.educationItems.${index}.degree`, v)}
+                    />
+                  ),
+                  years: (
+                    <EditableText
+                      as="p"
+                      className="font-sans text-base text-muted-foreground my-2"
+                      initialValue={educationItem.years}
+                      onSave={(v) => handleSave(`education.educationItems.${index}.years`, v)}
+                    />
+                  ),
+                  description: (
+                    <EditableText
+                      textarea
+                      as="p"
+                      className="font-sans text-muted-foreground text-sm sm:text-base mt-2"
+                      initialValue={educationItem.description}
+                      onSave={(v) => handleSave(`education.educationItems.${index}.description`, v)}
+                    />
+                  ),
+                  imageUrl: educationItem.imageUrl,
+                  imageAlt: educationItem.imageAlt,
+                  imageTransform: educationItem.imageTransform,
                 }
-              }))
-            }}
-          />
+                
+                return (
+                  <div className="mb-8">
+                    <VerticalTimeline 
+                      items={[timelineItem]} 
+                      isEditMode={isEditMode}
+                      onEdit={() => {
+                        // Handle edit functionality
+                        console.log('Edit education item:', index)
+                      }}
+                      onDelete={() => removeItem('education', index)}
+                      onUpdateImage={(_, imageUrl, imageAlt, imageTransform) => {
+                        const newItems = [...data.education.educationItems]
+                        newItems[index] = {
+                          ...newItems[index],
+                          imageUrl,
+                          imageAlt,
+                          imageTransform
+                        }
+                        setData(prev => ({
+                          ...prev,
+                          education: {
+                            ...prev.education,
+                            educationItems: newItems
+                          }
+                        }))
+                      }}
+                    />
+                  </div>
+                )
+              }}
+              keyExtractor={(item, index) => `education-${data.education.educationItems[index]?.institution || index}`}
+              className="w-full"
+            />
+          ) : (
+            <VerticalTimeline 
+              items={educationTimelineItems} 
+              isEditMode={isEditMode}
+              onEdit={(index) => {
+                // Handle edit functionality
+                console.log('Edit education item:', index)
+              }}
+              onDelete={(index) => removeItem('education', index)}
+              onUpdateImage={(index, imageUrl, imageAlt, imageTransform) => {
+                const newItems = [...data.education.educationItems]
+                newItems[index] = {
+                  ...newItems[index],
+                  imageUrl,
+                  imageAlt,
+                  imageTransform
+                }
+                setData(prev => ({
+                  ...prev,
+                  education: {
+                    ...prev.education,
+                    educationItems: newItems
+                  }
+                }))
+              }}
+            />
+          )}
         </Section>
         </EditableSection>
       ) : null,
