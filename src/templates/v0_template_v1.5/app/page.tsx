@@ -27,6 +27,7 @@ import { Section } from "@/components/section"
 import { DraggableSection } from "@/components/draggable-section-simple"
 import { DraggableList } from "@/components/draggable-list"
 import { CardCarousel } from "@/components/card-carousel"
+import { DraggableCardCarousel } from "@/components/draggable-card-carousel"
 import { HeroSection } from "@/components/hero-section"
 import { SkillsSection } from "@/components/skills-section"
 import { ContactSection } from "@/components/contact-section"
@@ -502,6 +503,24 @@ export default function FashionPortfolioPage() {
     toast.success("Item removed!")
   }
 
+  /* Helper functions for reordering carousel items */
+  const reorderItems = (section: string, newItems: any[]) => {
+    setData(prev => {
+      const sectionData = (prev as any)[section]
+      const itemsKey = Object.keys(sectionData).find(k => k.endsWith('Items'))
+      if (itemsKey) {
+        return {
+          ...prev,
+          [section]: {
+            ...sectionData,
+            [itemsKey]: newItems
+          }
+        }
+      }
+      return prev
+    })
+  }
+
   /* Navigation items */ /* --------------------------------------- */
   const navItems = useMemo(
     () =>
@@ -667,8 +686,10 @@ export default function FashionPortfolioPage() {
             fullWidth
           >
           {data.projects.projectItems.length > 0 ? (
-            <CardCarousel
+            <DraggableCardCarousel
               items={data.projects.projectItems}
+              onReorder={(newItems) => reorderItems('projects', newItems)}
+              keyExtractor={(item, index) => `project-${index}-${item.title}`}
               itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
               renderItem={(item, i) => {
                 const selectedGradient = getGradientForIndex(i)
@@ -774,7 +795,6 @@ export default function FashionPortfolioPage() {
               }
               onSaveUngroupedSkill={(idx, v) => handleSave(`skills.ungroupedSkills.${idx}.name`, v)}
               onReorderCategories={(newCategories) => handleSave("skills.skillCategories", newCategories, false)}
-              onReorderSkills={(catIdx, newSkills) => handleSave(`skills.skillCategories.${catIdx}.skills`, newSkills, false)}
             />
           </Section>
         </EditableSection>
@@ -938,8 +958,10 @@ export default function FashionPortfolioPage() {
             className="bg-secondary/30"
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.testimonials.testimonialItems}
+            onReorder={(newItems) => reorderItems('testimonials', newItems)}
+            keyExtractor={(item, index) => `testimonial-${index}-${item.name || item.title}`}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
             renderItem={(item, i) => (
               <TestimonialCard
@@ -980,8 +1002,10 @@ export default function FashionPortfolioPage() {
             isVisible
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.achievements.achievementItems}
+            onReorder={(newItems) => reorderItems('achievements', newItems)}
+            keyExtractor={(item, index) => `achievement-${index}-${item.title}`}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)
@@ -1067,8 +1091,10 @@ export default function FashionPortfolioPage() {
             className="bg-secondary/30"
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.certifications.certificationItems}
+            onReorder={(newItems) => reorderItems('certifications', newItems)}
+            keyExtractor={(item, index) => `certification-${index}-${item.title}`}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)
@@ -1154,8 +1180,10 @@ export default function FashionPortfolioPage() {
             isVisible
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.volunteer.volunteerItems}
+            onReorder={(newItems) => reorderItems('volunteer', newItems)}
+            keyExtractor={(item, index) => `volunteer-${index}-${item.title}`}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)
@@ -1247,8 +1275,10 @@ export default function FashionPortfolioPage() {
             fullWidth
           >
           {data.hobbies.hobbyItems.length > 0 ? (
-            <CardCarousel
+            <DraggableCardCarousel
               items={data.hobbies.hobbyItems}
+              onReorder={(newItems) => reorderItems('hobbies', newItems)}
+              keyExtractor={(item, index) => `hobby-${index}-${item.title}`}
               itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
               renderItem={(item, i) => {
                 const selectedGradient = getGradientForIndex(i)
@@ -1347,8 +1377,10 @@ export default function FashionPortfolioPage() {
             isVisible
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.courses.courseItems}
+            onReorder={(newItems) => reorderItems('courses', newItems)}
+            keyExtractor={(item, index) => `course-${index}-${item.title}`}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)
@@ -1435,8 +1467,10 @@ export default function FashionPortfolioPage() {
             className="bg-secondary/30"
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.publications.publicationItems}
+            onReorder={(newItems) => reorderItems('publications', newItems)}
+            keyExtractor={(item, index) => `publication-${index}-${item.title}`}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)
@@ -1526,8 +1560,10 @@ export default function FashionPortfolioPage() {
             isVisible
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.speakingEngagements.engagementItems}
+            onReorder={(newItems) => reorderItems('speakingEngagements', newItems)}
+            keyExtractor={(item, index) => `engagement-${index}-${item.title}`}
             itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)
@@ -1607,8 +1643,10 @@ export default function FashionPortfolioPage() {
             className="bg-secondary/30"
             fullWidth
           >
-          <CardCarousel
+          <DraggableCardCarousel
             items={data.memberships.membershipItems}
+            onReorder={(newItems) => reorderItems('memberships', newItems)}
+            keyExtractor={(item, index) => `membership-${index}-${item.title}`}
             itemClassName="basis-1/3"
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)

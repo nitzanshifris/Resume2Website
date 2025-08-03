@@ -15,7 +15,8 @@ import {
   arrayMove, 
   SortableContext, 
   sortableKeyboardCoordinates, 
-  verticalListSortingStrategy 
+  verticalListSortingStrategy,
+  rectSortingStrategy 
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { useSortable } from "@dnd-kit/sortable"
@@ -29,15 +30,18 @@ interface DraggableListProps<T> {
   renderItem: (item: T, index: number) => React.ReactNode
   keyExtractor: (item: T, index: number) => string
   className?: string
+  handlePosition?: 'left' | 'right' | 'top-right'
+  strategy?: 'vertical' | 'grid'
 }
 
 interface DraggableItemProps {
   id: string
   children: React.ReactNode
   index: number
+  handlePosition?: 'left' | 'right' | 'top-right'
 }
 
-function DraggableItem({ id, children, index }: DraggableItemProps) {
+function DraggableItem({ id, children, index, handlePosition = 'left' }: DraggableItemProps) {
   const { isEditMode } = useEditMode()
   const {
     attributes,
@@ -67,18 +71,21 @@ function DraggableItem({ id, children, index }: DraggableItemProps) {
           {...attributes}
           {...listeners}
           className={cn(
-            "absolute -left-12 top-8 z-40",
+            "absolute z-40",
             "flex items-center justify-center",
-            "w-10 h-10 rounded-lg",
+            "rounded-lg",
             "bg-gradient-to-r from-blue-500 to-blue-600",
             "text-white shadow-lg",
             "cursor-grab active:cursor-grabbing",
             "transition-all duration-200 hover:scale-105",
-            "opacity-0 hover:opacity-100",
-            "group-hover/list:opacity-100"
+            handlePosition === 'left' && "-left-12 top-8 w-10 h-10",
+            handlePosition === 'right' && "right-2 top-1/2 -translate-y-1/2 w-8 h-8",
+            handlePosition === 'top-right' && "right-2 top-2 w-8 h-8"
           )}
         >
-          <GripVertical className="h-5 w-5" />
+          <GripVertical className={cn(
+            handlePosition === 'left' ? "h-5 w-5" : "h-4 w-4"
+          )} />
         </div>
       )}
       {children}
@@ -91,7 +98,9 @@ export function DraggableList<T>({
   onReorder, 
   renderItem, 
   keyExtractor,
-  className 
+  className,
+  handlePosition = 'left',
+  strategy = 'vertical'
 }: DraggableListProps<T>) {
   const [activeId, setActiveId] = React.useState<string | null>(null)
   
@@ -139,7 +148,7 @@ export function DraggableList<T>({
     >
       <SortableContext
         items={items.map((item, index) => keyExtractor(item, index))}
-        strategy={verticalListSortingStrategy}
+        strategy={strategy === 'grid' ? rectSortingStrategy : verticalListSortingStrategy}
       >
         <div className={cn("relative group/list", className)}>
           {items.map((item, index) => (
@@ -147,6 +156,7 @@ export function DraggableList<T>({
               key={keyExtractor(item, index)}
               id={keyExtractor(item, index)}
               index={index}
+              handlePosition={handlePosition}
             >
               {renderItem(item, index)}
             </DraggableItem>
