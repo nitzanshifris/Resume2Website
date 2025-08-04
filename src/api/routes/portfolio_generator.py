@@ -21,11 +21,94 @@ import re
 from datetime import datetime
 from typing import Dict, Optional
 
+# Import configuration
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+import config
+
 # Import authentication dependency
-from src.api.routes.auth import get_current_user
+from src.api.routes.auth import get_current_user, get_current_user_optional
 from src.api.db import get_user_cv_uploads
 
 logger = logging.getLogger(__name__)
+
+# Global dictionary to track portfolio processes
+PORTFOLIO_PROCESSES = {}
+
+def find_available_port(start_port: int = 4000, max_port: int = 5000) -> int:
+    """
+    Find an available port in the specified range.
+    
+    Args:
+        start_port: Starting port number (default: 4000)
+        max_port: Maximum port number (default: 5000)
+        
+    Returns:
+        Available port number
+        
+    Raises:
+        RuntimeError: If no available port is found
+    """
+    for port in range(start_port, max_port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.bind(('', port))
+            sock.close()
+            return port
+        except OSError:
+            continue
+    raise RuntimeError(f"No available port found between {start_port} and {max_port}")
+
+def wait_for_server(port: int, timeout: int = 30) -> bool:
+    """
+    Wait for a server to start on the specified port.
+    
+    Args:
+        port: Port number to check
+        timeout: Maximum time to wait in seconds (default: 30)
+        
+    Returns:
+        True if server is ready, False if timeout
+    """
+    start_time = time.time()
+    
+    while time.time() - start_time < timeout:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            result = sock.connect_ex(('localhost', port))
+            sock.close()
+            if result == 0:
+                return True  # Returns immediately when server is ready!
+        except:
+            pass
+        time.sleep(0.5)  # Check every 0.5 seconds for faster response
+    
+    return False
+
+def cleanup_zombie_processes():
+    """
+    Professional cleanup: Kill zombie processes that might be using our port range
+    """
+    try:
+        import subprocess
+        # Kill any node processes that might be using ports 4000-5000
+        result = subprocess.run(
+            ["lsof", "-t", "-i:4000-5000"],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0 and result.stdout.strip():
+            pids = result.stdout.strip().split('\n')
+            for pid in pids:
+                if pid.strip():
+                    try:
+                        subprocess.run(["kill", "-9", pid.strip()], check=False)
+                        logger.info(f"🧹 Cleaned up zombie process PID: {pid.strip()}")
+                    except Exception:
+                        pass  # Ignore cleanup errors
+    except Exception as e:
+        logger.warning(f"⚠️ Cleanup failed (non-critical): {e}")
 
 class GeneratePortfolioRequest(BaseModel):
     template: Optional[str] = None
@@ -296,15 +379,608 @@ PORTFOLIOS_DIR = BASE_DIR / "data" / "generated_portfolios"
 
 # Available templates
 AVAILABLE_TEMPLATES = {
-    "v0_template_1.3": "v0_template_1.3",
-    "v0_template_1.4": "v0_template_1.4",
-    "v0_template_v1.5": "v0_template_v1.5",
-    "v0_template_v2.1": "v0_template_v2.1"
+    "v0_template_v1.5": "src/templates/v0_template_v1.5",
+    "v0_template_v2.1": "src/templates/v0_template_v2.1"
 }
 DEFAULT_TEMPLATE = "v0_template_v1.5"
 
 # Ensure portfolios directory exists
 PORTFOLIOS_DIR.mkdir(parents=True, exist_ok=True)
+
+@router.post("/generate-anonymous/{job_id}")
+async def generate_portfolio_anonymous(
+    job_id: str,
+    request: GeneratePortfolioRequest = GeneratePortfolioRequest(),
+    current_user_id: Optional[str] = Depends(get_current_user_optional)
+):
+    """
+    Generate a portfolio website from CV data (anonymous access allowed)
+    
+    Args:
+        job_id: The CV job ID to generate portfolio from
+        current_user_id: Optional user ID if authenticated
+        
+    Returns:
+        Portfolio generation result with URL and status
+    """
+    try:
+        # Professional cleanup: Kill any zombie processes using ports in our range
+        cleanup_zombie_processes()
+        
+        # Generate anonymous user ID if not authenticated
+        if not current_user_id:
+            current_user_id = f"anonymous_{uuid.uuid4().hex[:12]}"
+            logger.info(f"🚀 Starting anonymous portfolio generation for job_id: {job_id}")
+        else:
+            logger.info(f"🚀 Starting portfolio generation for job_id: {job_id}, user: {current_user_id}")
+        
+        # === 1. GET CV DATA ===
+        # For anonymous users, we need to find the CV data
+        # Check if the CV extraction was completed
+        import glob
+        import json
+        from pathlib import Path
+        BASE_DIR = Path(__file__).parent.parent.parent.parent
+        
+        # Try to find the file with this job_id
+        file_pattern = str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}*")
+        matching_files = glob.glob(file_pattern, recursive=True)
+        
+        if not matching_files:
+            raise HTTPException(status_code=404, detail=f"CV upload not found for job_id: {job_id}")
+        
+        # For anonymous users, we need to extract the CV data if not already done
+        cv_data = None
+        
+        # First, check if we already have extracted data (would be in a JSON file)
+        json_file = BASE_DIR / "data" / "uploads" / f"{job_id}_extracted.json"
+        if json_file.exists():
+            with open(json_file, 'r') as f:
+                cv_data = json.load(f)
+        
+        # If we don't have CV data yet, check the database
+        if not cv_data:
+            # For anonymous users, try to get CV data from the database
+            # This should already be extracted during upload
+            logger.info(f"📊 Checking database for CV data for job_id: {job_id}")
+            
+            # Try to get CV data from the upload status
+            from src.api.db import get_db_connection
+            conn = get_db_connection()
+            try:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT cv_data, status FROM cv_uploads WHERE job_id = ?",
+                    (job_id,)
+                )
+                result = cursor.fetchone()
+                
+                if result and result['status'] == 'completed' and result['cv_data']:
+                    cv_data = json.loads(result['cv_data'])
+                    logger.info(f"✅ Found CV data in database for job {job_id}")
+                    
+                    # Save to JSON file for future use
+                    with open(json_file, 'w') as f:
+                        json.dump(cv_data, f, indent=2)
+                else:
+                    # Only extract if really needed (shouldn't happen with new flow)
+                    logger.warning(f"⚠️ CV data not found in DB, extracting now for job_id: {job_id}")
+                    
+                    from src.api.routes.cv import extract_cv_data_endpoint
+                    extract_result = await extract_cv_data_endpoint(job_id, current_user_id)
+                    
+                    if extract_result['status'] == 'completed':
+                        cv_data = extract_result['cv_data']
+                        with open(json_file, 'w') as f:
+                            json.dump(cv_data, f, indent=2)
+                        logger.info(f"✅ CV data extracted and saved")
+                    else:
+                        raise HTTPException(status_code=500, detail="Failed to extract CV data")
+            finally:
+                conn.close()
+        
+        # === 2. SELECT TEMPLATE ===
+        template_id = request.template or "v0_template_v1.5"  # Default template
+        
+        if template_id not in AVAILABLE_TEMPLATES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid template: {template_id}. Available templates: {list(AVAILABLE_TEMPLATES.keys())}"
+            )
+        
+        template_path = AVAILABLE_TEMPLATES[template_id]
+        full_template_path = str(Path(config.PROJECT_ROOT) / template_path.lstrip('/'))
+        
+        # === 3. GENERATE PORTFOLIO ID ===
+        portfolio_id = f"{current_user_id}_{job_id}_{uuid.uuid4().hex[:8]}"
+        
+        # === 4. CREATE SANDBOX DIRECTORY ===
+        sandbox_path = Path(config.SANDBOXES_DIR) / "portfolios" / portfolio_id
+        sandbox_path.mkdir(parents=True, exist_ok=True)
+        
+        logger.info(f"📁 Created sandbox directory: {sandbox_path}")
+        
+        # Create .watchmanconfig to exclude from file watching
+        watchman_config = {
+            "ignore_dirs": ["node_modules", ".next", ".git", "dist", "build"]
+        }
+        watchman_file = sandbox_path / ".watchmanconfig"
+        with open(watchman_file, 'w') as f:
+            json.dump(watchman_config, f, indent=2)
+        
+        # === 5. COPY TEMPLATE TO SANDBOX ===
+        try:
+            # Copy entire template directory
+            shutil.copytree(full_template_path, sandbox_path, dirs_exist_ok=True)
+            logger.info(f"📋 Copied template from {full_template_path} to {sandbox_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to copy template: {e}")
+            shutil.rmtree(sandbox_path, ignore_errors=True)
+            raise HTTPException(status_code=500, detail=f"Failed to copy template: {str(e)}")
+        
+        # === 6. INJECT CV DATA INTO TEMPLATE ===
+        try:
+            logger.info("💉 Injecting CV data into template...")
+            
+            # Create the injected-data.tsx file with actual CV data
+            injected_data_file = sandbox_path / "lib" / "injected-data.tsx"
+            injected_data_file.parent.mkdir(exist_ok=True)
+            
+            # Create injected data content with the CV data
+            injected_content = f'''/**
+ * Auto-generated CV data for portfolio
+ * Generated at: {datetime.now().isoformat()}
+ * User: {current_user_id}
+ * Job ID: {job_id}
+ */
+
+import {{ adaptCV2WebToTemplate }} from './cv-data-adapter'
+
+// CV Data from extraction (CV2WEB format)
+const extractedCVData = {json.dumps(cv_data, indent=2)}
+
+// Convert CV data to template format using the cv-data-adapter
+export const portfolioData = adaptCV2WebToTemplate(extractedCVData)
+
+// Force use of real data instead of sample data
+export const useRealData = true
+
+// Export extracted data for compatibility
+export {{ extractedCVData }}
+'''
+            
+            # Write the injected data file
+            with open(injected_data_file, 'w') as f:
+                f.write(injected_content)
+            
+            logger.info(f"✅ CV data injected into {injected_data_file}")
+            logger.info(f"📋 Template will use real CV data via adaptCV2WebToTemplate()")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to inject CV data: {e}")
+            shutil.rmtree(sandbox_path, ignore_errors=True)
+            raise HTTPException(status_code=500, detail=f"Failed to inject CV data: {str(e)}")
+        
+        # === 7. INSTALL DEPENDENCIES WITH CLEAN INSTALL ===
+        try:
+            logger.info("📦 Installing dependencies with clean install and @dnd-kit peer dependency fix...")
+            
+            # Step 0: Clear any existing node_modules and lock files to prevent corruption
+            node_modules_path = sandbox_path / "node_modules"
+            pnpm_lock_path = sandbox_path / "pnpm-lock.yaml"
+            npm_lock_path = sandbox_path / "package-lock.json"
+            yarn_lock_path = sandbox_path / "yarn.lock"
+            
+            if node_modules_path.exists():
+                logger.info("🧹 Cleaning existing node_modules...")
+                shutil.rmtree(node_modules_path, ignore_errors=True)
+            
+            # Remove ALL lockfiles to prevent conflicts
+            for lockfile in [pnpm_lock_path, npm_lock_path, yarn_lock_path]:
+                if lockfile.exists():
+                    logger.info(f"🧹 Removing {lockfile.name}...")
+                    lockfile.unlink(missing_ok=True)
+            
+            # Step 1: Use npm for better compatibility (pnpm has issues with isolated sandboxes)
+            install_cmd = ["npm", "install", "--legacy-peer-deps"]
+            logger.info(f"📦 Running: {' '.join(install_cmd)}")
+            result = subprocess.run(
+                install_cmd,
+                cwd=str(sandbox_path),
+                capture_output=True,
+                text=True,
+                timeout=180  # Give more time for initial install
+            )
+            
+            if result.returncode != 0:
+                logger.error(f"❌ npm install failed: {result.stderr}")
+                logger.error(f"❌ npm install stdout: {result.stdout}")
+                
+                # Try simpler install without legacy-peer-deps
+                logger.warning("⚠️ Trying simpler npm install...")
+                
+                install_cmd = ["npm", "install"]
+                result = subprocess.run(
+                    install_cmd,
+                    cwd=str(sandbox_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=180
+                )
+                
+                if result.returncode != 0:
+                    # Last resort: install core packages individually
+                    logger.warning("⚠️ Installing core packages individually...")
+                    core_packages = ["next@latest", "react", "react-dom"]
+                    for package in core_packages:
+                        pkg_cmd = ["npm", "install", package, "--save"]
+                        pkg_result = subprocess.run(pkg_cmd, cwd=str(sandbox_path), capture_output=True, text=True, timeout=60)
+                        if pkg_result.returncode != 0:
+                            logger.error(f"❌ Failed to install {package}: {pkg_result.stderr}")
+                    
+                    raise Exception(f"npm install failed: {result.stderr}")
+                
+                logger.info("✅ npm install succeeded (simple mode)")
+            else:
+                logger.info("✅ npm install succeeded")
+            
+            # Step 2: Verify Next.js is properly installed
+            logger.info("📦 Verifying Next.js installation...")
+            next_bin_path = sandbox_path / "node_modules" / ".bin" / "next"
+            if not next_bin_path.exists():
+                logger.error("❌ Next.js binary not found in node_modules/.bin/")
+                
+                # Check if Next.js was installed at all
+                next_module_path = sandbox_path / "node_modules" / "next"
+                if next_module_path.exists():
+                    logger.info("✅ Next.js module found, checking binary installation...")
+                    # Try to find the next binary in the module
+                    next_cli_path = next_module_path / "dist" / "bin" / "next"
+                    if next_cli_path.exists():
+                        logger.info("✅ Found Next.js CLI in dist/bin/next")
+                        # Create a symlink or try direct execution
+                        next_bin_path = next_cli_path
+                    else:
+                        logger.error("❌ Next.js CLI not found in expected locations")
+                        logger.info(f"📋 Listing contents of {next_module_path}:")
+                        try:
+                            contents = list(next_module_path.iterdir())[:10]  # Show first 10 items
+                            for item in contents:
+                                logger.info(f"  - {item.name}")
+                        except Exception as e:
+                            logger.error(f"Could not list contents: {e}")
+                else:
+                    logger.error("❌ Next.js module not found at all")
+                    
+                # Try to manually install Next.js
+                logger.warning("⚠️ Attempting to manually install Next.js...")
+                try:
+                    manual_install_cmd = ["npm", "install", "next@latest", "--save"]
+                    manual_result = subprocess.run(
+                        manual_install_cmd,
+                        cwd=str(sandbox_path),
+                        capture_output=True,
+                        text=True,
+                        timeout=60
+                    )
+                    
+                    if manual_result.returncode == 0:
+                        logger.info("✅ Manual Next.js installation succeeded")
+                        # Check again
+                        next_bin_path = sandbox_path / "node_modules" / ".bin" / "next"
+                        if not next_bin_path.exists():
+                            logger.error("❌ Next.js binary still not found after manual install")
+                            raise Exception("Next.js installation failed - binary not found after manual install")
+                    else:
+                        logger.error(f"❌ Manual Next.js installation failed: {manual_result.stderr}")
+                        raise Exception("Next.js installation failed - manual install failed")
+                except subprocess.TimeoutExpired:
+                    logger.error("❌ Manual Next.js installation timed out")
+                    raise Exception("Next.js installation failed - manual install timeout")
+                except Exception as manual_error:
+                    logger.error(f"❌ Manual Next.js installation error: {manual_error}")
+                    logger.warning("⚠️ Will continue with server startup despite Next.js binary issues...")
+                    # Don't raise here - try to continue with server startup
+            
+            # Try to verify Next.js can be executed (if binary exists)
+            if next_bin_path and next_bin_path.exists():
+                try:
+                    # Use the binary directly instead of through node (fixes double path issue)
+                    next_version_cmd = [str(next_bin_path), "--version"]
+                    version_result = subprocess.run(
+                        next_version_cmd,
+                        cwd=str(sandbox_path),
+                        capture_output=True,
+                        text=True,
+                        timeout=5  # Shorter timeout
+                    )
+                    if version_result.returncode == 0:
+                        logger.debug(f"Next.js version: {version_result.stdout.strip()}")
+                    else:
+                        logger.debug(f"Next.js version check failed: {version_result.stderr}")
+                except FileNotFoundError:
+                    logger.debug("Next.js binary check skipped - not critical")
+                except Exception as version_error:
+                    logger.debug(f"Could not verify Next.js version: {version_error}")
+                    # Not critical - continue with server startup
+            else:
+                logger.debug("Skipping Next.js version check - binary not found")
+            
+            # Step 3: Verify @dnd-kit dependencies are properly installed
+            logger.info("📦 Verifying @dnd-kit dependencies...")
+            
+            # Check if @dnd-kit/accessibility exists in node_modules
+            accessibility_path = sandbox_path / "node_modules" / "@dnd-kit" / "accessibility"
+            
+            if not accessibility_path.exists():
+                logger.warning("⚠️ @dnd-kit/accessibility not found, installing explicitly...")
+                
+                # Use npm directly (no workspace issues)
+                dnd_deps_cmd = ["npm", "install", "@dnd-kit/accessibility@^3.1.0", "@dnd-kit/utilities@^3.2.2", "--save"]
+                dnd_result = subprocess.run(
+                    dnd_deps_cmd,
+                    cwd=str(sandbox_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+                
+                if dnd_result.returncode != 0:
+                    logger.error(f"❌ Failed to install @dnd-kit peer deps: {dnd_result.stderr}")
+                    # Force continue - Next.js might still build
+                    logger.warning("⚠️ Continuing despite @dnd-kit dependency issues...")
+                
+                # Verify installation worked
+                if accessibility_path.exists():
+                    logger.info("✅ @dnd-kit/accessibility successfully installed")
+                else:
+                    logger.warning("⚠️ @dnd-kit/accessibility still missing, may cause build issues")
+            else:
+                logger.info("✅ @dnd-kit/accessibility already present")
+            
+            logger.info("✅ Dependencies installation completed")
+            
+        except subprocess.TimeoutExpired:
+            logger.error("❌ Dependency installation timed out")
+            shutil.rmtree(sandbox_path, ignore_errors=True)
+            raise HTTPException(status_code=500, detail="Dependency installation timed out")
+        except Exception as e:
+            logger.error(f"❌ Failed to install dependencies: {e}")
+            shutil.rmtree(sandbox_path, ignore_errors=True)
+            raise HTTPException(status_code=500, detail=f"Failed to install dependencies: {str(e)}")
+        
+        # === 8. START DEVELOPMENT SERVER WITH DYNAMIC PORT ALLOCATION ===
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                # Find available port right before starting server (prevents race conditions)
+                port = find_available_port()
+                logger.info(f"🔌 Attempt {attempt + 1}: Found available port: {port}")
+                
+                # Create .env.local file with port configuration
+                env_file = sandbox_path / ".env.local"
+                with open(env_file, 'w') as f:
+                    f.write(f"PORT={port}\n")
+                
+                # Start the Next.js development server with multiple fallback approaches
+                # Try npx first (most reliable), then pnpm run dev, then direct node
+                start_commands = [
+                    (["npm", "run", "dev"], "npm run dev"),
+                    (["npx", "next", "dev", "-p", str(port)], "npx next dev"),
+                    (["node", "node_modules/.bin/next", "dev", "--port", str(port)], "direct node")
+                ]
+                
+                # Create environment with PORT and NODE_ENV
+                env = {
+                    **os.environ,
+                    "PORT": str(port),
+                    "NODE_ENV": "development"
+                }
+                
+                process = None
+                used_command = None
+                
+                for start_cmd, cmd_name in start_commands:
+                    try:
+                        logger.info(f"🚀 Trying {cmd_name}: {' '.join(start_cmd)}")
+                        logger.info(f"📁 Working directory: {sandbox_path}")
+                        logger.info(f"🔌 Server will run on port: {port}")
+                        
+                        process = subprocess.Popen(
+                            start_cmd,
+                            cwd=str(sandbox_path),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                            env=env
+                        )
+                        
+                        # Give it a moment to start
+                        time.sleep(2)
+                        
+                        # Check if it started successfully
+                        if process.poll() is None:
+                            logger.info(f"✅ {cmd_name} started successfully")
+                            used_command = cmd_name
+                            break
+                        else:
+                            logger.warning(f"⚠️ {cmd_name} failed with code {process.returncode}")
+                            stdout, stderr = process.communicate()
+                            if stderr:
+                                logger.warning(f"Error: {stderr}")
+                            process = None
+                            continue
+                            
+                    except Exception as cmd_error:
+                        logger.warning(f"⚠️ {cmd_name} failed with exception: {cmd_error}")
+                        if process:
+                            try:
+                                process.terminate()
+                            except:
+                                pass
+                        process = None
+                        continue
+                
+                if not process:
+                    raise Exception("All Next.js startup methods failed")
+                
+                # Store process info
+                PORTFOLIO_PROCESSES[portfolio_id] = {
+                    "process": process,
+                    "port": port,
+                    "sandbox_path": str(sandbox_path),
+                    "created_at": datetime.now(),
+                    "user_id": current_user_id,
+                    "job_id": job_id,
+                    "template": template_id,
+                    "start_method": used_command,
+                    "status": "starting"
+                }
+                
+                # Start monitoring server output in background
+                def monitor_output():
+                    try:
+                        for line in iter(process.stdout.readline, ''):
+                            if line:
+                                logger.info(f"[Next.js stdout]: {line.strip()}")
+                    except Exception as e:
+                        logger.error(f"Error monitoring stdout: {e}")
+                        
+                def monitor_errors():
+                    try:
+                        for line in iter(process.stderr.readline, ''):
+                            if line:
+                                logger.error(f"[Next.js stderr]: {line.strip()}")
+                    except Exception as e:
+                        logger.error(f"Error monitoring stderr: {e}")
+                
+                import threading
+                threading.Thread(target=monitor_output, daemon=True).start()
+                threading.Thread(target=monitor_errors, daemon=True).start()
+                
+                # Give the process a moment to start before checking
+                time.sleep(2)
+                
+                # Check if process is still running
+                if process.poll() is not None:
+                    logger.error(f"❌ Process died immediately with code: {process.returncode}")
+                    # Read any remaining output
+                    stdout, stderr = process.communicate()
+                    if stdout:
+                        logger.error(f"Final stdout: {stdout}")
+                    if stderr:
+                        logger.error(f"Final stderr: {stderr}")
+                    
+                    # If it's a port conflict, retry with different port
+                    if "EADDRINUSE" in stderr:
+                        logger.warning(f"⚠️ Port {port} was in use, retrying with different port...")
+                        if portfolio_id in PORTFOLIO_PROCESSES:
+                            del PORTFOLIO_PROCESSES[portfolio_id]
+                        continue  # Retry with new port
+                    elif "Cannot find module '../server/require-hook'" in stderr or "MODULE_NOT_FOUND" in stderr:
+                        # Next.js installation issue - try direct node command as fallback
+                        logger.warning("⚠️ Next.js module issue detected, trying direct node command...")
+                        
+                        # Kill the failed process
+                        if portfolio_id in PORTFOLIO_PROCESSES:
+                            del PORTFOLIO_PROCESSES[portfolio_id]
+                        
+                        # Try direct node command
+                        try:
+                            direct_cmd = ["node", "node_modules/.bin/next", "dev", "-p", str(port)]
+                            logger.info(f"🔄 Fallback: Starting with direct node command: {' '.join(direct_cmd)}")
+                            
+                            process = subprocess.Popen(
+                                direct_cmd,
+                                cwd=str(sandbox_path),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                text=True,
+                                env=env
+                            )
+                            
+                            # Store process info for the retry
+                            PORTFOLIO_PROCESSES[portfolio_id] = {
+                                'process': process,
+                                'port': port,
+                                'template': template_name,
+                                'created_at': time.time(),
+                                'status': 'starting'
+                            }
+                            
+                            # Give it a moment and check again
+                            time.sleep(3)
+                            
+                            if process.poll() is not None:
+                                logger.error(f"❌ Direct node command also failed with code: {process.returncode}")
+                                if portfolio_id in PORTFOLIO_PROCESSES:
+                                    del PORTFOLIO_PROCESSES[portfolio_id]
+                                raise Exception(f"Both pnpm and direct node commands failed")
+                            else:
+                                logger.info("✅ Direct node command seems to be working, continuing...")
+                                # Continue with the existing process monitoring
+                                
+                        except Exception as fallback_error:
+                            logger.error(f"❌ Direct node fallback failed: {fallback_error}")
+                            if portfolio_id in PORTFOLIO_PROCESSES:
+                                del PORTFOLIO_PROCESSES[portfolio_id]
+                            raise Exception(f"Server process died immediately with code {process.returncode}")
+                    else:
+                        # Different error, don't retry
+                        if portfolio_id in PORTFOLIO_PROCESSES:
+                            del PORTFOLIO_PROCESSES[portfolio_id]
+                        raise Exception(f"Server process died immediately with code {process.returncode}")
+                
+                # Wait for server to start (check if port is listening)
+                logger.info(f"⏳ Waiting for server to be ready on port {port}...")
+                if not wait_for_server(port):
+                    # Get final output before terminating
+                    logger.error("❌ Server failed to start within timeout")
+                    process.terminate()
+                    stdout, stderr = process.communicate(timeout=5)
+                    if stdout:
+                        logger.error(f"Final stdout: {stdout}")
+                    if stderr:
+                        logger.error(f"Final stderr: {stderr}")
+                    
+                    # If timeout, could be port issue, retry
+                    logger.warning(f"⚠️ Server timeout on port {port}, retrying with different port...")
+                    if portfolio_id in PORTFOLIO_PROCESSES:
+                        del PORTFOLIO_PROCESSES[portfolio_id]
+                    continue  # Retry with new port
+                
+                # Success! Break out of retry loop
+                break
+                
+            except Exception as e:
+                logger.error(f"❌ Attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries - 1:
+                    # Last attempt failed
+                    shutil.rmtree(sandbox_path, ignore_errors=True)
+                    raise HTTPException(status_code=500, detail=f"Failed to start portfolio server after {max_retries} attempts: {str(e)}")
+                # Continue to next attempt
+                time.sleep(1)  # Brief pause before retry
+            
+        # If we get here, server started successfully
+        PORTFOLIO_PROCESSES[portfolio_id]["status"] = "running"
+        
+        portfolio_url = f"http://localhost:{port}"
+        logger.info(f"✅ Portfolio server started at {portfolio_url}")
+        
+        return {
+            "success": True,
+            "portfolio_id": portfolio_id,
+            "portfolio_url": portfolio_url,
+            "message": f"Portfolio generated successfully and running on port {port}",
+            "template": template_id,
+            "sandbox_path": str(sandbox_path)
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Portfolio generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Portfolio generation failed: {str(e)}")
 
 @router.post("/generate/{job_id}")
 async def generate_portfolio(
@@ -547,10 +1223,10 @@ import { portfolioData, useRealData } from "@/lib/injected-data"'''
         logger.info(f"🌐 Starting enhanced portfolio server for portfolio: {portfolio_id}")
         
         try:
-            # Use the enhanced server manager
+            # Use the enhanced server manager (Fix: use sandbox_path, not portfolio_dir)
             server_config = server_manager.create_server_instance(
                 portfolio_id=portfolio_id,
-                project_path=str(portfolio_dir)
+                project_path=str(sandbox_path)
             )
             
             port = server_config['port']

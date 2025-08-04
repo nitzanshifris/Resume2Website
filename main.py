@@ -76,9 +76,31 @@ if __name__ == "__main__":
     
     logger.info(f"Starting CV2WEB API on {host}:{port}")
     
+    # Configure reload with exclusions to prevent watchfiles overload
+    def get_reload_excludes():
+        """Read reload exclusions from .watchmanconfig for consistency"""
+        try:
+            import json
+            with open('.watchmanconfig', 'r') as f:
+                config = json.load(f)
+                return config.get('ignore_dirs', [])
+        except Exception as e:
+            logger.warning(f"Could not read .watchmanconfig: {e}. Using defaults.")
+            # Fallback to essential excludes
+            return [
+                "sandboxes/*",
+                "data/*",
+                "**/node_modules/*",
+                "**/.next/*",
+                "venv/*"
+            ]
+    
+    reload_excludes = get_reload_excludes()
+    
     uvicorn.run(
         "main:app",
         host=host,
         port=port,
-        reload=True  # Auto-reload on code changes
+        reload=True,  # Auto-reload on code changes
+        reload_excludes=reload_excludes  # Exclude heavy directories
     )

@@ -23,6 +23,7 @@ CV2WEB is an AI-powered CV to portfolio website converter that transforms resume
 - **UI Libraries**: Aceternity UI, Magic UI (100+ animated components)
 - **Infrastructure**: Vercel deployment, Railway, local development
 - **Database**: SQLite with session-based authentication
+- **Package Manager**: npm (switched from pnpm for sandbox compatibility)
 
 ## 🚀 Quick Start
 
@@ -31,7 +32,8 @@ CV2WEB is an AI-powered CV to portfolio website converter that transforms resume
 # Required tools
 node >= 18.0.0          # For frontend
 python >= 3.11          # For backend  
-pnpm >= 8.0.0          # Package manager (NOT npm/yarn)
+pnpm >= 8.0.0          # Package manager for main project (NOT npm/yarn)
+                       # Note: Sandboxes use npm for compatibility
 git                    # Version control
 ```
 
@@ -75,6 +77,7 @@ python3 main.py                              # Alternative start method
 ```bash
 # 1. MANDATORY: Check current branch first
 git branch --show-current  # Must NOT be 'main'
+# Note: Currently on 'nitzan-development-2' branch
 
 # 2. Create feature branch (REQUIRED)
 git checkout -b feature/description
@@ -116,6 +119,7 @@ CV2WEB-V4/
 │   │   └── routes/        # Individual route modules
 │   │       ├── portfolio_generator.py # Main portfolio creation & management
 │   │       ├── cv.py                  # CV CRUD operations
+│   │       ├── auth.py                # Authentication endpoints
 │   │       ├── archived/              # Deprecated/unused routes
 │   │       └── future_use/            # Ready but not yet active
 │   │           └── portfolio_expert.py # AI portfolio guidance (not mounted)
@@ -126,10 +130,14 @@ CV2WEB-V4/
 │   ├── services/          # Business services
 │   │   └── claude_portfolio_expert.py # AI expert service
 │   └── templates/         # Portfolio templates with data adapters
-│       └── v0_template_1/ # Modern portfolio template
+│       ├── v0_template_v1.5/ # Modern portfolio template v1.5
+│       └── v0_template_v2.1/ # Modern portfolio template v2.1
 │           └── lib/       # Data transformation adapters
+├── user_web_example/      # Main frontend (Next.js)
+│   ├── app/              # App router pages
+│   └── components/       # React components
 ├── packages/              
-│   └── new-renderer/      # Frontend (Next.js)
+│   └── new-renderer/      # Legacy frontend (not actively used)
 │       └── components/    # React components
 ├── components/            # Shared UI components
 │   ├── aceternity/        # Premium animations
@@ -348,9 +356,10 @@ export const adaptCVData = (cvData: CVData): TemplateData => {
 // 3. Register template in portfolio generator
 // src/api/routes/portfolio_generator.py
 AVAILABLE_TEMPLATES = {
-    "v0_template_1": "/src/templates/v0_template_1",
-    "new-template": "/src/templates/new-template",
+    "v0_template_v1.5": "src/templates/v0_template_v1.5",
+    "v0_template_v2.1": "src/templates/v0_template_v2.1"
 }
+DEFAULT_TEMPLATE = "v0_template_v1.5"
 ```
 
 ### Adding a New API Endpoint
@@ -410,11 +419,17 @@ POST /api/v1/portfolio-expert/generate
 # src/api/routes/portfolio_generator.py
 # Mounted at: /api/v1/portfolio/* (not /api/v1/portfolios/*)
 
-# 1. Create new portfolio
+# 1. Create new portfolio (anonymous access allowed)
+POST /api/v1/portfolio/generate-anonymous/{job_id}
+{
+    "template": "v0_template_v1.5",  # or "v0_template_v2.1"
+    "config": {...}
+}
+
+# 1b. Create new portfolio (authenticated)
 POST /api/v1/portfolio/generate/{job_id}
 {
-    "job_id": "user_cv_id",
-    "template": "v0_template_1",
+    "template": "v0_template_v1.5",
     "config": {...}
 }
 
@@ -447,12 +462,15 @@ POST /api/v1/portfolio/{portfolio_id}/stop
 | SSE connection error | Normal for MVP - using simulated progress instead |
 | PDF not displaying | Check file exists in `data/uploads/` with job_id |
 | Portfolio Expert timeout | Check Claude API rate limits and retry |
-| Sandbox generation fails | Verify Node.js and pnpm available in PATH |
+| Sandbox generation fails | Verify Node.js and npm available in PATH |
 | CV data not loading in template | Check cv-data-adapter.tsx implementation |
 | Multiple portfolio conflicts | Each portfolio uses unique port (4000+) |
 | File preservation issues | Ensure proper session authentication |
 | **CSS not loading / Broken HTML display** | Ensure `postcss.config.mjs` includes both `tailwindcss` AND `autoprefixer`. Clear `.next` cache and restart dev server |
 | **Hydration errors** | Add `suppressHydrationWarning` to elements with dynamic content. Use `dynamic` imports with `ssr: false` for browser-only components |
+| **Next.js binary not found** | npm install issues in sandboxes - switch to npm from pnpm |
+| **Multiple lockfile conflicts** | Clean all lockfiles before installation |
+| **Watchfiles overload (thousands of changes)** | Add .watchmanconfig and uvicorn reload_excludes |
 
 ### Debug Commands
 ```bash
@@ -562,6 +580,32 @@ If you encounter broken HTML display (no styling):
 3. Restart dev server: `pnpm run dev`
 4. Hard refresh browser: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
 
+## 🚀 Quick Fix Reference
+
+### Portfolio Generation Issues
+```bash
+# Issue: Next.js binary not found
+# Fix: Already switched to npm in sandboxes
+
+# Issue: Multiple lockfile conflicts  
+# Fix: We now clean all lockfiles before install
+
+# Issue: Watchfiles detecting thousands of changes
+# Fix: Added .watchmanconfig + uvicorn excludes
+
+# Issue: Path duplication in Next.js check
+# Fix: Use binary directly: [str(next_bin_path), "--version"]
+
+# Issue: Portfolio stuck at 55% progress
+# Fix: Check API response format, use fallback logic
+```
+
+### Performance Tips
+1. **Restart backend with optimizations**: `python main.py` (includes reload excludes)
+2. **Check portfolio health**: `curl http://localhost:2000/api/v1/portfolio/list`
+3. **Monitor sandbox creation**: Look for npm (not pnpm) in logs
+4. **Verify watchfiles**: Should see minimal change detections
+
 ## 🚢 Deployment
 
 ### Local Testing
@@ -630,7 +674,7 @@ python3 src/utils/setup_keychain.py      # Setup credentials
 ## ⚠️ Critical Reminders
 
 1. **ALWAYS** run `pnpm run typecheck` before committing
-2. **NEVER** use npm or yarn - only pnpm
+2. **NEVER** use npm or yarn in main project - only pnpm (sandboxes use npm)
 3. **NEVER** commit API keys - use keychain manager
 4. **ALWAYS** check existing components before creating new ones
 5. Backend runs on port **2000**, not 8000
@@ -682,6 +726,31 @@ CV2WEB-V4/
 3. **Preview in isolation** before user approval
 4. **Export approved code** to final destination
 5. **Clean up sandbox** after completion
+
+### Sandbox-Specific Configuration
+```python
+# portfolio_generator.py - Key differences for sandboxes:
+
+# 1. Use npm instead of pnpm
+install_cmd = ["npm", "install", "--legacy-peer-deps"]
+
+# 2. Clean ALL lockfiles before installation
+for lockfile in [pnpm_lock_path, npm_lock_path, yarn_lock_path]:
+    if lockfile.exists():
+        lockfile.unlink(missing_ok=True)
+
+# 3. Create .watchmanconfig in each sandbox
+watchman_config = {
+    "ignore_dirs": ["node_modules", ".next", ".git", "dist", "build"]
+}
+
+# 4. Start server with npm (not pnpm)
+start_commands = [
+    (["npm", "run", "dev"], "npm run dev"),
+    (["npx", "next", "dev", "-p", str(port)], "npx next dev"),
+    (["node", "node_modules/.bin/next", "dev", "--port", str(port)], "direct node")
+]
+```
 
 ### Claude SDK Best Practices
 - Use persistent memory via Markdown files in `.claude/memory/`
@@ -774,10 +843,36 @@ After CV upload, users are directed to the CV Editor where they can:
 // Authentication handled via X-Session-ID header
 ```
 
+### Authentication API Endpoints
+```python
+# Login with email/password
+POST /api/v1/auth/login
+{
+    "email": str,
+    "password": str
+}
+
+# Register new user
+POST /api/v1/auth/register
+{
+    "email": str,
+    "password": str,
+    "full_name": str
+}
+
+# Logout
+POST /api/v1/auth/logout
+
+# Get current user
+GET /api/v1/auth/me
+Headers: X-Session-ID: <session_id>
+```
+
 ### API Endpoints for CV Management
 ```python
-# Get all user's CVs
+# Get all user's CVs (requires auth)
 GET /api/v1/my-cvs
+Headers: X-Session-ID: <session_id>
 
 # Get specific CV data
 GET /api/v1/cv/{job_id}
@@ -787,6 +882,7 @@ PUT /api/v1/cv/{job_id}
 
 # Download original file
 GET /api/v1/download/{job_id}
+Headers: X-Session-ID: <session_id>
 ```
 
 ### Portfolio Expert API Endpoints (Currently in future_use - not active)
@@ -874,6 +970,53 @@ POST /api/v1/payments/refund
 - Frontend SSE connection ready (`lib/api.ts`)
 - Currently using simulated progress for better UX
 
+## 🔧 Performance Optimizations
+
+### Watchfiles Configuration
+To prevent watchfiles from detecting thousands of changes in sandboxes:
+
+1. **Project-wide .watchmanconfig**:
+```json
+{
+  "ignore_dirs": [
+    "sandboxes",
+    "data/generated_portfolios",
+    "data/uploads",
+    "**/node_modules",
+    "**/.next",
+    "**/dist",
+    "**/build",
+    "**/.git",
+    "venv",
+    "__pycache__",
+    "**/*.pyc",
+    ".pytest_cache",
+    "**/.DS_Store"
+  ]
+}
+```
+
+2. **Uvicorn reload exclusions** (main.py):
+```python
+# Reads from .watchmanconfig for consistency
+def get_reload_excludes():
+    try:
+        import json
+        with open('.watchmanconfig', 'r') as f:
+            config = json.load(f)
+            return config.get('ignore_dirs', [])
+    except:
+        return ["sandboxes/*", "data/*", "**/node_modules/*"]
+
+reload_excludes = get_reload_excludes()
+uvicorn.run(app, reload_excludes=reload_excludes)
+```
+
+### npm vs pnpm in Sandboxes
+- **Main project**: Still uses pnpm
+- **Sandboxes**: Uses npm for better compatibility
+- **Reason**: pnpm workspace conflicts in isolated environments
+
 ## Recent Updates
 
 ### Critical CSS Fix & PostCSS Validation (2025-08-02)
@@ -921,6 +1064,24 @@ POST /api/v1/payments/refund
 - **🔗 API Expansion**: New endpoints for portfolio expert, generation management, and enhanced CV operations
 - **📖 Documentation Enhancement**: Added CV Editor implementation guide and comprehensive API documentation
 
+### Portfolio Generation Stability Improvements (2025-08-04)
+- **🔧 Fixed portfolio_dir Undefined Bug**: Changed from undefined `portfolio_dir` to correct `sandbox_path` in server manager
+- **📦 Switched to npm for Sandboxes**: Better compatibility than pnpm in isolated environments, fixes "Next.js binary not found" errors
+- **🧹 Enhanced Lockfile Cleanup**: Remove ALL lockfiles (pnpm-lock.yaml, package-lock.json, yarn.lock) before installation
+- **🐛 Fixed Path Duplication Bug**: Next.js version check now uses binary directly instead of through node
+- **🛡️ Added Watchfiles Protection**: Created .watchmanconfig to exclude heavy directories from file watching
+- **⚡ Uvicorn Performance**: Dynamic reload_excludes from .watchmanconfig prevents thousands of change detections
+- **📝 Improved Logging**: Next.js version checks now use debug level to reduce noise
+
+### Critical CSP Iframe Fix & Full Pipeline Integration (2025-08-04)
+- **🔗 Connected Full Pipeline**: Integrated CV upload → extraction → portfolio generation with MacBook preview at 60% progress
+- **🐛 Fixed Next.js Module Error**: Resolved "Cannot find module '../server/require-hook'" by implementing clean installation with multiple startup methods
+- **🛡️ Fixed CSP Iframe Blocking**: Discovered middleware.ts was overriding next.config.mjs headers with restrictive `frame-ancestors 'none'`
+- **✅ Three-Layer CSP Fix**: Updated middleware.ts, next.config.mjs, and csp-config.ts to allow `frame-ancestors *` for iframe embedding
+- **🎯 Smart Cross-Origin Handling**: Added intelligent fallback UI for production→localhost scenarios with "Open in New Tab" option
+- **📊 Progress Animation Fix**: Fixed progress bar stuck at 55% by adding fallback logic for different API response formats
+- **🚀 Complete Flow Working**: CV upload → extraction → generation → MacBook display with proper error handling
+
 ### Previous Updates
 - **2025-01-15**: Fixed critical cross-section contamination with advanced classifier
 - **2025-01-15**: Implemented Claude 4 Opus deterministic extraction (temperature 0.0)
@@ -942,4 +1103,4 @@ POST /api/v1/payments/refund
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-01-22 | Version: 4.6*
+*Last updated: 2025-08-04 | Version: 4.8*

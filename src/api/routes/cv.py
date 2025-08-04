@@ -64,7 +64,7 @@ from src.utils.enhanced_sse_logger import EnhancedSSELogger, WorkflowPhase
 from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadResponse, CleanupResponse, UserProfileUpdate
 
 # Import authentication dependency
-from src.api.routes.auth import get_current_user
+from src.api.routes.auth import get_current_user, get_current_user_optional
 
 # ========== PASSWORD HASHING ==========
 # Initialize password context with bcrypt
@@ -456,7 +456,7 @@ async def upload_cv(
             
             if not cv_data:
                 logger.error("❌ CV data extraction returned None")
-                update_cv_upload_status(job_id, 'failed', error_message="Failed to extract CV data - no data returned")
+                update_cv_upload_status(job_id, 'failed')
                 # Return success with job_id even if extraction failed
                 return UploadResponse(
                     status="success",
@@ -770,6 +770,245 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
     )
 
 
+@router.post("/cv/extract/{job_id}")
+async def extract_cv_data_endpoint(
+    job_id: str,
+    current_user_id: Optional[str] = Depends(get_current_user_optional)
+) -> Dict[str, Any]:
+    """
+    Extract CV data from an uploaded file.
+    Supports both authenticated and anonymous users.
+    
+    Args:
+        job_id: The job ID from the upload
+        current_user_id: Optional user ID if authenticated
+        
+    Returns:
+        Extraction status and result
+    """
+    try:
+        # Get CV upload record based on user authentication status
+        cv_upload = None
+        if current_user_id and not current_user_id.startswith("anonymous_"):
+            # For authenticated users, get their uploads and verify ownership
+            uploads = get_user_cv_uploads(current_user_id)
+            for upload in uploads:
+                if upload['job_id'] == job_id:
+                    cv_upload = upload
+                    break
+            if not cv_upload:
+                raise HTTPException(status_code=404, detail="CV upload not found")
+        else:
+            # For anonymous users, we need to construct the upload info
+            # Since we don't have direct DB access, check if file exists
+            import glob
+            BASE_DIR = Path(__file__).parent.parent.parent.parent
+            
+            # Try to find the file with this job_id
+            file_pattern = str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}*")
+            matching_files = glob.glob(file_pattern, recursive=True)
+            
+            if not matching_files:
+                raise HTTPException(status_code=404, detail="CV upload not found")
+            
+            # Use the first matching file
+            file_path = matching_files[0]
+            file_extension = Path(file_path).suffix
+            cv_upload = {
+                'job_id': job_id,
+                'file_path': file_path,
+                'file_type': file_extension,
+                'status': 'uploaded',
+                'cv_data': None
+            }
+        
+        # Check if already extracted
+        if cv_upload['status'] == 'completed' and cv_upload.get('cv_data'):
+            import json
+            return {
+                "status": "completed",
+                "cv_data": json.loads(cv_upload['cv_data'])
+            }
+        
+        # Extract text from file
+        file_path = cv_upload.get('file_path')
+        if not file_path:
+            # Construct file path if not in cv_upload
+            BASE_DIR = Path(__file__).parent.parent.parent.parent
+            file_extension = cv_upload['file_type'].lower()
+            file_path = str(BASE_DIR / "data" / "uploads" / f"{job_id}{file_extension}")
+            
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Update status to processing
+        update_cv_upload_status(job_id, 'processing')
+        
+        # Extract text
+        text = text_extractor.extract_text(str(file_path))
+        
+        if not text or len(text.strip()) < 10:
+            update_cv_upload_status(job_id, 'failed')
+            raise HTTPException(status_code=400, detail="No text content found in file")
+        
+        # Extract structured data using Claude 4 Opus
+        logger.info(f"🤖 Extracting CV data for job {job_id} using Claude 4 Opus")
+        cv_data = await data_extractor.extract_cv_data(text)
+        
+        if cv_data:
+            # Store extraction result
+            import json
+            cv_data_json = json.dumps(cv_data.model_dump_nullable())
+            update_cv_upload_status(job_id, 'completed', cv_data_json)
+            
+            return {
+                "status": "completed",
+                "cv_data": cv_data.model_dump_nullable()
+            }
+        else:
+            update_cv_upload_status(job_id, 'failed')
+            raise HTTPException(status_code=500, detail="Failed to extract CV data")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"CV extraction error for job {job_id}: {e}")
+        update_cv_upload_status(job_id, 'failed')
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
+
+@router.post("/upload-anonymous", response_model=UploadResponse)
+async def upload_cv_anonymous(
+    file: UploadFile = File(...),
+    current_user_id: Optional[str] = Depends(get_current_user_optional)
+) -> UploadResponse:
+    """
+    Upload and process a CV file anonymously (for demo purposes).
+    
+    Authentication is optional - allows anonymous users to try the service.
+    
+    Args:
+        file: The CV file (PDF, DOCX, TXT, images, etc.)
+        current_user_id: Optional user ID if authenticated
+        
+    Returns:
+        Job details including job_id
+    """
+    # Generate anonymous user ID if not authenticated
+    if not current_user_id:
+        current_user_id = f"anonymous_{uuid.uuid4().hex[:12]}"
+        logger.info(f"Anonymous user uploading file: {file.filename}")
+    else:
+        logger.info(f"Authenticated user {current_user_id} uploading file: {file.filename}")
+    
+    # === FILE VALIDATION ===
+    # Add timeout protection
+    import asyncio
+    try:
+        file_content = await asyncio.wait_for(file.read(), timeout=config.UPLOAD_TIMEOUT)
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=408, detail="File upload timed out. Please check your connection and try again.")
+    
+    if not file_content:
+        raise HTTPException(status_code=400, detail="File is empty")
+    
+    # Check file size
+    if len(file_content) > config.MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413, 
+            detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024:.0f}MB"
+        )
+    
+    # Check file type
+    file_extension = Path(file.filename).suffix.lower()
+    if file_extension not in config.ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"File type {file_extension} not supported. Allowed types: {', '.join(config.ALLOWED_EXTENSIONS)}"
+        )
+    
+    # === CREATE JOB ID & SAVE FILE ===
+    job_id = str(uuid.uuid4())
+    
+    # Ensure user directory exists
+    user_dir = os.path.join(config.UPLOAD_DIR, current_user_id)
+    os.makedirs(user_dir, exist_ok=True)
+    
+    # Build file path
+    file_path = os.path.join(user_dir, f"{job_id}_{file.filename}")
+    
+    # Save file
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+    
+    logger.info(f"File saved for job {job_id}: {file_path}")
+    
+    # === CREATE CV UPLOAD RECORD ===
+    create_cv_upload(
+        user_id=current_user_id,
+        job_id=job_id,
+        filename=file.filename,
+        file_type=file_extension,
+        file_hash=None  # Optional parameter
+    )
+    
+    # === CV PROCESSING (SAME AS REGULAR UPLOAD) ===
+    try:
+        # Extract text from file
+        text = text_extractor.extract_text(file_path)
+        
+        if not text or len(text.strip()) < 10:
+            # Update status to failed
+            update_cv_upload_status(job_id, 'failed')
+            raise HTTPException(status_code=400, detail="File appears to be empty or unreadable")
+        
+        # Extract structured data from text using Claude 4 Opus
+        logger.info(f"🤖 Extracting structured data using Claude 4 Opus from {len(text)} characters of text")
+        try:
+            cv_data = await data_extractor.extract_cv_data(text)
+            
+            if not cv_data:
+                logger.error("❌ CV data extraction returned None")
+                update_cv_upload_status(job_id, 'failed')
+                # Return success with job_id even if extraction failed
+                return UploadResponse(
+                    message="File uploaded but CV extraction failed. Please try again.",
+                    job_id=job_id
+                )
+            
+            sections_count = len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])
+            logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
+            
+            # Save CV data to database
+            import json
+            cv_data_json = json.dumps(cv_data.model_dump_nullable())
+            update_cv_upload_status(job_id, 'completed', cv_data_json)
+            
+            logger.info(f"✅ Anonymous CV upload and extraction completed for job {job_id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to extract CV data: {e}")
+            import traceback
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+            # Mark as failed but still return job_id
+            update_cv_upload_status(job_id, 'failed')
+            return UploadResponse(
+                message="File uploaded but CV extraction failed. Please try again.",
+                job_id=job_id
+            )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"CV processing failed for job {job_id}: {e}")
+        update_cv_upload_status(job_id, 'failed')
+        raise HTTPException(status_code=500, detail=f"CV processing failed: {str(e)}")
+    
+    # === RETURN SUCCESS ===
+    return UploadResponse(
+        message="CV uploaded successfully", 
+        job_id=job_id
+    )
+
 @router.post("/upload-multiple", response_model=UploadResponse)
 async def upload_multiple_files(
     files: List[UploadFile] = File(...),
@@ -898,7 +1137,7 @@ async def process_multiple_files(job_id: str, file_paths: List[str], user_id: st
                 logger.error(f"Failed to extract text from {file_path}: {e}")
         
         if not combined_text.strip():
-            update_cv_upload_status(job_id, 'failed', error_message="No text content found in files")
+            update_cv_upload_status(job_id, 'failed')
             return
         
         # Extract CV data from combined text
@@ -912,12 +1151,12 @@ async def process_multiple_files(job_id: str, file_paths: List[str], user_id: st
             update_cv_upload_status(job_id, 'completed', cv_data_json)
             logger.info(f"✅ Multi-file CV extraction completed for job {job_id}")
         else:
-            update_cv_upload_status(job_id, 'failed', error_message="Failed to extract CV data")
+            update_cv_upload_status(job_id, 'failed')
             logger.error(f"Failed to extract CV data for job {job_id}")
             
     except Exception as e:
         logger.error(f"Multi-file processing error for job {job_id}: {e}")
-        update_cv_upload_status(job_id, 'failed', error_message=str(e))
+        update_cv_upload_status(job_id, 'failed')
 
 
 @router.get("/download/{job_id}/all")

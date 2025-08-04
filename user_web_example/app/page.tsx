@@ -29,8 +29,29 @@ import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
-import DragDropUpload from "@/components/drag-drop-upload"
 import dynamic from 'next/dynamic'
+import { uploadFile, API_BASE_URL } from "@/lib/api"
+
+// Progress animation constants
+const PROGRESS_MILESTONES = {
+  UPLOAD_START: 5,
+  UPLOAD_COMPLETE: 20,
+  EXTRACTION_START: 35,
+  EXTRACTION_COMPLETE: 40,
+  GENERATION_START: 55,
+  GENERATION_COMPLETE: 60,
+} as const
+
+// Timing constants (in milliseconds)
+const TIMINGS = {
+  UPLOAD_ANIMATION: 1500,
+  EXTRACTION_ANIMATION: 8000,
+  GENERATION_ANIMATION: 12000,
+  FINAL_ANIMATION: 1000,
+  PORTFOLIO_DISPLAY_DELAY: 2000,
+  IFRAME_TIMEOUT_LOCAL: 10000,
+  IFRAME_TIMEOUT_REMOTE: 5000,
+} as const
 
 // Client-only RoughNotation to prevent hydration issues
 const ClientRoughNotation = dynamic(
@@ -68,6 +89,121 @@ const TypewriterText = ({ text, delay, className }: { text: string; delay: numbe
         cursor: "",
         }}
       />
+    </div>
+  )
+}
+
+// Iframe component with fallback handling and timeout
+const IframeWithFallback = ({ src, title, className }: { src: string; title: string; className: string }) => {
+  const [loadError, setLoadError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [showFallback, setShowFallback] = useState(false)
+  
+  useEffect(() => {
+    // For localhost URLs, show fallback immediately since cross-origin won't work from production
+    const isLocalhost = src.includes('localhost')
+    const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
+    
+    if (isLocalhost && isProduction) {
+      console.log('🌐 Cross-origin detected: production → localhost, showing fallback immediately')
+      setLoadError(true)
+      setIsLoading(false)
+      setShowFallback(true)
+      return
+    }
+    
+    // Set a timeout to show fallback if iframe doesn't load
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('⏰ Iframe timeout - showing fallback')
+        setLoadError(true)
+        setIsLoading(false)
+        setShowFallback(true)
+      }
+    }, isLocalhost ? TIMINGS.IFRAME_TIMEOUT_LOCAL : TIMINGS.IFRAME_TIMEOUT_REMOTE)
+    
+    return () => clearTimeout(timeout)
+  }, [isLoading, src])
+  
+  return (
+    <div className="relative w-full h-full">
+      {!loadError && !showFallback && (
+        <iframe
+          src={src}
+          title={title}
+          className={className}
+          style={{ backgroundColor: 'white' }}
+          onLoad={() => {
+            console.log('✅ Iframe loaded successfully')
+            setIsLoading(false)
+          }}
+          onError={() => {
+            console.error('❌ Iframe failed to load')
+            setLoadError(true)
+            setIsLoading(false)
+            setShowFallback(true)
+          }}
+          // Enhanced security and compatibility settings for localhost
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox allow-top-navigation"
+          referrerPolicy="no-referrer-when-downgrade"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        />
+      )}
+      
+      {/* Loading indicator */}
+      {isLoading && !loadError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white">
+          <div className="text-center">
+            <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your portfolio...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Error/Timeout fallback */}
+      {(loadError || showFallback) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+          <div className="text-center p-8 max-w-md">
+            <div className="mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <span className="text-2xl text-white">🚀</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Portfolio Generated Successfully!</h3>
+              <p className="text-gray-600 mb-6">
+                Your portfolio is running on <span className="font-mono text-sm bg-gray-200 px-1 rounded">localhost:4000</span><br/>
+                <span className="text-sm">Browser security prevents embedding localhost in frames</span>
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <a
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Open Portfolio in New Tab ↗
+              </a>
+              
+              <p className="text-xs text-gray-500">
+                Your portfolio is ready and running! Click above to view it.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Direct link overlay - always visible */}
+      <div className="absolute top-4 right-4 z-10">
+        <a 
+          href={src} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="bg-black/70 text-white px-3 py-1 rounded text-sm hover:bg-black/90 transition-colors backdrop-blur-sm"
+        >
+          Open in New Tab ↗
+        </a>
+      </div>
     </div>
   )
 }
@@ -489,7 +625,17 @@ const SimpleTypewriter = ({
 }
 
 // Vertical Progress Bar Component - Modern Glassmorphism Design
-const VerticalProgressBar = ({ onProgressChange }: { onProgressChange?: (percentage: number) => void }) => {
+const VerticalProgressBar = ({ 
+  onProgressChange, 
+  externalProgress,
+  isClickable = false,
+  onCircleClick
+}: { 
+  onProgressChange?: (percentage: number) => void
+  externalProgress?: number
+  isClickable?: boolean
+  onCircleClick?: () => void
+}) => {
   const [percentage, setPercentage] = useState(0)
   const [isClient, setIsClient] = useState(false)
   
@@ -498,6 +644,13 @@ const VerticalProgressBar = ({ onProgressChange }: { onProgressChange?: (percent
   }, [])
   
   useEffect(() => {
+    // If external progress is provided, use it instead of time-based progress
+    if (externalProgress !== undefined) {
+      setPercentage(externalProgress)
+      onProgressChange?.(externalProgress)
+      return
+    }
+    
     if (!isClient) return
     
     const startTime = Date.now()
@@ -510,13 +663,13 @@ const VerticalProgressBar = ({ onProgressChange }: { onProgressChange?: (percent
       setPercentage(newPercentage)
       onProgressChange?.(newPercentage)
       
-      if (progress < 60) {
+      if (progress < PROGRESS_MILESTONES.GENERATION_COMPLETE) {
         requestAnimationFrame(updateProgress)
       }
     }
     
     requestAnimationFrame(updateProgress)
-  }, [onProgressChange, isClient])
+  }, [onProgressChange, isClient, externalProgress])
   
   return (
     <div className="relative flex items-center justify-center h-full">
@@ -588,7 +741,16 @@ const VerticalProgressBar = ({ onProgressChange }: { onProgressChange?: (percent
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 blur-xl opacity-70" />
           
           {/* Glass button */}
-          <div className="relative w-full h-full rounded-full bg-white/30 backdrop-blur-lg border-2 border-white/40 shadow-2xl flex items-center justify-center">
+          <div 
+            className={`relative w-full h-full rounded-full bg-white/30 backdrop-blur-lg border-2 border-white/40 shadow-2xl flex items-center justify-center ${
+              isClickable && percentage >= 60 ? 'cursor-pointer hover:scale-110 transition-transform' : ''
+            }`}
+            onClick={() => {
+              if (isClickable && percentage >= 60 && onCircleClick) {
+                onCircleClick()
+              }
+            }}
+          >
             {/* Inner glass layer */}
             <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/30 to-white/10" />
             
@@ -596,6 +758,22 @@ const VerticalProgressBar = ({ onProgressChange }: { onProgressChange?: (percent
             <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
               {percentage}%
             </span>
+            
+            {/* Click indicator when ready */}
+            {isClickable && percentage >= 60 && (
+              <motion.div
+                className="absolute inset-0 rounded-full border-2 border-white"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.5, 0, 0.5]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            )}
           </div>
         </motion.div>
       </div>
@@ -604,7 +782,13 @@ const VerticalProgressBar = ({ onProgressChange }: { onProgressChange?: (percent
 }
 
 // CV2Web Demo Component - Mobile-First WOW Experience
-function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; setShowPricing: (value: boolean) => void }) {
+function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick }: { 
+  onOpenModal: () => void; 
+  setShowPricing: (value: boolean) => void;
+  uploadedFile: File | null;
+  setUploadedFile: (file: File | null) => void;
+  onFileClick: (file: File) => void;
+}) {
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
   >("typewriter")
@@ -615,7 +799,6 @@ function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; 
   const [isHydrated, setIsHydrated] = useState(false)
   const [showStrikeThrough, setShowStrikeThrough] = useState(false)
   const [showCVCard, setShowCVCard] = useState(true)
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [hasScrolledHero, setHasScrolledHero] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -623,6 +806,14 @@ function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; 
   const headlineRef = useRef<HTMLDivElement>(null)
   const [headlineWidth, setHeadlineWidth] = useState<number | undefined>(undefined)
   const { isAuthenticated } = useAuthContext()
+  
+  // Backend processing states
+  const [portfolioUrl, setPortfolioUrl] = useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [processingError, setProcessingError] = useState<string | null>(null)
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null)
+  const [realProgress, setRealProgress] = useState(0)
+  const [showPortfolioInMacBook, setShowPortfolioInMacBook] = useState(false)
   
   // Loading sequence states for mobile
   const [loadingStep, setLoadingStep] = useState(0) // 0: backgrounds, 1: headline, 2: subheadline, 3: cv image
@@ -743,8 +934,143 @@ function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; 
     }
   }, [stage])
 
-  const handleStartDemo = () => {
-    console.log('🚀 handleStartDemo called! Current isPlaying:', isPlaying, 'stage:', stage)
+  // Smooth progress animation helper with integer steps
+  const animateProgress = (from: number, to: number, duration: number = 1000) => {
+    const startTime = Date.now()
+    const diff = to - from
+    let lastIntegerProgress = Math.floor(from)
+    
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+      const currentProgress = from + (diff * easeOutQuart)
+      
+      // Only update if we've reached a new integer value
+      const currentInteger = Math.floor(currentProgress)
+      if (currentInteger !== lastIntegerProgress && currentInteger <= to) {
+        setRealProgress(currentInteger)
+        lastIntegerProgress = currentInteger
+      }
+      
+      // Continue animation until we reach the target
+      if (currentProgress < to) {
+        requestAnimationFrame(updateProgress)
+      } else {
+        // Ensure we set the final value
+        setRealProgress(Math.floor(to))
+      }
+    }
+    
+    requestAnimationFrame(updateProgress)
+  }
+
+  // Process portfolio generation in the background
+  const processPortfolioGeneration = async (file: File) => {
+    try {
+      setIsProcessing(true)
+      setProcessingError(null)
+      
+      // Step 1: Upload file (0-20%)
+      console.log('📤 Uploading file...', file.name, file.size, 'bytes')
+      animateProgress(0, PROGRESS_MILESTONES.UPLOAD_START, 500) // Quick start
+      
+      const uploadResponse = await uploadFile(file)
+      const jobId = uploadResponse.job_id
+      setCurrentJobId(jobId)
+      animateProgress(PROGRESS_MILESTONES.UPLOAD_START, PROGRESS_MILESTONES.UPLOAD_COMPLETE, TIMINGS.UPLOAD_ANIMATION)
+      console.log('✅ Upload complete, job_id:', jobId)
+      
+      // Step 2: Extract CV data (20-40%)
+      console.log('🔍 Extracting CV data...')
+      // Start gradual progress while extraction happens
+      animateProgress(PROGRESS_MILESTONES.UPLOAD_COMPLETE, PROGRESS_MILESTONES.EXTRACTION_START, TIMINGS.EXTRACTION_ANIMATION)
+      
+      const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
+        method: 'POST',
+        headers: {
+          'X-Session-ID': localStorage.getItem('cv2web_session_id') || ''
+        }
+      })
+      
+      if (!extractResponse.ok) {
+        throw new Error('Failed to extract CV data')
+      }
+      animateProgress(PROGRESS_MILESTONES.EXTRACTION_START, PROGRESS_MILESTONES.EXTRACTION_COMPLETE, 800)
+      console.log('✅ CV extraction complete')
+      
+      // Step 3: Generate portfolio (40-60%)
+      console.log('🎨 Generating portfolio...')
+      const templates = ['v0_template_v1.5', 'v0_template_v2.1']
+      const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
+      console.log('🎯 Selected template:', randomTemplate)
+      
+      // Start slow progress during portfolio generation
+      animateProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE, PROGRESS_MILESTONES.GENERATION_START, TIMINGS.GENERATION_ANIMATION)
+      
+      const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate-anonymous/${jobId}`
+      const generateResponse = await fetch(generateUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-ID': localStorage.getItem('cv2web_session_id') || ''
+        },
+        body: JSON.stringify({
+          template: randomTemplate
+        })
+      })
+      
+      if (!generateResponse.ok) {
+        const errorData = await generateResponse.json().catch(() => ({ detail: `HTTP ${generateResponse.status}` }))
+        console.error('❌ Portfolio generation failed:', errorData)
+        throw new Error(errorData.detail || 'Failed to generate portfolio')
+      }
+      
+      const generateData = await generateResponse.json()
+      
+      if (generateData.portfolio_url) {
+        setPortfolioUrl(generateData.portfolio_url)
+        animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, TIMINGS.FINAL_ANIMATION)
+        console.log('✅ Portfolio generated successfully:', generateData.portfolio_url)
+        
+        // Auto-show portfolio in MacBook when ready (after a brief delay)
+        setTimeout(() => {
+          setShowPortfolioInMacBook(true)
+          console.log('🖥️ Auto-showing portfolio in MacBook frame')
+        }, TIMINGS.PORTFOLIO_DISPLAY_DELAY)
+        
+      } else {
+        console.error('❌ No portfolio URL in response:', generateData)
+        // Check if generation was successful but URL format is different
+        if (generateData.success && generateData.portfolio_id) {
+          // Construct URL from available data - use the actual generated URL if available
+          const baseUrl = generateData.portfolio_url || 'http://localhost:4000'
+          setPortfolioUrl(baseUrl)
+          animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, TIMINGS.FINAL_ANIMATION)
+          console.log('✅ Portfolio generated successfully (constructed URL):', baseUrl)
+          
+          setTimeout(() => {
+            setShowPortfolioInMacBook(true)
+            console.log('🖥️ Auto-showing portfolio in MacBook frame')
+          }, TIMINGS.PORTFOLIO_DISPLAY_DELAY)
+        } else {
+          // Only throw error if generation actually failed
+          throw new Error('Portfolio generation succeeded but no URL returned')
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Processing error:', error)
+      setProcessingError(error instanceof Error ? error.message : 'An error occurred')
+      setIsProcessing(false)
+      // Show error in UI
+      alert(`Error: ${error instanceof Error ? error.message : 'Processing failed'}`)
+    }
+  }
+  
+  const handleStartDemo = async () => {
     
     // Reset everything to initial state before starting
     setStage("typewriter")
@@ -752,9 +1078,17 @@ function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; 
     setShowNewTypewriter(false)
     setShowStrikeThrough(false)
     setShowCVCard(true)
+    setPortfolioUrl(null)
+    setProcessingError(null)
+    setRealProgress(0)
     
     // Start the animation
     setIsPlaying(true)
+    
+    // Start backend processing in parallel
+    if (uploadedFile) {
+      processPortfolioGeneration(uploadedFile)
+    }
   }
 
   const handleFileSelect = (file: File) => {
@@ -765,8 +1099,9 @@ function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; 
   }
   
   const handleFileClick = (file: File) => {
-    // This is called when user clicks on their uploaded file card
-    // Now we start the demo animation
+    // When CV card is clicked, start the demo with real backend processing
+    console.log('🎯 CV card clicked, starting demo with file:', file.name)
+    setUploadedFile(file)
     handleStartDemo()
   }
 
@@ -1070,7 +1405,18 @@ function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; 
                       className="flex items-center w-full"
                       style={{ height: "400px", paddingLeft: "120px" }} // Move progress bar to center above both buttons
                     >
-                      <VerticalProgressBar onProgressChange={setProgressBarPercentage} />
+                      <VerticalProgressBar 
+                        onProgressChange={setProgressBarPercentage}
+                        externalProgress={realProgress}
+                        isClickable={true}
+                        onCircleClick={() => {
+                          if (portfolioUrl && realProgress >= 60) {
+                            // Load portfolio in MacBook iframe
+                            console.log('🎯 Loading portfolio in MacBook:', portfolioUrl)
+                            setShowPortfolioInMacBook(true)
+                          }
+                        }}
+                      />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -1273,18 +1619,68 @@ function CV2WebDemo({ onOpenModal, setShowPricing }: { onOpenModal: () => void; 
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.8, delay: 1.6, ease: "easeOut" }}
                         >
-                          {progressBarPercentage >= 60 ? (
-                            // Phase 5: Gate-kept website preview (when progress reaches 60%)
-                            <GateKeptWebsitePreview 
-                              uploadedFile={uploadedFile}
-                              onScrollAttempt={() => {
-                                if (!isAuthenticated) {
-                                  onOpenModal() // Show auth modal for non-authenticated users
-                                } else {
-                                  setHasScrolledHero(true) // Mark as scrolled for authenticated users
-                                }
-                              }}
-                            />
+                          
+                          {(showPortfolioInMacBook || realProgress >= 60) && portfolioUrl ? (
+                            // Show the generated portfolio automatically when ready or when clicked
+                            <div className="absolute inset-0 w-full h-full bg-white z-50">
+                              <IframeWithFallback 
+                                src={portfolioUrl}
+                                title="Generated Portfolio"
+                                className="w-full h-full border-0"
+                              />
+                            </div>
+                          ) : progressBarPercentage >= 60 || realProgress >= 60 ? (
+                            // Phase 5: Show portfolio URL info and debugging when ready
+                            <div className="text-center p-8">
+                              <div className="mb-4 text-sm text-gray-600">
+                                Debug Info:<br/>
+                                Progress: {realProgress}%<br/>
+                                Portfolio URL: {portfolioUrl || 'Not set'}<br/>
+                                Show Portfolio: {showPortfolioInMacBook ? 'Yes' : 'No'}
+                              </div>
+                              
+                              {portfolioUrl && (
+                                <div className="mb-4">
+                                  <button
+                                    onClick={() => {
+                                      console.log('🔧 Manual portfolio show triggered')
+                                      setShowPortfolioInMacBook(true)
+                                    }}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                  >
+                                    Force Show Portfolio
+                                  </button>
+                                  <br/>
+                                  <a 
+                                    href={portfolioUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 underline text-sm mt-2 inline-block"
+                                  >
+                                    Open Portfolio in New Tab
+                                  </a>
+                                </div>
+                              )}
+                              
+                              <motion.div
+                                animate={{
+                                  scale: [1, 1.05, 1]
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: "easeInOut"
+                                }}
+                                className="inline-block"
+                              >
+                                <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                                  Your portfolio is ready! 🎉
+                                </h3>
+                                <p className="text-gray-600">
+                                  Click the <span className="font-bold text-blue-600">60%</span> button to preview
+                                </p>
+                              </motion.div>
+                            </div>
                           ) : (
                             // Phase 3C: Video carousel (until progress reaches 60%)
                             <VideoCarousel />
@@ -1900,6 +2296,7 @@ export default function Home() {
   const [showDashboard, setShowDashboard] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [droppedFile, setDroppedFile] = useState<File | null>(null)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [hasTriggeredPhase6Modal, setHasTriggeredPhase6Modal] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   
@@ -1972,6 +2369,9 @@ export default function Home() {
     if (droppedFile) {
       // Go directly to upload with the file
       setShowUpload(true)
+    } else if (uploadedFile) {
+      // If we have an uploaded file from CV card click, go to processing
+      setShowProcessing(true)
     } else {
       // Normal flow - go to dashboard
       setShowDashboard(true)
@@ -1980,6 +2380,11 @@ export default function Home() {
 
   const handleAuthClose = () => {
     setShowAuthModal(false)
+  }
+
+  const handleCVCardClick = (file: File) => {
+    // The CV2WebDemo component will handle everything internally
+    // This is just a placeholder for the prop
   }
 
   const handleLogout = () => {
@@ -2184,7 +2589,13 @@ export default function Home() {
       />
       <section id="hero" className="pt-16 relative min-h-screen">
         <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-white/50 to-gray-100 z-20"></div>
-        <CV2WebDemo onOpenModal={handleOpenModal} setShowPricing={setShowPricing} />
+        <CV2WebDemo 
+          onOpenModal={handleOpenModal} 
+          setShowPricing={setShowPricing}
+          uploadedFile={uploadedFile}
+          setUploadedFile={setUploadedFile}
+          onFileClick={handleCVCardClick}
+        />
       </section>
       <section id="demo" className="min-h-screen">
         <SeeTheDifference onOpenModal={handleOpenModal} setShowPricing={setShowPricing} />
@@ -2314,9 +2725,16 @@ export default function Home() {
       {/* Processing Page */}
       <ProcessingPage
         isOpen={showProcessing}
+        file={uploadedFile}
         onComplete={handleProcessingComplete}
         onPlanRequired={handlePlanRequired}
         isPostPayment={isPostPayment}
+        onAuthRequired={() => {
+          console.log('Auth required after scrolling portfolio preview')
+          if (!isAuthenticated) {
+            setShowAuthModal(true)
+          }
+        }}
       />
 
       {/* Pricing Modal */}

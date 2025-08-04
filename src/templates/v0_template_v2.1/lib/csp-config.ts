@@ -13,7 +13,7 @@ export const CSP_CONFIGS = {
     'object-src': ["'none'"],
     'base-uri': ["'self'"],
     'form-action': ["'self'"],
-    'frame-ancestors': ["'none'"],
+    'frame-ancestors': ["*"],
   },
 
   // Balanced CSP (recommended for this portfolio)
@@ -27,7 +27,7 @@ export const CSP_CONFIGS = {
     'object-src': ["'none'"],
     'base-uri': ["'self'"],
     'form-action': ["'self'"],
-    'frame-ancestors': ["'none'"],
+    'frame-ancestors': ["*"],
   },
 
   // Relaxed CSP for development
@@ -41,7 +41,7 @@ export const CSP_CONFIGS = {
     'object-src': ["'none'"],
     'base-uri': ["'self'"],
     'form-action': ["'self'"],
-    'frame-ancestors': ["'none'"],
+    'frame-ancestors': ["*"],
   }
 }
 
@@ -62,7 +62,7 @@ export function getCSPConfig() {
 // Additional security headers
 export const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
+  // X-Frame-Options removed to allow iframe embedding
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',

@@ -1,0 +1,296 @@
+{
+  "hero": {
+    "fullName": "RAN LOTAN",
+    "professionalTitle": "System Engineer",
+    "summaryTagline": "Experienced Full-Stack Software Engineer with 11+ years building scalable web applications. Led architecture redesign that improved performance by 300%. Contributed to open-source projects with 10k+ GitHub stars. Expert in cloud infrastructure and microservices.",
+    "profilePhotoUrl": "/placeholder.svg?height=160&width=160"
+  },
+  "contact": {
+    "email": "email@email.com",
+    "phone": "(541) 754-3010",
+    "location": {
+      "city": "Los Angeles",
+      "state": "California",
+      "country": "United States"
+    },
+    "professionalLinks": [
+      {
+        "platform": "Linkedin",
+        "url": "https://placeholder.url/linkedin"
+      },
+      {
+        "platform": "Pinterest",
+        "url": "https://placeholder.url/pinterest"
+      },
+      {
+        "platform": "Behance",
+        "url": "https://placeholder.url/behance"
+      },
+      {
+        "platform": "Portfolio",
+        "url": "https://placeholder.url/portfolio"
+      }
+    ],
+    "availability": "Available for Immediate Start"
+  },
+  "summary": {
+    "sectionTitle": "Professional Summary",
+    "summaryText": "Experienced System Engineer with 11+ years designing and implementing complex infrastructure solutions. Led system architecture redesign that improved performance by 300% and reduced infrastructure costs by 40%. Strong expertise in distributed systems, cloud infrastructure, and automation. Passionate about system reliability, security, and mentoring junior engineers.",
+    "yearsOfExperience": 11,
+    "keySpecializations": ["Distributed Systems", "Cloud Architecture", "Full-Stack Development"],
+    "careerHighlights": [
+      "Led architecture redesign that improved system performance by 300%",
+      "Built microservices handling 50M+ requests daily",
+      "Contributed to open-source projects with 10k+ GitHub stars",
+      "Reduced cloud infrastructure costs by 40% through optimization",
+      "Mentored 15+ junior developers to senior positions"
+    ]
+  },
+  "experience": {
+    "sectionTitle": "Experience",
+    "experienceItems": [
+      {
+        "jobTitle": "Senior System Engineer",
+        "companyName": "Netflix",
+        "location": { "city": "San Francisco", "country": "United States" },
+        "dateRange": { "startDate": "January 2017", "endDate": "July 2021" },
+        "responsibilitiesAndAchievements": [
+          "Led development of recommendation engine serving 200M+ users globally.",
+          "Architected microservices infrastructure handling 50M+ requests daily.",
+          "Reduced system latency by 60% through performance optimization."
+        ]
+      },
+      {
+        "jobTitle": "Full Stack Developer",
+        "companyName": "Amazon",
+        "location": { "city": "Seattle", "country": "United States" },
+        "dateRange": { "startDate": "January 2014", "endDate": "December 2018" },
+        "responsibilitiesAndAchievements": [
+          "Built scalable APIs for AWS marketplace serving millions of customers.",
+          "Implemented CI/CD pipelines reducing deployment time by 75%.",
+          "Mentored 5 junior developers and led code review sessions."
+        ]
+      },
+      {
+        "jobTitle": "Software Developer",
+        "companyName": "Microsoft",
+        "location": { "city": "Redmond", "country": "United States" },
+        "dateRange": { "startDate": "June 2012", "endDate": "December 2013" },
+        "responsibilitiesAndAchievements": [
+          "Developed features for Azure cloud platform used by enterprise customers.",
+          "Improved code coverage from 45% to 85% through comprehensive testing.",
+          "Contributed to open-source .NET framework components."
+        ]
+      },
+      {
+        "jobTitle": "Software Engineering Intern",
+        "companyName": "Google",
+        "location": { "city": "Mountain View", "country": "United States" },
+        "dateRange": { "startDate": "May 2011", "endDate": "August 2011" },
+        "responsibilitiesAndAchievements": [
+          "Built internal tools for developer productivity using Python and React.",
+          "Participated in code reviews and learned best practices from senior engineers.",
+          "Implemented features that improved build times by 20%."
+        ]
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "Education",
+    "educationItems": [
+      {
+        "degree": "Bachelor of Science",
+        "fieldOfStudy": "Computer Science",
+        "institution": "Stanford University",
+        "location": { "city": "Stanford" },
+        "dateRange": { "startDate": "2008", "endDate": "2012" },
+        "honors": ["Dean's List - 3 semesters", "ACM Programming Competition Winner 2011"]
+      },
+      {
+        "degree": "Master of Science",
+        "fieldOfStudy": "Software Engineering",
+        "institution": "Carnegie Mellon University",
+        "location": { "city": "Pittsburgh" },
+        "dateRange": { "startDate": "2012", "endDate": "2014" }
+      },
+      {
+        "degree": "Certificate Program",
+        "fieldOfStudy": "Digital Fashion Pro",
+        "institution": "Parsons School of Design",
+        "location": { "city": "Online" },
+        "dateRange": { "startDate": "Summer 2022", "endDate": "" }
+      },
+      {
+        "degree": "Short Course",
+        "fieldOfStudy": "Draping and Experimental Cutting",
+        "institution": "Central Saint Martins",
+        "location": { "city": "London" },
+        "dateRange": { "startDate": "Summer 2019", "endDate": "" }
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "Skills",
+    "skillCategories": [
+      {
+        "categoryName": "Programming Languages",
+        "skills": ["JavaScript/TypeScript", "Python", "Java", "Go"]
+      },
+      {
+        "categoryName": "Backend Development",
+        "skills": ["Node.js", "Django", "GraphQL", "REST APIs"]
+      },
+      {
+        "categoryName": "Frontend Development",
+        "skills": ["React/Next.js", "Vue.js", "CSS/Tailwind", "WebGL/Three.js"]
+      },
+      {
+        "categoryName": "Cloud & DevOps",
+        "skills": ["AWS/GCP", "Docker/Kubernetes", "CI/CD", "Terraform"]
+      },
+      { "categoryName": "Tools & Version Control", "skills": ["Git/GitHub", "VS Code", "JIRA", "Postman"] },
+      {
+        "categoryName": "Security & Testing",
+        "skills": ["Jest/Cypress", "Security Best Practices", "Penetration Testing", "Code Review"]
+      }
+    ]
+  },
+  "projects": {
+    "sectionTitle": "Projects",
+    "projectItems": [
+      {
+        "title": "E-Commerce Platform Microservices",
+        "description": "Built scalable microservices architecture handling 50M+ daily transactions with 99.9% uptime using Node.js and Kubernetes.",
+        "projectUrl": "#"
+      },
+      {
+        "title": "Real-time Analytics Dashboard",
+        "description": "Developed React-based dashboard with WebSocket integration processing 100k+ events/second for business intelligence.",
+        "projectUrl": "#"
+      },
+      {
+        "title": "Open Source GraphQL Framework",
+        "description": "Created and maintain GraphQL framework with 10k+ GitHub stars, used by 500+ companies worldwide.",
+        "projectUrl": "#"
+      },
+      {
+        "title": "AI-Powered Code Review Tool",
+        "description": "Built ML-based tool that automatically detects code quality issues and suggests improvements, reducing review time by 40%.",
+        "projectUrl": "#"
+      }
+    ]
+  },
+  "achievements": {
+    "sectionTitle": "Key Achievements",
+    "achievements": [
+      { "value": "Tech Lead of the Year", "label": "Recognized as", "timeframe": "2022" },
+      { "value": "300%", "label": "performance improvement", "contextOrDetail": "through system architecture redesign" },
+      { "value": "40%", "label": "infrastructure costs reduced", "contextOrDetail": "through cloud optimization" },
+      { "value": "15 engineers", "label": "Led team of", "contextOrDetail": "across 3 continents" },
+      {
+        "value": "Best Open Source Contributor",
+        "label": "Awarded",
+        "contextOrDetail": "by GitHub Universe",
+        "timeframe": "2021"
+      },
+      {
+        "value": "Technical Speaker",
+        "label": "Featured at",
+        "contextOrDetail": "Google I/O, AWS re:Invent, ReactConf",
+        "timeframe": "2020-2023"
+      }
+    ]
+  },
+  "certifications": {
+    "sectionTitle": "Certifications",
+    "certificationItems": [
+      { "title": "AWS Solutions Architect Professional", "issuingOrganization": "Amazon Web Services", "issueDate": "July 2022" },
+      {
+        "title": "Google Cloud Professional Developer",
+        "issuingOrganization": "Google Cloud",
+        "issueDate": "March 2021"
+      },
+      {
+        "title": "Certified Kubernetes Administrator",
+        "issuingOrganization": "Cloud Native Computing Foundation",
+        "issueDate": "January 2023"
+      },
+      {
+        "title": "MongoDB Certified Developer",
+        "issuingOrganization": "MongoDB University",
+        "issueDate": "June 2020"
+      }
+    ]
+  },
+  "languages": {
+    "sectionTitle": "Languages",
+    "languageItems": [
+      { "language": "English", "proficiency": "Native speaker" },
+      { "language": "Italian", "proficiency": "Fluent" },
+      { "language": "French", "proficiency": "Professional Working Proficiency" },
+      { "language": "Spanish", "proficiency": "Conversational" }
+    ]
+  },
+  "publications": {
+    "sectionTitle": "Publications",
+    "publications": [
+      {
+        "title": "Scalable Microservices Architecture for High-Traffic Applications",
+        "publicationType": "Technical Blog, Netflix Engineering",
+        "publicationDate": "2023",
+        "publicationUrl": "#"
+      },
+      {
+        "title": "Optimizing React Performance in Production",
+        "publicationType": "Conference Paper, React Summit",
+        "publicationDate": "2022",
+        "publicationUrl": "#"
+      },
+      {
+        "title": "Building Resilient Distributed Systems with Go",
+        "publicationType": "O'Reilly Media Technical Article",
+        "publicationDate": "2021",
+        "publicationUrl": "#"
+      },
+      {
+        "title": "GraphQL at Scale: Lessons from Production",
+        "publicationType": "Medium Engineering Blog",
+        "publicationDate": "2020",
+        "publicationUrl": "#"
+      }
+    ]
+  },
+  "speaking": {
+    "sectionTitle": "Speaking Engagements",
+    "speakingEngagements": [
+      {
+        "eventName": "Google I/O",
+        "topic": "Building Scalable Web Applications with Modern JavaScript",
+        "date": "2023",
+        "venue": "Mountain View, CA"
+      },
+      {
+        "eventName": "AWS re:Invent",
+        "topic": "Serverless Architecture at Scale",
+        "date": "2022",
+        "venue": "Las Vegas, NV"
+      },
+      {
+        "eventName": "ReactConf",
+        "topic": "Performance Optimization Techniques for Large React Apps",
+        "date": "2023",
+        "venue": "Online"
+      },
+      {
+        "eventName": "Stanford University - CS Department",
+        "topic": "Guest Lecture: 'From Code to Career: Building Your Path in Tech'",
+        "date": "2021",
+        "venue": "Stanford, CA"
+      }
+    ]
+  },
+  "hobbies": {
+    "sectionTitle": "Hobbies & Interests",
+    "hobbies": ["Open Source Contributing", "Competitive Programming", "Hackathons", "Tech Blogging", "3D Printing", "Game Development"]
+  }
+}

@@ -4,3 +4,26 @@ portfolios/*
 
 # But keep directory structure
 !.gitignore
+
+# Ignore all node modules in sandboxes
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+
+# Ignore all lockfiles
+**/*.lock
+**/package-lock.json
+**/pnpm-lock.yaml
+**/yarn.lock
+
+# Ignore all logs
+**/*.log
+
+# Ignore all environment files
+**/.env
+**/.env.local
+**/.env.*
+
+# Exclude from file watchers
+.watchmanconfig

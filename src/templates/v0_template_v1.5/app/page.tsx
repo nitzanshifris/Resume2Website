@@ -124,12 +124,27 @@ export default function FashionPortfolioPage() {
           // Use the demo data from initialData
           // No need to do anything else - initialData is already set
         } else {
-          // For generated portfolios, always fetch CV data (which will use injected data)
+          // For generated portfolios, first try to load injected data
           console.log('🔄 Loading CV data...')
+          
+          try {
+            // First try to load injected data dynamically (for portfolio generator)
+            const injectedModule = await import('@/lib/injected-data')
+            if (injectedModule.useRealData && injectedModule.portfolioData) {
+              console.log('✅ Using injected CV data from portfolio generator')
+              setData(injectedModule.portfolioData)
+              toast.success('Portfolio loaded with your CV data!')
+              return // Exit early - we have the data
+            }
+          } catch (injectedError) {
+            console.log('ℹ️ No injected data found, trying API...')
+          }
+          
+          // Fallback to API fetch (original behavior)
           const sessionId = getSessionId() || 'generated-portfolio'
           const cvData = await fetchLatestCVData(sessionId)
           setData(cvData)
-          console.log('✅ CV data loaded successfully')
+          console.log('✅ CV data loaded from API')
           toast.success('Portfolio loaded successfully!')
         }
       } catch (err) {
