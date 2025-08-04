@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   })
 
   // Content Security Policy
-  // This is a balanced policy that provides security while allowing necessary features
+  // Modified to allow iframe embedding from any origin
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval';
@@ -24,8 +24,8 @@ export function middleware(request: NextRequest) {
     media-src 'self';
     object-src 'none';
     child-src 'self';
-    frame-src 'self';
-    frame-ancestors 'none';
+    frame-src *;
+    frame-ancestors *;
     base-uri 'self';
     form-action 'self';
     manifest-src 'self';
@@ -35,7 +35,8 @@ export function middleware(request: NextRequest) {
   // Apply security headers
   response.headers.set('Content-Security-Policy', cspHeader)
   response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('X-Frame-Options', 'DENY')
+  // Remove X-Frame-Options to allow iframe embedding
+  response.headers.delete('X-Frame-Options')
   response.headers.set('X-XSS-Protection', '1; mode=block')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')

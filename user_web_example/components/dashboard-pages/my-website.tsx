@@ -117,6 +117,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
     'memberships',
     'languages'
   ])
+  const [sectionContent, setSectionContent] = useState<Record<string, string>>({})
 
   const currentTheme = colorThemes.find(theme => theme.id === selectedTheme) || colorThemes[0]
 

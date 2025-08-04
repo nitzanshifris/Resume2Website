@@ -17,6 +17,8 @@ ALLOWED_ORIGINS = [
     "http://localhost:3001",  # React alternative
     "http://localhost:3019",  # Reef's custom port
     "http://localhost:5173",  # Vite default
+    "http://127.0.0.1:3000",  # Local IP variant
+    "http://127.0.0.1:3001",  # Local IP variant
 ]
 
 # File Upload
@@ -37,8 +39,10 @@ DATABASE_PATH = "data/cv2web.db"
 SESSION_EXPIRY_DAYS = 7
 
 # Paths
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = "data/uploads"
 OUTPUT_DIR = "data/outputs"
+SANDBOXES_DIR = "sandboxes"
 
 # AI Models - Using Claude 4 Opus for maximum determinism
 PRIMARY_MODEL = "claude-opus-4-20250514"  # Claude 4 Opus for deterministic extraction

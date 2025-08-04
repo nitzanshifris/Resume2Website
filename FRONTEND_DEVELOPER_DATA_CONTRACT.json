@@ -1,0 +1,606 @@
+{
+  "documentType": "CV2WEB Portfolio Template Data Contract",
+  "version": "1.0.0",
+  "description": "This document describes the data structure that will be injected into your portfolio template. Your template should be able to handle and display all these data sections appropriately.",
+  "dataStructure": {
+    "hero": {
+      "description": "Personal information displayed prominently",
+      "required": true,
+      "fields": {
+        "fullName": {
+          "type": "string",
+          "required": true,
+          "example": "Jennifer Adams"
+        },
+        "professionalTitle": {
+          "type": "string",
+          "required": true,
+          "example": "Senior Software Engineer"
+        },
+        "summaryTagline": {
+          "type": "string",
+          "required": false,
+          "example": "Building scalable solutions with modern technologies"
+        },
+        "profilePhotoUrl": {
+          "type": "string | null",
+          "required": false,
+          "example": "https://example.com/photo.jpg"
+        }
+      }
+    },
+    "contact": {
+      "description": "Contact information and social links",
+      "required": true,
+      "fields": {
+        "email": {
+          "type": "string",
+          "required": true,
+          "example": "jennifer@example.com"
+        },
+        "phone": {
+          "type": "string",
+          "required": false,
+          "example": "+1 (555) 123-4567"
+        },
+        "location": {
+          "type": "object",
+          "required": false,
+          "fields": {
+            "city": { "type": "string", "example": "San Francisco" },
+            "state": { "type": "string", "example": "CA" },
+            "country": { "type": "string", "example": "USA" }
+          }
+        },
+        "professionalLinks": {
+          "type": "array",
+          "required": false,
+          "itemStructure": {
+            "platform": {
+              "type": "string",
+              "enum": ["LinkedIn", "GitHub", "Twitter", "Website", "Portfolio", "Other"],
+              "example": "LinkedIn"
+            },
+            "url": {
+              "type": "string",
+              "example": "https://linkedin.com/in/jennifer"
+            }
+          }
+        },
+        "availability": {
+          "type": "string",
+          "required": false,
+          "example": "Available for new opportunities"
+        }
+      }
+    },
+    "summary": {
+      "description": "Professional summary or about section",
+      "required": false,
+      "fields": {
+        "summaryText": {
+          "type": "string",
+          "required": true,
+          "example": "Experienced software engineer with 10+ years..."
+        },
+        "yearsOfExperience": {
+          "type": "number",
+          "required": false,
+          "example": 10
+        },
+        "keySpecializations": {
+          "type": "array<string>",
+          "required": false,
+          "example": ["Full Stack Development", "Cloud Architecture", "Team Leadership"]
+        }
+      }
+    },
+    "experience": {
+      "description": "Work experience history",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "jobTitle": {
+          "type": "string",
+          "required": true,
+          "example": "Senior Software Engineer"
+        },
+        "companyName": {
+          "type": "string",
+          "required": true,
+          "example": "Tech Corp"
+        },
+        "location": {
+          "type": "object",
+          "required": false,
+          "fields": {
+            "city": { "type": "string" },
+            "state": { "type": "string" },
+            "country": { "type": "string" }
+          }
+        },
+        "dateRange": {
+          "type": "object",
+          "required": true,
+          "fields": {
+            "startDate": { "type": "string", "example": "Jan 2020" },
+            "endDate": { "type": "string", "example": "Present" },
+            "isCurrent": { "type": "boolean", "example": true }
+          }
+        },
+        "responsibilitiesAndAchievements": {
+          "type": "array<string>",
+          "required": false,
+          "example": [
+            "Led team of 5 engineers",
+            "Reduced deployment time by 50%"
+          ]
+        },
+        "technologiesUsed": {
+          "type": "array<string>",
+          "required": false,
+          "example": ["React", "Node.js", "AWS"]
+        }
+      }
+    },
+    "education": {
+      "description": "Educational background",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "degree": {
+          "type": "string",
+          "required": true,
+          "example": "Bachelor of Science in Computer Science"
+        },
+        "fieldOfStudy": {
+          "type": "string",
+          "required": false,
+          "example": "Computer Science"
+        },
+        "institution": {
+          "type": "string",
+          "required": true,
+          "example": "Stanford University"
+        },
+        "location": {
+          "type": "object",
+          "required": false,
+          "fields": {
+            "city": { "type": "string" },
+            "state": { "type": "string" },
+            "country": { "type": "string" }
+          }
+        },
+        "dateRange": {
+          "type": "object",
+          "required": false,
+          "fields": {
+            "startDate": { "type": "string" },
+            "endDate": { "type": "string" }
+          }
+        },
+        "gpa": {
+          "type": "string",
+          "required": false,
+          "example": "3.8/4.0"
+        },
+        "honors": {
+          "type": "array<string>",
+          "required": false,
+          "example": ["Magna Cum Laude", "Dean's List"]
+        }
+      }
+    },
+    "skills": {
+      "description": "Technical and professional skills",
+      "required": false,
+      "fields": {
+        "skillCategories": {
+          "type": "array",
+          "required": false,
+          "itemStructure": {
+            "categoryName": {
+              "type": "string",
+              "required": true,
+              "example": "Programming Languages"
+            },
+            "skills": {
+              "type": "array<string>",
+              "required": true,
+              "example": ["JavaScript", "Python", "Java"]
+            }
+          }
+        },
+        "ungroupedSkills": {
+          "type": "array<string>",
+          "required": false,
+          "example": ["Project Management", "Public Speaking"]
+        }
+      }
+    },
+    "projects": {
+      "description": "Portfolio projects or significant work",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "example": "E-commerce Platform"
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "example": "Built a scalable e-commerce solution..."
+        },
+        "role": {
+          "type": "string",
+          "required": false,
+          "example": "Lead Developer"
+        },
+        "technologiesUsed": {
+          "type": "array<string>",
+          "required": false,
+          "example": ["React", "Node.js", "PostgreSQL"]
+        },
+        "projectUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://project.com"
+        },
+        "githubUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://github.com/user/project"
+        },
+        "imageUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://example.com/project-screenshot.png"
+        },
+        "videoUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://youtube.com/watch?v=..."
+        },
+        "demoUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://demo.project.com"
+        }
+      }
+    },
+    "achievements": {
+      "description": "Notable achievements and metrics",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "value": {
+          "type": "string",
+          "required": true,
+          "example": "40%"
+        },
+        "label": {
+          "type": "string",
+          "required": true,
+          "example": "Performance Improvement"
+        },
+        "contextOrDetail": {
+          "type": "string",
+          "required": false,
+          "example": "Optimized database queries resulting in 40% faster load times"
+        },
+        "timeframe": {
+          "type": "string",
+          "required": false,
+          "example": "2023"
+        }
+      }
+    },
+    "certifications": {
+      "description": "Professional certifications",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "example": "AWS Certified Solutions Architect"
+        },
+        "issuingOrganization": {
+          "type": "string",
+          "required": true,
+          "example": "Amazon Web Services"
+        },
+        "issueDate": {
+          "type": "string",
+          "required": true,
+          "example": "May 2023"
+        },
+        "expirationDate": {
+          "type": "string",
+          "required": false,
+          "example": "May 2026"
+        },
+        "credentialId": {
+          "type": "string",
+          "required": false,
+          "example": "ABC123XYZ"
+        },
+        "verificationUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://verify.certification.com/ABC123XYZ"
+        }
+      }
+    },
+    "languages": {
+      "description": "Language proficiencies",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "language": {
+          "type": "string",
+          "required": true,
+          "example": "English"
+        },
+        "proficiency": {
+          "type": "string",
+          "required": false,
+          "example": "Native"
+        },
+        "certification": {
+          "type": "string",
+          "required": false,
+          "example": "TOEFL Score: 110"
+        }
+      }
+    },
+    "volunteer": {
+      "description": "Volunteer experience",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "role": {
+          "type": "string",
+          "required": true,
+          "example": "Technical Mentor"
+        },
+        "organization": {
+          "type": "string",
+          "required": true,
+          "example": "Code for Good"
+        },
+        "dateRange": {
+          "type": "object",
+          "required": false,
+          "fields": {
+            "startDate": { "type": "string" },
+            "endDate": { "type": "string" },
+            "isCurrent": { "type": "boolean" }
+          }
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "example": "Mentored 20+ students in web development"
+        }
+      }
+    },
+    "publications": {
+      "description": "Published articles, papers, or books",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "example": "Machine Learning in Production"
+        },
+        "publicationType": {
+          "type": "string",
+          "required": false,
+          "example": "Journal Article"
+        },
+        "publicationVenue": {
+          "type": "string",
+          "required": false,
+          "example": "IEEE Computer Society"
+        },
+        "publicationDate": {
+          "type": "string",
+          "required": false,
+          "example": "March 2023"
+        },
+        "url": {
+          "type": "string",
+          "required": false,
+          "example": "https://publication.com/article"
+        }
+      }
+    },
+    "speaking": {
+      "description": "Speaking engagements and presentations",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "eventName": {
+          "type": "string",
+          "required": true,
+          "example": "React Conference 2023"
+        },
+        "topic": {
+          "type": "string",
+          "required": true,
+          "example": "State Management at Scale"
+        },
+        "date": {
+          "type": "string",
+          "required": false,
+          "example": "June 2023"
+        },
+        "venue": {
+          "type": "string",
+          "required": false,
+          "example": "San Francisco Convention Center"
+        },
+        "eventUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://reactconf.com/2023"
+        },
+        "presentationUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://slides.com/presentation"
+        },
+        "videoUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://youtube.com/watch?v=..."
+        }
+      }
+    },
+    "courses": {
+      "description": "Relevant courses completed",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "example": "Advanced React Patterns"
+        },
+        "institution": {
+          "type": "string",
+          "required": false,
+          "example": "Frontend Masters"
+        },
+        "completionDate": {
+          "type": "string",
+          "required": false,
+          "example": "January 2023"
+        },
+        "certificateUrl": {
+          "type": "string",
+          "required": false,
+          "example": "https://certificate.url"
+        }
+      }
+    },
+    "memberships": {
+      "description": "Professional memberships",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "organization": {
+          "type": "string",
+          "required": true,
+          "example": "Association for Computing Machinery"
+        },
+        "role": {
+          "type": "string",
+          "required": false,
+          "example": "Senior Member"
+        },
+        "membershipType": {
+          "type": "string",
+          "required": false,
+          "example": "Professional"
+        },
+        "dateRange": {
+          "type": "object",
+          "required": false,
+          "fields": {
+            "startDate": { "type": "string" },
+            "endDate": { "type": "string" },
+            "isCurrent": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "hobbies": {
+      "description": "Personal interests and hobbies",
+      "required": false,
+      "type": "array<string>",
+      "example": ["Photography", "Hiking", "Open Source Contributing"]
+    },
+    "patents": {
+      "description": "Patents filed or granted",
+      "required": false,
+      "type": "array",
+      "itemStructure": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "example": "Method for Optimizing Database Queries"
+        },
+        "patentNumber": {
+          "type": "string",
+          "required": false,
+          "example": "US10123456B2"
+        },
+        "status": {
+          "type": "string",
+          "required": false,
+          "enum": ["Filed", "Pending", "Granted"],
+          "example": "Granted"
+        },
+        "filingDate": {
+          "type": "string",
+          "required": false,
+          "example": "2022-03-15"
+        },
+        "grantDate": {
+          "type": "string",
+          "required": false,
+          "example": "2023-09-20"
+        },
+        "url": {
+          "type": "string",
+          "required": false,
+          "example": "https://patents.google.com/patent/US10123456B2"
+        }
+      }
+    }
+  },
+  "technicalRequirements": {
+    "framework": "Next.js 15+",
+    "language": "TypeScript",
+    "styling": "Tailwind CSS (any version)",
+    "dataInjection": "Data will be injected as a JSON file that your template imports",
+    "responsiveness": "Must be fully responsive across all devices",
+    "performance": "Should load quickly and be optimized for web",
+    "accessibility": "Should follow WCAG guidelines",
+    "seo": "Should include proper meta tags and semantic HTML"
+  },
+  "deliverables": {
+    "templateStructure": {
+      "description": "Your template should be a self-contained Next.js app",
+      "requiredFiles": [
+        "package.json - with all dependencies",
+        "app/page.tsx - main portfolio page",
+        "lib/cv-data-adapter.tsx - adapter to transform our data to your template format",
+        "lib/data.tsx - your template's data types",
+        "components/* - all your components",
+        "public/* - any static assets"
+      ]
+    },
+    "dataAdapter": {
+      "description": "You must create an adapter that transforms our data structure to your template's needs",
+      "example": "export function adaptCV2WebToTemplate(cv2webData: CV2WebData): YourTemplateData"
+    }
+  },
+  "importantNotes": [
+    "All sections are optional - your template should gracefully handle missing data",
+    "Arrays might be empty - ensure your template doesn't break with empty arrays",
+    "Some fields within objects are optional - use appropriate fallbacks",
+    "URLs might be null or undefined - handle gracefully",
+    "The template should look professional even with minimal data",
+    "You have complete creative freedom in how to display this data",
+    "Consider using modern UI patterns and animations",
+    "The portfolio should tell a story about the person",
+    "Make it memorable and unique"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "ignore_dirs": [
+    "sandboxes",
+    "data/generated_portfolios",
+    "data/uploads",
+    "**/node_modules",
+    "**/.next",
+    "**/dist",
+    "**/build",
+    "**/.git",
+    "venv",
+    "__pycache__",
+    "**/*.pyc",
+    ".pytest_cache",
+    "**/.DS_Store"
+  ]
+}

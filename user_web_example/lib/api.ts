@@ -20,12 +20,13 @@ export interface UploadResponse {
 }
 
 export interface ProcessingStatus {
-  job_id: string
+  job_id?: string
   status: 'pending' | 'processing' | 'completed' | 'failed'
   progress: number
   message: string
   result?: any
   error?: string
+  phase?: string
 }
 
 export interface Template {
@@ -69,26 +70,31 @@ export async function apiRequest<T>(
 // File upload function
 export async function uploadFile(file: File): Promise<UploadResponse> {
   const sessionId = getSessionId()
-  if (!sessionId) {
-    throw new Error('Not authenticated. Please sign in.')
-  }
+  // Allow upload without authentication for demo purposes
   
   const formData = new FormData()
   formData.append('file', file)
   
-  const uploadUrl = `${API_BASE_URL}/api/v1/upload`
+  // Use anonymous upload endpoint if no session
+  const uploadUrl = sessionId 
+    ? `${API_BASE_URL}/api/v1/upload`
+    : `${API_BASE_URL}/api/v1/upload-anonymous`
   console.log('Uploading to:', uploadUrl)
-  console.log('Session ID:', sessionId)
+  console.log('Session ID:', sessionId || 'anonymous')
   console.log('File:', file.name, file.size, file.type)
   
   try {
+    const headers: HeadersInit = {}
+    if (sessionId) {
+      headers['X-Session-ID'] = sessionId
+    }
+    // Don't set Content-Type header, let the browser set it with boundary
+    
     const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
-      headers: {
-        'X-Session-ID': sessionId,
-        // Don't set Content-Type header, let the browser set it with boundary
-      }
+      headers,
+      mode: 'cors'
     })
     
     if (!response.ok) {
@@ -220,7 +226,7 @@ export function createSSEConnection(
     }
   })
   
-  eventSource.addEventListener('error', (event) => {
+  eventSource.addEventListener('error', (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data)
       onError?.(new Error(data.message || 'Processing error'))

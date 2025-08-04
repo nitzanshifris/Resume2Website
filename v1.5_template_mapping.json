@@ -1,0 +1,823 @@
+{
+  "template": "v0_template_v1.5",
+  "version": "1.5",
+  "description": "Comprehensive mapping of all sections and data fields that v1.5 template can display",
+  "sections": {
+    "hero": {
+      "sectionId": "hero",
+      "displayLocation": "Hero section at top of page",
+      "dataMapping": {
+        "fullName": {
+          "source": "hero.fullName",
+          "type": "string",
+          "required": true,
+          "displayAs": "Main heading text"
+        },
+        "professionalTitle": {
+          "source": "hero.professionalTitle",
+          "type": "string",
+          "required": true,
+          "displayAs": "Subtitle under name"
+        },
+        "summaryTagline": {
+          "source": "hero.summaryTagline",
+          "type": "string",
+          "required": true,
+          "displayAs": "Tagline text below title"
+        },
+        "profilePhotoUrl": {
+          "source": "hero.profilePhotoUrl",
+          "type": "string | null",
+          "required": false,
+          "displayAs": "Profile photo in hero section"
+        }
+      }
+    },
+    "summary": {
+      "sectionId": "summary",
+      "displayLocation": "Full-width section with flip text animation",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "summary.sectionTitle",
+          "type": "string",
+          "default": "Professional Summary",
+          "displayAs": "Section heading"
+        },
+        "summaryText": {
+          "source": "summary.summaryText",
+          "type": "string",
+          "required": true,
+          "displayAs": "Animated flip text paragraph"
+        }
+      }
+    },
+    "experience": {
+      "sectionId": "experience",
+      "displayLocation": "Accordion layout section",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "experience.sectionTitle",
+          "type": "string",
+          "default": "Professional Experience",
+          "displayAs": "Section heading"
+        },
+        "experienceItems": {
+          "source": "experience.experienceItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Job title in accordion header"
+            },
+            "company": {
+              "type": "string",
+              "displayAs": "Company name in accordion header"
+            },
+            "location": {
+              "type": "string",
+              "displayAs": "Location in accordion header"
+            },
+            "startDate": {
+              "type": "string",
+              "displayAs": "Start date in date range"
+            },
+            "endDate": {
+              "type": "string",
+              "displayAs": "End date in date range"
+            },
+            "description": {
+              "type": "string",
+              "displayAs": "Job description in accordion content"
+            },
+            "technologies": {
+              "type": "array<string>",
+              "optional": true,
+              "displayAs": "Technology tags below description"
+            },
+            "achievements": {
+              "type": "array<Achievement>",
+              "optional": true,
+              "displayAs": "Achievement cards in accordion",
+              "itemStructure": {
+                "id": "string",
+                "title": "string",
+                "description": "string",
+                "icon": "'award' | 'users' | 'target' | 'trending-up'"
+              }
+            }
+          }
+        }
+      }
+    },
+    "projects": {
+      "sectionId": "projects",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "projects.sectionTitle",
+          "type": "string",
+          "default": "Projects",
+          "displayAs": "Section heading"
+        },
+        "projectItems": {
+          "source": "projects.projectItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Card title"
+            },
+            "description": {
+              "type": "string",
+              "displayAs": "Card description"
+            },
+            "link": {
+              "type": "string",
+              "displayAs": "Card link URL"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Card icon",
+              "options": ["Lightbulb", "Palette", "SwatchBook", "Layers", "DraftingCompass", "Award", "Star", "ShieldCheck", "Heart", "Users", "Quote"]
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "options": ["text", "images", "code", "github", "uri", "video", "tweet", "multi-images", "compare"],
+              "displayAs": "SmartCard view mode"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "options": ["simple", "detailed"],
+              "default": "detailed"
+            },
+            "videoUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Video embed when viewMode is 'video'"
+            },
+            "githubUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "GitHub repo preview when viewMode is 'github'"
+            },
+            "images": {
+              "type": "array<string>",
+              "optional": true,
+              "displayAs": "Image gallery when viewMode is 'images'"
+            },
+            "tweetId": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Tweet embed when viewMode is 'tweet'"
+            },
+            "linkUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Preview URL when viewMode is 'uri'"
+            },
+            "technologies": {
+              "type": "array<string>",
+              "optional": true,
+              "displayAs": "Technology tags on card"
+            },
+            "codeSnippet": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Code snippet when viewMode is 'code'"
+            },
+            "codeLanguage": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Code highlighting language"
+            }
+          }
+        }
+      }
+    },
+    "skills": {
+      "sectionId": "skills",
+      "displayLocation": "Custom skills section with categories",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "skills.sectionTitle",
+          "type": "string",
+          "default": "Skills",
+          "displayAs": "Section heading"
+        },
+        "skillCategories": {
+          "source": "skills.skillCategories",
+          "type": "array",
+          "itemStructure": {
+            "categoryName": {
+              "type": "string",
+              "displayAs": "Category heading"
+            },
+            "skills": {
+              "type": "array<Skill>",
+              "itemStructure": {
+                "name": {
+                  "type": "string",
+                  "displayAs": "Skill name"
+                },
+                "level": {
+                  "type": "number",
+                  "optional": true,
+                  "range": "1-5",
+                  "displayAs": "Skill proficiency level"
+                },
+                "detailedDisplayText": {
+                  "type": "string",
+                  "optional": true,
+                  "displayAs": "Detailed skill description on hover"
+                }
+              }
+            }
+          }
+        },
+        "ungroupedSkills": {
+          "source": "skills.ungroupedSkills",
+          "type": "array<Skill>",
+          "displayAs": "Skills without category"
+        }
+      }
+    },
+    "education": {
+      "sectionId": "education",
+      "displayLocation": "Vertical timeline with cards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "education.sectionTitle",
+          "type": "string",
+          "default": "Education",
+          "displayAs": "Section heading"
+        },
+        "educationItems": {
+          "source": "education.educationItems",
+          "type": "array",
+          "itemStructure": {
+            "institution": {
+              "type": "string",
+              "displayAs": "Institution name on timeline"
+            },
+            "degree": {
+              "type": "string",
+              "displayAs": "Degree title"
+            },
+            "years": {
+              "type": "string",
+              "displayAs": "Year range"
+            },
+            "description": {
+              "type": "string",
+              "displayAs": "Education description"
+            },
+            "imageUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Institution logo/image"
+            },
+            "imageAlt": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Image alt text"
+            },
+            "imageTransform": {
+              "type": "object",
+              "optional": true,
+              "displayAs": "Image transformation settings",
+              "structure": {
+                "crop": { "x": "number", "y": "number" },
+                "zoom": "number",
+                "rotation": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "testimonials": {
+      "sectionId": "testimonials",
+      "displayLocation": "Carousel of testimonial cards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "testimonials.sectionTitle",
+          "type": "string",
+          "default": "Testimonials",
+          "displayAs": "Section heading"
+        },
+        "testimonialItems": {
+          "source": "testimonials.testimonialItems",
+          "type": "array",
+          "itemStructure": {
+            "quote": {
+              "type": "string",
+              "displayAs": "Testimonial quote text"
+            },
+            "authorName": {
+              "type": "string",
+              "displayAs": "Author name"
+            },
+            "authorTitle": {
+              "type": "string",
+              "displayAs": "Author job title"
+            },
+            "authorImage": {
+              "type": "string",
+              "displayAs": "Author profile image"
+            }
+          }
+        }
+      }
+    },
+    "achievements": {
+      "sectionId": "achievements",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "achievements.sectionTitle",
+          "type": "string",
+          "default": "Achievements",
+          "displayAs": "Section heading"
+        },
+        "achievementItems": {
+          "source": "achievements.achievementItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Achievement title"
+            },
+            "description": {
+              "type": "string",
+              "displayAs": "Achievement description"
+            },
+            "year": {
+              "type": "string",
+              "displayAs": "Achievement year"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Achievement icon"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text",
+              "displayAs": "SmartCard view mode"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "detailed"
+            }
+          }
+        }
+      }
+    },
+    "certifications": {
+      "sectionId": "certifications",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "certifications.sectionTitle",
+          "type": "string",
+          "default": "Certifications",
+          "displayAs": "Section heading"
+        },
+        "certificationItems": {
+          "source": "certifications.certificationItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Certification name"
+            },
+            "issuingBody": {
+              "type": "string",
+              "displayAs": "Issuing organization"
+            },
+            "year": {
+              "type": "string",
+              "displayAs": "Issue date"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Certification icon"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text",
+              "displayAs": "SmartCard view mode"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "detailed"
+            },
+            "linkUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Verification URL when viewMode is 'uri'"
+            }
+          }
+        }
+      }
+    },
+    "volunteer": {
+      "sectionId": "volunteer",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "volunteer.sectionTitle",
+          "type": "string",
+          "default": "Volunteer Experience",
+          "displayAs": "Section heading"
+        },
+        "volunteerItems": {
+          "source": "volunteer.volunteerItems",
+          "type": "array",
+          "itemStructure": {
+            "role": {
+              "type": "string",
+              "displayAs": "Volunteer role"
+            },
+            "organization": {
+              "type": "string",
+              "displayAs": "Organization name"
+            },
+            "period": {
+              "type": "string",
+              "displayAs": "Time period"
+            },
+            "description": {
+              "type": "string",
+              "displayAs": "Role description"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Card icon"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "detailed"
+            }
+          }
+        }
+      }
+    },
+    "hobbies": {
+      "sectionId": "hobbies",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "hobbies.sectionTitle",
+          "type": "string",
+          "default": "Hobbies & Interests",
+          "displayAs": "Section heading"
+        },
+        "hobbyItems": {
+          "source": "hobbies.hobbyItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Hobby name"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Hobby icon"
+            },
+            "description": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Hobby description"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "detailed"
+            }
+          }
+        }
+      }
+    },
+    "courses": {
+      "sectionId": "courses",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "courses.sectionTitle",
+          "type": "string",
+          "default": "Courses",
+          "displayAs": "Section heading"
+        },
+        "courseItems": {
+          "source": "courses.courseItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Course title"
+            },
+            "institution": {
+              "type": "string",
+              "displayAs": "Institution name"
+            },
+            "year": {
+              "type": "string",
+              "displayAs": "Completion year"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Course icon"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "detailed"
+            }
+          }
+        }
+      }
+    },
+    "publications": {
+      "sectionId": "publications",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "publications.sectionTitle",
+          "type": "string",
+          "default": "Publications",
+          "displayAs": "Section heading"
+        },
+        "publicationItems": {
+          "source": "publications.publicationItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Publication title"
+            },
+            "journal": {
+              "type": "string",
+              "displayAs": "Journal/venue name"
+            },
+            "year": {
+              "type": "string",
+              "displayAs": "Publication year"
+            },
+            "link": {
+              "type": "string",
+              "displayAs": "Publication URL"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Publication icon"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text",
+              "displayAs": "SmartCard view mode (auto-detects video URLs)"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "detailed"
+            },
+            "videoUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Video URL when viewMode is 'video'"
+            },
+            "linkUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Preview URL when viewMode is 'uri'"
+            }
+          }
+        }
+      }
+    },
+    "speakingEngagements": {
+      "sectionId": "speakingEngagements",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "speakingEngagements.sectionTitle",
+          "type": "string",
+          "default": "Speaking Engagements",
+          "displayAs": "Section heading"
+        },
+        "engagementItems": {
+          "source": "speakingEngagements.engagementItems",
+          "type": "array",
+          "itemStructure": {
+            "title": {
+              "type": "string",
+              "displayAs": "Talk topic"
+            },
+            "event": {
+              "type": "string",
+              "displayAs": "Event name"
+            },
+            "year": {
+              "type": "string",
+              "displayAs": "Event date"
+            },
+            "location": {
+              "type": "string",
+              "displayAs": "Event location"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Engagement icon"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text",
+              "displayAs": "SmartCard view mode (auto-detects video URLs in venue)"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "detailed"
+            },
+            "videoUrl": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Video URL when venue contains video link"
+            }
+          }
+        }
+      }
+    },
+    "memberships": {
+      "sectionId": "memberships",
+      "displayLocation": "Carousel of SmartCards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "memberships.sectionTitle",
+          "type": "string",
+          "default": "Professional Memberships",
+          "displayAs": "Section heading"
+        },
+        "membershipItems": {
+          "source": "memberships.membershipItems",
+          "type": "array",
+          "itemStructure": {
+            "organization": {
+              "type": "string",
+              "displayAs": "Organization name"
+            },
+            "role": {
+              "type": "string",
+              "displayAs": "Member role"
+            },
+            "period": {
+              "type": "string",
+              "displayAs": "Membership period"
+            },
+            "description": {
+              "type": "string",
+              "optional": true,
+              "displayAs": "Membership description"
+            },
+            "icon": {
+              "type": "keyof contentIconMap",
+              "displayAs": "Membership icon"
+            },
+            "viewMode": {
+              "type": "string",
+              "optional": true,
+              "default": "text"
+            },
+            "textVariant": {
+              "type": "string",
+              "optional": true,
+              "default": "simple or detailed based on description presence"
+            }
+          }
+        }
+      }
+    },
+    "languages": {
+      "sectionId": "languages",
+      "displayLocation": "Centered flex layout with language cards",
+      "dataMapping": {
+        "sectionTitle": {
+          "source": "languages.sectionTitle",
+          "type": "string",
+          "default": "Languages",
+          "displayAs": "Section heading"
+        },
+        "languageItems": {
+          "source": "languages.languageItems",
+          "type": "array",
+          "itemStructure": {
+            "language": {
+              "type": "string",
+              "displayAs": "Language name"
+            },
+            "proficiency": {
+              "type": "string",
+              "displayAs": "Proficiency level"
+            }
+          }
+        }
+      }
+    },
+    "contact": {
+      "sectionId": "contact",
+      "displayLocation": "Footer section with contact information",
+      "dataMapping": {
+        "email": {
+          "source": "contact.email",
+          "type": "string",
+          "displayAs": "Email link"
+        },
+        "phone": {
+          "source": "contact.phone",
+          "type": "string",
+          "displayAs": "Phone link"
+        },
+        "location": {
+          "source": "contact.location",
+          "type": "object",
+          "structure": {
+            "city": "string",
+            "country": "string"
+          },
+          "displayAs": "Location text"
+        },
+        "professionalLinks": {
+          "source": "contact.professionalLinks",
+          "type": "array",
+          "itemStructure": {
+            "name": {
+              "type": "keyof socialIconMap",
+              "options": ["linkedin", "resume", "pinterest", "github", "twitter"],
+              "displayAs": "Social icon"
+            },
+            "url": {
+              "type": "string",
+              "displayAs": "Social link URL"
+            }
+          }
+        },
+        "availability": {
+          "source": "contact.availability",
+          "type": "string",
+          "displayAs": "Availability status text"
+        },
+        "copyright": {
+          "source": "contact.copyright",
+          "type": "string",
+          "displayAs": "Copyright text"
+        }
+      }
+    }
+  },
+  "smartCardFeatures": {
+    "description": "SmartCard components support multiple view modes for rich content display",
+    "supportedViewModes": {
+      "text": "Default text-based card with title and description",
+      "images": "Image gallery with lightbox",
+      "code": "Syntax-highlighted code snippets",
+      "github": "GitHub repository preview",
+      "uri": "URL preview with iframe",
+      "video": "Embedded video player",
+      "tweet": "Embedded tweet",
+      "multi-images": "Multiple images with quotes",
+      "compare": "Before/after image comparison"
+    },
+    "editableFields": "All text fields are editable in edit mode",
+    "settingsPanel": "Each SmartCard has 9 view modes accessible via settings button"
+  },
+  "notes": {
+    "dataAdapter": "cv-data-adapter.tsx handles mapping from CV2WEB extraction format to template format",
+    "autoDetection": "Template automatically detects video URLs, GitHub repos, and tweets for optimal display",
+    "testimonials": "Currently no CV extraction data maps to testimonials - always empty",
+    "icons": "Icons are randomly assigned from contentIconMap during data adaptation"
+  }
+}
