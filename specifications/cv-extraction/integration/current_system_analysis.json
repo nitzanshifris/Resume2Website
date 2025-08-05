@@ -1,0 +1,9 @@
+{
+  "current_extraction_file": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/src/api/routes/cv.py",
+  "prompt_locations": [
+    "/Users/nitzan_shifris/Desktop/CV2WEB-V4/src/core/cv_extraction/data_extractor.py",
+    "/Users/nitzan_shifris/Desktop/CV2WEB-V4/src/api/routes/cv.py"
+  ],
+  "integration_points": [],
+  "improvement_opportunities": []
+}

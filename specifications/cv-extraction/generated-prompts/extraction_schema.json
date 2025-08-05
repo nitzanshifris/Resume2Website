@@ -1,0 +1,200 @@
+{
+  "hero": {
+    "fullName": "string (required) - candidate's exact name as written",
+    "professionalTitle": "string (required) - candidate's exact title, don't interpret",
+    "summaryTagline": "string or null - brief professional tagline if present",
+    "profilePhotoUrl": "string or null - photo URL if mentioned"
+  },
+  "contact": {
+    "email": "string (required) - primary email address",
+    "phone": "string or null - phone number if present",
+    "location": {
+      "city": "string or null",
+      "state": "string or null",
+      "country": "string or null"
+    },
+    "professionalLinks": [
+      {
+        "platform": "string - LinkedIn|GitHub|Twitter|Website|Portfolio|Other",
+        "url": "string - full URL"
+      }
+    ],
+    "availability": "string or null - availability status if mentioned"
+  },
+  "summary": {
+    "summaryText": "string (required) - professional summary paragraph",
+    "yearsOfExperience": "number or null - total years if calculable",
+    "keySpecializations": [
+      "string"
+    ]
+  },
+  "experience": [
+    {
+      "jobTitle": "string (required) - exact job title as written",
+      "companyName": "string (required) - exact company name",
+      "location": {
+        "city": "string or null",
+        "state": "string or null",
+        "country": "string or null"
+      },
+      "dateRange": {
+        "startDate": "string (required) - flexible format",
+        "endDate": "string (required) - 'Present'/'Current' for ongoing",
+        "isCurrent": "boolean - true if ongoing position"
+      },
+      "responsibilitiesAndAchievements": [
+        "string"
+      ],
+      "technologiesUsed": [
+        "string"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "string (required) - exact degree name",
+      "fieldOfStudy": "string or null - field of study",
+      "institution": "string (required) - exact institution name",
+      "location": {
+        "city": "string or null",
+        "state": "string or null",
+        "country": "string or null"
+      },
+      "dateRange": {
+        "startDate": "string or null",
+        "endDate": "string or null"
+      },
+      "gpa": "string or null - GPA if mentioned",
+      "honors": [
+        "string"
+      ]
+    }
+  ],
+  "skills": {
+    "skillCategories": [
+      {
+        "categoryName": "string (required) - category name",
+        "skills": [
+          "string"
+        ]
+      }
+    ],
+    "ungroupedSkills": [
+      "string"
+    ]
+  },
+  "projects": [
+    {
+      "title": "string (required) - project title",
+      "description": "string (required) - project description",
+      "role": "string or null - user's role in project",
+      "technologiesUsed": [
+        "string"
+      ],
+      "projectUrl": "string or null - live project URL",
+      "githubUrl": "string or null - GitHub repository URL",
+      "imageUrl": "string or null - project image URL",
+      "videoUrl": "string or null - demo video URL",
+      "demoUrl": "string or null - demo URL"
+    }
+  ],
+  "achievements": [
+    {
+      "value": "string (required) - achievement metric/value",
+      "label": "string (required) - achievement description",
+      "contextOrDetail": "string or null - additional context",
+      "timeframe": "string or null - when achieved"
+    }
+  ],
+  "certifications": [
+    {
+      "title": "string (required) - certification title",
+      "issuingOrganization": "string (required) - issuing organization",
+      "issueDate": "string (required) - issue date",
+      "expirationDate": "string or null - expiration date",
+      "credentialId": "string or null - credential ID",
+      "verificationUrl": "string or null - verification URL"
+    }
+  ],
+  "languages": [
+    {
+      "language": "string (required) - language name",
+      "proficiency": "string or null - proficiency level",
+      "certification": "string or null - language certification"
+    }
+  ],
+  "volunteer": [
+    {
+      "role": "string (required) - volunteer role",
+      "organization": "string (required) - organization name",
+      "dateRange": {
+        "startDate": "string or null",
+        "endDate": "string or null",
+        "isCurrent": "boolean - true if ongoing"
+      },
+      "description": "string or null - description of work"
+    }
+  ],
+  "publications": [
+    {
+      "title": "string (required) - publication title",
+      "publicationType": "string or null - type of publication",
+      "publicationVenue": "string or null - where published",
+      "publicationDate": "string or null - publication date",
+      "url": "string or null - publication URL"
+    }
+  ],
+  "speaking": [
+    {
+      "eventName": "string (required) - event name",
+      "topic": "string (required) - speaking topic",
+      "date": "string or null - event date",
+      "venue": "string or null - event venue",
+      "eventUrl": "string or null - event URL",
+      "presentationUrl": "string or null - presentation URL",
+      "videoUrl": "string or null - video URL"
+    }
+  ],
+  "courses": [
+    {
+      "title": "string (required) - course title",
+      "institution": "string or null - institution name",
+      "completionDate": "string or null - completion date",
+      "certificateUrl": "string or null - certificate URL"
+    }
+  ],
+  "memberships": [
+    {
+      "organization": "string (required) - organization name",
+      "role": "string or null - role in organization",
+      "membershipType": "string or null - type of membership",
+      "dateRange": {
+        "startDate": "string or null",
+        "endDate": "string or null",
+        "isCurrent": "boolean - true if ongoing"
+      }
+    }
+  ],
+  "hobbies": [
+    "string"
+  ],
+  "patents": [
+    {
+      "title": "string (required) - patent title",
+      "patentNumber": "string or null - patent number",
+      "status": "string or null - Filed|Pending|Granted",
+      "filingDate": "string or null - filing date",
+      "grantDate": "string or null - grant date",
+      "url": "string or null - patent URL"
+    }
+  ],
+  "testimonials": [
+    {
+      "name": "string (required) - person's name",
+      "role": "string or null - person's role",
+      "company": "string or null - person's company",
+      "testimonialText": "string (required) - testimonial content",
+      "date": "string or null - testimonial date"
+    }
+  ]
+}
