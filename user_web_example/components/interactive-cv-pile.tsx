@@ -588,29 +588,25 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
                   {/* Display file based on type */}
                   {currentFile.type === 'application/pdf' || currentFile.name.endsWith('.pdf') ? (
                     <div className="w-full h-full relative overflow-hidden">
-                      <div className="absolute inset-0 -top-[10%]">
-                        <iframe
-                          src={URL.createObjectURL(currentFile)}
-                          className="w-full h-[110%]"
-                          title={currentFile.name}
-                        />
-                      </div>
+                      <iframe
+                        src={`${URL.createObjectURL(currentFile)}#toolbar=0&navpanes=0&scrollbar=0`}
+                        className="w-full h-full"
+                        title={currentFile.name}
+                      />
                     </div>
                   ) : currentFile.type.startsWith('image/') || 
                       ['.png', '.jpg', '.jpeg'].some(ext => currentFile.name.toLowerCase().endsWith(ext)) ? (
                     <div className="w-full h-full relative overflow-hidden">
-                      <div className="absolute inset-0 -top-[10%]">
-                        <Image
-                          src={URL.createObjectURL(currentFile)}
-                          alt={currentFile.name}
-                          fill
-                          className="object-cover object-top"
-                          onLoad={(e) => {
-                            // Clean up object URL after image loads
-                            URL.revokeObjectURL(e.currentTarget.src)
-                          }}
-                        />
-                      </div>
+                      <Image
+                        src={URL.createObjectURL(currentFile)}
+                        alt={currentFile.name}
+                        fill
+                        className="object-contain"
+                        onLoad={(e) => {
+                          // Clean up object URL after image loads
+                          URL.revokeObjectURL(e.currentTarget.src)
+                        }}
+                      />
                     </div>
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-8">

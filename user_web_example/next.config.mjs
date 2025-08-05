@@ -26,7 +26,7 @@ const nextConfig = {
               "media-src 'self'",
               "object-src 'none'",
               "child-src 'self'",
-              "frame-src *", // Allow all frame sources
+              "frame-src * blob:", // Allow all frame sources including blob URLs
               "frame-ancestors *", // Critical: Allow iframe embedding from any origin
               "base-uri 'self'",
               "form-action 'self'",
