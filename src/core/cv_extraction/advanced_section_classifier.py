@@ -381,8 +381,9 @@ class AdvancedSectionClassifier:
         
         # Check for programming languages in languages section
         programming_langs = ['python', 'javascript', 'java', 'c++', 'c#', 'php', 'ruby', 'go', 'rust', 'swift']
-        if cv_data.get('languages', {}).get('languageItems'):
-            for lang_item in cv_data['languages']['languageItems']:
+        languages_section = cv_data.get('languages') or {}
+        if languages_section and languages_section.get('languageItems'):
+            for lang_item in languages_section['languageItems']:
                 lang_name = self.normalize_text(lang_item.get('language', ''))
                 if lang_name in programming_langs:
                     issues['programming_lang_in_languages'].append(lang_item.get('language', ''))

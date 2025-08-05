@@ -946,13 +946,17 @@ async def upload_cv_anonymous(
     
     logger.info(f"File saved for job {job_id}: {file_path}")
     
+    # Calculate file hash for caching
+    import hashlib
+    file_hash = hashlib.sha256(file_content).hexdigest()
+    
     # === CREATE CV UPLOAD RECORD ===
     create_cv_upload(
         user_id=current_user_id,
         job_id=job_id,
         filename=file.filename,
         file_type=file_extension,
-        file_hash=None  # Optional parameter
+        file_hash=file_hash
     )
     
     # === CV PROCESSING (SAME AS REGULAR UPLOAD) ===
@@ -982,10 +986,30 @@ async def upload_cv_anonymous(
             sections_count = len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])
             logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
             
+            # Calculate confidence score
+            confidence_score = data_extractor.calculate_extraction_confidence(cv_data, text)
+            logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
+            
             # Save CV data to database
             import json
             cv_data_json = json.dumps(cv_data.model_dump_nullable())
             update_cv_upload_status(job_id, 'completed', cv_data_json)
+            
+            # Cache extraction result if confidence is high enough
+            if confidence_score >= 0.75:  # Only cache high-confidence extractions
+                cache_success = cache_extraction_result(
+                    file_hash=file_hash,
+                    cv_data=cv_data_json,
+                    extraction_model=config.PRIMARY_MODEL,  # claude-4-opus
+                    temperature=config.EXTRACTION_TEMPERATURE,  # 0.0
+                    confidence_score=confidence_score
+                )
+                if cache_success:
+                    logger.info(f"💾 High-confidence extraction cached for future use (score: {confidence_score:.2f})")
+                else:
+                    logger.warning("❌ Failed to cache extraction result")
+            else:
+                logger.info(f"⚠️ Low confidence score ({confidence_score:.2f}) - not caching result")
             
             logger.info(f"✅ Anonymous CV upload and extraction completed for job {job_id}")
             
