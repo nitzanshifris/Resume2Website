@@ -8,9 +8,12 @@ import sys
 print("🧪 Running CV2WEB Tests\n")
 
 tests = [
-    ("Comprehensive Test", "tests/comprehensive_test.py"),
+    ("Comprehensive Integration Test", "tests/comprehensive_test.py"),
+    ("CV Data Extraction", "tests/test_data_extraction.py"),
     ("Error Handling", "tests/test_error_handling.py"),
-    ("Edge Cases", "tests/test_mvp_edge_cases.py")
+    ("API Integration", "tests/integration/test_api.py"),
+    ("MVP Edge Cases", "tests/integration/test_mvp_edge_cases.py"),
+    ("Portfolio Integration", "tests/test_portfolio_integration.py")
 ]
 
 for name, path in tests:

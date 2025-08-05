@@ -167,18 +167,14 @@ def test_credential_access():
     
     try:
         from services.local.keychain_manager import (
-            get_openai_api_key,
             get_anthropic_api_key,
-            get_gemini_api_key,
             get_aws_credentials,
             get_google_credentials_path
         )
         
-        # Check which credentials are available
+        # Check which credentials are available (Claude 4 Opus only)
         creds_status = {
-            "OpenAI": bool(get_openai_api_key()),
-            "Anthropic": bool(get_anthropic_api_key()),
-            "Gemini": bool(get_gemini_api_key()),
+            "Anthropic (Claude 4 Opus)": bool(get_anthropic_api_key()),
             "AWS": bool(get_aws_credentials().get('aws_access_key_id')),
             "Google Vision": bool(get_google_credentials_path())
         }
