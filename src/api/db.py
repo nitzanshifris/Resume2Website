@@ -1,6 +1,7 @@
 """
 Database functions for CV2WEB MVP
 """
+import os
 import sqlite3
 import uuid
 from datetime import datetime, timedelta
@@ -10,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Database configuration
-DB_PATH = 'data/cv2web.db'
+DB_PATH = os.getenv('DATABASE_URL', 'data/cv2web.db').replace('sqlite:///', '')
 
 
 def get_db_connection():

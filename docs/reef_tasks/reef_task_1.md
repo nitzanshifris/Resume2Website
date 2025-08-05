@@ -1,4 +1,4 @@
-# Task #7 - Homepage Headlines Update
+# Task #1 - Homepage Headlines Update
 
 ## 📋 Task Overview
 
