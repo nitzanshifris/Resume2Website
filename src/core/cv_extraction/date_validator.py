@@ -139,7 +139,8 @@ class DateValidator:
         if not cv_data.get('education') or not cv_data['education'].get('educationItems'):
             return issues
         
-        education_items = cv_data['education']['educationItems']
+        # Filter out None items first
+        education_items = [item for item in cv_data['education']['educationItems'] if item is not None]
         
         for edu in education_items:
             if not edu:  # Skip None items
@@ -311,7 +312,8 @@ class DateValidator:
     
     def _move_certifications(self, cv_data: Dict[str, Any], issues: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Move misclassified certifications from education to certifications"""
-        cert_issues = [i for i in issues if i['type'] == 'misclassified_certification']
+        # Filter for certification issues and ensure data is not None
+        cert_issues = [i for i in issues if i['type'] == 'misclassified_certification' and i.get('data') is not None]
         
         if not cert_issues:
             return cv_data
@@ -327,12 +329,17 @@ class DateValidator:
         for issue in cert_issues:
             edu_item = issue['data']
             
+            # Skip if edu_item is None
+            if not edu_item:
+                logger.warning(f"Skipping None education item in certification move")
+                continue
+            
             # Create certification item
             cert_item = {
                 'title': edu_item.get('degree', ''),
                 'issuingOrganization': edu_item.get('institution', ''),
-                'issueDate': edu_item.get('dateRange', {}).get('startDate'),
-                'expirationDate': edu_item.get('dateRange', {}).get('endDate'),
+                'issueDate': edu_item.get('dateRange', {}).get('startDate') if edu_item.get('dateRange') else None,
+                'expirationDate': edu_item.get('dateRange', {}).get('endDate') if edu_item.get('dateRange') else None,
                 'credentialId': None,
                 'verificationUrl': None
             }

@@ -898,7 +898,7 @@ export {{ extractedCVData }}
                     "PORT": str(port),
                     "NODE_ENV": "development",
                     # Add memory limit to prevent runaway processes
-                    "NODE_OPTIONS": "--max-old-space-size=512"  # Limit to 512MB per portfolio
+                    "NODE_OPTIONS": "--max-old-space-size=1536"  # Increased to 1.5GB for Next.js compilation
                 }
                 
                 process = None
