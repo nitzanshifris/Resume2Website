@@ -143,9 +143,8 @@ CV2WEB-V4/
 ├── user_web_example/      # Main frontend (Next.js)
 │   ├── app/              # App router pages
 │   └── components/       # React components
-├── packages/              
-│   └── new-renderer/      # Legacy frontend (not actively used)
-│       └── components/    # React components
+├── .claude/               # Claude-specific commands and utilities
+│   └── commands/          # Development commands and scripts
 ├── components/            # Shared UI components
 │   ├── aceternity/        # Premium animations
 │   └── magicui/          # Magic UI library
@@ -155,6 +154,9 @@ CV2WEB-V4/
 ├── sandboxes/            # Isolated portfolio generation environments
 ├── tests/                # Test suites
 ├── docs/                 # Technical documentation
+│   ├── deployment/       # Deployment guides and environment templates
+│   └── archive/          # Historical documentation for reference
+├── src/future-use/       # K8s-ready code not yet in use
 └── .taskmaster/         # AI task management
 ```
 
@@ -212,6 +214,11 @@ ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:3001"]
 PRIMARY_MODEL = "claude-opus-4-20250514"  # Claude 4 Opus for deterministic extraction
 FALLBACK_MODEL = "claude-opus-4-20250514"
 EXTRACTION_TEMPERATURE = 0.0  # Maximum determinism
+
+# Portfolio Management
+PORTFOLIO_MAX_AGE_HOURS = 24  # Auto-cleanup after 24 hours
+PORTFOLIO_CLEANUP_INTERVAL = 300  # Check every 5 minutes
+MAX_ACTIVE_PORTFOLIOS = 20  # Capacity limit
 ```
 
 ### Credential Management
@@ -244,22 +251,18 @@ DO NOT use TaskMaster for:
 - Code explanations
 - Single file edits
 
-### TaskMaster Commands
+### Claude Commands
+All commands are now in `.claude/commands/`:
 ```bash
-# View available tasks
-taskmaster list --status=pending
+# Development commands
+.claude/commands/cleanup.sh      # Remove build artifacts and cache
+.claude/commands/prime.sh        # Initialize development environment
+.claude/commands/cv-extract.sh   # Test CV extraction
+.claude/commands/portfolio-generate.sh  # Generate portfolio
 
-# Get next task
-taskmaster next
-
-# Complete a task
-taskmaster set-status --id=<task-id> --status=done
-
-# Break down complex tasks
-taskmaster expand --id=<task-id>
-
-# Research best practices
-taskmaster research "Next.js 15 patterns"
+# Git workflow
+.claude/commands/commit-and-push.sh  # Smart commit with checks
+.claude/commands/code-review.sh      # Review code changes
 ```
 
 ### Custom Slash Commands
@@ -928,6 +931,10 @@ POST /api/v1/portfolio/generate/{job_id}
 # List user's portfolios
 GET /api/v1/portfolio/list
 
+# Get portfolio metrics
+GET /api/v1/portfolio/portfolios/metrics
+# Returns active portfolios, resource usage, cleanup stats
+
 # Get portfolio CV data
 GET /api/v1/portfolio/{portfolio_id}/cv-data
 
@@ -1023,6 +1030,15 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **Reason**: pnpm workspace conflicts in isolated environments
 
 ## Recent Updates
+
+### Kubernetes Preparation & Major Cleanup (2025-08-05)
+- **🚀 K8s Ready**: Made all hardcoded values configurable via environment variables
+- **📦 Removed Orphaned Packages**: Deleted unused design-tokens and tailwind-preset packages
+- **🧹 16GB Sandbox Cleanup**: Removed accumulated portfolio sandboxes, added automatic cleanup task
+- **📁 Organized Future Code**: Created src/future-use/ for K8s-ready storage abstraction
+- **📚 Documentation Cleanup**: Removed 18MB external docs, updated all tech references to Claude 4 Opus
+- **🗑️ Deleted Old Scripts**: Removed outdated scripts/, using .claude/commands/ instead
+- **⚡ Automatic Resource Management**: Portfolio cleanup runs every 5 minutes for portfolios >24h old
 
 ### Git Branch Consolidation & CV Extraction Fix (2025-08-05)
 - **🌿 Branch Consolidation**: Successfully merged all work from nitzan-development-2 into main branch
