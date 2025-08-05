@@ -18,8 +18,9 @@ import time
 import threading
 import requests
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional
+import asyncio
 
 # Import configuration
 import sys
@@ -34,6 +35,112 @@ logger = logging.getLogger(__name__)
 
 # Global dictionary to track portfolio processes
 PORTFOLIO_PROCESSES = {}
+
+# Configuration for portfolio management
+PORTFOLIO_MAX_AGE_HOURS = 24  # Portfolios older than this will be cleaned up
+PORTFOLIO_CLEANUP_INTERVAL = 300  # Check every 5 minutes
+MAX_ACTIVE_PORTFOLIOS = 20  # Maximum number of active portfolios
+
+# Portfolio metrics tracking
+class PortfolioMetrics:
+    def __init__(self):
+        self.total_created = 0
+        self.total_failed = 0
+        self.active_count = 0
+        self.cleanup_count = 0
+        self.startup_times = []
+        self.last_cleanup = datetime.now()
+    
+    def record_creation(self, portfolio_id: str, startup_time: float = None):
+        self.total_created += 1
+        self.active_count += 1
+        if startup_time:
+            self.startup_times.append(startup_time)
+            # Keep only last 100 startup times
+            if len(self.startup_times) > 100:
+                self.startup_times = self.startup_times[-100:]
+    
+    def record_failure(self):
+        self.total_failed += 1
+    
+    def record_cleanup(self, portfolio_id: str):
+        self.cleanup_count += 1
+        self.active_count = max(0, self.active_count - 1)
+    
+    def get_stats(self):
+        avg_startup = sum(self.startup_times) / len(self.startup_times) if self.startup_times else 0
+        return {
+            "active_portfolios": self.active_count,
+            "total_created": self.total_created,
+            "total_failed": self.total_failed,
+            "total_cleaned": self.cleanup_count,
+            "average_startup_ms": round(avg_startup * 1000, 2),
+            "last_cleanup": self.last_cleanup.isoformat(),
+            "uptime_hours": (datetime.now() - self.last_cleanup).total_seconds() / 3600
+        }
+
+# Initialize metrics
+portfolio_metrics = PortfolioMetrics()
+
+# Cleanup task
+async def portfolio_cleanup_task():
+    """Background task to clean up old portfolios"""
+    while True:
+        try:
+            logger.info("🧹 Running portfolio cleanup task")
+            now = datetime.now()
+            cleaned_count = 0
+            
+            for portfolio_id, info in list(PORTFOLIO_PROCESSES.items()):
+                age = now - info['created_at']
+                
+                if age > timedelta(hours=PORTFOLIO_MAX_AGE_HOURS):
+                    logger.info(f"🧹 Cleaning up old portfolio: {portfolio_id} (age: {age})")
+                    
+                    # Stop the server
+                    try:
+                        process = info.get('process')
+                        if process and process.poll() is None:
+                            process.terminate()
+                            # Give it time to terminate gracefully
+                            time.sleep(2)
+                            if process.poll() is None:
+                                process.kill()
+                    except Exception as e:
+                        logger.error(f"Error stopping portfolio {portfolio_id}: {e}")
+                    
+                    # Clean up the directory
+                    try:
+                        sandbox_path = Path(info.get('sandbox_path', ''))
+                        if sandbox_path.exists():
+                            shutil.rmtree(sandbox_path, ignore_errors=True)
+                    except Exception as e:
+                        logger.error(f"Error cleaning directory for {portfolio_id}: {e}")
+                    
+                    # Remove from tracking
+                    del PORTFOLIO_PROCESSES[portfolio_id]
+                    portfolio_metrics.record_cleanup(portfolio_id)
+                    cleaned_count += 1
+            
+            portfolio_metrics.last_cleanup = datetime.now()
+            if cleaned_count > 0:
+                logger.info(f"✅ Cleaned up {cleaned_count} old portfolios")
+                
+        except Exception as e:
+            logger.error(f"❌ Cleanup task error: {e}")
+        
+        # Wait before next cleanup
+        await asyncio.sleep(PORTFOLIO_CLEANUP_INTERVAL)
+
+# Start cleanup task on first request (will be initialized once)
+cleanup_task_started = False
+
+def ensure_cleanup_task():
+    global cleanup_task_started
+    if not cleanup_task_started:
+        cleanup_task_started = True
+        asyncio.create_task(portfolio_cleanup_task())
+        logger.info("🚀 Started portfolio cleanup task")
 
 def find_available_port(start_port: int = 4000, max_port: int = 5000) -> int:
     """
@@ -404,6 +511,21 @@ async def generate_portfolio_anonymous(
         Portfolio generation result with URL and status
     """
     try:
+        # Ensure cleanup task is running
+        ensure_cleanup_task()
+        
+        # Check if we've reached the maximum number of active portfolios
+        active_count = len([p for p in PORTFOLIO_PROCESSES.values() if p.get('status') != 'stopped'])
+        if active_count >= MAX_ACTIVE_PORTFOLIOS:
+            logger.warning(f"⚠️ Maximum active portfolios reached ({MAX_ACTIVE_PORTFOLIOS})")
+            raise HTTPException(
+                status_code=503,
+                detail=f"Server at capacity. Maximum {MAX_ACTIVE_PORTFOLIOS} active portfolios. Please try again later."
+            )
+        
+        # Track start time for metrics
+        start_time = time.time()
+        
         # Professional cleanup: Kill any zombie processes using ports in our range
         cleanup_zombie_processes()
         
@@ -774,7 +896,9 @@ export {{ extractedCVData }}
                 env = {
                     **os.environ,
                     "PORT": str(port),
-                    "NODE_ENV": "development"
+                    "NODE_ENV": "development",
+                    # Add memory limit to prevent runaway processes
+                    "NODE_OPTIONS": "--max-old-space-size=512"  # Limit to 512MB per portfolio
                 }
                 
                 process = None
@@ -964,6 +1088,11 @@ export {{ extractedCVData }}
         # If we get here, server started successfully
         PORTFOLIO_PROCESSES[portfolio_id]["status"] = "running"
         
+        # Record metrics
+        startup_time = time.time() - start_time
+        portfolio_metrics.record_creation(portfolio_id, startup_time)
+        logger.info(f"📊 Portfolio created in {startup_time:.2f} seconds")
+        
         portfolio_url = f"http://localhost:{port}"
         logger.info(f"✅ Portfolio server started at {portfolio_url}")
         
@@ -977,8 +1106,10 @@ export {{ extractedCVData }}
         }
             
     except HTTPException:
+        portfolio_metrics.record_failure()
         raise
     except Exception as e:
+        portfolio_metrics.record_failure()
         logger.error(f"❌ Portfolio generation failed: {e}")
         raise HTTPException(status_code=500, detail=f"Portfolio generation failed: {str(e)}")
 
@@ -999,6 +1130,21 @@ async def generate_portfolio(
         Portfolio generation result with URL and status
     """
     try:
+        # Ensure cleanup task is running
+        ensure_cleanup_task()
+        
+        # Check if we've reached the maximum number of active portfolios
+        active_count = len([p for p in PORTFOLIO_PROCESSES.values() if p.get('status') != 'stopped'])
+        if active_count >= MAX_ACTIVE_PORTFOLIOS:
+            logger.warning(f"⚠️ Maximum active portfolios reached ({MAX_ACTIVE_PORTFOLIOS})")
+            raise HTTPException(
+                status_code=503,
+                detail=f"Server at capacity. Maximum {MAX_ACTIVE_PORTFOLIOS} active portfolios. Please try again later."
+            )
+        
+        # Track start time for metrics
+        start_time = time.time()
+        
         logger.info(f"🚀 Starting portfolio generation for job_id: {job_id}, user: {current_user_id}")
         
         # === 1. VERIFY CV OWNERSHIP ===
@@ -1253,10 +1399,15 @@ import { portfolioData, useRealData } from "@/lib/injected-data"'''
         metadata_file = portfolio_dir / "portfolio_metadata.json"
         metadata_file.write_text(json.dumps(portfolio_metadata, indent=2))
         
+        # Record metrics
+        startup_time = time.time() - start_time
+        portfolio_metrics.record_creation(portfolio_id, startup_time)
+        
         logger.info(f"🎉 Portfolio generation completed successfully!")
         logger.info(f"   Portfolio ID: {portfolio_id}")
         logger.info(f"   URL: http://localhost:{port}")
         logger.info(f"   Directory: {portfolio_dir}")
+        logger.info(f"📊 Portfolio created in {startup_time:.2f} seconds")
         
         return {
             "status": "success",
@@ -1270,8 +1421,10 @@ import { portfolioData, useRealData } from "@/lib/injected-data"'''
         }
         
     except HTTPException:
+        portfolio_metrics.record_failure()
         raise
     except Exception as e:
+        portfolio_metrics.record_failure()
         logger.error(f"❌ Portfolio generation failed: {e}")
         raise HTTPException(status_code=500, detail=f"Portfolio generation failed: {str(e)}")
 
@@ -1617,3 +1770,21 @@ async def delete_portfolio(
     except Exception as e:
         logger.error(f"Failed to delete portfolio: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete portfolio")
+
+@router.get("/portfolios/metrics")
+async def get_portfolio_metrics():
+    """
+    Get portfolio generation metrics and statistics
+    
+    Returns:
+        Metrics including active portfolios, total created, failures, and performance stats
+    """
+    return {
+        "status": "success",
+        "metrics": portfolio_metrics.get_stats(),
+        "config": {
+            "max_active_portfolios": MAX_ACTIVE_PORTFOLIOS,
+            "portfolio_max_age_hours": PORTFOLIO_MAX_AGE_HOURS,
+            "cleanup_interval_seconds": PORTFOLIO_CLEANUP_INTERVAL
+        }
+    }

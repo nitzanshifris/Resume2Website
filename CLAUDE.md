@@ -15,15 +15,22 @@ CV2WEB is an AI-powered CV to portfolio website converter that transforms resume
 - **Deploys** to Vercel with one click
 - **Supports** multiple file formats (PDF, DOCX, images, etc.)
 
+## Language Configuration 
+
+### Language Communication Guidelines
+- Always answer in English! even if the user uses Hebrew, answer in English
+- Maintain clear and professional communication
+- Prioritize technical accuracy and detailed explanations
+
 ### Tech Stack at a Glance
 - **Backend**: FastAPI + Python 3.11+ with SQLite database
 - **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4
 - **Authentication**: Google OAuth 2.0 + Email/Password with bcrypt
-- **AI Services**: Google Gemini 2.5 Flash, Claude 4, OpenAI, AWS Textract
+- **AI Services**: Claude 4 Opus (primary), OpenAI, AWS Textract, Google Cloud Vision
 - **UI Libraries**: Aceternity UI, Magic UI (100+ animated components)
 - **Infrastructure**: Vercel deployment, Railway, local development
 - **Database**: SQLite with session-based authentication
-- **Package Manager**: npm (switched from pnpm for sandbox compatibility)
+- **Package Manager**: pnpm for main project, npm for sandboxes only
 
 ## 🚀 Quick Start
 
@@ -77,7 +84,7 @@ python3 main.py                              # Alternative start method
 ```bash
 # 1. MANDATORY: Check current branch first
 git branch --show-current  # Must NOT be 'main'
-# Note: Currently on 'nitzan-development-2' branch
+# Note: Currently on 'Nitzan-development' branch
 
 # 2. Create feature branch (REQUIRED)
 git checkout -b feature/description
@@ -408,7 +415,7 @@ POST /api/v1/portfolio-expert/chat
 POST /api/v1/portfolio-expert/generate
 {
     "session_id": "session_123",
-    "template_id": "v0_template_1",
+    "template_id": "v0_template_v1.5",
     "customizations": {...}
 }
 ```
@@ -1019,6 +1026,16 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 
 ## Recent Updates
 
+### Portfolio Resource Management & Monitoring (2025-08-05)
+- **📊 Portfolio Metrics System**: Added comprehensive metrics tracking for portfolio creation, failures, and performance
+- **🚫 Resource Limits**: Each portfolio limited to 512MB memory via NODE_OPTIONS to prevent server overload
+- **🧹 Automatic Cleanup**: Old portfolios (>24h) automatically cleaned up every 5 minutes
+- **⚡ Capacity Management**: Maximum 20 active portfolios with server capacity protection (503 response when full)
+- **📈 Metrics Endpoint**: New `/api/v1/portfolio/portfolios/metrics` endpoint for monitoring portfolio statistics
+- **⏱️ Performance Tracking**: Tracks average portfolio startup time and success/failure rates
+- **🔄 Background Tasks**: Async cleanup task runs continuously to manage portfolio lifecycle
+- **🛡️ Error Recovery**: Improved failure tracking with metrics recording on all error paths
+
 ### Critical CSS Fix & PostCSS Validation (2025-08-02)
 - **🐛 Fixed CSS Not Loading Issue**: Discovered missing `autoprefixer` in PostCSS configs causing broken HTML display
 - **🔧 Created Validation Script**: Added `src/utils/validate_postcss_config.py` to detect and fix PostCSS issues
@@ -1103,4 +1120,4 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-08-04 | Version: 4.8*
+*Last updated: 2025-08-05 | Version: 4.9*
