@@ -84,7 +84,7 @@ python3 main.py                              # Alternative start method
 ```bash
 # 1. MANDATORY: Check current branch first
 git branch --show-current  # Must NOT be 'main'
-# Note: Currently on 'Nitzan-development' branch
+# Note: Currently on 'main' branch (as of 2025-08-05)
 
 # 2. Create feature branch (REQUIRED)
 git checkout -b feature/description
@@ -1026,6 +1026,14 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 
 ## Recent Updates
 
+### Git Branch Consolidation & CV Extraction Fix (2025-08-05)
+- **🌿 Branch Consolidation**: Successfully merged all work from nitzan-development-2 into main branch
+- **🏷️ Backup Tags Created**: Created backup tags for safety: backup-main-2025-08-05, backup-nitzan-development-2-2025-08-05
+- **🧹 Branch Cleanup**: Deleted local branches (nitzan, Nitzan-development, nitzan-development-2) after merging
+- **🐛 Fixed Double CV Extraction**: Fixed issue where CV was extracted twice for anonymous users - now properly checks database cache
+- **⚡ Performance Improvement**: Eliminated redundant Claude API calls, significantly reducing processing time and costs
+- **📝 Enhanced Database Access**: Anonymous users now properly retrieve existing CV data from SQLite database
+
 ### Portfolio Resource Management & Monitoring (2025-08-05)
 - **📊 Portfolio Metrics System**: Added comprehensive metrics tracking for portfolio creation, failures, and performance
 - **🚫 Resource Limits**: Each portfolio limited to 512MB memory via NODE_OPTIONS to prevent server overload
@@ -1120,4 +1128,4 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-08-05 | Version: 4.9*
+*Last updated: 2025-08-05 | Version: 5.0*
