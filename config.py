@@ -8,8 +8,8 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 DEBUG = ENVIRONMENT == "development"
 
 # Server
-PORT = 2000
-HOST = "127.0.0.1"
+PORT = int(os.getenv("BACKEND_PORT", "2000"))
+HOST = os.getenv("BACKEND_HOST", "127.0.0.1")
 
 # CORS
 ALLOWED_ORIGINS = [
@@ -35,14 +35,20 @@ ALLOWED_EXTENSIONS = {
 }
 
 # Database
-DATABASE_PATH = "data/cv2web.db"
-SESSION_EXPIRY_DAYS = 7
+DATABASE_PATH = os.getenv("DATABASE_PATH", "data/cv2web.db")
+SESSION_EXPIRY_DAYS = int(os.getenv("SESSION_EXPIRY_DAYS", "7"))
 
-# Paths
+# Paths - Configurable for K8s volume mounts
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = "data/uploads"
-OUTPUT_DIR = "data/outputs"
-SANDBOXES_DIR = "sandboxes"
+UPLOAD_DIR = os.getenv("UPLOAD_PATH", "data/uploads")
+OUTPUT_DIR = os.getenv("OUTPUT_PATH", "data/outputs")
+SANDBOXES_DIR = os.getenv("PORTFOLIO_PATH", "sandboxes")
+
+# Portfolio Generation
+PORTFOLIO_START_PORT = int(os.getenv("PORTFOLIO_START_PORT", "4000"))
+PORTFOLIO_END_PORT = int(os.getenv("PORTFOLIO_END_PORT", "5000"))
+PORTFOLIO_MAX_INSTANCES = int(os.getenv("MAX_PORTFOLIOS", "20"))
+PORTFOLIO_CLEANUP_HOURS = int(os.getenv("CLEANUP_HOURS", "24"))
 
 # AI Models - Using Claude 4 Opus for maximum determinism
 PRIMARY_MODEL = "claude-opus-4-20250514"  # Claude 4 Opus for deterministic extraction
