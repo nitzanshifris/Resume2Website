@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, ArrowDown, Menu, X } from "lucide-react"
-import { ParticleSystem } from "@/components/particle-system"
 import { MacBookFrame } from "@/components/macbook-frame"
 import IPhoneFrame from "@/components/iphone-frame"
 import { cn } from "@/lib/utils"
@@ -1233,13 +1232,6 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
                 transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.2 }}
                 className="relative w-full max-w-[340px] h-[485px] flex items-center justify-center"
               >
-                <ParticleSystem
-                  isActive={true}
-                  width={340}
-                  height={485}
-                  intensity={stage === 'morphing' ? 'high' : 'medium'}
-                  particleType={stage === 'morphing' ? 'magical' : 'dissolve'}
-                />
               </motion.div>
             )}
             {/* Website: show during 'materializing' and 'complete' (iPhoneFrame for mobile) */}
@@ -1505,15 +1497,6 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
 
         {/* Right Side - Dynamic width based on stage (desktop only, keep MacBookFrame) */}
         <div className={`${isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full flex items-center ${(stage === "materializing" || stage === "complete") ? "justify-start" : "justify-center"} relative ${(stage === "materializing" || stage === "complete") ? "pl-2 pr-4 md:pr-6 lg:pr-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
-            <div className="absolute inset-0" style={{ pointerEvents: 'none', zIndex: 1 }}>
-              <ParticleSystem
-                isActive={stage === "morphing" || stage === "dissolving"}
-                width={1000}
-                height={1000}
-                intensity={stage === "morphing" ? "high" : "medium"}
-                particleType={stage === "morphing" ? "magical" : "dissolve"}
-              />
-            </div>
 
 
 
