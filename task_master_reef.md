@@ -549,26 +549,26 @@ This file contains the complete output of `taskmaster show {id}` for all tasks f
 │ };                                                                     │
 │ ```                                                                    │
 │                                                                        │
-│ ### 2. Enhance Hero Section Component                                  │
-│ - Update  Hero section code is in user_web_example/app/page.tsx`       
-  (CV2WebDemo component) 
-│ ```typescript                                                          │
-│ interface HeroSectionProps {                                           │
-│ mainHeadline: string;                                                  │
-│ subHeadline: string;                                                   │
-│ postAnimationHeadline?: string;                                        │
-│ enableGradient?: boolean;                                              │
-│ }                                                                      │
-│                                                                        │
-│ export const HeroSection: React.FC<HeroSectionProps> = ({              │
-│ mainHeadline,                                                          │
-│ subHeadline,                                                           │
-│ postAnimationHeadline,                                                 │
-│ enableGradient = true                                                  │
-│ }) => {                                                                │
-│ // Implementation                                                      │
-│ };                                                                     │
-│ ```                                                                    │
+│ - Update the CV2WebDemo component in user_web_example/app/page.tsx:
+  // The CV2WebDemo component contains all hero section logic
+  // Located at lines 482-1179 in page.tsx
+
+  // Update the headline rendering logic (around lines 908-933):
+  // Desktop version headlines
+  <span className="text-gray-800 font-bold">
+    Take control of your <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">career</span>,
+    <span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">stand out</span>,
+    get&nbsp;<span className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 bg-clip-text text-transparent">interviews</span>
+  </span>
+
+  // Mobile version headlines (around lines 698-701):
+  // Similar structure but with responsive sizing
+
+  // Key areas to modify:
+  // 1. Main headline text (lines 699, 910)
+  // 2. Sub-headline with RoughNotation strike-through effect (lines 720-731, 920-931)
+  // 3. Post-animation headline in AnimatePresence (lines 979-996)
+  // 4. Mobile-specific headline sizing (style={{ fontSize: 'clamp(3.2rem, 11vw, 4.5rem)' }})                                            │
 │                                                                        │
 │ ### 3. Implement Gradient Text Effects                                 │
 │  - Path: Lines 699, 910, 989 in CV2WEB-V4/user_web_example/app/page.tsx

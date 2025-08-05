@@ -1,4 +1,4 @@
-# Task #5 - Portfolio Generation Loading Animation
+# Task #2 - Portfolio Generation Loading Animation
 
 ## 📋 Task Overview
 

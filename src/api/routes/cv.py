@@ -799,28 +799,32 @@ async def extract_cv_data_endpoint(
             if not cv_upload:
                 raise HTTPException(status_code=404, detail="CV upload not found")
         else:
-            # For anonymous users, we need to construct the upload info
-            # Since we don't have direct DB access, check if file exists
-            import glob
-            BASE_DIR = Path(__file__).parent.parent.parent.parent
-            
-            # Try to find the file with this job_id
-            file_pattern = str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}*")
-            matching_files = glob.glob(file_pattern, recursive=True)
-            
-            if not matching_files:
-                raise HTTPException(status_code=404, detail="CV upload not found")
-            
-            # Use the first matching file
-            file_path = matching_files[0]
-            file_extension = Path(file_path).suffix
-            cv_upload = {
-                'job_id': job_id,
-                'file_path': file_path,
-                'file_type': file_extension,
-                'status': 'uploaded',
-                'cv_data': None
-            }
+            # For anonymous users, check database by job_id directly
+            from src.api.db import get_db_connection
+            conn = get_db_connection()
+            try:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT job_id, filename, file_type, status, cv_data FROM cv_uploads WHERE job_id = ?",
+                    (job_id,)
+                )
+                result = cursor.fetchone()
+                
+                if not result:
+                    raise HTTPException(status_code=404, detail="CV upload not found")
+                
+                cv_upload = dict(result)
+                
+                # If we need the file path, construct it
+                if not cv_upload.get('file_path'):
+                    import glob
+                    BASE_DIR = Path(__file__).parent.parent.parent.parent
+                    file_pattern = str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}*")
+                    matching_files = glob.glob(file_pattern, recursive=True)
+                    if matching_files:
+                        cv_upload['file_path'] = matching_files[0]
+            finally:
+                conn.close()
         
         # Check if already extracted
         if cv_upload['status'] == 'completed' and cv_upload.get('cv_data'):

@@ -3,3 +3,5 @@
 3 - error messegase to user  
 4 - find 15 people with different job to examine our app , make a doc of what we need from them 
 5 - ask them to post their results on our linkdin first post to see immidiet traction
+6- timing calculatur
+7- token calculator 
