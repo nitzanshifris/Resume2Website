@@ -270,7 +270,7 @@ taskmaster report --type=completion --task-id=X
 
 #### CV Extraction Tasks
 ```bash
-claude> Create tasks for improving CV extraction with Gemini 2.5 Flash. Focus on:
+claude> Create tasks for improving CV extraction with Claude 4 Opus. Focus on:
 - Better section detection
 - Improved date parsing
 - Multi-language support

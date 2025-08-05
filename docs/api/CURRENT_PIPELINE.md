@@ -1,88 +1,95 @@
-# CV2WEB Current Pipeline - Updated 2025-07-03
+# CV2WEB Current Pipeline - Updated January 2025
 
 ```mermaid
 graph TD
-    %% Frontend Integration
-    React[⚛️ React App] -->|CORS Enabled| API[🚀 FastAPI]
+    %% Frontend Flow
+    NextJS[🌐 Next.js App] -->|Auth Headers| API[🚀 FastAPI]
     
     %% Authentication Flow
-    API -->|/register, /login| Auth[🔐 Auth Service]
-    Auth -->|Keychain| Keys[🔑 macOS Keychain]
-    Auth -->|User Data| DB[(SQLite)]
+    API -->|/auth/login, /auth/register| Auth[🔐 Auth Service]
+    Auth -->|Sessions| DB[(SQLite)]
+    Auth -->|Credentials| Keys[🔑 Keychain Manager]
     
-    %% CV Upload Flow
-    API -->|/upload| Upload[📤 Upload Service]
-    Upload -->|Validate| Check{File OK?}
+    %% CV Upload & Processing Flow
+    API -->|/upload-cv| Upload[📤 Upload Service]
+    Upload -->|Validate| Check{Valid File?}
     Check -->|No| Error[❌ Error Response]
-    Check -->|Yes| Save[💾 Save File]
+    Check -->|Yes| Store[💾 Store Original]
     
-    %% Text Extraction Flow
-    Save -->|Extract Text| Extract[📄 Text Extractor]
-    Extract -->|PDF/DOCX/TXT| Local[📝 Local Parser]
+    %% Text Extraction
+    Store -->|Extract| Extract[📄 Text Extractor]
+    Extract -->|PDF/DOCX| Local[📝 Local Parser]
     Extract -->|Images| OCR{OCR Service}
     OCR -->|Primary| GVision[👁️ Google Vision]
     OCR -->|Fallback| AWS[📸 AWS Textract]
     
-    %% AI Processing Flow (17 Sections)
-    Extract -->|Raw Text| AI[🤖 Data Extractor]
-    AI -->|Primary| Gemini[✨ Gemini 2.0]
-    AI -->|Fallback| Claude[🧠 Claude Sonnet]
-    AI -->|17 Sections| CVData[📋 CV Data Schema]
+    %% AI Processing (Claude 4 Opus ONLY)
+    Extract -->|Raw Text| Claude[🧠 Claude 4 Opus]
+    Claude -->|Temperature 0.0| Extraction[🎯 Deterministic Extraction]
+    Extraction -->|18 Sections| CVData[📋 CV Data]
     
-    %% Smart Deduplication
-    Extract -->|Text| Dedup[🧹 Smart Deduplicator]
-    Dedup -->|Fuzzy Matching| AI
+    %% Advanced Classification
+    CVData -->|Section Analysis| Classifier[🔍 Advanced Classifier]
+    Classifier -->|Deduplication| Clean[🧹 Clean Data]
     
-    %% Component Selection
-    CVData -->|Archetype| Selector[🎨 Component Selector]
-    Selector -->|AI Analysis| Components[🎯 Aceternity Components]
+    %% CV Editor Flow
+    Clean -->|Display| Editor[✏️ CV Editor]
+    Editor -->|User Edits| Save[💾 Save Changes]
+    Save -->|Update| DB
     
     %% Portfolio Generation
-    Components -->|100+ Components| Generator[🏗️ Portfolio Generator]
-    Generator -->|Next.js 14| Portfolio[🌐 Generated Site]
-    Generator -->|Copy Components| Aceternity[📦 UI Library]
+    Editor -->|Generate| Expert[🤖 Portfolio Expert]
+    Expert -->|AI Guidance| Template[🎨 Template Selection]
+    Template -->|v1.5 or v2.1| Generator[🏗️ Portfolio Generator]
     
-    %% Response
-    Portfolio -->|Deploy Ready| Response[✅ Portfolio URL]
-    Response -->|Return to| React
+    %% Sandbox Environment
+    Generator -->|Create Sandbox| Sandbox[📦 Isolated Environment]
+    Sandbox -->|npm install| Install[⚙️ Dependencies]
+    Install -->|Start Server| Server[🚀 Dev Server]
+    Server -->|Unique Port| Preview[👁️ Live Preview]
     
-    %% Credentials
-    GVision -.->|Creds| Keys
-    AWS -.->|Creds| Keys
-    Gemini -.->|Creds| Keys
-    Claude -.->|Creds| Keys
+    %% Deployment
+    Preview -->|User Approves| Deploy[🌍 Deploy to Vercel]
+    Deploy -->|One Click| Live[✅ Live Portfolio]
+    
+    %% Data Flow
+    DB -.->|CV Data| Editor
+    DB -.->|File Info| Upload
+    Keys -.->|API Keys| Claude
+    Keys -.->|OAuth| Auth
     
     %% Styling
-    style React fill:#61DAFB
+    style NextJS fill:#000000
     style API fill:#009688
     style Auth fill:#2196F3
-    style Keys fill:#FFC107
     style DB fill:#FF9800
-    style Extract fill:#4CAF50
-    style OCR fill:#9C27B0
-    style Error fill:#f44336
-    style Generator fill:#673AB7
-    style Portfolio fill:#00BCD4
+    style Claude fill:#7C3AED
+    style Sandbox fill:#10B981
+    style Live fill:#00BCD4
 ```
 
 ## ✅ What Works Now
 
 ### 1. Complete End-to-End Pipeline
-- **CV Upload** → **Text Extraction** → **AI Analysis** → **Component Selection** → **Portfolio Generation**
-- ~20 seconds from CV upload to running Next.js site
+- **CV Upload** → **AI Extraction** → **CV Editor** → **Portfolio Generation** → **Live Preview**
+- File preservation with secure download
+- Real-time progress tracking (simulated for better UX)
 
-### 2. Text Extraction
-- All document formats: PDF, DOCX, TXT, MD, RTF, HTML
-- OCR for images (Google Vision + AWS Textract)
-- Unicode normalization (fixes ligatures, quotes)
-- Smart deduplication with fuzzy matching
+### 2. Text Extraction & Processing
+- **Supported formats**: PDF, DOCX, TXT, PNG, JPG, JPEG
+- **OCR capabilities**: Google Vision (primary) + AWS Textract (fallback)
+- **Text normalization**: Unicode fixes, smart deduplication
+- **File size limit**: 10MB per upload
+- **Multi-file support**: Process multiple images together
 
 ### 3. AI-Powered Data Extraction
-- 17 different CV sections extracted:
+- **Claude 4 Opus ONLY** with temperature 0.0 for deterministic results
+- **18 CV sections** extracted:
   - Hero (name, title, summary)
-  - Experience (work history)
-  - Education (degrees, institutions)
-  - Skills (technical, soft)
+  - Contact (email, phone, location)
+  - Experience (work history with achievements)
+  - Education (degrees, institutions, dates)
+  - Skills (categorized technical skills)
   - Projects (portfolio pieces)
   - Certifications & Licenses
   - Achievements & Awards
@@ -92,83 +99,110 @@ graph TD
   - Professional Memberships
   - Volunteer Experience
   - Languages
-  - Courses
+  - Courses & Training
   - Hobbies & Interests
-  - Contact Information
-- Gemini 2.0 Flash (primary) + Claude Sonnet (fallback)
-- Parallel extraction for speed
+  - References
+  - Social Links
+- **Advanced classification**: Prevents cross-section contamination
+- **Confidence scoring**: Caches high-confidence extractions (≥75%)
 
-### 4. Smart Component Selection
-- AI analyzes CV to determine user archetype:
-  - Technical/Developer → Code blocks, terminals, grids
-  - Business/Marketing → Professional gradients, testimonials
-  - Creative/Designer → 3D cards, parallax effects
-  - Academic/Researcher → Timelines, publication lists
-- Selects best-fitting Aceternity components
+### 4. CV Editor
+- **Full CRUD operations** on all CV sections
+- **Add/remove/reorder** list items (experience, education, skills)
+- **Real-time validation** and saving
+- **Original file display** with PDF viewer
+- **Direct flow**: Upload → Extract → Edit → Generate
 
-### 5. Portfolio Generation
-- Integrates 100+ real Aceternity UI components
-- Generates complete Next.js 14 app with:
-  - TypeScript/React components
-  - Tailwind CSS styling
-  - Framer Motion animations
-  - Responsive design
-  - Dark mode support
-- Automatic component copying and import fixing
-- Production-ready code
+### 5. Portfolio Generation System
+- **Isolated sandbox environments** for each portfolio
+- **Template options**: v1.5 and v2.1 with different styles
+- **Data adapters**: Transform CV data to template format
+- **Live preview**: Unique ports (4000+) for each instance
+- **Server management**: Start/stop/restart controls
+- **Health monitoring**: Real-time status checks
+- **npm-based**: Better compatibility than pnpm in sandboxes
 
-### 6. Authentication & Session Management
-- User registration & login
-- Session-based auth with SQLite
-- Secure credential storage in macOS Keychain
+### 6. Authentication & Security
+- **Email/password** registration and login
+- **Google OAuth** integration (ready)
+- **Session-based auth** with SQLite
+- **Secure headers**: X-Session-ID for API calls
+- **File access control**: Only owners can download originals
 
 ## 🚧 In Progress
 
-### High Priority Issues
-- [ ] JSON parsing errors in achievements section
-- [ ] Better error recovery for failed extractions
-- [ ] Add extraction quality validation
+### Payment System
+- [ ] Stripe/PayPal integration for three tiers
+- [ ] Go Live ($14.90) - Basic with branding
+- [ ] Get Hired ($19.90) - Premium features
+- [ ] Turn Heads ($89.90) - Custom design service
 
-### Feature Development
-- [ ] Real-time preview mode
-- [ ] Multiple theme selection
-- [ ] Custom component mappings
-- [ ] Deploy to Vercel integration
+### Portfolio Expert UI
+- [ ] Frontend interface for AI guidance
+- [ ] Chat-based portfolio recommendations
+- [ ] Template preview with customizations
+
+### Enhancement Tasks
+- [ ] Multiple portfolio management UI
+- [ ] Template marketplace
+- [ ] Custom domain connection
+- [ ] Analytics dashboard
 
 ## 🎯 Next Steps
 
-1. **Improve Reliability**
-   - Add JSON validation before saving
-   - Implement retry logic for AI calls
-   - Better error messages
+1. **Payment Integration**
+   - Backend payment processing endpoints
+   - Subscription management
+   - Refund system for Get Hired plan
+   - Monthly hosting billing
 
-2. **Enhanced Features**
-   - Component preview gallery
-   - Custom color schemes
-   - Font selection
-   - Layout variations
+2. **Performance Optimization**
+   - Portfolio generation under 10 seconds
+   - Parallel sandbox creation
+   - Template caching system
+   - CDN for static assets
 
-3. **Production Ready**
-   - Add monitoring/analytics
-   - Implement caching
-   - Optimize for scale
-   - Add deployment automation
+3. **Enterprise Features**
+   - Team accounts
+   - White-label options
+   - API access
+   - Bulk processing
 
 ## 📊 Performance Metrics
 
 - **Text Extraction**: <1 second
-- **AI Processing**: 10-15 seconds (parallel)
-- **Component Selection**: <2 seconds
-- **Portfolio Generation**: <5 seconds
-- **Total Pipeline**: ~20 seconds
+- **Claude 4 Extraction**: 8-12 seconds
+- **CV Editor Load**: <2 seconds
+- **Portfolio Generation**: 15-25 seconds
+- **Live Preview Ready**: 20-30 seconds total
 
 ## 🔧 Technical Stack
 
-- **Backend**: FastAPI, Python 3.11+
-- **AI**: Google Gemini 2.0, Anthropic Claude
+### Backend
+- **Framework**: FastAPI (Python 3.11+)
+- **Database**: SQLite (sessions, CV data)
+- **AI**: Claude 4 Opus (deterministic mode)
 - **OCR**: Google Vision, AWS Textract
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **UI**: Aceternity Components, Tailwind CSS
-- **Animation**: Framer Motion
-- **Database**: SQLite (sessions)
-- **Auth**: Custom session management
+- **Auth**: Session-based + OAuth ready
+
+### Frontend
+- **Framework**: Next.js 15, React 18
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **UI Libraries**: Aceternity UI, Magic UI
+- **State**: React Context + Hooks
+
+### Infrastructure
+- **Deployment**: Vercel
+- **Sandboxes**: Isolated Node.js environments
+- **Package Manager**: pnpm (main), npm (sandboxes)
+- **Monitoring**: Built-in health checks
+
+## 🔒 Security Features
+
+- **Input validation**: File type and size limits
+- **Authentication**: Secure session management
+- **File isolation**: User files in separate directories
+- **CSP headers**: Configured for iframe embedding
+- **API rate limiting**: Prevents abuse
+- **Secure credentials**: Keychain manager for API keys
