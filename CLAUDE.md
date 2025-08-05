@@ -26,7 +26,7 @@ CV2WEB is an AI-powered CV to portfolio website converter that transforms resume
 - **Backend**: FastAPI + Python 3.11+ with SQLite database
 - **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4
 - **Authentication**: Google OAuth 2.0 + Email/Password with bcrypt
-- **AI Services**: Claude 4 Opus (primary), OpenAI, AWS Textract, Google Cloud Vision
+- **AI Services**: Claude 4 Opus ONLY (deterministic CV extraction at temperature 0.0)
 - **UI Libraries**: Aceternity UI, Magic UI (100+ animated components)
 - **Infrastructure**: Vercel deployment, Railway, local development
 - **Database**: SQLite with session-based authentication
@@ -280,7 +280,7 @@ Claude: [Automatically creates PRD → generates tasks → analyzes → starts i
 ```
 
 ### CV2WEB Specific TaskMaster Usage
-- **CV Extraction**: `create tasks for improving CV extraction with Gemini 2.5 Flash`
+- **CV Extraction**: `create tasks for improving CV extraction with Claude 4 Opus`
 - **UI Components**: `break down portfolio templates focusing on Aceternity components`
 - **API Features**: `create tasks for new FastAPI endpoint with authentication`
 - **Research**: `research latest Next.js 15 patterns and update our frontend tasks`
@@ -653,8 +653,8 @@ vercel
 
 
 ### AI Services & Configuration
-- **Claude 4 Opus** - CV extraction (primary, deterministic with temperature 0.0)
-- **Google Cloud Vision** - OCR for images
+- **Claude 4 Opus** - CV extraction ONLY (deterministic with temperature 0.0)
+- **Note**: Other AI services (Gemini, Claude 3.5 Sonnet) are disabled/unused
 - **AWS Textract** - Alternative OCR
 - **OpenAI API** - Optional enhancement
 - **Vercel** - Deployment platform
@@ -702,9 +702,7 @@ python3 src/utils/setup_keychain.py      # Setup credentials
 When asked about any of these, **ALWAYS** use Context7 MCP tools:
 - FastAPI implementation patterns
 - React/Next.js best practices
-- Google Gemini API usage
-- Anthropic Claude API integration
-- AWS Textract/Google Vision OCR
+- Anthropic Claude 4 Opus API integration ONLY
 - Tailwind CSS v4 patterns
 - TypeScript patterns
 - Any library documentation

@@ -1,4 +1,5 @@
 packages:
   - "packages/*"
   - "aceternity-components-library"
-  - "aceternity-gallery-app" 
+  - "aceternity-gallery-app"
+  - "user_web_example" 

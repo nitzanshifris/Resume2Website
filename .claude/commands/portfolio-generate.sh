@@ -15,10 +15,12 @@ Analyze and optimize the portfolio generation system for CV2WEB. Focus on:
 
 Key areas to examine:
 - src/api/routes/portfolio_generator.py
-- src/templates/v0_template_1/lib/cv-data-adapter.tsx
+- src/templates/v0_template_v1.5/lib/cv-data-adapter.tsx
+- src/templates/v0_template_v2.1/lib/cv-data-adapter.tsx
 - NextJSServerManager class implementation
 - Port allocation and health monitoring
 - Template registration and validation
-- Sandbox environment isolation
+- Sandbox npm environment isolation (not pnpm)
+- Resource limits and automated cleanup system
 
 Provide actionable improvements for generation reliability and performance."
