@@ -1,179 +1,259 @@
-# CV2WEB Project Structure
+# CV2WEB-V4 Project Structure
 
-## Root Directory Organization
+## Overview
+This document provides a comprehensive overview of the CV2WEB-V4 project structure, explaining the purpose and contents of each directory.
+
+## Root Directory Structure
 
 ```
 CV2WEB-V4/
-├── README.md                    # Main project documentation
-├── requirements.txt             # Python dependencies
-├── config.py                    # Centralized configuration
-├── main.py                      # FastAPI application entry point
-│
-├── api/                         # API Layer
-│   ├── routes/                  # API endpoints
-│   │   ├── auth.py             # Authentication endpoints
-│   │   ├── cv.py               # CV upload & processing
-│   │   └── portfolio.py        # Portfolio generation
-│   ├── db.py                   # Database operations
-│   └── schemas.py              # Request/response schemas
-│
-├── backend/                     # Data Models
-│   └── schemas/
-│       └── unified.py          # 17 CV section schemas
-│
-├── services/                    # Core Business Logic
-│   ├── llm/                    # AI Services
-│   │   └── data_extractor.py  # Gemini/Claude integration
-│   ├── local/                  # Local Processing
-│   │   ├── text_extractor.py  # PDF/DOCX/Image extraction
-│   │   ├── smart_deduplicator.py # Fuzzy matching dedup
-│   │   └── keychain_manager.py # Credential management
-│   └── portfolio/              # Portfolio Generation
-│       ├── component_selector.py # AI component selection
-│       ├── portfolio_generator.py # Next.js generation
-│       ├── component_adapter.py # Data transformation
-│       └── component_mappings.py # Component configurations
-│
-├── aceternity-components-library/ # UI Component Library
-│   ├── components/             # 100+ Aceternity components
-│   ├── templates/              # Example templates
-│   └── package.json            # Component dependencies
-│
-├── data/                        # Data Storage
-│   ├── cv_examples/            # Test CV files
-│   ├── uploads/                # User uploaded files
-│   ├── test_outputs/           # Test extraction results
-│   └── cv2web.db              # SQLite database
-│
-├── tests/                       # Test Suite
-│   ├── comprehensive_test.py   # Full integration tests
-│   ├── test_*.py              # Unit & integration tests
-│   └── outputs/               # Test artifacts
-│
-├── docs/                        # Documentation
-│   ├── README.md              # Documentation hub
-│   ├── api.md                 # API reference
-│   ├── CURRENT_PIPELINE.md    # System architecture
-│   ├── PROJECT_STATUS.md      # Implementation status
-│   └── FUTURE_FEATURES.md     # Roadmap
-│
-├── scripts/                     # Utility Scripts
-│   └── setup_keychain.py      # One-time credential setup
-│
-├── generated-portfolio/         # Example Generated Portfolio
-│   └── [Next.js project files]
-│
-└── test-automated-portfolio/    # Test Generated Portfolio
-    └── [Next.js project files]
+├── src/                        # All backend source code
+│   ├── api/                    # API routes and database
+│   ├── core/                   # Core business logic
+│   ├── services/               # Business services
+│   ├── templates/              # Portfolio templates
+│   └── utils/                  # Utility functions
+├── user_web_example/           # Frontend Next.js application
+├── components/                 # Shared UI component libraries
+├── data/                       # Storage and examples
+├── sandboxes/                  # Isolated portfolio environments
+├── docs/                       # Documentation
+├── tests/                      # Test suites
+├── scripts/                    # Utility scripts
+├── main.py                     # FastAPI entry point
+├── config.py                   # Configuration
+└── CLAUDE.md                   # Development guide
 ```
 
-## Key Directories Explained
+## Directory Details
 
-### `/api`
-Contains all API-related code including routes, database operations, and request/response schemas. This is the entry point for all HTTP requests.
+### `/src` - Backend Source Code
 
-### `/backend`
-Houses the data models and schemas. The `unified.py` file contains all 17 CV section schemas used throughout the system.
+#### `/src/api` - API Layer
+- **`routes/`** - FastAPI endpoints
+  - `auth.py` - Authentication (login, register, logout)
+  - `cv.py` - CV upload and processing
+  - `cv_enhanced.py` - Enhanced CV operations
+  - `portfolio_generator.py` - Portfolio generation
+  - `sse.py` - Server-sent events
+  - `workflows.py` - Workflow management
+- **`db.py`** - SQLite database operations
+- **`schemas.py`** - Pydantic models
+- **`middleware/`** - Request middleware
 
-### `/services`
-Core business logic divided into:
-- **llm**: AI services for CV data extraction
-- **local**: Local file processing and OCR
-- **portfolio**: Portfolio generation engine
+#### `/src/core` - Business Logic
+- **`cv_extraction/`** - CV processing
+  - `data_extractor.py` - Claude 4 Opus extraction
+  - `advanced_section_classifier.py` - Section classification
+  - `date_validator.py` - Date validation
+  - `location_parser.py` - Location parsing
+  - `role_inferencer.py` - Role inference
+  - `url_normalizer.py` - URL normalization
+- **`local/`** - Local processing
+  - `text_extractor.py` - PDF/DOCX extraction
+  - `smart_deduplicator.py` - Text deduplication
+  - `keychain_manager.py` - Credential management
+- **`schemas/`** - Data models
+  - `unified_nullable.py` - CV data schema (18 sections)
 
-### `/aceternity-components-library`
-Complete library of 100+ Aceternity UI components that are used to build portfolios. Includes animations, layouts, and interactive elements.
+#### `/src/services` - Business Services
+- `claude_service.py` - Claude API integration
+- `claude_portfolio_expert.py` - AI portfolio guidance
+- `sse_service.py` - Real-time updates
+- `rate_limiter.py` - API rate limiting
+- `metrics_collector.py` - Performance metrics
+- `log_aggregation_service.py` - Log analysis
 
-### `/data`
-All data storage including:
-- Example CVs for testing
-- User uploaded files (with UUID names)
-- Extracted CV data (JSON)
-- SQLite database for sessions
+#### `/src/templates` - Portfolio Templates
+- `v0_template_v1.5/` - Modern portfolio v1.5
+- `v0_template_v2.1/` - Modern portfolio v2.1
+- `resume2web_branded/` - Branded template
+- Each template contains:
+  - `app/` - Next.js pages
+  - `components/` - React components
+  - `lib/cv-data-adapter.tsx` - Data transformation
+  - `package.json` - Dependencies
 
-### `/tests`
-Comprehensive test suite covering:
-- Unit tests for individual components
-- Integration tests for full pipeline
-- Edge case testing
-- Performance testing
+### `/user_web_example` - Frontend Application
+Main Next.js application for CV2WEB interface.
 
-### `/docs`
-All project documentation including:
-- API reference
-- Architecture diagrams
-- Status updates
-- Future roadmap
+- **`app/`** - App router pages
+  - `page.tsx` - Landing page
+  - `auth/` - Authentication pages
+- **`components/`** - React components
+  - `dashboard-pages/` - Dashboard views
+    - `cv-editor.tsx` - CV editing interface
+    - `my-resume.tsx` - Resume display
+    - `my-website.tsx` - Portfolio preview
+  - `ui/` - UI primitives
+  - `auth-modal.tsx` - Authentication modal
+  - `interactive-cv-pile.tsx` - CV upload
+  - `processing-page.tsx` - Progress display
+  - `pricing-modal.tsx` - Pricing tiers
+- **`contexts/`** - React contexts
+  - `AuthContext.tsx` - Authentication state
+- **`lib/`** - Utilities
+  - `api.ts` - API client
+  - `utils.ts` - Helper functions
 
-## File Naming Conventions
+### `/components` - Shared UI Libraries
+- **`libraries/`**
+  - `aceternity/ui/` - Aceternity components
+  - `magic-ui/ui/` - Magic UI components
+- **`gallery-app/`** - Component showcase
 
-- **Python files**: `snake_case.py`
-- **TypeScript/React**: `kebab-case.tsx` or `PascalCase.tsx`
-- **JSON**: `kebab-case.json`
-- **Markdown**: `UPPER_SNAKE_CASE.md` for docs, `lowercase.md` for content
+### `/data` - Storage
+- **`cv_examples/`** - Test CV files
+  - `pdf_examples/` - PDF samples
+  - `png_examples/` - Image samples
+  - `text_examples/` - Text samples
+- **`uploads/`** - User uploaded files
+- **`generated_portfolios/`** - Generated sites
+- **`cv2web.db`** - SQLite database
 
-## Environment Setup
+### `/sandboxes` - Portfolio Sandboxes
+Isolated environments for each generated portfolio.
+- **`portfolios/`** - Individual portfolio instances
+  - Each sandbox contains full Next.js project
+  - Unique port allocation (4000+)
+  - Independent npm dependencies
 
-1. **Python Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-   pip install -r requirements.txt
-   ```
+### `/docs` - Documentation
+- **`README.md`** - Documentation hub
+- **`CV_EDITOR_IMPLEMENTATION.md`** - CV editor guide
+- **`api/`** - API documentation
+  - `CURRENT_PIPELINE.md` - System flow
+  - `api.md` - Endpoint reference
+- **`architecture/`** - Design docs
+- **`taskmaster/`** - Task management
+- **`guides/`** - How-to guides
+- **`archive/`** - Historical docs
 
-2. **API Credentials**
-   ```bash
-   python scripts/setup_keychain.py
-   ```
+### `/tests` - Test Suites
+- **`unit/`** - Unit tests
+- **`integration/`** - Integration tests
+- **`e2e/`** - End-to-end tests
+- **`fixtures/`** - Test data
+- Individual test files for specific features
 
-3. **Aceternity Components**
-   - Ensure `/aceternity-components-library` is properly linked
-   - Components should be in `components/ui/` subdirectory
+### `/scripts` - Utility Scripts
+- `start_cv2web.sh` - Start all services
+- `cleanup.sh` - Clean generated files
+- `quickstart.sh` - One-command setup
+
+## Key Configuration Files
+
+### Root Level
+- **`main.py`** - FastAPI application
+- **`config.py`** - Global configuration
+- **`requirements.txt`** - Python dependencies
+- **`package.json`** - Node dependencies
+- **`pnpm-workspace.yaml`** - pnpm workspace
+
+### Frontend Config
+- **`next.config.mjs`** - Next.js config
+- **`tailwind.config.ts`** - Tailwind CSS
+- **`tsconfig.json`** - TypeScript config
+- **`postcss.config.mjs`** - PostCSS (must include autoprefixer!)
 
 ## Data Flow
 
-1. **Upload**: User uploads CV → Saved to `/data/uploads/`
-2. **Extract**: Text extracted from file → Processed by AI
-3. **Transform**: CV data mapped to component props
-4. **Generate**: Next.js portfolio created → Saved to output directory
-5. **Deploy**: Ready for Vercel/Netlify deployment
+1. **Upload** → `user_web_example` → `/api/v1/upload-cv`
+2. **Extract** → `src/core/local/text_extractor.py`
+3. **AI Process** → `src/core/cv_extraction/data_extractor.py` (Claude 4)
+4. **Classify** → `src/core/cv_extraction/advanced_section_classifier.py`
+5. **Edit** → `components/dashboard-pages/cv-editor.tsx`
+6. **Generate** → `src/api/routes/portfolio_generator.py`
+7. **Sandbox** → `/sandboxes/portfolios/{id}/`
+8. **Preview** → Live on unique port
 
-## Security Considerations
+## Environment Variables
 
-- All uploaded files get UUID names
-- Credentials stored in macOS Keychain
-- Session-based authentication
-- Input validation on all endpoints
-- Path traversal protection
+Set via `src/utils/setup_keychain.py`:
+```
+# API Keys
+ANTHROPIC_API_KEY       # Claude 4 Opus
+GOOGLE_CLOUD_PROJECT    # Google Vision OCR
+AWS_ACCESS_KEY_ID       # AWS Textract
 
-## Performance Optimizations
+# Database
+DATABASE_URL=data/cv2web.db
 
-- Parallel AI extraction (10-15s vs 60s sequential)
-- Smart deduplication reduces redundant text
-- Component caching for faster generation
-- Optimized file operations
+# Ports
+BACKEND_PORT=2000       # FastAPI
+FRONTEND_PORT=3000      # Next.js
+```
 
 ## Development Workflow
 
-1. **Start API Server**
+1. **Setup**
    ```bash
-   python main.py
+   # Backend
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   
+   # Frontend
+   pnpm install
+   
+   # Credentials
+   python3 src/utils/setup_keychain.py
    ```
 
-2. **Test Full Pipeline**
+2. **Run Services**
    ```bash
-   python test_automated_generation.py
+   # Terminal 1: Backend
+   python3 main.py
+   
+   # Terminal 2: Frontend
+   pnpm run dev
    ```
 
-3. **Run Generated Portfolio**
+3. **Testing**
    ```bash
-   cd test-automated-portfolio
-   npm install && npm run dev
+   # Backend tests
+   pytest
+   
+   # Frontend checks
+   pnpm run typecheck
    ```
 
-## Deployment Considerations
+## Portfolio Generation Details
 
-- API runs on port 2000 by default
-- CORS configured for localhost:3000, 3001, 5173
-- SQLite for development, consider PostgreSQL for production
-- File storage: Local for dev, consider S3/GCS for production
+Generated portfolios are created in isolated sandboxes:
+
+```
+sandboxes/portfolios/{user_id}_{job_id}_{portfolio_id}/
+├── app/                    # Next.js app directory
+├── components/             # React components
+├── lib/                    # Utilities
+│   └── cv-data-adapter.tsx # Data transformation
+├── public/                 # Static assets
+├── package.json            # Dependencies (npm)
+├── next.config.mjs         # Next.js config
+├── tailwind.config.js      # Tailwind config
+├── postcss.config.mjs      # PostCSS (with autoprefixer!)
+└── portfolio_metadata.json # Generation metadata
+```
+
+## Best Practices
+
+1. **Code Organization**
+   - Backend logic in `/src`
+   - Frontend in `/user_web_example`
+   - Shared components in `/components`
+
+2. **Testing**
+   - Run `pnpm run typecheck` before commits
+   - Test CV uploads with files from `/data/cv_examples`
+   - Never use made-up CV data
+
+3. **Git Workflow**
+   - Always work on feature branches
+   - Never commit to main directly
+   - Get approval before pushing
+
+4. **Performance**
+   - Portfolio generation uses npm (not pnpm) in sandboxes
+   - Each portfolio limited to 1.5GB memory
+   - Automatic cleanup after 24 hours
