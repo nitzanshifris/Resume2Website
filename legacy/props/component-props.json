@@ -1,0 +1,1427 @@
+{
+  "ui": {},
+  "backgrounds": {
+    "minSpeed": "number",
+    "maxSpeed": "number",
+    "minDelay": "number",
+    "maxDelay": "number",
+    "starColor": "string",
+    "trailColor": "string",
+    "starWidth": "number",
+    "starHeight": "number",
+    "className": "string"
+  },
+  "backgrounds-backgroundlines": {
+    "minSpeed": "number",
+    "maxSpeed": "number",
+    "minDelay": "number",
+    "maxDelay": "number",
+    "starColor": "string",
+    "trailColor": "string",
+    "starWidth": "number",
+    "starHeight": "number",
+    "className": "string"
+  },
+  "bento-grids": {
+    "items": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/packs/bento-grids/bento-grids.types\").BentoGridItem[]",
+    "className": "string"
+  },
+  "cards": {
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "cta-sections": {
+    "title": "string",
+    "description": "string",
+    "buttonText": "string",
+    "onButtonClick": "() => void",
+    "className": "string"
+  },
+  "feature-sections": {
+    "features": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/feature-sections/feature-sections.types\").Feature[]",
+    "title": "string",
+    "subtitle": "string",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "hero-sections": {
+    "containerClassName": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "logo-clouds": {
+    "logos": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/packs/logo-clouds/logo-clouds.types\").Logo[][]",
+    "animationDuration": "number",
+    "flipInterval": "number",
+    "className": "string"
+  },
+  "pricing-sections": {
+    "tiers": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/packs/pricing-sections/pricing-sections.types\").PricingTier[]",
+    "title": "string",
+    "subtitle": "string",
+    "className": "string"
+  },
+  "sidebars": {
+    "open": "boolean",
+    "setOpen": "React.Dispatch<React.SetStateAction<boolean>>"
+  },
+  "sidebars-collapsiblesidebar": {
+    "open": "boolean",
+    "setOpen": "React.Dispatch<React.SetStateAction<boolean>>"
+  },
+  "testimonials": {
+    "name": "string",
+    "quote": "string",
+    "src": "string",
+    "designation": "string"
+  },
+  "text-animations": {
+    "image": "string",
+    "children": "React.ReactNode"
+  },
+  "3d-card": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "containerClassName": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "3d-marquee": {
+    "images": "string[]",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "3d-pin": {
+    "children": "React.ReactNode",
+    "title": "React.ReactNode",
+    "href": "string",
+    "className": "string",
+    "containerClassName": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-beam": {
+    "className": "string",
+    "containerRef": "React.RefObject<HTMLElement>",
+    "fromRef": "React.RefObject<HTMLElement>",
+    "toRef": "React.RefObject<HTMLElement>",
+    "curvature": "number",
+    "reverse": "boolean",
+    "pathColor": "string",
+    "pathWidth": "number",
+    "pathOpacity": "number",
+    "gradientStartColor": "string",
+    "gradientStopColor": "string",
+    "delay": "number",
+    "duration": "number",
+    "startXOffset": "number",
+    "startYOffset": "number",
+    "endXOffset": "number",
+    "endYOffset": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-circular-progress-bar": {
+    "className": "string",
+    "max": "number",
+    "min": "number",
+    "value": "number",
+    "gaugePrimaryColor": "string",
+    "gaugeSecondaryColor": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-gradient-text": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-list": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "delay": "number",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-modal": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-shiny-text": {
+    "shimmerWidth": "number",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-subscribe-button": {
+    "subscribeStatus": "boolean",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-tabs": {
+    "tabs": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/animated-tabs/tabs.types\").Tab[]",
+    "containerClassName": "string",
+    "activeTabClassName": "string",
+    "tabClassName": "string",
+    "contentClassName": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-testimonials": {
+    "testimonials": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/animated-testimonials/animated-testimonials.types\").Testimonial[]",
+    "autoplay": "boolean",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "animated-tooltip": {
+    "items": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/animated-tooltip/animated-tooltip.types\").TooltipItem[]",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "apple-cards-carousel": {
+    "items": "React.ReactNode[]",
+    "initialScroll": "number",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "aurora-background": {
+    "children": "React.ReactNode",
+    "showRadialGradient": "boolean",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "aurora-text": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "colors": "string[]",
+    "speed": "number",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "background-beams": {
+    "className": "string",
+    "containerClassName": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "background-beams-with-collision": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "background-boxes": {
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "background-gradient": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "containerClassName": "string",
+    "animate": "boolean",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "background-gradient-animation": {
+    "gradientBackgroundStart": "string",
+    "gradientBackgroundEnd": "string",
+    "firstColor": "string",
+    "secondColor": "string",
+    "thirdColor": "string",
+    "fourthColor": "string",
+    "fifthColor": "string",
+    "pointerColor": "string",
+    "size": "string",
+    "blendingValue": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "interactive": "boolean",
+    "containerClassName": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "background-lines": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "svgOptions": "{ duration?: number; }",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "bento-grid": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "blur-fade": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "variant": "{ hidden: { y: number; }; visible: { y: number; }; }",
+    "duration": "number",
+    "delay": "number",
+    "offset": "number",
+    "direction": "\"up\" | \"down\" | \"left\" | \"right\"",
+    "inView": "boolean",
+    "inViewMargin": "MarginType",
+    "blur": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "border-beam": {
+    "size": "number",
+    "duration": "number",
+    "delay": "number",
+    "colorFrom": "string",
+    "colorTo": "string",
+    "transition": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/node_modules/.pnpm/motion-dom@12.22.0/node_modules/motion-dom/dist/index\").Transition",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "reverse": "boolean",
+    "initialOffset": "number",
+    "children": "React.ReactNode",
+    "textSize": "string",
+    "color": "string"
+  },
+  "box-reveal": {
+    "children": "React.ReactNode",
+    "width": "\"fit-content\" | \"100%\"",
+    "boxColor": "string",
+    "duration": "number",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "canvas-reveal-effect": {
+    "colors": "number[][]",
+    "opacities": "number[]",
+    "totalSize": "number",
+    "dotSize": "number",
+    "shader": "string",
+    "center": "(\"x\" | \"y\")[]",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "card-hover-effect": {
+    "items": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/card-hover-effect/card-hover-effect.types\").HoverEffectItem[]",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "card-spotlight": {
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "carousel": {
+    "slide": "SlideData",
+    "index": "number",
+    "current": "number",
+    "handleSlideClick": "(index: number) => void",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "code-comparison": {
+    "className": "string",
+    "beforeCode": "string",
+    "afterCode": "string",
+    "language": "string",
+    "filename": "string",
+    "lightTheme": "string",
+    "darkTheme": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "colourful-text": {
+    "text": "string",
+    "className": "string",
+    "colors": "string[]",
+    "animationDuration": "number",
+    "shuffleInterval": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "compare": {
+    "firstImage": "string",
+    "secondImage": "string",
+    "className": "string",
+    "firstImageClassName": "string",
+    "secondImageClassname": "string",
+    "initialSliderPercentage": "number",
+    "slideMode": "\"hover\" | \"drag\"",
+    "showHandlebar": "boolean",
+    "autoplay": "boolean",
+    "autoplayDuration": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "confetti": {
+    "options": "any",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "container-scroll-animation": {
+    "titleComponent": "React.ReactNode",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "container-text-flip": {
+    "words": "string[]",
+    "interval": "number",
+    "className": "string",
+    "textClassName": "string",
+    "animationDuration": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "cool-mode": {
+    "children": "React.ReactNode",
+    "options": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/magicui/cool-mode/index\").CoolParticleOptions",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "cover": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "direction-aware-hover": {
+    "imageUrl": "string",
+    "children": "React.ReactNode",
+    "childrenClassName": "string",
+    "imageClassName": "string",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "dock": {
+    "className": "string",
+    "iconSize": "number",
+    "iconMagnification": "number",
+    "iconDistance": "number",
+    "direction": "\"bottom\" | \"top\" | \"middle\"",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "draggable-card": {
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "evervault-card": {
+    "text": "string",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "expandable-cards": {
+    "cards": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/expandable-cards/expandable-cards.types\").CardData[]",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "file-tree": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "file-upload": {
+    "onChange": "(files: File[]) => void",
+    "className": "string",
+    "containerClassName": "string",
+    "maxFiles": "number",
+    "accept": "Record<string, string[]>",
+    "maxSize": "number",
+    "disabled": "boolean",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "flickering-grid": {
+    "squareSize": "number",
+    "gridGap": "number",
+    "flickerChance": "number",
+    "color": "string",
+    "width": "number",
+    "height": "number",
+    "className": "string",
+    "maxOpacity": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string"
+  },
+  "flip-text": {
+    "duration": "number",
+    "delayMultiple": "number",
+    "framerProps": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/node_modules/.pnpm/motion-dom@12.22.0/node_modules/motion-dom/dist/index\").Variants",
+    "className": "string",
+    "as": "React.ElementType",
+    "children": "React.ReactNode",
+    "variants": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/node_modules/.pnpm/motion-dom@12.22.0/node_modules/motion-dom/dist/index\").Variants",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "flip-words": {
+    "words": "string[]",
+    "duration": "number",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "floating-dock": {
+    "items": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/floating-dock/floating-dock.types\").FloatingDockItem[]",
+    "desktopClassName": "string",
+    "mobileClassName": "string",
+    "position": "\"left\" | \"right\" | \"bottom\" | \"top\"",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "floating-navbar": {
+    "navItems": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/floating-navbar/floating-navbar.types\").NavItem[]",
+    "className": "string",
+    "containerClassName": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "focus-cards": {
+    "cards": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/focus-cards/focus-cards.types\").Card[]",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "following-pointer": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "title": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "glare-card": {
+    "children": "React.ReactElement<unknown, string | React.JSXElementConstructor<any>>",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "globe": {
+    "globeConfig": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/globe/globe.types\").GlobeConfig",
+    "data": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/globe/globe.types\").Position[]",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "glowing-effect": {
+    "blur": "number",
+    "inactiveZone": "number",
+    "proximity": "number",
+    "spread": "number",
+    "variant": "\"default\" | \"white\"",
+    "glow": "boolean",
+    "className": "string",
+    "disabled": "boolean",
+    "movementDuration": "number",
+    "borderWidth": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "glowing-stars": {
+    "className": "string",
+    "children": "React.ReactElement<unknown, string | React.JSXElementConstructor<any>>",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "google-gemini-effect": {
+    "pathLengths": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/node_modules/.pnpm/motion-dom@12.22.0/node_modules/motion-dom/dist/index\").MotionValue<any>[]",
+    "title": "string",
+    "description": "string",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "grid-and-dot-backgrounds": {
+    "children": "React.ReactNode",
+    "variant": "\"grid\" | \"dot\" | \"gridSmall\"",
+    "size": "\"default\" | \"small\"",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "hero-highlight": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "containerClassName": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "hero-parallax": {
+    "products": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/hero-parallax/hero-parallax.types\").Product[]",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "hero-video-dialog": {
+    "animationStyle": "AnimationStyle",
+    "videoSrc": "string",
+    "thumbnailSrc": "string",
+    "thumbnailAlt": "string",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "hover-border-gradient": {
+    "children": "React.ReactNode",
+    "containerClassName": "string",
+    "className": "string",
+    "as": "React.ElementType<any, keyof React.JSX.IntrinsicElements>",
+    "duration": "number",
+    "clockwise": "boolean",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "hyper-text": {
+    "children": "string",
+    "className": "string",
+    "duration": "number",
+    "delay": "number",
+    "as": "React.ElementType<any, keyof React.JSX.IntrinsicElements>",
+    "startOnView": "boolean",
+    "animateOnHover": "boolean",
+    "characterSet": "string[]",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "icon-cloud": {
+    "className": "string",
+    "icons": "React.ReactNode[]",
+    "images": "string[]",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "images-slider": {
+    "images": "string[]",
+    "children": "React.ReactNode",
+    "overlay": "React.ReactNode",
+    "overlayClassName": "string",
+    "className": "string",
+    "autoplay": "boolean",
+    "direction": "\"up\" | \"down\"",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "infinite-moving-cards": {
+    "items": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/infinite-moving-cards/infinite-moving-cards.types\").TestimonialItem[]",
+    "direction": "\"left\" | \"right\"",
+    "speed": "\"normal\" | \"fast\" | \"slow\"",
+    "pauseOnHover": "boolean",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "interactive-grid-pattern": {
+    "width": "number",
+    "height": "number",
+    "squares": "[number, number]",
+    "className": "string",
+    "squaresClassName": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "interactive-hover-button": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "iphone-15-pro": {
+    "width": "number",
+    "height": "number",
+    "src": "string",
+    "videoSrc": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "lamp": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "layout-grid": {
+    "cards": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/layout-grid/layout-grid.types\").Card[]",
+    "className": "string",
+    "containerClassName": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "lens": {
+    "children": "React.ReactNode",
+    "zoomFactor": "number",
+    "lensSize": "number",
+    "position": "Position",
+    "defaultPosition": "Position",
+    "isStatic": "boolean",
+    "duration": "number",
+    "lensColor": "string",
+    "ariaLabel": "string",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "line-shadow-text": {
+    "shadowColor": "string",
+    "as": "React.ElementType<any, keyof React.JSX.IntrinsicElements>",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "link-preview": {
+    "className": "string",
+    "containerClassName": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "macbook-scroll": {
+    "src": "string",
+    "showGradient": "boolean",
+    "title": "React.ReactNode",
+    "badge": "React.ReactNode",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "magicui": {
+    "className": "string",
+    "reverse": "boolean",
+    "pauseOnHover": "boolean",
+    "children": "React.ReactNode",
+    "vertical": "boolean",
+    "repeat": "number",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "meteors": {
+    "number": "number",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "moving-border": {
+    "borderRadius": "string",
+    "children": "React.ReactNode",
+    "as": "any",
+    "containerClassName": "string",
+    "borderClassName": "string",
+    "duration": "number",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "multi-step-loader": {
+    "loadingStates": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/multi-step-loader/multi-step-loader-base\").LoadingStep[]",
+    "loading": "boolean",
+    "duration": "number",
+    "loop": "boolean",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "navbar-menu": {
+    "setActive": "(item: string) => void",
+    "active": "string",
+    "item": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "number-ticker": {
+    "value": "number",
+    "direction": "\"up\" | \"down\"",
+    "delay": "number",
+    "className": "string",
+    "startValue": "number",
+    "decimalPlaces": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "orbiting-circles": {
+    "className": "string",
+    "children": "React.ReactNode",
+    "reverse": "boolean",
+    "duration": "number",
+    "delay": "number",
+    "radius": "number",
+    "path": "boolean",
+    "iconSize": "number",
+    "speed": "number",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "parallax-scroll": {
+    "images": "string[]",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "placeholders-and-vanish-input": {
+    "placeholders": "string[]",
+    "onChange": "(e: React.ChangeEvent<HTMLInputElement>) => void",
+    "onSubmit": "(e: React.FormEvent<HTMLFormElement>) => void",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "pointer": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "pointer-highlight": {
+    "children": "React.ReactNode",
+    "rectangleClassName": "string",
+    "pointerClassName": "string",
+    "containerClassName": "string",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "pulsating-button": {
+    "pulseColor": "string",
+    "duration": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "resizable-navbar": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "ripple": {
+    "mainCircleSize": "number",
+    "mainCircleOpacity": "number",
+    "numCircles": "number",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "ripple-button": {
+    "rippleColor": "string",
+    "duration": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "safari": {
+    "url": "string",
+    "imageSrc": "string",
+    "videoSrc": "string",
+    "width": "number",
+    "height": "number",
+    "mode": "SafariMode",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "scratch-to-reveal": {
+    "width": "number",
+    "height": "number",
+    "minScratchPercentage": "number",
+    "onComplete": "() => void",
+    "className": "string",
+    "gradientColors": "[string, string, string]",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "script-copy-btn": {
+    "showMultiplePackageOptions": "boolean",
+    "codeLanguage": "string",
+    "lightTheme": "string",
+    "darkTheme": "string",
+    "commandMap": "Record<string, string>",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "scroll-based-velocity": {
+    "defaultVelocity": "number",
+    "className": "string",
+    "numRows": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "shimmer-button": {
+    "shimmerColor": "string",
+    "shimmerSize": "string",
+    "borderRadius": "string",
+    "shimmerDuration": "string",
+    "background": "string",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "shine-border": {
+    "borderWidth": "number",
+    "duration": "number",
+    "shineColor": "string | string[]",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "shooting-stars": {
+    "minSpeed": "number",
+    "maxSpeed": "number",
+    "minDelay": "number",
+    "maxDelay": "number",
+    "starColor": "string",
+    "trailColor": "string",
+    "starWidth": "number",
+    "starHeight": "number",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "sidebar": {
+    "open": "boolean",
+    "setOpen": "React.Dispatch<React.SetStateAction<boolean>>",
+    "animate": "boolean",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "signup-form": {
+    "className": "string",
+    "onSubmit": "(data: import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/signup-form/signup-form.types\").SignupFormData) => void",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "smooth-cursor": {
+    "cursor": "React.JSX.Element",
+    "springConfig": "{ damping: number; stiffness: number; mass: number; restDelta: number; }",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "sparkles": {
+    "id": "string",
+    "className": "string",
+    "background": "string",
+    "particleSize": "number",
+    "minSize": "number",
+    "maxSize": "number",
+    "speed": "number",
+    "particleColor": "string",
+    "particleDensity": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "sparkles-text": {
+    "as": "React.ReactElement<unknown, string | React.JSXElementConstructor<any>>",
+    "className": "string",
+    "children": "React.ReactNode",
+    "sparklesCount": "number",
+    "colors": "{ first: string; second: string; }",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "spotlight": {
+    "className": "string",
+    "fill": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "spotlight-new": {
+    "gradientFirst": "string",
+    "gradientSecond": "string",
+    "gradientThird": "string",
+    "translateY": "number",
+    "width": "number",
+    "height": "number",
+    "smallWidth": "number",
+    "duration": "number",
+    "xOffset": "number",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "stars-background": {
+    "x": "number",
+    "y": "number",
+    "radius": "number",
+    "opacity": "number",
+    "twinkleSpeed": "number",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "sticky-banner": {
+    "className": "string",
+    "children": "React.ReactNode",
+    "hideOnScroll": "boolean",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "sticky-scroll-reveal": {
+    "content": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/sticky-scroll-reveal/sticky-scroll-reveal.types\").StickyScrollContent[]",
+    "contentClassName": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "svg-mask-effect": {
+    "children": "React.ReactNode",
+    "revealText": "React.ReactNode",
+    "size": "number",
+    "revealSize": "number",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "tailwindcss-buttons": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "onClick": "() => void",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "terminal": {
+    "children": "React.ReactNode",
+    "delay": "number",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "text-animate": {
+    "children": "string",
+    "className": "string",
+    "segmentClassName": "string",
+    "delay": "number",
+    "duration": "number",
+    "variants": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/node_modules/.pnpm/motion-dom@12.22.0/node_modules/motion-dom/dist/index\").Variants",
+    "as": "React.ElementType",
+    "by": "AnimationType",
+    "startOnView": "boolean",
+    "once": "boolean",
+    "animation": "AnimationVariant",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "text-generate-effect": {
+    "words": "string",
+    "className": "string",
+    "filter": "boolean",
+    "duration": "number",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "text-hover-effect": {
+    "text": "string",
+    "duration": "number",
+    "automatic": "boolean",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "text-reveal": {
+    "children": "string",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "text-reveal-card": {
+    "text": "string",
+    "revealText": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "timeline": {
+    "data": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/timeline/timeline.types\").TimelineEntry[]",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "tracing-beam": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "tweet-card": {
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "typewriter-effect": {
+    "words": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/typewriter-effect/typewriter-effect.types\").Word[]",
+    "className": "string",
+    "cursorClassName": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "typing-animation": {
+    "children": "string",
+    "className": "string",
+    "duration": "number",
+    "delay": "number",
+    "as": "React.ElementType<any, keyof React.JSX.IntrinsicElements>",
+    "startOnView": "boolean",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "ui_basic": {
+    "dir": "\"ltr\" | \"rtl\"",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "video-text": {
+    "src": "string",
+    "className": "string",
+    "autoPlay": "boolean",
+    "muted": "boolean",
+    "loop": "boolean",
+    "preload": "\"metadata\" | \"auto\" | \"none\"",
+    "children": "React.ReactNode",
+    "fontSize": "string | number",
+    "fontWeight": "string | number",
+    "textAnchor": "string",
+    "dominantBaseline": "string",
+    "fontFamily": "string",
+    "as": "React.ElementType",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "vortex": {
+    "children": "any",
+    "className": "string",
+    "containerClassName": "string",
+    "particleCount": "number",
+    "rangeY": "number",
+    "baseHue": "number",
+    "baseSpeed": "number",
+    "rangeSpeed": "number",
+    "baseRadius": "number",
+    "rangeRadius": "number",
+    "backgroundColor": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "warp-background": {
+    "children": "React.ReactNode",
+    "perspective": "number",
+    "beamsPerSide": "number",
+    "beamSize": "number",
+    "beamDelayMax": "number",
+    "beamDelayMin": "number",
+    "beamDuration": "number",
+    "gridColor": "string",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "wavy-background": {
+    "children": "any",
+    "className": "string",
+    "containerClassName": "string",
+    "colors": "string[]",
+    "waveWidth": "number",
+    "backgroundFill": "string",
+    "blur": "number",
+    "speed": "\"fast\" | \"slow\"",
+    "waveOpacity": "number",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "wobble-card": {
+    "children": "React.ReactNode",
+    "containerClassName": "string",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "word-rotate": {
+    "words": "string[]",
+    "duration": "number",
+    "motionProps": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/node_modules/.pnpm/framer-motion@12.23.0_@emotion+is-prop-valid@1.3.1_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/framer-motion/dist/types.d-D0HXPxHm\").M",
+    "className": "string",
+    "children": "React.ReactNode",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "world-map": {
+    "dots": "import(\"/Users/nitzan_shifris/Desktop/CV2WEB-V4/aceternity-components-library/components/ui/world-map/world-map.types\").MapDot[]",
+    "lineColor": "string",
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string"
+  },
+  "card-stack": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string",
+    "__placeholder": true
+  },
+  "client-tweet-card": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string",
+    "__placeholder": true
+  },
+  "code-block": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string",
+    "__placeholder": true
+  },
+  "marquee": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string",
+    "__placeholder": true
+  },
+  "playful-hero-section": {
+    "children": "React.ReactNode",
+    "className": "string",
+    "style": "React.CSSProperties",
+    "textSize": "string",
+    "color": "string",
+    "__placeholder": true
+  }
+}
