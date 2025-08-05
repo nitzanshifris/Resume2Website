@@ -1,4 +1,4 @@
-# Task #10 - Portfolio Generation Text Animation
+# Task #3 - Portfolio Generation Text Animation
 
 ## 📋 Task Overview
 
