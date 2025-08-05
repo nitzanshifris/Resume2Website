@@ -6,7 +6,7 @@ Transform your CV into a stunning portfolio website powered by AI and Aceternity
 
 ### ✅ What's Working
 - **Complete End-to-End Pipeline**: Upload CV → Extract Data → Generate Portfolio
-- **AI-Powered Extraction**: 17 different CV sections extracted using Gemini 2.0 & Claude
+- **AI-Powered Extraction**: 18 different CV sections extracted using Claude 4 Opus only
 - **Aceternity UI Integration**: 100+ real components with animations
 - **Smart Component Selection**: AI selects best components based on your profile
 - **Content-Aware Intelligence**: Analyzes content richness to optimize layouts
@@ -168,5 +168,5 @@ MIT License - see [LICENSE](LICENSE) file
 ## 🙏 Credits
 
 - [Aceternity UI](https://ui.aceternity.com/) - Amazing component library
-- Google Gemini & Anthropic Claude - AI capabilities
+- Anthropic Claude 4 Opus - Deterministic CV extraction
 - Next.js & Vercel - Modern web framework

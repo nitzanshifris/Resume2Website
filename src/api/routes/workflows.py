@@ -378,7 +378,7 @@ async def execute_cv_processing_workflow(logger: EnhancedSSELogger, config: Dict
     # Phase 2: AI extraction
     logger.start_phase(WorkflowPhase.PROCESSING, expected_steps=4)
     
-    logger.step("Initializing Gemini 2.5 Flash")
+    logger.step("Initializing Claude 4 Opus")
     await asyncio.sleep(1)
     logger.step_complete("AI model initialized")
     

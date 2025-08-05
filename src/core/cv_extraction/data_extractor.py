@@ -1,6 +1,6 @@
 """
 Data Extraction Service for CV2WEB MVP
-Primary: Gemini 2.5 Pro | Fallback: Claude Sonnet
+Primary: Claude 4 Opus ONLY (deterministic extraction at temperature 0.0)
 """
 import asyncio
 import json

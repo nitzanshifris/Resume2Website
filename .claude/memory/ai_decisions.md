@@ -1,5 +1,40 @@
 # AI Decision Log
 
+## Portfolio Generation Stability Fixes (2025-08-05)
+**Decision**: Switch from pnpm to npm in sandboxes
+**Reasoning**: Next.js binary not found errors in isolated environments
+**Implementation**:
+- Changed all pnpm commands to npm in portfolio_generator.py
+- Added cleanup of ALL lockfiles before installation
+- Fixed path duplication bug in Next.js binary execution
+**Impact**: Stable portfolio generation without binary errors
+
+## Resource Management (2025-08-05)
+**Decision**: Add resource limits and automated cleanup
+**Reasoning**: Prevent memory overload and accumulation of old portfolios
+**Implementation**:
+- NODE_OPTIONS="--max-old-space-size=512" for each portfolio
+- MAX_ACTIVE_PORTFOLIOS = 20 with automated cleanup
+- Portfolio metrics tracking system
+**Impact**: Better resource utilization and system stability
+
+## Git Branch Consolidation (2025-08-05)
+**Decision**: Make nitzan-development-2 the new main branch
+**Reasoning**: Main branch was outdated (July 22-23) vs nitzan-development-2 (August 1-5)
+**Implementation**:
+- Merged nitzan-development-2 into main
+- Created backup tags for safety
+- Archived legacy code to separate branch
+**Impact**: Cleaner codebase with latest work in main
+
+## Double CV Extraction Fix (2025-08-05)
+**Decision**: Check database for existing CV data before extraction
+**Reasoning**: Anonymous users were triggering duplicate extractions
+**Implementation**:
+- Modified extract endpoint to query database first
+- Only extract if no existing data found
+**Impact**: Significant performance improvement, no duplicate API calls
+
 ## Schema Migration (2025-01-14)
 **Decision**: Migrate from `unified.py` to `unified_nullable.py` schema
 **Reasoning**: User requested all JSON fields to be nullable (null instead of empty strings)
