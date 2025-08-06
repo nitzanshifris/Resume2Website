@@ -1,0 +1,297 @@
+# Core Intent Specifications - Executable Format
+# These are the fundamental values that all other specifications depend on
+
+specifications:
+  - id: CI01
+    title: "User-Centric Value Creation"
+    type: core
+    owner: product
+    status: active
+    version: "1.0.0"
+    dependencies: []
+    required_by: [UI01, UI02, UI03, UI04, UI05, UI06, UI07, CV02, PQ01, UX01, SC01]
+    
+    description: |
+      CV2WEB prioritizes genuine value for job seekers above all else. 
+      Every feature, every optimization, every decision must demonstrably 
+      improve a candidate's chances of getting hired.
+      
+    interfaces:
+      outputs:
+        - name: value_metric
+          type: boolean
+          constraints:
+            - "must_improve_hiring_chances"
+            
+    validation:
+      automated_tests:
+        - test_id: CI01_value_creation
+          test_type: integration
+          threshold:
+            metric: user_outcome_improvement
+            operator: ">="
+            value: 0
+            
+      manual_tests:
+        - scenario: "Feature adds complexity without clear user benefit"
+          expected_outcome: "Feature rejected or redesigned for clear value"
+          
+    implementation:
+      components: ["ProductDecisionFramework", "FeatureValidation"]
+      coverage: 100
+      
+    metrics:
+      success_criteria:
+        - metric: feature_adoption_rate
+          target: ">70% of users use new features"
+          current: null
+          status: unknown
+          
+    changelog:
+      - version: "1.0.0"
+        date: 2024-01-01
+        author: product
+        changes:
+          - "Initial specification definition"
+          
+  - id: CI02
+    title: "Preserve Human Intent"
+    type: core
+    owner: engineering
+    status: active
+    version: "1.0.0"
+    dependencies: []
+    required_by: [CV01, CV03, CV12, CV13, PQ05, UI04, SC11]
+    
+    description: |
+      We extract and present information exactly as the user intended. 
+      Never paraphrase, rewrite, or "improve" the user's language. 
+      Their words carry their personality and should be preserved authentically.
+      
+    interfaces:
+      inputs:
+        - name: user_content
+          type: string
+          constraints:
+            - "original_user_text"
+      outputs:
+        - name: preserved_content
+          type: string
+          constraints:
+            - "identical_to_input"
+            - "no_modifications"
+            
+    validation:
+      automated_tests:
+        - test_id: CI02_language_preservation
+          test_type: unit
+          threshold:
+            metric: semantic_similarity
+            operator: ">="
+            value: 0.99
+            
+        - test_id: CI02_no_paraphrasing
+          test_type: unit
+          threshold:
+            metric: exact_match_percentage
+            operator: "=="
+            value: 100
+            
+      manual_tests:
+        - scenario: "User writes 'ninja-level JavaScript skills'"
+          expected_outcome: "Exact phrase preserved, not changed to 'expert JavaScript skills'"
+          
+    implementation:
+      components: ["DataExtractor", "LanguagePreservation"]
+      coverage: 95
+      
+    metrics:
+      success_criteria:
+        - metric: language_preservation_accuracy
+          target: "99%+"
+          current: null
+          status: unknown
+          
+    changelog:
+      - version: "1.0.0"
+        date: 2024-01-01
+        author: engineering
+        changes:
+          - "Initial specification definition"
+          
+  - id: CI03
+    title: "Quality Over Speed"
+    type: core
+    owner: engineering
+    status: active
+    version: "1.0.0"
+    dependencies: []
+    required_by: [CV02, CV09, PQ11, BL02, SC04, SC05]
+    
+    description: |
+      A portfolio that accurately represents the candidate is more valuable 
+      than a fast but inaccurate one. We optimize for correctness first, 
+      performance second.
+      
+    interfaces:
+      inputs:
+        - name: processing_request
+          type: object
+          constraints:
+            - "valid_cv_file"
+      outputs:
+        - name: quality_result
+          type: object
+          constraints:
+            - "accuracy >= 95%"
+            - "no_fabricated_content"
+            
+    validation:
+      automated_tests:
+        - test_id: CI03_accuracy_over_speed
+          test_type: performance
+          threshold:
+            metric: accuracy_score
+            operator: ">="
+            value: 0.95
+            
+      manual_tests:
+        - scenario: "System under high load with processing queue"
+          expected_outcome: "Maintains accuracy standards even if slower"
+          
+    implementation:
+      components: ["QualityGates", "AccuracyValidation"]
+      coverage: 90
+      
+    metrics:
+      success_criteria:
+        - metric: extraction_accuracy
+          target: "95%+"
+          current: null
+          status: unknown
+        - metric: user_complaints_about_accuracy
+          target: "<1%"
+          current: null
+          status: unknown
+          
+    changelog:
+      - version: "1.0.0"
+        date: 2024-01-01
+        author: engineering
+        changes:
+          - "Initial specification definition"
+          
+  - id: CI04
+    title: "Accessibility and Inclusion"
+    type: core
+    owner: design
+    status: active
+    version: "1.0.0"
+    dependencies: []
+    required_by: [UI09, PQ03, UX08, UX15, CV07]
+    
+    description: |
+      Job seeking is stressful enough. CV2WEB should work for everyone 
+      regardless of CV format, language proficiency, career stage, or 
+      technical skill level.
+      
+    interfaces:
+      outputs:
+        - name: accessible_interface
+          type: interface
+          constraints:
+            - "wcag_2.1_aa_compliant"
+            - "keyboard_navigable"
+            - "screen_reader_compatible"
+            
+    validation:
+      automated_tests:
+        - test_id: CI04_wcag_compliance
+          test_type: integration
+          threshold:
+            metric: wcag_score
+            operator: ">="
+            value: "AA"
+            
+        - test_id: CI04_format_support
+          test_type: unit
+          threshold:
+            metric: supported_formats_percentage
+            operator: ">="
+            value: 90
+            
+      manual_tests:
+        - scenario: "User with screen reader navigates entire flow"
+          expected_outcome: "Complete journey accessible without mouse"
+          
+    implementation:
+      components: ["AccessibilityFramework", "UniversalDesign"]
+      coverage: 85
+      
+    metrics:
+      success_criteria:
+        - metric: accessibility_score
+          target: "WCAG 2.1 AA"
+          current: null
+          status: unknown
+          
+    changelog:
+      - version: "1.0.0"
+        date: 2024-01-01
+        author: design
+        changes:
+          - "Initial specification definition"
+          
+  - id: CI05
+    title: "Transparency and Trust"
+    type: core
+    owner: product
+    status: active
+    version: "1.0.0"
+    dependencies: []
+    required_by: [UX02, UX03, UI10, BL08, LS01]
+    
+    description: |
+      Users should always understand what's happening with their data. 
+      Progress should be clear, failures should be explained, and success 
+      should be measurable.
+      
+    interfaces:
+      outputs:
+        - name: progress_status
+          type: object
+          constraints:
+            - "real_time_updates"
+            - "clear_messaging"
+            - "error_explanations"
+            
+    validation:
+      automated_tests:
+        - test_id: CI05_progress_transparency
+          test_type: integration
+          threshold:
+            metric: progress_update_frequency
+            operator: "<="
+            value: 3  # seconds between updates
+            
+      manual_tests:
+        - scenario: "Processing fails due to corrupted file"
+          expected_outcome: "Clear error message with actionable next steps"
+          
+    implementation:
+      components: ["ProgressTracking", "ErrorMessaging", "UserCommunication"]
+      coverage: 90
+      
+    metrics:
+      success_criteria:
+        - metric: user_trust_score
+          target: ">85%"
+          current: null
+          status: unknown
+          
+    changelog:
+      - version: "1.0.0"
+        date: 2024-01-01
+        author: product
+        changes:
+          - "Initial specification definition"

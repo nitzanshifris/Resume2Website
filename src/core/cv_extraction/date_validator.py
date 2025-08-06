@@ -223,9 +223,15 @@ class DateValidator:
         
         # Check for React in fashion designer CV
         if cv_data.get('experience') and cv_data['experience'].get('experienceItems'):
-            for exp in cv_data['experience']['experienceItems']:
-                company = exp.get('companyName', '').lower()
-                job_title = exp.get('jobTitle', '').lower()
+            # Filter out None items first
+            experience_items = [item for item in cv_data['experience']['experienceItems'] if item is not None]
+            
+            for exp in experience_items:
+                if not isinstance(exp, dict):
+                    continue
+                    
+                company = (exp.get('companyName') or '').lower()
+                job_title = (exp.get('jobTitle') or '').lower()
                 techs = exp.get('technologiesUsed', [])
                 
                 # Fashion-related keywords
@@ -362,8 +368,14 @@ class DateValidator:
         """Remove suspicious technologies from experience"""
         tech_issues = [i for i in issues if i['type'] == 'suspicious_technology']
         
-        if not tech_issues and cv_data.get('experience'):
-            for exp in cv_data['experience']['experienceItems']:
+        if not tech_issues and cv_data.get('experience') and cv_data['experience'].get('experienceItems'):
+            # Filter out None items first
+            experience_items = [item for item in cv_data['experience']['experienceItems'] if item is not None]
+            
+            for exp in experience_items:
+                if not isinstance(exp, dict):
+                    continue
+                    
                 if exp.get('technologiesUsed'):
                     original_count = len(exp['technologiesUsed'])
                     # Remove suspicious techs

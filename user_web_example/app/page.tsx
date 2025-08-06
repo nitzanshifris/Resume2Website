@@ -31,23 +31,23 @@ import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
 import { uploadFile, API_BASE_URL } from "@/lib/api"
 
-// Progress animation constants
+// Linear progress milestones - evenly distributed for predictable progress
 const PROGRESS_MILESTONES = {
-  UPLOAD_START: 5,
-  UPLOAD_COMPLETE: 20,
-  EXTRACTION_START: 35,
-  EXTRACTION_COMPLETE: 40,
-  GENERATION_START: 55,
-  GENERATION_COMPLETE: 60,
+  UPLOAD_START: 5,      // Quick visual start
+  UPLOAD_COMPLETE: 15,  // File upload (fast)
+  EXTRACTION_START: 20, // CV processing begins
+  EXTRACTION_COMPLETE: 45, // CV analysis (major step)
+  GENERATION_START: 50, // Portfolio generation begins  
+  GENERATION_COMPLETE: 60, // Portfolio ready (stops at 60% as designed)
 } as const
 
-// Timing constants (in milliseconds)
+// Timing constants - realistic durations for smooth linear progress
 const TIMINGS = {
-  UPLOAD_ANIMATION: 1500,
-  EXTRACTION_ANIMATION: 8000,
-  GENERATION_ANIMATION: 12000,
-  FINAL_ANIMATION: 1000,
-  PORTFOLIO_DISPLAY_DELAY: 2000,
+  UPLOAD_ANIMATION: 500,      // 0.5 second for upload progress (5% → 15%)
+  EXTRACTION_ANIMATION: 2000, // 2 seconds for CV extraction (15% → 45%) 
+  GENERATION_ANIMATION: 1500, // 1.5 seconds for portfolio generation (45% → 60%)
+  FINAL_ANIMATION: 300,       // Quick final animation
+  PORTFOLIO_DISPLAY_DELAY: 800, // Shorter delay before showing portfolio
   IFRAME_TIMEOUT_LOCAL: 10000,
   IFRAME_TIMEOUT_REMOTE: 5000,
 } as const
@@ -643,26 +643,35 @@ const VerticalProgressBar = ({
   }, [])
   
   useEffect(() => {
-    // If external progress is provided, use it instead of time-based progress
+    // Always use external progress when provided - no time-based animation
     if (externalProgress !== undefined) {
-      setPercentage(externalProgress)
-      onProgressChange?.(externalProgress)
+      const integerProgress = Math.floor(externalProgress)
+      setPercentage(integerProgress)
+      onProgressChange?.(integerProgress)
       return
     }
     
+    // Only use time-based animation if no external progress is provided
+    // This prevents conflicts between backend progress and time-based progress
     if (!isClient) return
     
+    // Fallback time-based animation (only when no backend progress)
     const startTime = Date.now()
     const duration = 60000 // 60 seconds
     
     const updateProgress = () => {
+      // Check again if external progress was provided during animation
+      if (externalProgress !== undefined) {
+        return // Stop time-based animation
+      }
+      
       const elapsed = Date.now() - startTime
       const progress = Math.min((elapsed / duration) * 60, 60)
       const newPercentage = Math.floor(progress)
       setPercentage(newPercentage)
       onProgressChange?.(newPercentage)
       
-      if (progress < PROGRESS_MILESTONES.GENERATION_COMPLETE) {
+      if (progress < PROGRESS_MILESTONES.GENERATION_COMPLETE && externalProgress === undefined) {
         requestAnimationFrame(updateProgress)
       }
     }
@@ -933,7 +942,7 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
     }
   }, [stage])
 
-  // Smooth progress animation helper with integer steps
+  // Linear progress animation helper - more predictable and backend-synchronized
   const animateProgress = (from: number, to: number, duration: number = 1000) => {
     const startTime = Date.now()
     const diff = to - from
@@ -943,23 +952,26 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
       const elapsed = Date.now() - startTime
       const progress = Math.min(elapsed / duration, 1)
       
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
-      const currentProgress = from + (diff * easeOutQuart)
+      // Use linear interpolation for more predictable progress
+      // This ensures progress moves steadily without jumps
+      const currentProgress = from + (diff * progress)
       
-      // Only update if we've reached a new integer value
+      // Update every integer change for smooth visual progression
       const currentInteger = Math.floor(currentProgress)
       if (currentInteger !== lastIntegerProgress && currentInteger <= to) {
         setRealProgress(currentInteger)
         lastIntegerProgress = currentInteger
+        console.log(`📊 Progress: ${currentInteger}% (${from}% → ${to}%)`)
       }
       
       // Continue animation until we reach the target
-      if (currentProgress < to) {
+      if (progress < 1) {
         requestAnimationFrame(updateProgress)
       } else {
         // Ensure we set the final value
-        setRealProgress(Math.floor(to))
+        const finalValue = Math.floor(to)
+        setRealProgress(finalValue)
+        console.log(`✅ Progress complete: ${finalValue}%`)
       }
     }
     
@@ -982,35 +994,90 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
       animateProgress(PROGRESS_MILESTONES.UPLOAD_START, PROGRESS_MILESTONES.UPLOAD_COMPLETE, TIMINGS.UPLOAD_ANIMATION)
       console.log('✅ Upload complete, job_id:', jobId)
       
-      // Step 2: Extract CV data (20-40%)
+      // Step 2: Extract CV data (15-45%) - major processing step
       console.log('🔍 Extracting CV data...')
-      // Start gradual progress while extraction happens
-      animateProgress(PROGRESS_MILESTONES.UPLOAD_COMPLETE, PROGRESS_MILESTONES.EXTRACTION_START, TIMINGS.EXTRACTION_ANIMATION)
+      // Start progress animation immediately  
+      animateProgress(PROGRESS_MILESTONES.UPLOAD_COMPLETE, PROGRESS_MILESTONES.EXTRACTION_START, 500)
       
-      const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
-        method: 'POST',
-        headers: {
-          'X-Session-ID': localStorage.getItem('cv2web_session_id') || ''
+      // Simulate progress during extraction
+      const progressInterval = setInterval(() => {
+        setRealProgress(prev => {
+          if (prev >= PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5) {
+            clearInterval(progressInterval)
+            return prev
+          }
+          return Math.min(prev + 1, PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5)
+        })
+      }, 800) // Update every 800ms
+      
+      // Start extraction with proper timeout handling
+      const extractStartTime = Date.now()
+      
+      // Set a longer timeout for CV extraction (60 seconds)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000)
+      
+      try {
+        const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
+          method: 'POST',
+          headers: {
+            'X-Session-ID': localStorage.getItem('cv2web_session_id') || ''
+          },
+          signal: controller.signal
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!extractResponse.ok) {
+          throw new Error('Failed to extract CV data')
         }
-      })
-      
-      if (!extractResponse.ok) {
-        throw new Error('Failed to extract CV data')
+        
+        // Wait for response to ensure extraction completed
+        const extractData = await extractResponse.json()
+        console.log('✅ CV extraction response received:', extractData)
+        
+        // Clear the progress interval and complete extraction
+        clearInterval(progressInterval)
+        setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
+        console.log('✅ CV extraction complete')
+      } catch (error) {
+        clearTimeout(timeoutId)
+        clearInterval(progressInterval)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('CV extraction timed out after 60 seconds')
+        }
+        throw error
       }
-      animateProgress(PROGRESS_MILESTONES.EXTRACTION_START, PROGRESS_MILESTONES.EXTRACTION_COMPLETE, 800)
-      console.log('✅ CV extraction complete')
       
-      // Step 3: Generate portfolio (40-60%)
+      // Step 3: Generate portfolio (45-60%) - final step
       console.log('🎨 Generating portfolio...')
       const templates = ['v0_template_v1.5', 'v0_template_v2.1']
       const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
       console.log('🎯 Selected template:', randomTemplate)
       
-      // Start slow progress during portfolio generation
-      animateProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE, PROGRESS_MILESTONES.GENERATION_START, TIMINGS.GENERATION_ANIMATION)
+      // Jump directly to generation phase since extraction is complete
+      setRealProgress(PROGRESS_MILESTONES.GENERATION_START)
       
+      // Simulate progress during generation
+      const generateProgressInterval = setInterval(() => {
+        setRealProgress(prev => {
+          if (prev >= PROGRESS_MILESTONES.GENERATION_COMPLETE - 2) {
+            clearInterval(generateProgressInterval)
+            return prev
+          }
+          return Math.min(prev + 1, PROGRESS_MILESTONES.GENERATION_COMPLETE - 2)
+        })
+      }, 2000) // Update every 2 seconds to avoid decimals
+      
+      const generateStartTime = Date.now()
       const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate-anonymous/${jobId}`
-      const generateResponse = await fetch(generateUrl, {
+      
+      // Set timeout for portfolio generation (90 seconds)
+      const generateController = new AbortController()
+      const generateTimeoutId = setTimeout(() => generateController.abort(), 90000)
+      
+      try {
+        const generateResponse = await fetch(generateUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1018,8 +1085,11 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
         },
         body: JSON.stringify({
           template: randomTemplate
-        })
+        }),
+        signal: generateController.signal
       })
+      
+      clearTimeout(generateTimeoutId)
       
       if (!generateResponse.ok) {
         const errorData = await generateResponse.json().catch(() => ({ detail: `HTTP ${generateResponse.status}` }))
@@ -1029,12 +1099,18 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
       
       const generateData = await generateResponse.json()
       
+      // Calculate remaining time for smooth final animation
+      const generateElapsed = Date.now() - generateStartTime
+      const remainingGenerationTime = Math.max(200, TIMINGS.GENERATION_ANIMATION - generateElapsed)
+      
       if (generateData.portfolio_url) {
         setPortfolioUrl(generateData.portfolio_url)
-        animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, TIMINGS.FINAL_ANIMATION)
+        // Clear progress interval and jump to completion
+        clearInterval(generateProgressInterval)
+        setRealProgress(PROGRESS_MILESTONES.GENERATION_COMPLETE)
         console.log('✅ Portfolio generated successfully:', generateData.portfolio_url)
         
-        // Auto-show portfolio in MacBook when ready (after a brief delay)
+        // Show portfolio immediately with a small delay for UX
         setTimeout(() => {
           setShowPortfolioInMacBook(true)
           console.log('🖥️ Auto-showing portfolio in MacBook frame')
@@ -1047,17 +1123,25 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
           // Construct URL from available data - use the actual generated URL if available
           const baseUrl = generateData.portfolio_url || 'http://localhost:4000'
           setPortfolioUrl(baseUrl)
-          animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, TIMINGS.FINAL_ANIMATION)
+          animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, remainingGenerationTime)
           console.log('✅ Portfolio generated successfully (constructed URL):', baseUrl)
           
           setTimeout(() => {
             setShowPortfolioInMacBook(true)
             console.log('🖥️ Auto-showing portfolio in MacBook frame')
-          }, TIMINGS.PORTFOLIO_DISPLAY_DELAY)
+          }, remainingGenerationTime + TIMINGS.PORTFOLIO_DISPLAY_DELAY)
         } else {
           // Only throw error if generation actually failed
           throw new Error('Portfolio generation succeeded but no URL returned')
         }
+      }
+      } catch (error) {
+        clearTimeout(generateTimeoutId)
+        clearInterval(generateProgressInterval)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Portfolio generation timed out after 90 seconds')
+        }
+        throw error
       }
       
     } catch (error) {

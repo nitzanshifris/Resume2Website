@@ -1,0 +1,154 @@
+# Test Cases for CI02: Preserve Human Intent
+# Executable test specifications that validate language preservation
+
+test_specification:
+  specification_id: CI02
+  specification_title: "Preserve Human Intent"
+  test_version: "1.0.0"
+  
+test_cases:
+  - id: CI02_TC01
+    name: "Technical Jargon Preservation"
+    priority: high
+    type: automated
+    
+    setup:
+      input_cv_content: |
+        Architected microservices using event-driven patterns
+        Orchestrated CI/CD pipelines with GitOps methodology
+        Implemented blue-green deployments via Kubernetes
+        
+    execution:
+      - step: "Extract CV content using DataExtractor"
+        expected: "All technical terms preserved exactly"
+        
+    validation:
+      - assertion: "extracted_text.contains('Architected microservices')"
+        expected: true
+      - assertion: "extracted_text.contains('GitOps methodology')"
+        expected: true
+      - assertion: "extracted_text != 'Designed microservices'"
+        expected: true
+      - assertion: "semantic_similarity(input, output) >= 0.99"
+        expected: true
+        
+    cleanup:
+      - "Clear test data"
+      
+  - id: CI02_TC02
+    name: "Cultural Linguistic Variations"
+    priority: high
+    type: automated
+    
+    setup:
+      input_cv_content: |
+        Specialised in optimisation techniques
+        Managed a team of 5 whilst maintaining quality standards
+        Achieved £50K cost savings through process improvements
+        
+    execution:
+      - step: "Extract with British English content"
+        expected: "British spellings and terms preserved"
+        
+    validation:
+      - assertion: "extracted_text.contains('Specialised')"
+        expected: true
+      - assertion: "extracted_text.contains('optimisation')"
+        expected: true
+      - assertion: "extracted_text.contains('whilst')"
+        expected: true
+      - assertion: "extracted_text.contains('£50K')"
+        expected: true
+      - assertion: "!extracted_text.contains('Specialized')"
+        expected: true
+        
+  - id: CI02_TC03
+    name: "Personal Voice Preservation"
+    priority: medium
+    type: automated
+    
+    setup:
+      input_cv_content: |
+        Passionate about creating user-centric solutions
+        Thrives in fast-paced, collaborative environments
+        Believes in continuous learning and knowledge sharing
+        
+    execution:
+      - step: "Extract personal descriptors"
+        expected: "Emotional and personality language preserved"
+        
+    validation:
+      - assertion: "extracted_text.contains('Passionate about')"
+        expected: true
+      - assertion: "extracted_text.contains('Thrives in')"
+        expected: true
+      - assertion: "extracted_text.contains('Believes in')"
+        expected: true
+      - assertion: "personal_voice_score(extracted_text) == personal_voice_score(input)"
+        expected: true
+        
+  - id: CI02_TC04
+    name: "Creative Language Preservation"
+    priority: medium
+    type: manual
+    
+    setup:
+      input_cv_content: |
+        Ninja-level proficiency in JavaScript
+        Rockstar developer with 5+ years experience
+        Growth-hacked user acquisition by 300%
+        
+    execution:
+      - step: "Process CV with unconventional terminology"
+        expected: "Creative terms preserved without standardization"
+        
+    validation:
+      - check: "Verify 'Ninja-level' appears in output"
+        expected: "Present exactly as written"
+      - check: "Verify 'Rockstar developer' preserved"
+        expected: "Not changed to 'Senior developer' or similar"
+      - check: "Verify 'Growth-hacked' maintained"
+        expected: "Modern terminology kept intact"
+        
+  - id: CI02_TC05
+    name: "Edge Case - Mixed Languages"
+    priority: high
+    type: automated
+    
+    setup:
+      input_cv_content: |
+        Développeur Full-Stack with expertise in React
+        管理了一个5人的开发团队 (Managed a 5-person dev team)
+        Certificado en Gestión de Proyectos Ágiles
+        
+    execution:
+      - step: "Process multilingual CV content"
+        expected: "All languages preserved exactly"
+        
+    validation:
+      - assertion: "extracted_text.contains('Développeur Full-Stack')"
+        expected: true
+      - assertion: "extracted_text.contains('管理了一个5人的开发团队')"
+        expected: true
+      - assertion: "extracted_text.contains('Certificado en Gestión')"
+        expected: true
+      - assertion: "character_encoding_preserved(input, output)"
+        expected: true
+        
+performance_criteria:
+  - metric: execution_time
+    threshold: "< 100ms per test case"
+  - metric: memory_usage
+    threshold: "< 50MB per test execution"
+  - metric: accuracy
+    threshold: "100% string preservation"
+    
+coverage_requirements:
+  - "All language preservation scenarios covered"
+  - "Edge cases for special characters and encodings"
+  - "Performance under various input sizes"
+  
+regression_tests:
+  - "Run on every code change to DataExtractor"
+  - "Run on every specification update"
+  - "Include in CI/CD pipeline"

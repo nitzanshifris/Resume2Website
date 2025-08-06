@@ -840,10 +840,42 @@ async def extract_cv_data_endpoint(
             # Construct file path if not in cv_upload
             BASE_DIR = Path(__file__).parent.parent.parent.parent
             file_extension = cv_upload['file_type'].lower()
-            file_path = str(BASE_DIR / "data" / "uploads" / f"{job_id}{file_extension}")
             
+            # Try multiple file path patterns
+            possible_paths = [
+                # Standard pattern for authenticated users
+                str(BASE_DIR / "data" / "uploads" / f"{job_id}{file_extension}"),
+                # Anonymous pattern with glob search
+                str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}_*{file_extension}")
+            ]
+            
+            for pattern in possible_paths:
+                if '*' in pattern:
+                    # Use glob for wildcard patterns
+                    import glob
+                    matches = glob.glob(pattern, recursive=True)
+                    if matches:
+                        file_path = matches[0]
+                        logger.info(f"Found file using glob pattern: {file_path}")
+                        break
+                elif os.path.exists(pattern):
+                    file_path = pattern
+                    logger.info(f"Found file at: {file_path}")
+                    break
+            else:
+                # If still not found, log available files for debugging
+                import glob
+                all_files = glob.glob(str(BASE_DIR / "data" / "uploads" / "**" / "*"), recursive=True)
+                job_files = [f for f in all_files if job_id in f]
+                logger.error(f"File not found for job {job_id}. Files containing job_id: {job_files}")
+                raise HTTPException(status_code=404, detail="File not found")
+        
+        # Verify file exists after all the path resolution
         if not os.path.exists(file_path):
-            raise HTTPException(status_code=404, detail="File not found")
+            logger.error(f"Resolved file path does not exist: {file_path}")
+            raise HTTPException(status_code=404, detail="File not found after path resolution")
+        
+        logger.info(f"Processing file for extraction: {file_path}")
         
         # Update status to processing
         update_cv_upload_status(job_id, 'processing')
@@ -876,7 +908,9 @@ async def extract_cv_data_endpoint(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
         logger.error(f"CV extraction error for job {job_id}: {e}")
+        logger.error(f"Full traceback:\n{traceback.format_exc()}")
         update_cv_upload_status(job_id, 'failed')
         raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
 
