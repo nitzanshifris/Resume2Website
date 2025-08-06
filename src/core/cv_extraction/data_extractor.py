@@ -563,15 +563,17 @@ IMPORTANT:
                 # Fix common extraction errors with institution names
                 if item and item.get('institution'):
                     inst = item['institution']
-                    # Fix "University Newtown Square University" -> "Newtown Square University"
-                    if inst.startswith('University ') and inst.endswith(' University'):
-                        item['institution'] = inst[11:]  # Remove first "University "
-                        logger.debug(f"Fixed institution name: {inst} -> {item['institution']}")
-                    # Fix when only "University" is extracted (common OCR/parsing error)
-                    elif inst == 'University' or inst.lower() == 'university':
-                        # This is clearly an extraction error - mark for re-extraction
-                        item['institution'] = '[University Name Not Extracted]'
-                        logger.warning(f"Institution extracted as just 'University' - marking as incomplete")
+                    # Only process if inst is a string
+                    if inst and isinstance(inst, str):
+                        # Fix "University Newtown Square University" -> "Newtown Square University"
+                        if inst.startswith('University ') and inst.endswith(' University'):
+                            item['institution'] = inst[11:]  # Remove first "University "
+                            logger.debug(f"Fixed institution name: {inst} -> {item['institution']}")
+                        # Fix when only "University" is extracted (common OCR/parsing error)
+                        elif inst == 'University' or inst.lower() == 'university':
+                            # This is clearly an extraction error - mark for re-extraction
+                            item['institution'] = '[University Name Not Extracted]'
+                            logger.warning(f"Institution extracted as just 'University' - marking as incomplete")
                 
                 # Fix missing city for known institutions
                 if item and item.get('institution') == 'Project Management Institute (PMI)':
@@ -790,7 +792,7 @@ IMPORTANT:
                 for edu_item in education_items:
                     if isinstance(edu_item, dict) and edu_item.get('relevantCoursework'):
                         for coursework in edu_item['relevantCoursework']:
-                            if 'dissertation' in coursework.lower():
+                            if coursework and isinstance(coursework, str) and 'dissertation' in coursework.lower():
                                 # Extract dissertation title and topic
                                 dissertation_match = re.search(r'[Dd]issertation.*?["\'](.+?)["\']', coursework)
                                 if dissertation_match:
@@ -817,7 +819,7 @@ IMPORTANT:
                 existing_titles = {pub.get('title', '').lower() for pub in enhanced['publications']['publications'] if pub}
                 
                 for dissertation in dissertations_found:
-                    if dissertation['title'].lower() not in existing_titles:
+                    if dissertation.get('title') and dissertation['title'].lower() not in existing_titles:
                         enhanced['publications']['publications'].append({
                             'title': dissertation['title'],
                             'authors': None,

@@ -1,0 +1,376 @@
+# CV2WEB Specification Dependency Graph
+# Shows how all specifications compose and depend on each other
+
+dependency_graph:
+  core_layer:
+    - id: CI01
+      title: "User-Centric Value Creation"
+      dependencies: []
+      required_by: [UI01, UI02, UI03, UI04, UI05, UI06, UI07, CV02, PQ01, UX01, SC01]
+      
+    - id: CI02
+      title: "Preserve Human Intent"
+      dependencies: []
+      required_by: [CV01, CV03, CV12, CV13, PQ05, UI04, SC11]
+      
+    - id: CI03
+      title: "Quality Over Speed"
+      dependencies: []
+      required_by: [CV02, CV09, PQ11, BL02, SC04, SC05]
+      
+    - id: CI04
+      title: "Accessibility and Inclusion"
+      dependencies: []
+      required_by: [UI09, PQ03, UX08, UX15, CV07]
+      
+    - id: CI05
+      title: "Transparency and Trust"
+      dependencies: []
+      required_by: [UX02, UX03, UI10, BL08, LS01]
+      
+  user_intent_layer:
+    - id: UI01
+      title: "Escape the No Pile"
+      dependencies: [CI01]
+      required_by: [CV02, PQ01, PQ04, UX01, SC01]
+      
+    - id: UI02
+      title: "Tell Complete Career Story"
+      dependencies: [CI01, CI02]
+      required_by: [CV02, CV04, PQ05, SC02]
+      
+    - id: UI03
+      title: "Professional Credibility"
+      dependencies: [CI01]
+      required_by: [PQ01, PQ02, PQ06, SC03]
+      
+    - id: UI04
+      title: "Authentic Self-Representation"
+      dependencies: [CI01, CI02]
+      required_by: [CV01, PQ10, SC11]
+      
+    - id: UI05
+      title: "Immediate Value"
+      dependencies: [CI01]
+      required_by: [UX01, UX04, SC03, BL03]
+      
+    - id: UI06
+      title: "Control and Iteration"
+      dependencies: [CI01]
+      required_by: [BL07, UX05]
+      
+    - id: UI07
+      title: "Confidence Building"
+      dependencies: [CI01]
+      required_by: [UX10, PQ04, SC02]
+      
+    - id: UI08
+      title: "Career Transition Support"
+      dependencies: [CI01]
+      required_by: [CV04, PQ06]
+      
+    - id: UI09
+      title: "International Accessibility"
+      dependencies: [CI01, CI04]
+      required_by: [CV07, CV13, PQ02]
+      
+    - id: UI10
+      title: "Privacy and Control"
+      dependencies: [CI01, CI05]
+      required_by: [BL05, BL08, LS01, LS02]
+      
+  technical_layer:
+    - id: CV01
+      title: "Preserve Original Language"
+      dependencies: [CI02, UI04]
+      required_by: [PQ05, SC04, SC11]
+      interfaces:
+        input: "RawCVText"
+        output: "PreservedLanguageText"
+        validation: "semantic_similarity > 0.99"
+        
+    - id: CV02
+      title: "Complete Information Extraction"
+      dependencies: [CI01, CI03, UI01, UI02]
+      required_by: [PQ04, PQ05, SC04]
+      interfaces:
+        input: "CVFile"
+        output: "StructuredCVData[18 sections]"
+        validation: "extraction_accuracy >= defined_thresholds"
+        
+    - id: CV03
+      title: "Zero Fabrication Policy"
+      dependencies: [CI02]
+      required_by: [SC10, PQ05]
+      interfaces:
+        validation: "no_generated_content_detected"
+        
+    - id: CV04
+      title: "Structured Data Integrity"
+      dependencies: [UI02, UI08]
+      required_by: [PQ04, BL02]
+      interfaces:
+        output: "CVData[18 standardized sections]"
+        
+    - id: PQ01
+      title: "Professional Appearance"
+      dependencies: [CI01, UI01, UI03]
+      required_by: [SC05]
+      interfaces:
+        output: "Portfolio"
+        validation: "lighthouse_score >= 90"
+        
+    - id: PQ02
+      title: "Mobile Responsiveness"
+      dependencies: [UI03, UI09]
+      required_by: [SC05, SC13]
+      interfaces:
+        validation: "mobile_lighthouse_score >= 90"
+        
+    - id: PQ03
+      title: "Accessibility Compliance"
+      dependencies: [CI04]
+      required_by: [SC12, LS03]
+      interfaces:
+        validation: "wcag_2.1_aa_compliant"
+        
+    - id: PQ04
+      title: "Information Hierarchy"
+      dependencies: [UI01, UI07, CV02, CV04]
+      required_by: [SC01, SC07]
+      interfaces:
+        validation: "key_info_visible_in_3_seconds"
+        
+    - id: PQ05
+      title: "Content Fidelity"
+      dependencies: [CI02, CV01, CV03]
+      required_by: [SC04, SC11]
+      interfaces:
+        validation: "content_accuracy = 100%"
+        
+  experience_layer:
+    - id: UX01
+      title: "Immediate Value Delivery"
+      dependencies: [CI01, UI01, UI05]
+      required_by: [SC03, SC07]
+      interfaces:
+        validation: "value_visible_within_60_seconds"
+        
+    - id: UX02
+      title: "Transparent Progress Communication"
+      dependencies: [CI05]
+      required_by: [SC07, SC08]
+      interfaces:
+        output: "ProgressStatus"
+        validation: "progress_updates_every_3_seconds"
+        
+    - id: UX03
+      title: "Error Prevention and Recovery"
+      dependencies: [CI05]
+      required_by: [SC08, BL10]
+      interfaces:
+        input: "UserAction"
+        output: "Result | Error with recovery path"
+        
+    - id: UX04
+      title: "Onboarding Simplicity"
+      dependencies: [UI05]
+      required_by: [SC07, BL07]
+      interfaces:
+        validation: "no_account_required_for_initial_value"
+        
+    - id: UX08
+      title: "Accessibility Throughout Journey"
+      dependencies: [CI04]
+      required_by: [SC12, PQ03]
+      interfaces:
+        validation: "keyboard_navigable && screen_reader_compatible"
+        
+    - id: UX10
+      title: "Confidence-Building Communication"
+      dependencies: [UI07]
+      required_by: [SC02, SC09]
+      interfaces:
+        output: "ConfidenceMessage"
+        validation: "positive_sentiment_score >= 0.8"
+        
+  business_logic_layer:
+    - id: BL01
+      title: "File Handling Standards"
+      dependencies: []
+      required_by: [CV02, SC06]
+      interfaces:
+        input: "File[size <= 10MB, format in supported_formats]"
+        output: "ValidatedFile | Error"
+        sla: "processing_time < 30s"
+        
+    - id: BL02
+      title: "Data Extraction Logic"
+      dependencies: [CI03, CV04]
+      required_by: [SC04, SC06]
+      interfaces:
+        input: "ValidatedFile"
+        output: "ExtractedData"
+        constraints: ["temperature = 0.0", "model = claude-4-opus"]
+        
+    - id: BL03
+      title: "Portfolio Generation Rules"
+      dependencies: [UI05]
+      required_by: [SC06, SC16]
+      interfaces:
+        input: "ExtractedData"
+        output: "GeneratedPortfolio"
+        constraints: ["max_concurrent = 20", "memory_limit = 512MB"]
+        
+    - id: BL05
+      title: "Data Retention and Cleanup"
+      dependencies: [UI10]
+      required_by: [LS01, LS02]
+      interfaces:
+        validation: "anonymous_data_deleted_after_24h"
+        
+    - id: BL07
+      title: "Anonymous User Capabilities"
+      dependencies: [UI06, UX04]
+      required_by: [SC14]
+      interfaces:
+        validation: "core_features_available_without_auth"
+        
+    - id: BL08
+      title: "Authentication and Session Management"
+      dependencies: [CI05, UI10]
+      required_by: [LS01, SS01]
+      interfaces:
+        output: "SecureSession"
+        validation: "csrf_protected && https_only"
+        
+    - id: BL09
+      title: "Rate Limiting and Abuse Prevention"
+      dependencies: []
+      required_by: [SS02, SC16]
+      interfaces:
+        validation: "rate_limits_enforced"
+        
+    - id: BL10
+      title: "Graceful Degradation"
+      dependencies: [UX03]
+      required_by: [SC06]
+      interfaces:
+        validation: "partial_functionality_on_component_failure"
+        
+  compliance_layer:
+    - id: LS01
+      title: "Privacy Compliance"
+      dependencies: [CI05, UI10, BL05, BL08]
+      required_by: [SC18]
+      type: legal
+      owner: legal
+      
+    - id: LS02
+      title: "Data Protection"
+      dependencies: [UI10, BL05]
+      required_by: [SC18]
+      type: legal
+      owner: legal
+      
+    - id: LS03
+      title: "Accessibility Laws"
+      dependencies: [PQ03, UX08]
+      required_by: []
+      type: legal
+      owner: legal
+      
+    - id: SS01
+      title: "Authentication Security"
+      dependencies: [BL08]
+      required_by: []
+      type: safety
+      owner: safety
+      
+    - id: SS02
+      title: "Abuse Prevention"
+      dependencies: [BL09]
+      required_by: []
+      type: safety
+      owner: safety
+      
+  success_criteria_layer:
+    - id: SC01
+      title: "Interview Rate Improvement"
+      dependencies: [CI01, UI01, PQ04]
+      validation: "40%+ increase in callbacks"
+      
+    - id: SC02
+      title: "User Confidence Score"
+      dependencies: [UI02, UI07, UX10]
+      validation: "85%+ report increased confidence"
+      
+    - id: SC03
+      title: "Time to Value"
+      dependencies: [UI05, UX01]
+      validation: "portfolio_ready < 5_minutes"
+      
+    - id: SC04
+      title: "Extraction Accuracy"
+      dependencies: [CI03, CV01, CV02, BL02, PQ05]
+      validation: "accuracy >= defined_thresholds_per_section"
+      
+    - id: SC05
+      title: "Portfolio Load Performance"
+      dependencies: [PQ01, PQ02]
+      validation: "load_time < 3_seconds"
+      
+    - id: SC06
+      title: "System Reliability"
+      dependencies: [BL01, BL02, BL03, BL10]
+      validation: "success_rate >= 99.5%"
+      
+    - id: SC07
+      title: "Abandonment Rate"
+      dependencies: [UX01, UX02, UX04, PQ04]
+      validation: "abandonment < 10%"
+      
+    - id: SC08
+      title: "Support Request Volume"
+      dependencies: [UX02, UX03]
+      validation: "support_requests < 5%_of_users"
+      
+    - id: SC09
+      title: "User Satisfaction"
+      dependencies: [UX10]
+      validation: "nps > 50"
+      
+    - id: SC10
+      title: "Zero Fabrication Tolerance"
+      dependencies: [CV03]
+      validation: "fabricated_content = 0"
+      
+    - id: SC11
+      title: "Language Preservation"
+      dependencies: [CI02, CV01, PQ05]
+      validation: "semantic_preservation > 95%"
+      
+    - id: SC12
+      title: "Multi-Format Support"
+      dependencies: [CI04, UX08]
+      validation: "format_support >= 90%"
+      
+    - id: SC13
+      title: "Responsive Design"
+      dependencies: [PQ02]
+      validation: "consistent_experience_all_viewports"
+      
+    - id: SC14
+      title: "Organic Growth Rate"
+      dependencies: [BL07]
+      validation: "growth >= 20%_mom"
+      
+    - id: SC16
+      title: "Cost Per Portfolio"
+      dependencies: [BL03, BL09]
+      validation: "cost < $2_per_portfolio"
+      
+    - id: SC18
+      title: "Data Privacy Breach"
+      dependencies: [LS01, LS02]
+      validation: "breaches = 0"
