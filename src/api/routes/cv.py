@@ -111,8 +111,11 @@ def validate_filename(filename: str) -> bool:
             logger.warning(f"Filename validation failed: '{pattern}' in '{filename}'")
             return False
     
-    # Only allow safe characters (alphanumeric, dash, underscore, dot, space)
-    if not re.match(r'^[a-zA-Z0-9_\-\. ]+$', filename):
+    # Allow most characters except control characters and path separators
+    # This includes letters, numbers, spaces, and common punctuation like ()[]{}+-=,._
+    # Explicitly exclude: / \ : * ? " < > | and control characters (0x00-0x1F, 0x7F)
+    if re.search(r'[/\\:*?"<>|\x00-\x1F\x7F]', filename):
+        logger.warning(f"Filename validation failed: invalid character in '{filename}'")
         return False
     
     # Check reasonable length (most filesystems limit to 255)
