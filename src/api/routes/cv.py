@@ -86,6 +86,42 @@ def verify_password(password: str, hashed: str) -> bool:
     return pwd_context.verify(password, hashed)
 
 
+def validate_filename(filename: str) -> bool:
+    """
+    Validate that a filename is safe to use.
+    
+    Checks for:
+    - Empty filenames  
+    - Path traversal attempts (.., /, \\)
+    - Invalid characters
+    
+    Args:
+        filename: The filename to validate
+        
+    Returns:
+        bool: True if safe, False otherwise
+    """
+    if not filename or not filename.strip():
+        return False
+    
+    # Check for path traversal patterns
+    dangerous_patterns = ['..', '/', '\\']
+    for pattern in dangerous_patterns:
+        if pattern in filename:
+            logger.warning(f"Filename validation failed: '{pattern}' in '{filename}'")
+            return False
+    
+    # Only allow safe characters (alphanumeric, dash, underscore, dot, space)
+    if not re.match(r'^[a-zA-Z0-9_\-\. ]+$', filename):
+        return False
+    
+    # Check reasonable length (most filesystems limit to 255)
+    if len(filename) > 255:
+        return False
+    
+    return True
+
+
 # ========== AUTHENTICATION ENDPOINTS ==========
 
 @router.post("/register", response_model=SessionResponse)
@@ -404,7 +440,7 @@ async def upload_cv(
     job_id = str(uuid.uuid4())
     
     # Security check against path traversal
-    if '..' in file.filename or '/' in file_extension or '\\' in file_extension:
+    if not validate_filename(file.filename):
         raise HTTPException(status_code=400, detail="Invalid filename")
     
     # Create uploads directory with absolute path
@@ -1312,12 +1348,8 @@ async def download_specific_file(
         raise HTTPException(status_code=404, detail="CV not found")
     
     # Validate filename - prevent path traversal attempts
-    if not filename or '..' in filename or '/' in filename or '\\' in filename:
+    if not validate_filename(filename):
         raise HTTPException(status_code=400, detail="Invalid filename")
-    
-    # Additional validation: ensure filename contains only safe characters
-    if not re.match(r'^[a-zA-Z0-9_\-\.]+$', filename):
-        raise HTTPException(status_code=400, detail="Invalid filename format")
     
     # Construct file path
     BASE_DIR = Path(__file__).parent.parent.parent.parent
