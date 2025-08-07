@@ -992,6 +992,10 @@ async def upload_cv_anonymous(
             detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024:.0f}MB"
         )
     
+    # Validate filename first
+    if not validate_filename(file.filename):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
     # Check file type
     file_extension = Path(file.filename).suffix.lower()
     if file_extension not in config.ALLOWED_EXTENSIONS:
