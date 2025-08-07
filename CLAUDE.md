@@ -35,6 +35,8 @@ uvicorn main:app --reload --port 2000  # Alternative start method
 
 # Testing & Quality
 pytest                         # Run backend tests
+python3 tests/unit/run_unit_tests.py  # Run unit tests for cv.py
+python3 tests/unit/test_cv_helpers_isolated.py  # Run isolated unit tests (no DB)
 pnpm run typecheck            # TypeScript validation
 
 # Utilities
@@ -251,6 +253,7 @@ CV2WEB-V4/
 │   └── generated_portfolios/ # Portfolio outputs
 ├── sandboxes/               # Isolated portfolio environments
 ├── tests/                   # Test suites
+│   └── unit/               # Unit tests for cv.py helpers
 ├── .claude/                 # Claude-specific utilities
 │   └── commands/           # Development scripts
 ├── config.py               # Backend configuration
