@@ -122,6 +122,50 @@ def validate_filename(filename: str) -> bool:
     return True
 
 
+def get_file_extension(filename: str) -> str:
+    """
+    Safely extract file extension from filename.
+    
+    Handles edge cases:
+    - Empty or None filename returns empty string
+    - No extension returns empty string  
+    - Multiple dots (e.g., 'file.min.js' -> '.js')
+    - Always returns lowercase
+    - Preserves the dot (e.g., '.pdf' not 'pdf')
+    
+    Args:
+        filename: The filename to extract extension from
+        
+    Returns:
+        str: Lowercase extension with dot (e.g., '.pdf') or empty string
+        
+    Examples:
+        >>> get_file_extension("resume.pdf")
+        '.pdf'
+        >>> get_file_extension("resume.PDF")
+        '.pdf'
+        >>> get_file_extension("my.resume.docx")
+        '.docx'
+        >>> get_file_extension("no_extension")
+        ''
+        >>> get_file_extension("")
+        ''
+        >>> get_file_extension(None)
+        ''
+    """
+    if not filename:
+        return ""
+    
+    # Convert to string in case we get a Path object
+    filename = str(filename)
+    
+    # Use Path for robust extraction
+    extension = Path(filename).suffix.lower()
+    
+    # Path.suffix returns empty string for no extension, which is what we want
+    return extension
+
+
 # ========== AUTHENTICATION ENDPOINTS ==========
 
 @router.post("/register", response_model=SessionResponse)
@@ -387,7 +431,7 @@ async def upload_cv(
         )
     
     # === 2.5 GET FILE EXTENSION ===
-    file_extension = Path(file.filename).suffix.lower()
+    file_extension = get_file_extension(file.filename)
     
     # === 2.6 CALCULATE FILE HASH FOR CACHING ===
     file_hash = hashlib.sha256(file_content).hexdigest()
@@ -752,7 +796,7 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
     
     # Construct file path
     BASE_DIR = Path(__file__).parent.parent.parent.parent  # Go up to project root
-    file_extension = cv_upload['file_type'].lower()
+    file_extension = cv_upload['file_type'].lower() if cv_upload.get('file_type') else ''
     
     # Check if this is a multi-file upload
     multi_file_dir = BASE_DIR / "data" / "uploads" / job_id
@@ -875,7 +919,7 @@ async def extract_cv_data_endpoint(
         if not file_path:
             # Construct file path if not in cv_upload
             BASE_DIR = Path(__file__).parent.parent.parent.parent
-            file_extension = cv_upload['file_type'].lower()
+            file_extension = cv_upload['file_type'].lower() if cv_upload.get('file_type') else ''
             
             # Try multiple file path patterns
             possible_paths = [
@@ -997,7 +1041,7 @@ async def upload_cv_anonymous(
         raise HTTPException(status_code=400, detail="Invalid filename")
     
     # Check file type
-    file_extension = Path(file.filename).suffix.lower()
+    file_extension = get_file_extension(file.filename)
     if file_extension not in config.ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400, 
@@ -1139,7 +1183,7 @@ async def upload_multiple_files(
             continue
             
         # Get file extension
-        file_extension = Path(file.filename).suffix.lower()
+        file_extension = get_file_extension(file.filename)
         if file_extension not in config.ALLOWED_EXTENSIONS:
             logger.warning(f"Skipping file {file.filename} - invalid type {file_extension}")
             continue
@@ -1297,7 +1341,7 @@ async def get_all_files(job_id: str, current_user_id: str = Depends(get_current_
             files.append({
                 "filename": file_path.name,
                 "size": file_path.stat().st_size,
-                "type": file_path.suffix.lower(),
+                "type": get_file_extension(file_path.name),
                 "url": f"/api/v1/download/{job_id}/{file_path.name}"
             })
         
@@ -1373,7 +1417,7 @@ async def download_specific_file(
         raise HTTPException(status_code=404, detail="File not found")
     
     # Determine MIME type based on file extension
-    file_extension = file_path.suffix.lower()
+    file_extension = get_file_extension(file_path.name)
     mime_type_map = {
         '.pdf': 'application/pdf',
         '.doc': 'application/msword',
