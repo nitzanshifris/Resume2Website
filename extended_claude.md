@@ -93,6 +93,7 @@ git checkout -b feature/description
 # 3. Make changes and verify
 pnpm run typecheck      # No TypeScript errors
 pytest                  # Backend tests pass
+python3 tests/unit/run_unit_tests.py  # Unit tests pass
 
 # 4. Stage changes (ask user first)
 git add .               # ⚠️ Requires user approval
@@ -153,6 +154,7 @@ CV2WEB-V4/
 │   └── generated_portfolios/ # Generated portfolio outputs
 ├── sandboxes/            # Isolated portfolio generation environments
 ├── tests/                # Test suites
+│   └── unit/            # Unit tests for cv.py helper functions
 ├── docs/                 # Technical documentation
 │   ├── deployment/       # Deployment guides and environment templates
 │   └── archive/          # Historical documentation for reference
@@ -1031,6 +1033,17 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 
 ## Recent Updates
 
+### CV.py Security & Code Quality Improvements (2025-08-07)
+- **🔒 Enhanced Security**: Added comprehensive filename validation to prevent path traversal attacks
+- **🧪 Unit Test Coverage**: Added complete unit test suite for cv.py helper functions
+  - test_cv_helpers.py: Tests for validate_filename, get_file_extension, get_mime_type
+  - test_cv_auth.py: Tests for password hashing and verification
+  - test_cv_helpers_isolated.py: Database-free tests for CI/CD environments
+- **♻️ Code Refactoring**: Eliminated code duplication with reusable helper functions
+- **📝 Test Documentation**: Added comprehensive README.md in tests/unit/ directory
+- **✅ All Tests Passing**: 100% pass rate on security validation and utility functions
+- **🌿 Branch Management**: All changes in cv.py-improvements branch for safe review
+
 ### Comprehensive Codebase Analysis & Major Cleanup (2025-08-05)
 - **🔍 Complete System Analysis**: Systematic analysis of entire CV2WEB-V4 codebase folder by folder
 - **📚 Documentation Overhaul**: Updated all docs to reflect Claude 4 Opus as ONLY AI model, removed outdated Gemini references
@@ -1161,4 +1174,4 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-08-05 | Version: 5.0*
+*Last updated: 2025-08-07 | Version: 5.1*

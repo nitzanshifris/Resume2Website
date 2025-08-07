@@ -86,6 +86,150 @@ def verify_password(password: str, hashed: str) -> bool:
     return pwd_context.verify(password, hashed)
 
 
+def validate_filename(filename: str) -> bool:
+    """
+    Validate that a filename is safe to use.
+    
+    Checks for:
+    - Empty filenames  
+    - Path traversal attempts (.., /, \\)
+    - Invalid characters
+    
+    Args:
+        filename: The filename to validate
+        
+    Returns:
+        bool: True if safe, False otherwise
+    """
+    if not filename or not filename.strip():
+        return False
+    
+    # Check for path traversal patterns
+    dangerous_patterns = ['..', '/', '\\']
+    for pattern in dangerous_patterns:
+        if pattern in filename:
+            logger.warning(f"Filename validation failed: '{pattern}' in '{filename}'")
+            return False
+    
+    # Allow most characters except control characters and path separators
+    # This includes letters, numbers, spaces, and common punctuation like ()[]{}+-=,._
+    # Explicitly exclude: / \ : * ? " < > | and control characters (0x00-0x1F, 0x7F)
+    if re.search(r'[/\\:*?"<>|\x00-\x1F\x7F]', filename):
+        logger.warning(f"Filename validation failed: invalid character in '{filename}'")
+        return False
+    
+    # Check reasonable length (most filesystems limit to 255)
+    if len(filename) > 255:
+        return False
+    
+    return True
+
+
+def get_file_extension(filename: str) -> str:
+    """
+    Safely extract file extension from filename.
+    
+    Handles edge cases:
+    - Empty or None filename returns empty string
+    - No extension returns empty string  
+    - Multiple dots (e.g., 'file.min.js' -> '.js')
+    - Always returns lowercase
+    - Preserves the dot (e.g., '.pdf' not 'pdf')
+    
+    Args:
+        filename: The filename to extract extension from
+        
+    Returns:
+        str: Lowercase extension with dot (e.g., '.pdf') or empty string
+        
+    Examples:
+        >>> get_file_extension("resume.pdf")
+        '.pdf'
+        >>> get_file_extension("resume.PDF")
+        '.pdf'
+        >>> get_file_extension("my.resume.docx")
+        '.docx'
+        >>> get_file_extension("no_extension")
+        ''
+        >>> get_file_extension("")
+        ''
+        >>> get_file_extension(None)
+        ''
+    """
+    if not filename:
+        return ""
+    
+    # Convert to string in case we get a Path object
+    filename = str(filename)
+    
+    # Use Path for robust extraction
+    extension = Path(filename).suffix.lower()
+    
+    # Path.suffix returns empty string for no extension, which is what we want
+    return extension
+
+
+def get_mime_type(file_extension: str) -> str:
+    """
+    Get MIME type for a file extension.
+    
+    Args:
+        file_extension: File extension with or without dot (e.g., '.pdf' or 'pdf')
+        
+    Returns:
+        str: MIME type (e.g., 'application/pdf') or 'application/octet-stream' for unknown
+        
+    Examples:
+        >>> get_mime_type('.pdf')
+        'application/pdf'
+        >>> get_mime_type('pdf')
+        'application/pdf'
+        >>> get_mime_type('.PDF')
+        'application/pdf'
+        >>> get_mime_type('.xyz')
+        'application/octet-stream'
+        >>> get_mime_type('')
+        'application/octet-stream'
+    """
+    # Handle empty input
+    if not file_extension:
+        return 'application/octet-stream'
+    
+    # Normalize extension (ensure it has a dot and is lowercase)
+    ext = file_extension.lower()
+    if not ext.startswith('.'):
+        ext = '.' + ext
+    
+    # Comprehensive MIME type mapping for all supported file types
+    mime_map = {
+        # Documents
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.txt': 'text/plain',
+        '.rtf': 'application/rtf',
+        '.odt': 'application/vnd.oasis.opendocument.text',
+        
+        # Web formats
+        '.html': 'text/html',
+        '.htm': 'text/html',
+        '.md': 'text/markdown',
+        
+        # Images
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.webp': 'image/webp',
+        '.heic': 'image/heic',
+        '.heif': 'image/heif',
+        '.tiff': 'image/tiff',
+        '.tif': 'image/tiff',
+        '.bmp': 'image/bmp'
+    }
+    
+    return mime_map.get(ext, 'application/octet-stream')
+
+
 # ========== AUTHENTICATION ENDPOINTS ==========
 
 @router.post("/register", response_model=SessionResponse)
@@ -351,7 +495,7 @@ async def upload_cv(
         )
     
     # === 2.5 GET FILE EXTENSION ===
-    file_extension = Path(file.filename).suffix.lower()
+    file_extension = get_file_extension(file.filename)
     
     # === 2.6 CALCULATE FILE HASH FOR CACHING ===
     file_hash = hashlib.sha256(file_content).hexdigest()
@@ -404,7 +548,7 @@ async def upload_cv(
     job_id = str(uuid.uuid4())
     
     # Security check against path traversal
-    if '..' in file.filename or '/' in file_extension or '\\' in file_extension:
+    if not validate_filename(file.filename):
         raise HTTPException(status_code=400, detail="Invalid filename")
     
     # Create uploads directory with absolute path
@@ -716,7 +860,7 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
     
     # Construct file path
     BASE_DIR = Path(__file__).parent.parent.parent.parent  # Go up to project root
-    file_extension = cv_upload['file_type'].lower()
+    file_extension = cv_upload['file_type'].lower() if cv_upload.get('file_type') else ''
     
     # Check if this is a multi-file upload
     multi_file_dir = BASE_DIR / "data" / "uploads" / job_id
@@ -737,23 +881,7 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
         raise HTTPException(status_code=404, detail="Original file not found")
     
     # Determine MIME type based on file extension
-    mime_type_map = {
-        '.pdf': 'application/pdf',
-        '.doc': 'application/msword',
-        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        '.txt': 'text/plain',
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.webp': 'image/webp',
-        '.heic': 'image/heic',
-        '.heif': 'image/heif',
-        '.tiff': 'image/tiff',
-        '.tif': 'image/tiff',
-        '.bmp': 'image/bmp'
-    }
-    
-    media_type = mime_type_map.get(file_extension, 'application/octet-stream')
+    media_type = get_mime_type(file_extension)
     
     # Return the file with proper headers for inline display
     return FileResponse(
@@ -839,7 +967,7 @@ async def extract_cv_data_endpoint(
         if not file_path:
             # Construct file path if not in cv_upload
             BASE_DIR = Path(__file__).parent.parent.parent.parent
-            file_extension = cv_upload['file_type'].lower()
+            file_extension = cv_upload['file_type'].lower() if cv_upload.get('file_type') else ''
             
             # Try multiple file path patterns
             possible_paths = [
@@ -956,8 +1084,12 @@ async def upload_cv_anonymous(
             detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024:.0f}MB"
         )
     
+    # Validate filename first
+    if not validate_filename(file.filename):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
     # Check file type
-    file_extension = Path(file.filename).suffix.lower()
+    file_extension = get_file_extension(file.filename)
     if file_extension not in config.ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400, 
@@ -1099,7 +1231,7 @@ async def upload_multiple_files(
             continue
             
         # Get file extension
-        file_extension = Path(file.filename).suffix.lower()
+        file_extension = get_file_extension(file.filename)
         if file_extension not in config.ALLOWED_EXTENSIONS:
             logger.warning(f"Skipping file {file.filename} - invalid type {file_extension}")
             continue
@@ -1257,7 +1389,7 @@ async def get_all_files(job_id: str, current_user_id: str = Depends(get_current_
             files.append({
                 "filename": file_path.name,
                 "size": file_path.stat().st_size,
-                "type": file_path.suffix.lower(),
+                "type": get_file_extension(file_path.name),
                 "url": f"/api/v1/download/{job_id}/{file_path.name}"
             })
         
@@ -1312,12 +1444,8 @@ async def download_specific_file(
         raise HTTPException(status_code=404, detail="CV not found")
     
     # Validate filename - prevent path traversal attempts
-    if not filename or '..' in filename or '/' in filename or '\\' in filename:
+    if not validate_filename(filename):
         raise HTTPException(status_code=400, detail="Invalid filename")
-    
-    # Additional validation: ensure filename contains only safe characters
-    if not re.match(r'^[a-zA-Z0-9_\-\.]+$', filename):
-        raise HTTPException(status_code=400, detail="Invalid filename format")
     
     # Construct file path
     BASE_DIR = Path(__file__).parent.parent.parent.parent
@@ -1337,24 +1465,8 @@ async def download_specific_file(
         raise HTTPException(status_code=404, detail="File not found")
     
     # Determine MIME type based on file extension
-    file_extension = file_path.suffix.lower()
-    mime_type_map = {
-        '.pdf': 'application/pdf',
-        '.doc': 'application/msword',
-        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        '.txt': 'text/plain',
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.webp': 'image/webp',
-        '.heic': 'image/heic',
-        '.heif': 'image/heif',
-        '.tiff': 'image/tiff',
-        '.tif': 'image/tiff',
-        '.bmp': 'image/bmp'
-    }
-    
-    media_type = mime_type_map.get(file_extension, 'application/octet-stream')
+    file_extension = get_file_extension(file_path.name)
+    media_type = get_mime_type(file_extension)
     
     # Return the file
     return FileResponse(
