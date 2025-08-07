@@ -166,6 +166,67 @@ def get_file_extension(filename: str) -> str:
     return extension
 
 
+def get_mime_type(file_extension: str) -> str:
+    """
+    Get MIME type for a file extension.
+    
+    Args:
+        file_extension: File extension with or without dot (e.g., '.pdf' or 'pdf')
+        
+    Returns:
+        str: MIME type (e.g., 'application/pdf') or 'application/octet-stream' for unknown
+        
+    Examples:
+        >>> get_mime_type('.pdf')
+        'application/pdf'
+        >>> get_mime_type('pdf')
+        'application/pdf'
+        >>> get_mime_type('.PDF')
+        'application/pdf'
+        >>> get_mime_type('.xyz')
+        'application/octet-stream'
+        >>> get_mime_type('')
+        'application/octet-stream'
+    """
+    # Handle empty input
+    if not file_extension:
+        return 'application/octet-stream'
+    
+    # Normalize extension (ensure it has a dot and is lowercase)
+    ext = file_extension.lower()
+    if not ext.startswith('.'):
+        ext = '.' + ext
+    
+    # Comprehensive MIME type mapping for all supported file types
+    mime_map = {
+        # Documents
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.txt': 'text/plain',
+        '.rtf': 'application/rtf',
+        '.odt': 'application/vnd.oasis.opendocument.text',
+        
+        # Web formats
+        '.html': 'text/html',
+        '.htm': 'text/html',
+        '.md': 'text/markdown',
+        
+        # Images
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.webp': 'image/webp',
+        '.heic': 'image/heic',
+        '.heif': 'image/heif',
+        '.tiff': 'image/tiff',
+        '.tif': 'image/tiff',
+        '.bmp': 'image/bmp'
+    }
+    
+    return mime_map.get(ext, 'application/octet-stream')
+
+
 # ========== AUTHENTICATION ENDPOINTS ==========
 
 @router.post("/register", response_model=SessionResponse)
@@ -817,23 +878,7 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
         raise HTTPException(status_code=404, detail="Original file not found")
     
     # Determine MIME type based on file extension
-    mime_type_map = {
-        '.pdf': 'application/pdf',
-        '.doc': 'application/msword',
-        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        '.txt': 'text/plain',
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.webp': 'image/webp',
-        '.heic': 'image/heic',
-        '.heif': 'image/heif',
-        '.tiff': 'image/tiff',
-        '.tif': 'image/tiff',
-        '.bmp': 'image/bmp'
-    }
-    
-    media_type = mime_type_map.get(file_extension, 'application/octet-stream')
+    media_type = get_mime_type(file_extension)
     
     # Return the file with proper headers for inline display
     return FileResponse(
@@ -1418,23 +1463,7 @@ async def download_specific_file(
     
     # Determine MIME type based on file extension
     file_extension = get_file_extension(file_path.name)
-    mime_type_map = {
-        '.pdf': 'application/pdf',
-        '.doc': 'application/msword',
-        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        '.txt': 'text/plain',
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.webp': 'image/webp',
-        '.heic': 'image/heic',
-        '.heif': 'image/heif',
-        '.tiff': 'image/tiff',
-        '.tif': 'image/tiff',
-        '.bmp': 'image/bmp'
-    }
-    
-    media_type = mime_type_map.get(file_extension, 'application/octet-stream')
+    media_type = get_mime_type(file_extension)
     
     # Return the file
     return FileResponse(
