@@ -25,7 +25,7 @@ import ProcessingPage from "@/components/processing-page"
 import PricingModal from "@/components/pricing-modal"
 import SimpleDashboard from "@/components/simple-dashboard"
 import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
-import AuthModal from "@/components/auth-modal"
+import AuthModal from "@/components/auth-modal-new"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
