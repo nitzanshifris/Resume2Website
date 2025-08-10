@@ -78,14 +78,14 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
       return
     }
 
-    // Success!
-    setUploadState('success')
+    // Success! - Don't show success overlay, go straight to file display
+    // setUploadState('success') // Remove this to avoid showing checkmark
     setLocalUploadedFiles(prev => [...prev, file])
     // Don't trigger animation yet, just notify parent that file was selected
     if (onFileSelect) {
       onFileSelect(file)
     }
-    resetUploadState()
+    // resetUploadState() // No need to reset since we're not setting success state
   }, [onFileSelect, resetUploadState])
   
   const handleMultipleFiles = useCallback((files: FileList) => {
@@ -105,14 +105,15 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
     }
     
     if (validFiles.length > 0) {
-      setUploadState('success')
+      // Don't show success overlay, go straight to file display
+      // setUploadState('success') // Remove this to avoid showing checkmark
       setLocalUploadedFiles(validFiles)
       setCurrentFileIndex(0)
       // Don't trigger animation yet, just notify parent that files were selected
       if (onFileSelect) {
         onFileSelect(validFiles[0]) // Send the first file to parent
       }
-      resetUploadState()
+      // resetUploadState() // No need to reset since we're not setting success state
     } else {
       setUploadState('error')
       resetUploadState()
@@ -630,16 +631,7 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
           
           {/* Upload state indicators */}
           <AnimatePresence>
-            {uploadState === 'success' && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="absolute inset-0 bg-white/95 flex items-center justify-center"
-              >
-                <CheckCircle className="w-16 h-16 text-emerald-500" />
-              </motion.div>
-            )}
+            {/* Removed success state overlay - file preview shows immediately */}
             
             {uploadState === 'error' && (
               <motion.div
