@@ -267,6 +267,20 @@ def get_user_id_from_session(session_id: str) -> Optional[str]:
         conn.close()
 
 
+def delete_session(session_id: str) -> bool:
+    """Delete a specific session"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute(
+            "DELETE FROM sessions WHERE session_id = ?",
+            (session_id,)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
 def cleanup_old_sessions(days: int = 7) -> int:
     """Delete sessions older than specified days"""
     conn = get_db_connection()
