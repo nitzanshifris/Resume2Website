@@ -823,6 +823,11 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
   const [realProgress, setRealProgress] = useState(0)
   const [showPortfolioInMacBook, setShowPortfolioInMacBook] = useState(false)
   
+  // Auth and signup modal states
+  const [showSignupModal, setShowSignupModal] = useState(false)
+  const [isWaitingForAuth, setIsWaitingForAuth] = useState(false)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  
   // Loading sequence states for mobile
   const [loadingStep, setLoadingStep] = useState(0) // 0: backgrounds, 1: headline, 2: subheadline, 3: cv image
 
@@ -887,12 +892,21 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
       setShowStrikeThrough(true)
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
+      // Don't stop the animation immediately - let it progress to show visual feedback
+      // We'll check isWaitingForAuth later after showing some animation
+
       // Stage 2: Quick Morphing (still original content)
       setStage("morphing")
       await new Promise((resolve) => setTimeout(resolve, 1800))
 
       // Stage 3: Dissolution (still original content)
       setStage("dissolving")
+      
+      // Don't pause here anymore - let animation continue to MacBook stage
+      // if (isWaitingForAuth) {
+      //   console.log('⏸️ Animation paused at dissolving stage - waiting for authentication')
+      //   return
+      // }
       // Trigger text change FIRST, then hide strike-through
       setTimeout(() => {
         setShowNewTypewriter(true)  // Change text immediately
@@ -907,11 +921,19 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
 
       // Stage 5: Complete (final state)
       setStage("complete")
+      
+      // Check if we should pause for auth after showing the full animation
+      if (isWaitingForAuth) {
+        console.log('⏸️ Animation complete, waiting for authentication')
+        // Keep isPlaying true to maintain the visual state
+        return
+      }
+      
       setIsPlaying(false)
     }
 
     sequence()
-  }, [isPlaying])
+  }, [isPlaying, isWaitingForAuth])
 
   // Progress tracking
   useEffect(() => {
@@ -1174,26 +1196,139 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
     }
   }
 
-  const handleFileSelect = (file: File) => {
-    // Set the uploaded file
-    setUploadedFile(file)
+  const startPreviewAnimation = () => {
+    console.log('🎬 Starting preview animation (no backend processing)')
     
-    // Don't start the demo automatically - wait for click
+    // Reset states for preview
+    setStage("initial") // Start from initial stage to show CV immediately
+    setProgress(0)
+    setShowNewTypewriter(false)
+    setShowStrikeThrough(false)
+    setShowCVCard(true)
+    setPortfolioUrl(null)
+    setProcessingError(null)
+    setRealProgress(0)
+    setShowPortfolioInMacBook(false)
+    
+    // Don't start animation immediately - wait for CV to appear in card
+    setIsWaitingForAuth(true)
+    setPendingFile(uploadedFile)
+    
+    // Timeline:
+    // 1. Wait for CV to fully appear in card (estimated 4 seconds)
+    // 2. Wait 3 more seconds with CV visible
+    // 3. Start the MacBook animation
+    // 4. Wait for MacBook to fully open and show progress bar
+    // 5. Show progress bar for 3 seconds
+    // 6. Then show signup modal
+    
+    // Step 1: Wait for CV to appear (~2 seconds for upload/display)
+    console.log('⏳ Waiting for CV to appear in card...')
+    
+    setTimeout(() => {
+      // Step 2: CV is now visible, wait 1.5 more seconds
+      console.log('✅ CV visible in card, waiting 1.5 seconds...')
+      
+      setTimeout(() => {
+        // Step 3: Start the MacBook animation
+        console.log('🎬 Starting MacBook animation...')
+        setIsPlaying(true)
+        
+        // Keep progress at 0% - it should NOT animate until user signs up
+        setRealProgress(0)
+        
+        // DO NOT animate progress bar - keep it at 0% while waiting for auth
+        
+        // The animation sequence takes about 6 seconds to reach "materializing" stage
+        // where the MacBook appears and opens
+        setTimeout(() => {
+          // Step 4: MacBook should be fully open now
+          console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
+          setShowPortfolioInMacBook(true) // Ensure MacBook content is visible
+          
+          // Step 5: Wait 3 seconds with progress bar visible
+          setTimeout(() => {
+            // Step 6: Now show the signup modal
+            console.log('⏰ Showing signup modal after full preview')
+            setShowSignupModal(true)
+          }, 3000)
+        }, 6000) // Time for animation to reach MacBook stage
+      }, 1500) // 1.5 seconds after CV appears
+    }, 2000) // 2 seconds for CV to appear
+  }
+
+  const handleAuthSuccess = (userData: any) => {
+    console.log('✅ User authenticated successfully:', userData)
+    setShowSignupModal(false)
+    setIsWaitingForAuth(false)
+    
+    // Now start the real backend processing with the pending file
+    if (pendingFile) {
+      // Start the actual portfolio generation - this will update realProgress from backend
+      processPortfolioGeneration(pendingFile)
+      // The progress bar will now animate based on real backend progress
+      // No need to manually set progress values - backend handles it
+      setIsPlaying(true)
+    }
+  }
+
+  const handleSignupModalClose = () => {
+    console.log('❌ User closed signup modal without signing up')
+    setShowSignupModal(false)
+    setIsWaitingForAuth(false)
+    // Keep animation at current state - user can see the conviction flow
+    // TODO: Add conviction flow logic here
+  }
+
+  const handleFileSelect = (file: File) => {
+    // Set the uploaded file - this will trigger CV to appear in the card
+    console.log('📁 File selected, showing CV in card:', file.name)
+    setUploadedFile(file)
+    setShowCVCard(true) // Ensure CV card is visible
+    
+    // Don't start animation immediately - follow the timeline
+    // Check if user is authenticated
+    if (isAuthenticated) {
+      // User is signed in - wait for CV to appear then start full process
+      console.log('✅ User authenticated, will start full process after CV appears')
+      setTimeout(() => {
+        console.log('🚀 Starting full process for authenticated user')
+        handleStartDemo()
+      }, 2000) // Wait for CV to appear first
+    } else {
+      // User is not signed in - start preview animation sequence
+      console.log('⚠️ User not authenticated, starting preview sequence')
+      startPreviewAnimation()
+    }
   }
   
   const handleFileClick = (file: File) => {
-    // When CV card is clicked, start the demo with real backend processing
-    console.log('🎯 CV card clicked, starting demo with file:', file.name)
+    // When CV card is clicked, check if already processing
+    console.log('🎯 CV card clicked:', file.name)
+    
+    // If already playing or waiting for auth, don't restart
+    if (isPlaying || isWaitingForAuth) {
+      console.log('⚠️ Already processing, ignoring click')
+      return
+    }
+    
     setUploadedFile(file)
-    handleStartDemo()
+    
+    // Check if user is authenticated
+    if (isAuthenticated) {
+      console.log('✅ User authenticated, starting full process')
+      handleStartDemo()
+    } else {
+      console.log('⚠️ User not authenticated, starting preview')
+      startPreviewAnimation()
+    }
   }
 
   // Mobile-First Layout
   if (isMobile) {
     // Boxed block rendered only once, inside main content flow, left-aligned, mobile only
     const showStableHeadline = stage !== "typewriter"
-    return (
-      <div className="min-h-screen w-full relative overflow-hidden">
+    return <div className="min-h-screen w-full relative overflow-hidden">
         {/* Apple-style gradient background */}
         <motion.div 
           className="absolute inset-0 bg-gradient-to-br from-transparent via-white to-gray-100"
@@ -1342,8 +1477,14 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
             )}
           </div>
         </div>
-      </div>
-    )
+        
+        {/* Authentication Modal for signup after file upload */}
+        <AuthModal
+          isOpen={showSignupModal}
+          onClose={handleSignupModalClose}
+          onAuthSuccess={handleAuthSuccess}
+        />
+    </div>
   }
 
   // Desktop version (keep existing logic but simplified)
@@ -1696,7 +1837,7 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
                                 className="w-full h-full border-0"
                               />
                             </div>
-                          ) : progressBarPercentage >= 60 || realProgress >= 60 ? (
+                          ) : (portfolioUrl && realProgress >= 60) ? (
                             // Phase 5: Show portfolio URL info and debugging when ready
                             <div className="text-center p-8">
                               <div className="mb-4 text-sm text-gray-600">
@@ -1788,6 +1929,13 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
           </div>
         </div>
       </div>
+      
+      {/* Authentication Modal for signup after file upload */}
+      <AuthModal
+        isOpen={showSignupModal}
+        onClose={handleSignupModalClose}
+        onAuthSuccess={handleAuthSuccess}
+      />
     </div>
   )
 }
