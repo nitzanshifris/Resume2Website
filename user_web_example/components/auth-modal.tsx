@@ -142,25 +142,29 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     setIsLoading(true);
     setError(null);
 
-    try {
-      // Initialize Google OAuth flow
-      const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-      googleAuthUrl.searchParams.append('client_id', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
-      googleAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/google/callback`);
-      googleAuthUrl.searchParams.append('response_type', 'code');
-      googleAuthUrl.searchParams.append('scope', 'openid email profile');
-      googleAuthUrl.searchParams.append('state', 'cv2web_google_auth');
-
-      // Store auth modal state to restore after callback
-      localStorage.setItem('cv2web_auth_return', 'true');
-
-      // Redirect to Google OAuth
-      window.location.href = googleAuthUrl.toString();
-    } catch (error) {
-      console.error('Google auth error:', error);
-      setError('Google authentication failed. Please try again.');
+    // Check if Google Client ID is configured
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      setError('Google Sign-In is not configured. Please use email/password instead.');
       setIsLoading(false);
+      return;
     }
+    
+    // Initialize Google OAuth flow
+    const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    googleAuthUrl.searchParams.append('client_id', googleClientId);
+    googleAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/google/callback`);
+    googleAuthUrl.searchParams.append('response_type', 'code');
+    googleAuthUrl.searchParams.append('scope', 'openid email profile');
+    googleAuthUrl.searchParams.append('state', 'cv2web_google_auth');
+    googleAuthUrl.searchParams.append('access_type', 'offline');
+    googleAuthUrl.searchParams.append('prompt', 'consent');
+
+    // Store auth modal state to restore after callback
+    localStorage.setItem('cv2web_auth_return', 'true');
+
+    // Redirect to Google OAuth
+    window.location.href = googleAuthUrl.toString();
   };
 
   const switchMode = () => {

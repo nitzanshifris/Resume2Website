@@ -49,8 +49,34 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     }
     
     setIsLoading(true);
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000';
-    window.location.href = `${apiUrl}/api/v1/auth/google`;
+    
+    // Check if Google Client ID is configured
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      showToast({
+        title: "Configuration Error",
+        description: "Google Sign-In is not configured. Please use email/password instead.",
+        variant: "error"
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    // Initialize Google OAuth flow
+    const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    googleAuthUrl.searchParams.append('client_id', googleClientId);
+    googleAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/google/callback`);
+    googleAuthUrl.searchParams.append('response_type', 'code');
+    googleAuthUrl.searchParams.append('scope', 'openid email profile');
+    googleAuthUrl.searchParams.append('state', 'cv2web_google_auth');
+    googleAuthUrl.searchParams.append('access_type', 'offline');
+    googleAuthUrl.searchParams.append('prompt', 'consent');
+
+    // Store auth modal state to restore after callback
+    localStorage.setItem('cv2web_auth_return', 'true');
+
+    // Redirect to Google OAuth
+    window.location.href = googleAuthUrl.toString();
   };
 
   const handleEmailLogin = () => {
@@ -63,16 +89,34 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   };
 
   const handleFacebookLogin = async () => {
-    // Facebook OAuth implementation
     setIsLoading(true);
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000';
-    // You'll need to implement the Facebook OAuth endpoint in your backend
-    showToast({
-      title: "Facebook Sign-in",
-      description: "Facebook authentication coming soon!",
-      variant: "info"
-    });
-    setIsLoading(false);
+    
+    // Check if Facebook App ID is configured
+    const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+    if (!facebookAppId) {
+      // For now, just use a placeholder since we haven't added it to env yet
+      showToast({
+        title: "Configuration Needed",
+        description: "Please add your Facebook App ID to continue",
+        variant: "info"
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    // Initialize Facebook OAuth flow
+    const facebookAuthUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth');
+    facebookAuthUrl.searchParams.append('client_id', facebookAppId);
+    facebookAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/facebook/callback`);
+    facebookAuthUrl.searchParams.append('response_type', 'code');
+    facebookAuthUrl.searchParams.append('scope', 'email');  // Only request email, public_profile is automatic
+    facebookAuthUrl.searchParams.append('state', 'cv2web_facebook_auth');
+
+    // Store auth modal state to restore after callback
+    localStorage.setItem('cv2web_auth_return', 'true');
+
+    // Redirect to Facebook OAuth
+    window.location.href = facebookAuthUrl.toString();
   };
 
   const handleLinkedInLogin = async () => {
@@ -163,19 +207,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 </span>
               </button>
 
-              {/* Facebook Sign In */}
-              <button
-                onClick={handleFacebookLogin}
-                disabled={isLoading}
-                className="w-full bg-[#2a2a2a] hover:bg-[#333333] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl py-3 px-4 flex items-center justify-center gap-3 transition-all duration-200 border border-gray-700 hover:border-gray-600"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                <span className="text-sm font-medium">
-                  Continue with Facebook
-                </span>
-              </button>
 
               {/* LinkedIn Sign In */}
               <button
