@@ -1222,12 +1222,12 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
     // 5. Show progress bar for 3 seconds
     // 6. Then show signup modal
     
-    // Step 1: Wait for CV to appear (~2 seconds for upload/display)
+    // Step 1: Wait for CV to appear (~1.5 seconds for upload/display)
     console.log('⏳ Waiting for CV to appear in card...')
     
     setTimeout(() => {
-      // Step 2: CV is now visible, wait 1.5 more seconds
-      console.log('✅ CV visible in card, waiting 1.5 seconds...')
+      // Step 2: CV is now visible, wait 1 more second
+      console.log('✅ CV visible in card, waiting 1 second...')
       
       setTimeout(() => {
         // Step 3: Start the MacBook animation
@@ -1253,8 +1253,8 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
             setShowSignupModal(true)
           }, 3000)
         }, 6000) // Time for animation to reach MacBook stage
-      }, 1500) // 1.5 seconds after CV appears
-    }, 2000) // 2 seconds for CV to appear
+      }, 1000) // 1 second after CV appears
+    }, 1500) // 1.5 seconds for CV to appear
   }
 
   const handleAuthSuccess = (userData: any) => {
@@ -1275,9 +1275,19 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
   const handleSignupModalClose = () => {
     console.log('❌ User closed signup modal without signing up')
     setShowSignupModal(false)
-    setIsWaitingForAuth(false)
-    // Keep animation at current state - user can see the conviction flow
-    // TODO: Add conviction flow logic here
+    // Don't reset isWaitingForAuth - keep it true to maintain the preview state
+    // setIsWaitingForAuth(false) // REMOVED - this was causing the UI to break
+    
+    // Keep the visual state intact:
+    // - MacBook stays open (stage remains "complete")
+    // - Progress bar stays at 0%
+    // - Video carousel remains visible
+    // - User can still decide to sign up later via the "Start now" button
+    
+    // The user can:
+    // 1. Click "Start now" to show signup modal again
+    // 2. Upload a different CV to restart the process
+    // 3. Navigate away and come back
   }
 
   const handleFileSelect = (file: File) => {
@@ -1294,7 +1304,7 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
       setTimeout(() => {
         console.log('🚀 Starting full process for authenticated user')
         handleStartDemo()
-      }, 2000) // Wait for CV to appear first
+      }, 1500) // Wait for CV to appear first (reduced by 0.5s to match preview)
     } else {
       // User is not signed in - start preview animation sequence
       console.log('⚠️ User not authenticated, starting preview sequence')
@@ -1675,10 +1685,15 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
                         <Button
                           size="lg"
                           onClick={() => {
-                            // Phase 7: When progress reaches 60%, Start now opens pricing modal
-                            if (progressBarPercentage >= 60) {
+                            // Check if we're in preview mode (waiting for auth)
+                            if (isWaitingForAuth && !isAuthenticated) {
+                              // Re-open the signup modal for preview users
+                              setShowSignupModal(true)
+                            } else if (progressBarPercentage >= 60) {
+                              // Phase 7: When progress reaches 60%, Start now opens pricing modal
                               setShowPricing(true)
                             } else {
+                              // Default: open general auth modal
                               onOpenModal()
                             }
                           }}
