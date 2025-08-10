@@ -517,42 +517,10 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
             </div>
           ) : (
             /* Uploaded File State - Show actual file */
-            <div className="w-full h-full relative bg-white rounded-xl overflow-hidden group cursor-pointer">
+            <div className="w-full h-full relative bg-white rounded-xl overflow-hidden">
               {currentFile && (
                 <>
-                  {/* Click to transform overlay */}
-                  <motion.div 
-                    className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 z-10 flex items-center justify-center"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                  >
-                    <motion.div
-                      className="bg-white/95 backdrop-blur-sm rounded-xl p-6 shadow-2xl"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      whileHover={{ scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    >
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.1, 1],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                        className="flex flex-col items-center"
-                      >
-                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-3">
-                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
-                        </div>
-                        <p className="text-lg font-bold text-gray-800">Click to Transform</p>
-                        <p className="text-sm text-gray-600 mt-1">Generate your portfolio</p>
-                      </motion.div>
-                    </motion.div>
-                  </motion.div>
+                  {/* Removed hover overlay - no click to transform */}
                   {/* File type indicator and navigation */}
                   {displayFiles.length > 1 && (
                     <div className="absolute top-2 right-2 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
