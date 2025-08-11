@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react'
@@ -50,6 +50,38 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
   // Use uploadedFiles if provided, otherwise use local state
   const displayFiles = uploadedFiles || localUploadedFiles
   const currentFile = displayFiles[currentFileIndex] || uploadedFile
+  
+  // Keep track of the last valid file to prevent blinking
+  const [stableFile, setStableFile] = useState<File | null>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  
+  useEffect(() => {
+    if (currentFile) {
+      setStableFile(currentFile)
+      
+      // Create stable PDF URL to prevent iframe reload
+      if (currentFile.type === 'application/pdf' || currentFile.name.endsWith('.pdf')) {
+        // Clean up previous URL if exists
+        if (pdfUrl) {
+          URL.revokeObjectURL(pdfUrl)
+        }
+        const newUrl = URL.createObjectURL(currentFile)
+        setPdfUrl(newUrl)
+      }
+    }
+  }, [currentFile])
+  
+  // Cleanup PDF URL on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+  }, [])
+  
+  // Use stable file for display to prevent blinking
+  const fileToDisplay = currentFile || stableFile
 
   const resetUploadState = useCallback(() => {
     setTimeout(() => {
@@ -307,7 +339,7 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
             }}
           />
           
-          {!currentFile && !isProcessing ? (
+          {!fileToDisplay && !isProcessing ? (
             /* Upload State */
             <div className="w-full h-full relative">
               {/* Animated gradient border */}
@@ -518,7 +550,7 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
           ) : (
             /* Uploaded File State - Show actual file */
             <div className="w-full h-full relative bg-white rounded-xl overflow-hidden">
-              {currentFile && (
+              {fileToDisplay && (
                 <>
                   {/* Removed hover overlay - no click to transform */}
                   {/* File type indicator and navigation */}
@@ -555,20 +587,22 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
                   )}
                   
                   {/* Display file based on type */}
-                  {currentFile.type === 'application/pdf' || currentFile.name.endsWith('.pdf') ? (
+                  {fileToDisplay.type === 'application/pdf' || fileToDisplay.name.endsWith('.pdf') ? (
                     <div className="w-full h-full relative overflow-hidden">
-                      <iframe
-                        src={`${URL.createObjectURL(currentFile)}#toolbar=0&navpanes=0&scrollbar=0`}
-                        className="w-full h-full"
-                        title={currentFile.name}
-                      />
+                      {pdfUrl && (
+                        <iframe
+                          src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                          className="w-full h-full"
+                          title={fileToDisplay.name}
+                        />
+                      )}
                     </div>
-                  ) : currentFile.type.startsWith('image/') || 
-                      ['.png', '.jpg', '.jpeg'].some(ext => currentFile.name.toLowerCase().endsWith(ext)) ? (
+                  ) : fileToDisplay.type.startsWith('image/') || 
+                      ['.png', '.jpg', '.jpeg'].some(ext => fileToDisplay.name.toLowerCase().endsWith(ext)) ? (
                     <div className="w-full h-full relative overflow-hidden">
                       <Image
-                        src={URL.createObjectURL(currentFile)}
-                        alt={currentFile.name}
+                        src={URL.createObjectURL(fileToDisplay)}
+                        alt={fileToDisplay.name}
                         fill
                         className="object-contain"
                         onLoad={(e) => {
@@ -580,17 +614,17 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-8">
                       <FileText className="w-16 h-16 text-blue-600 mb-4" />
-                      <h3 className="text-lg font-bold text-gray-900 text-center mb-2">{currentFile.name}</h3>
+                      <h3 className="text-lg font-bold text-gray-900 text-center mb-2">{fileToDisplay.name}</h3>
                       <p className="text-sm text-gray-600">Ready to transform</p>
                       <p className="text-xs text-gray-400 mt-2">
-                        {(currentFile.size / 1024 / 1024).toFixed(2)} MB
+                        {(fileToDisplay.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                   )}
                   
                   {/* File name overlay */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <p className="text-white text-sm font-medium truncate">{currentFile.name}</p>
+                    <p className="text-white text-sm font-medium truncate">{fileToDisplay.name}</p>
                   </div>
                 </>
               )}
