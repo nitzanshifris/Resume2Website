@@ -103,6 +103,8 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
     const isLocalhost = src.includes('localhost')
     const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
     
+    // Only show fallback if portfolio is on localhost but viewer is NOT on localhost
+    // This allows viewing localhost portfolios when developing locally
     if (isLocalhost && isProduction) {
       console.log('🌐 Cross-origin detected: production → localhost, showing fallback immediately')
       setLoadError(true)
@@ -169,7 +171,7 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-2">Portfolio Generated Successfully!</h3>
               <p className="text-gray-600 mb-6">
-                Your portfolio is running on <span className="font-mono text-sm bg-gray-200 px-1 rounded">localhost:4000</span><br/>
+                Your portfolio is running on <span className="font-mono text-sm bg-gray-200 px-1 rounded">{src}</span><br/>
                 <span className="text-sm">Browser security prevents embedding localhost in frames</span>
               </p>
             </div>
@@ -1096,7 +1098,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       }, 2000) // Update every 2 seconds to avoid decimals
       
       const generateStartTime = Date.now()
-      const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate-anonymous/${jobId}`
+      const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate/${jobId}`
       
       // Set timeout for portfolio generation (90 seconds)
       const generateController = new AbortController()

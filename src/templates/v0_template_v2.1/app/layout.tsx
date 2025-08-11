@@ -10,7 +10,11 @@ import { EditModeProvider } from "@/contexts/edit-mode-context"
 import { WatermarkProvider } from "@/contexts/watermark-context"
 import { Watermark } from "@/components/watermark"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const inter = Inter({ 
+  subsets: ["latin"], 
+  variable: "--font-inter",
+  display: "swap"
+})
 
 export const metadata: Metadata = {
   title: "Ran Lotan | System Engineer",
