@@ -1291,27 +1291,37 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
     // 3. Navigate away and come back
   }
 
+  // Track previous uploadedFile to detect changes
+  const [prevUploadedFile, setPrevUploadedFile] = useState<File | null>(null)
+  
+  // Watch for uploadedFile changes from ANY source (dropbox, navbar, button)
+  useEffect(() => {
+    if (uploadedFile && uploadedFile !== prevUploadedFile) {
+      console.log('📁 New file detected from parent:', uploadedFile.name)
+      setPrevUploadedFile(uploadedFile)
+      setShowCVCard(true)
+      
+      // Trigger animation based on auth status
+      if (isAuthenticated) {
+        console.log('✅ User authenticated, will start full process after CV appears')
+        setTimeout(() => {
+          console.log('🚀 Starting full process for authenticated user')
+          handleStartDemo()
+        }, 1500) // Wait for CV to appear first
+      } else {
+        console.log('⚠️ User not authenticated, starting preview sequence')
+        setTimeout(() => {
+          startPreviewAnimation()
+        }, 1500) // Wait for CV to appear first
+      }
+    }
+  }, [uploadedFile, prevUploadedFile, isAuthenticated])
+  
   // Wrapper for handleFileSelect that also sets showCVCard
   const handleLocalFileSelect = (file: File) => {
     // Call the parent's handleFileSelect
     handleFileSelect(file)
-    
-    // Also set showCVCard to true
-    setShowCVCard(true)
-    
-    // Check if user is authenticated and trigger appropriate animation
-    if (isAuthenticated) {
-      // User is signed in - wait for CV to appear then start full process
-      console.log('✅ User authenticated, will start full process after CV appears')
-      setTimeout(() => {
-        console.log('🚀 Starting full process for authenticated user')
-        handleStartDemo()
-      }, 1500) // Wait for CV to appear first
-    } else {
-      // User is not signed in - start preview animation sequence
-      console.log('⚠️ User not authenticated, starting preview sequence')
-      startPreviewAnimation()
-    }
+    // Note: The animation will be triggered by the useEffect above
   }
   
   const handleFileClick = (file: File) => {
