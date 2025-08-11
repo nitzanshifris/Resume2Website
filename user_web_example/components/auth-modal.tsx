@@ -9,7 +9,7 @@ import {
   AuthTabs,
   TechOrbitDisplay,
 } from '@/components/ui/modern-animated-sign-in';
-import Resume2WebsiteAuthHero from '@/components/ui/resume2website-auth-hero';
+import Resume2WebsiteAuthHero from '@/components/ui/cv2web-auth-hero';
 import { useToast } from '@/components/ui/toast-container';
 
 // Legacy RESUME2WEBSITE icons array removed - now using enhanced Resume2WebsiteAuthHero component
@@ -178,7 +178,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       {
         label: 'Email',
         required: true,
-        type: 'email',
+        type: 'email' as const,
         placeholder: 'Enter your email address',
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'email'),
@@ -186,7 +186,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       {
         label: 'Password',
         required: true,
-        type: 'password',
+        type: 'password' as const,
         placeholder: 'Enter your password',
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'password'),
@@ -198,7 +198,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         {
           label: 'Name',
           required: true,
-          type: 'text',
+          type: 'text' as const,
           placeholder: 'Enter your full name',
           onChange: (event: ChangeEvent<HTMLInputElement>) =>
             handleInputChange(event, 'name'),
@@ -206,7 +206,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         {
           label: 'Phone',
           required: false,
-          type: 'tel',
+          type: 'tel' as const,
           placeholder: 'Enter your phone number (optional)',
           onChange: (event: ChangeEvent<HTMLInputElement>) =>
             handleInputChange(event, 'phone'),

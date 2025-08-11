@@ -75,11 +75,11 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
       }
     }
 
-    window.addEventListener('openUploadModal', handleOpenUploadModal)
-    window.addEventListener('navigateToCVEditor', handleNavigateToCVEditor)
+    window.addEventListener('openUploadModal', handleOpenUploadModal as EventListener)
+    window.addEventListener('navigateToCVEditor', handleNavigateToCVEditor as EventListener)
     return () => {
-      window.removeEventListener('openUploadModal', handleOpenUploadModal)
-      window.removeEventListener('navigateToCVEditor', handleNavigateToCVEditor)
+      window.removeEventListener('openUploadModal', handleOpenUploadModal as EventListener)
+      window.removeEventListener('navigateToCVEditor', handleNavigateToCVEditor as EventListener)
     }
   }, [])
 
@@ -1186,6 +1186,8 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
       <ResumeFlowModal
         isOpen={isResumeFlowOpen}
         onClose={() => setIsResumeFlowOpen(false)}
+        onYesChoice={() => setIsResumeFlowOpen(false)}
+        onNoChoice={() => setIsResumeFlowOpen(false)}
         onContinue={handleResumeFlowContinue}
       />
 

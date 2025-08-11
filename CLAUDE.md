@@ -167,7 +167,7 @@ python >= 3.11
 pnpm >= 8.0.0
 
 # Setup
-git clone <repo> && cd RESUME2WEBSITE-V4
+git clone <repo> && cd Resume2Website-V4
 pnpm install                           # Install frontend deps
 python3 -m venv venv                   # Create Python venv
 source venv/bin/activate               # Activate venv
@@ -229,7 +229,7 @@ pnpm run dev --verbose                         # Frontend verbose logs
 
 ## Directory Structure
 ```
-RESUME2WEBSITE-V4/
+Resume2Website-V4/
 ├── src/                        # Backend (FastAPI)
 │   ├── api/                   # API routes and endpoints
 │   │   ├── routes/           # Individual route modules

@@ -177,8 +177,8 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
   }, [isOpen, file, currentJobId, onComplete])
 
   const handleTemplateSelect = (templateId: string) => {
-    onTemplateSelect(templateId)
-    onComplete()
+    onTemplateSelect?.(templateId)
+    onComplete?.()
   }
 
   // Show auth prompt after user has viewed portfolio for a few seconds

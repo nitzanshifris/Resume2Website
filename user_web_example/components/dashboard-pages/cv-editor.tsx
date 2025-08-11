@@ -22,6 +22,14 @@ import {
 import { cn } from "@/lib/utils"
 import { Confetti, type ConfettiRef } from "@/components/ui/confetti"
 
+interface CVData {
+  job_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  upload_date: string;
+  cv_data?: any;
+  filename?: string;
+}
+
 interface CVEditorProps {
   userName?: string
 }
@@ -125,13 +133,13 @@ export default function CVEditor({ userName }: CVEditorProps) {
       const data = await response.json()
       
       // Prioritize the most recently uploaded CV (users expect to see what they just uploaded)
-      const completedCVs = data.cvs?.filter((cv: any) => cv.status === 'completed') || []
+      const completedCVs: CVData[] = data.cvs?.filter((cv: CVData) => cv.status === 'completed') || []
       
       // Sort by upload_date descending (most recent first)
-      completedCVs.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime())
+      completedCVs.sort((a: CVData, b: CVData) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime())
       
       // Get the most recent CV with valid data
-      const latestCV = completedCVs.find(cv => cv.cv_data) || data.cvs?.[0]
+      const latestCV = completedCVs.find((cv: CVData) => cv.cv_data) || data.cvs?.[0]
       
       // Debug logging
       if (latestCV) {

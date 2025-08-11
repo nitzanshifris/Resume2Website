@@ -39,6 +39,34 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+interface CVHeroData {
+  fullName?: string;
+  professionalTitle?: string;
+  summaryTagline?: string;
+  profilePhotoUrl?: string;
+}
+
+interface ExperienceData {
+  experienceItems?: any[];
+  [key: string]: any;
+}
+
+interface EducationData {
+  educationItems?: any[];
+  [key: string]: any;
+}
+
+interface CVDataStructure {
+  hero?: CVHeroData;
+  contact?: any;
+  summary?: any;
+  experience?: ExperienceData;
+  education?: EducationData;
+  skills?: any;
+  projects?: any[];
+  [key: string]: any;
+}
+
 interface MyWebsiteProps {
   userName?: string
 }
@@ -55,6 +83,7 @@ const colorThemes = [
 
 interface Portfolio {
   portfolio_id: string
+  job_id: string
   url: string
   port: number
   created_at: string
@@ -72,7 +101,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
   const [isLoadingPortfolios, setIsLoadingPortfolios] = useState(true)
   const [portfolioError, setPortfolioError] = useState<string | null>(null)
   const [isRestartingServer, setIsRestartingServer] = useState(false)
-  const [currentCVData, setCurrentCVData] = useState<any>(null)
+  const [currentCVData, setCurrentCVData] = useState<CVDataStructure | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     hero: true,
@@ -130,7 +159,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
     // Send content update to portfolio iframe
     const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
     if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({
+      iframe.contentWindow?.postMessage({
         type: 'UPDATE_CONTENT',
         sectionId: sectionId,
         content: content
@@ -412,7 +441,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
         // Send the updated data back to the iframe
         const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
         if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage({
+          iframe.contentWindow?.postMessage({
             type: 'ADD_ITEM',
             section: section,
             item: item
@@ -690,16 +719,16 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                     
                     // Send initial visibility states to the portfolio
                     setTimeout(() => {
-                      if (iframe.contentWindow) {
+                      if (iframe && iframe.contentWindow) {
                         // Send profile photo visibility
-                        iframe.contentWindow.postMessage({
+                        iframe.contentWindow?.postMessage({
                           type: 'TOGGLE_PHOTO',
                           show: showProfilePhoto
                         }, selectedPortfolio?.url || '*')
                         
                         // Send all section visibility states
                         Object.entries(sectionVisibility).forEach(([section, visible]) => {
-                          iframe.contentWindow.postMessage({
+                          iframe.contentWindow?.postMessage({
                             type: 'TOGGLE_SECTION',
                             section: section,
                             visible: visible
@@ -707,7 +736,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         })
                         
                         // Send current theme
-                        iframe.contentWindow.postMessage({
+                        iframe.contentWindow?.postMessage({
                           type: 'CHANGE_THEME',
                           themeId: selectedTheme
                         }, selectedPortfolio?.url || '*')
@@ -769,16 +798,16 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                       
                       // Send initial visibility states to the portfolio
                       setTimeout(() => {
-                        if (iframe.contentWindow) {
+                        if (iframe && iframe.contentWindow) {
                           // Send profile photo visibility
-                          iframe.contentWindow.postMessage({
+                          iframe.contentWindow?.postMessage({
                             type: 'TOGGLE_PHOTO',
                             show: showProfilePhoto
                           }, selectedPortfolio?.url || '*')
                           
                           // Send all section visibility states
                           Object.entries(sectionVisibility).forEach(([section, visible]) => {
-                            iframe.contentWindow.postMessage({
+                            iframe.contentWindow?.postMessage({
                               type: 'TOGGLE_SECTION',
                               section: section,
                               visible: visible
@@ -786,7 +815,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                           })
                           
                           // Send current theme
-                          iframe.contentWindow.postMessage({
+                          iframe.contentWindow?.postMessage({
                             type: 'CHANGE_THEME',
                             themeId: selectedTheme
                           }, selectedPortfolio?.url || '*')
@@ -851,7 +880,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                     // Send theme change message to portfolio iframe
                     const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
                     if (iframe && iframe.contentWindow) {
-                      iframe.contentWindow.postMessage({
+                      iframe.contentWindow?.postMessage({
                         type: 'CHANGE_THEME',
                         themeId: theme.id
                       }, selectedPortfolio?.url || '*')
@@ -907,7 +936,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                     // Send update to iframe
                     const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
                     if (iframe && iframe.contentWindow) {
-                      iframe.contentWindow.postMessage({
+                      iframe.contentWindow?.postMessage({
                         type: 'TOGGLE_PHOTO',
                         show: checked
                       }, selectedPortfolio?.url || '*')
@@ -938,7 +967,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         // Send update to iframe
                         const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
                         if (iframe && iframe.contentWindow) {
-                          iframe.contentWindow.postMessage({
+                          iframe.contentWindow?.postMessage({
                             type: 'TOGGLE_SECTION',
                             section: section,
                             visible: checked
@@ -985,9 +1014,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         <Input
                           value={currentCVData.hero?.fullName || ''}
                           onChange={(e) => {
-                            setCurrentCVData(prev => ({
+                            setCurrentCVData((prev: CVDataStructure | null) => ({
                               ...prev,
-                              hero: { ...prev.hero, fullName: e.target.value }
+                              hero: { ...prev?.hero, fullName: e.target.value }
                             }))
                             handleSectionEdit('fullName', e.target.value)
                           }}
@@ -999,9 +1028,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         <Input
                           value={currentCVData.hero?.professionalTitle || ''}
                           onChange={(e) => {
-                            setCurrentCVData(prev => ({
+                            setCurrentCVData((prev: CVDataStructure | null) => ({
                               ...prev,
-                              hero: { ...prev.hero, professionalTitle: e.target.value }
+                              hero: { ...prev?.hero, professionalTitle: e.target.value }
                             }))
                             handleSectionEdit('professionalTitle', e.target.value)
                           }}
@@ -1013,9 +1042,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         <Input
                           value={currentCVData.hero?.summaryTagline || ''}
                           onChange={(e) => {
-                            setCurrentCVData(prev => ({
+                            setCurrentCVData((prev: CVDataStructure | null) => ({
                               ...prev,
-                              hero: { ...prev.hero, summaryTagline: e.target.value }
+                              hero: { ...prev?.hero, summaryTagline: e.target.value }
                             }))
                           }}
                           className="mt-1 text-sm"
@@ -1046,9 +1075,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         <Input
                           value={currentCVData.contact?.email || ''}
                           onChange={(e) => {
-                            setCurrentCVData(prev => ({
+                            setCurrentCVData((prev: CVDataStructure | null) => ({
                               ...prev,
-                              contact: { ...prev.contact, email: e.target.value }
+                              contact: { ...prev?.contact, email: e.target.value }
                             }))
                           }}
                           className="mt-1 text-sm"
@@ -1059,9 +1088,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         <Input
                           value={currentCVData.contact?.phone || ''}
                           onChange={(e) => {
-                            setCurrentCVData(prev => ({
+                            setCurrentCVData((prev: CVDataStructure | null) => ({
                               ...prev,
-                              contact: { ...prev.contact, phone: e.target.value }
+                              contact: { ...prev?.contact, phone: e.target.value }
                             }))
                           }}
                           className="mt-1 text-sm"
@@ -1073,10 +1102,10 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                           value={`${currentCVData.contact?.location?.city || ''} ${currentCVData.contact?.location?.state || ''} ${currentCVData.contact?.location?.country || ''}`.trim()}
                           onChange={(e) => {
                             const parts = e.target.value.split(' ')
-                            setCurrentCVData(prev => ({
+                            setCurrentCVData((prev: CVDataStructure | null) => ({
                               ...prev,
                               contact: { 
-                                ...prev.contact, 
+                                ...prev?.contact, 
                                 location: {
                                   city: parts[0] || '',
                                   state: parts[1] || '',
@@ -1111,9 +1140,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                     <Textarea
                       value={currentCVData.summary?.summaryText || ''}
                       onChange={(e) => {
-                        setCurrentCVData(prev => ({
+                        setCurrentCVData((prev: CVDataStructure | null) => ({
                           ...prev,
-                          summary: { ...prev.summary, summaryText: e.target.value }
+                          summary: { ...prev?.summary, summaryText: e.target.value }
                         }))
                         handleSectionEdit('summary', e.target.value)
                       }}
@@ -1148,10 +1177,10 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                const updatedExperiences = currentCVData.experience.experienceItems.filter((_: any, i: number) => i !== index)
-                                setCurrentCVData(prev => ({
+                                const updatedExperiences = currentCVData.experience?.experienceItems?.filter((_: any, i: number) => i !== index)
+                                setCurrentCVData((prev: CVDataStructure | null) => ({
                                   ...prev,
-                                  experience: { ...prev.experience, experienceItems: updatedExperiences }
+                                  experience: { ...prev?.experience, experienceItems: updatedExperiences }
                                 }))
                               }}
                               className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
@@ -1163,11 +1192,11 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                             <Input
                               value={exp.jobTitle || ''}
                               onChange={(e) => {
-                                const updatedExperiences = [...currentCVData.experience.experienceItems]
+                                const updatedExperiences = [...(currentCVData.experience?.experienceItems || [])]
                                 updatedExperiences[index] = { ...exp, jobTitle: e.target.value }
-                                setCurrentCVData(prev => ({
+                                setCurrentCVData((prev: CVDataStructure | null) => ({
                                   ...prev,
-                                  experience: { ...prev.experience, experienceItems: updatedExperiences }
+                                  experience: { ...prev?.experience, experienceItems: updatedExperiences }
                                 }))
                               }}
                               placeholder="Job Title"
@@ -1176,11 +1205,11 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                             <Input
                               value={exp.companyName || ''}
                               onChange={(e) => {
-                                const updatedExperiences = [...currentCVData.experience.experienceItems]
+                                const updatedExperiences = [...(currentCVData.experience?.experienceItems || [])]
                                 updatedExperiences[index] = { ...exp, companyName: e.target.value }
-                                setCurrentCVData(prev => ({
+                                setCurrentCVData((prev: CVDataStructure | null) => ({
                                   ...prev,
-                                  experience: { ...prev.experience, experienceItems: updatedExperiences }
+                                  experience: { ...prev?.experience, experienceItems: updatedExperiences }
                                 }))
                               }}
                               placeholder="Company Name"
@@ -1190,14 +1219,14 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                               <Input
                                 value={exp.dateRange?.startDate || ''}
                                 onChange={(e) => {
-                                  const updatedExperiences = [...currentCVData.experience.experienceItems]
+                                  const updatedExperiences = [...(currentCVData.experience?.experienceItems || [])]
                                   updatedExperiences[index] = { 
                                     ...exp, 
                                     dateRange: { ...exp.dateRange, startDate: e.target.value }
                                   }
-                                  setCurrentCVData(prev => ({
+                                  setCurrentCVData((prev: CVDataStructure | null) => ({
                                     ...prev,
-                                    experience: { ...prev.experience, experienceItems: updatedExperiences }
+                                    experience: { ...prev?.experience, experienceItems: updatedExperiences }
                                   }))
                                 }}
                                 placeholder="Start Date"
@@ -1206,7 +1235,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                               <Input
                                 value={exp.dateRange?.endDate || (exp.dateRange?.isCurrent ? 'Present' : '')}
                                 onChange={(e) => {
-                                  const updatedExperiences = [...currentCVData.experience.experienceItems]
+                                  const updatedExperiences = [...(currentCVData.experience?.experienceItems || [])]
                                   updatedExperiences[index] = { 
                                     ...exp, 
                                     dateRange: { 
@@ -1215,9 +1244,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                                       isCurrent: e.target.value.toLowerCase() === 'present'
                                     }
                                   }
-                                  setCurrentCVData(prev => ({
+                                  setCurrentCVData((prev: CVDataStructure | null) => ({
                                     ...prev,
-                                    experience: { ...prev.experience, experienceItems: updatedExperiences }
+                                    experience: { ...prev?.experience, experienceItems: updatedExperiences }
                                   }))
                                 }}
                                 placeholder="End Date"
@@ -1237,11 +1266,11 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                             dateRange: { startDate: '', endDate: '', isCurrent: false },
                             responsibilitiesAndAchievements: []
                           }
-                          setCurrentCVData(prev => ({
+                          setCurrentCVData((prev: CVDataStructure | null) => ({
                             ...prev,
                             experience: {
-                              ...prev.experience,
-                              experienceItems: [...(prev.experience?.experienceItems || []), newExperience]
+                              ...prev?.experience,
+                              experienceItems: [...(prev?.experience?.experienceItems || []), newExperience]
                             }
                           }))
                         }}
@@ -1277,9 +1306,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                             onChange={(e) => {
                               const updatedCategories = [...currentCVData.skills.skillCategories]
                               updatedCategories[index] = { ...category, categoryName: e.target.value }
-                              setCurrentCVData(prev => ({
+                              setCurrentCVData((prev: CVDataStructure | null) => ({
                                 ...prev,
-                                skills: { ...prev.skills, skillCategories: updatedCategories }
+                                skills: { ...prev?.skills, skillCategories: updatedCategories }
                               }))
                             }}
                             placeholder="Category Name"
@@ -1293,9 +1322,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                                 ...category, 
                                 skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                               }
-                              setCurrentCVData(prev => ({
+                              setCurrentCVData((prev: CVDataStructure | null) => ({
                                 ...prev,
-                                skills: { ...prev.skills, skillCategories: updatedCategories }
+                                skills: { ...prev?.skills, skillCategories: updatedCategories }
                               }))
                             }}
                             placeholder="Skills (comma-separated)"
@@ -1308,10 +1337,10 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                         <Input
                           value={currentCVData.skills.ungroupedSkills.join(', ')}
                           onChange={(e) => {
-                            setCurrentCVData(prev => ({
+                            setCurrentCVData((prev: CVDataStructure | null) => ({
                               ...prev,
                               skills: { 
-                                ...prev.skills, 
+                                ...prev?.skills, 
                                 ungroupedSkills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                               }
                             }))
@@ -1346,11 +1375,11 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                             <Input
                               value={edu.degree || ''}
                               onChange={(e) => {
-                                const updatedEducation = [...currentCVData.education.educationItems]
+                                const updatedEducation = [...(currentCVData.education?.educationItems || [])]
                                 updatedEducation[index] = { ...edu, degree: e.target.value }
-                                setCurrentCVData(prev => ({
+                                setCurrentCVData((prev: CVDataStructure | null) => ({
                                   ...prev,
-                                  education: { ...prev.education, educationItems: updatedEducation }
+                                  education: { ...prev?.education, educationItems: updatedEducation }
                                 }))
                               }}
                               placeholder="Degree"
@@ -1359,11 +1388,11 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                             <Input
                               value={edu.fieldOfStudy || ''}
                               onChange={(e) => {
-                                const updatedEducation = [...currentCVData.education.educationItems]
+                                const updatedEducation = [...(currentCVData.education?.educationItems || [])]
                                 updatedEducation[index] = { ...edu, fieldOfStudy: e.target.value }
-                                setCurrentCVData(prev => ({
+                                setCurrentCVData((prev: CVDataStructure | null) => ({
                                   ...prev,
-                                  education: { ...prev.education, educationItems: updatedEducation }
+                                  education: { ...prev?.education, educationItems: updatedEducation }
                                 }))
                               }}
                               placeholder="Field of Study"
@@ -1372,11 +1401,11 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                             <Input
                               value={edu.institution || ''}
                               onChange={(e) => {
-                                const updatedEducation = [...currentCVData.education.educationItems]
+                                const updatedEducation = [...(currentCVData.education?.educationItems || [])]
                                 updatedEducation[index] = { ...edu, institution: e.target.value }
-                                setCurrentCVData(prev => ({
+                                setCurrentCVData((prev: CVDataStructure | null) => ({
                                   ...prev,
-                                  education: { ...prev.education, educationItems: updatedEducation }
+                                  education: { ...prev?.education, educationItems: updatedEducation }
                                 }))
                               }}
                               placeholder="Institution"
@@ -1479,7 +1508,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                               // Send ADD_ITEM message to iframe
                               const iframe = document.querySelector('iframe[title="Portfolio Preview"]') as HTMLIFrameElement
                               if (iframe && iframe.contentWindow) {
-                                iframe.contentWindow.postMessage({
+                                iframe.contentWindow?.postMessage({
                                   type: 'ADD_ITEM',
                                   section: section === 'speakingEngagements' ? 'speaking' : section,
                                   item: newItem
