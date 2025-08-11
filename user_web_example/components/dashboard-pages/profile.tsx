@@ -17,6 +17,20 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+interface LocationData {
+  city?: string;
+  state?: string;
+  country?: string;
+}
+
+interface ProfileFormData {
+  name: string;
+  email: string;
+  phone: string;
+  location: string | LocationData;
+  dateOfBirth: string;
+}
+
 interface ProfileProps {
   userName?: string
 }
@@ -26,7 +40,7 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   // Removed activeTab - simplified to single page
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     // Personal Details only
     name: "",
     email: "",
@@ -231,7 +245,7 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
               <p className="text-xl text-gray-600 mb-2">{formData.email}</p>
               <p className="text-gray-500 mb-3">
                 {typeof formData.location === 'object' && formData.location 
-                  ? `${formData.location.city || ''}${formData.location.city && formData.location.state ? ', ' : ''}${formData.location.state || ''}${(formData.location.city || formData.location.state) && formData.location.country ? ', ' : ''}${formData.location.country || ''}`
+                  ? `${(formData.location as LocationData).city || ''}${(formData.location as LocationData).city && (formData.location as LocationData).state ? ', ' : ''}${(formData.location as LocationData).state || ''}${((formData.location as LocationData).city || (formData.location as LocationData).state) && (formData.location as LocationData).country ? ', ' : ''}${(formData.location as LocationData).country || ''}`
                   : formData.location || ''}
               </p>
               <div className="flex items-center gap-3">
@@ -341,7 +355,7 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
 
               <EditableField label="Location">
                 <Input
-                  value={formData.location || ''}
+                  value={typeof formData.location === 'string' ? formData.location : ''}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   disabled={!isEditing}
                   className={!isEditing ? "bg-gray-50" : ""}

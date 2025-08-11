@@ -316,7 +316,7 @@ const TechOrbitDisplay = memo(function TechOrbitDisplay({
 
 // ==================== AnimatedForm Component ====================
 
-type FieldType = 'text' | 'email' | 'password';
+type FieldType = 'text' | 'email' | 'password' | 'tel';
 
 type Field = {
   label: string;
@@ -564,7 +564,7 @@ interface AuthTabsProps {
     fields: Array<{
       label: string;
       required?: boolean;
-      type: string;
+      type: FieldType;
       placeholder: string;
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     }>;

@@ -13,9 +13,10 @@ interface UploadResumeProps {
   onClose: () => void
   onBack: () => void
   onSuccess: (jobId: string) => void
+  initialFile?: File | null
 }
 
-export default function UploadResume({ isOpen, onClose, onBack, onSuccess }: UploadResumeProps) {
+export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initialFile }: UploadResumeProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)

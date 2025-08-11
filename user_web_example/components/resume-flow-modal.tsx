@@ -11,9 +11,10 @@ interface ResumeFlowModalProps {
   onClose: () => void
   onYesChoice: () => void
   onNoChoice: () => void
+  onContinue?: (plan: string) => void
 }
 
-export default function ResumeFlowModal({ isOpen, onClose, onYesChoice, onNoChoice }: ResumeFlowModalProps) {
+export default function ResumeFlowModal({ isOpen, onClose, onYesChoice, onNoChoice, onContinue }: ResumeFlowModalProps) {
   // Handle escape key press
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
