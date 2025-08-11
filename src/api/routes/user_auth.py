@@ -5,13 +5,13 @@ Handles registration, login, logout, and session management
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Dict, Any
-import hashlib
 import logging
 from datetime import datetime
 import os
 import requests
 import json
 from dotenv import load_dotenv
+from passlib.context import CryptContext
 
 # Load environment variables
 load_dotenv()
@@ -59,14 +59,29 @@ class AuthResponse(BaseModel):
     message: str
 
 
+# Create password context with bcrypt
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
 def hash_password(password: str) -> str:
-    """Hash password using SHA256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash password using bcrypt for secure storage"""
+    return pwd_context.hash(password)
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    """Verify password against hash"""
-    return hash_password(password) == password_hash
+    """Verify password against bcrypt hash"""
+    try:
+        # Try bcrypt verification first
+        return pwd_context.verify(password, password_hash)
+    except:
+        # Fallback for old SHA256 hashes (for backward compatibility)
+        import hashlib
+        sha256_hash = hashlib.sha256(password.encode()).hexdigest()
+        if sha256_hash == password_hash:
+            # Password is correct but using old hash, should be updated
+            logger.warning("User has old SHA256 password hash, should be migrated to bcrypt")
+            return True
+        return False
 
 
 @router.post("/register", response_model=AuthResponse)

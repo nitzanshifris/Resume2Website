@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Linkedin } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/components/ui/toast-container';
+import EmailAuthForm from './email-auth-form';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -18,6 +19,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [authMode, setAuthMode] = useState<AuthMode>('signin');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const [googleStatus, setGoogleStatus] = useState({ available: true, message: '', client_secret_configured: true });
   const { showToast } = useToast();
 
@@ -78,11 +80,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   };
 
   const handleEmailLogin = () => {
-    // For now, we'll just show a toast. You can implement email auth later
-    showToast(
-      "Email authentication coming soon!",
-      "info"
-    );
+    setShowEmailForm(true);
+  };
+  
+  const handleBackToOptions = () => {
+    setShowEmailForm(false);
   };
 
   const handleFacebookLogin = async () => {
@@ -170,7 +172,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         >
           {/* Content Container */}
           <div className="px-8 py-10">
-            {/* Logo */}
+            {showEmailForm ? (
+              <EmailAuthForm
+                mode={authMode}
+                onBack={handleBackToOptions}
+                onAuthSuccess={onAuthSuccess}
+                onClose={onClose}
+              />
+            ) : (
+              <>
+                {/* Logo */}
             <div className="flex justify-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
                 <span className="text-white text-2xl font-bold">CV</span>
@@ -264,6 +275,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
                 Skip for now
               </button>
             </div>
+              </>
+            )}
           </div>
 
           {/* Footer */}

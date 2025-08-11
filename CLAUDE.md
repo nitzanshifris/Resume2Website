@@ -8,7 +8,7 @@ CV2WEB is an AI-powered platform that transforms CVs into stunning portfolio web
 - **Generates** portfolio websites in isolated sandbox environments 
 - **Manages** multiple portfolio instances with real-time health monitoring
 - **Provides** CV editing capabilities with CRUD operations
-- **Authenticates** users with email/password + Google OAuth
+- **Authenticates** users with email/password + Google OAuth + LinkedIn OAuth
 - **Preserves** original files with hash-based deduplication
 
 ## Tech Stack Essentials
@@ -116,13 +116,16 @@ POST /api/v1/auth/register                # Register user
 POST /api/v1/auth/login                   # Login user
 POST /api/v1/auth/logout                  # Logout
 GET /api/v1/auth/me                       # Get current user
+POST /api/v1/auth/google/callback         # Google OAuth callback
+POST /api/v1/auth/linkedin/callback       # LinkedIn OAuth callback
+GET /api/v1/auth/google/status            # Check Google OAuth availability
 ```
 
 ## Architecture Essentials
 - **CV Extraction**: 18 sections, cached in SQLite, deduplication enabled
 - **Portfolio Generation**: Isolated Next.js sandboxes (ports 4000-5000)
 - **Templates**: 2 active (v0_template_v1.5, v0_template_v2.1)
-- **Authentication**: Email/password + Google OAuth, session-based
+- **Authentication**: Email/password + Google OAuth + LinkedIn OAuth, session-based
 - **File Storage**: Preserved in data/uploads/ with hash-based deduplication
 - **Resource Management**: Auto-cleanup portfolios >24h, max 20 active portfolios
 - **Monitoring**: Portfolio metrics tracking, health checks, performance stats
@@ -268,7 +271,8 @@ CV2WEB-V4/
 - **main.py** - FastAPI application entry point with routing
 - **src/api/routes/portfolio_generator.py** - PRIMARY portfolio generation script
 - **src/api/routes/cv.py** - CV upload, extraction, CRUD operations
-- **src/api/db.py** - SQLite database operations, user management
+- **src/api/routes/user_auth.py** - OAuth authentication endpoints (Google, LinkedIn)
+- **src/api/db.py** - SQLite database operations, user management, session handling
 - **src/core/cv_extraction/data_extractor.py** - Claude 4 Opus integration
 - **user_web_example/app/page.tsx** - Main frontend entry point
 - **package.json** - Frontend dependencies, scripts, workspace config
