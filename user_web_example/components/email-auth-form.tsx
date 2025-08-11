@@ -15,7 +15,8 @@ interface EmailAuthFormProps {
 }
 
 export default function EmailAuthForm({ mode, onBack, onAuthSuccess, onClose }: EmailAuthFormProps) {
-  const [authMode, setAuthMode] = useState<AuthMode>(mode);
+  // Start with signup mode by default for new users
+  const [authMode, setAuthMode] = useState<AuthMode>('signup');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { showToast } = useToast();
@@ -74,7 +75,9 @@ export default function EmailAuthForm({ mode, onBack, onAuthSuccess, onClose }: 
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.detail || `${authMode === 'signup' ? 'Registration' : 'Login'} failed`);
+        // Handle specific error messages
+        const errorMessage = data.detail || data.message || `${authMode === 'signup' ? 'Registration' : 'Login'} failed`;
+        throw new Error(errorMessage);
       }
       
       // Store session

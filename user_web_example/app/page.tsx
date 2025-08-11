@@ -2603,8 +2603,10 @@ export default function Home() {
       // If we have an uploaded file from CV card click, go to processing
       setShowProcessing(true)
     } else {
-      // Normal flow - go to dashboard
-      setShowDashboard(true)
+      // After signup/login without a file, stay on home page
+      // Don't automatically go to dashboard
+      // User can navigate to dashboard manually if they want
+      console.log('Authentication successful, staying on home page')
     }
   }
 
