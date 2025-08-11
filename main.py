@@ -16,6 +16,9 @@ from src.api.routes import cv, sse, workflows, cv_enhanced, portfolio_generator,
 from src.api.routes.future_use import portfolio_generator_v2
 # from src.api.routes.archived import portfolio  # Archived - replaced by portfolio_generator
 
+# Import database initialization
+from src.api.db import init_db
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -38,6 +41,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize database on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database on startup"""
+    logger.info("Initializing database...")
+    init_db()
+    logger.info("Database initialized successfully")
 
 # Include routers
 app.include_router(user_auth.router, prefix="/api/v1")  # Authentication endpoints
@@ -70,6 +81,10 @@ def health_check():
 # Run the app
 if __name__ == "__main__":
     import uvicorn
+    
+    # Initialize database
+    logger.info("Initializing database...")
+    init_db()
     
     # Get host and port from config
     host = config.HOST
