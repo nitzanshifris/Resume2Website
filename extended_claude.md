@@ -1051,7 +1051,16 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 
 ## Recent Updates
 
-### OAuth Authentication Implementation (2025-08-11)
+### Company Rebranding & UX Improvements (2025-01-12)
+- **🏢 Complete Rebranding**: Changed company name from CV2Web to Resume2Website across entire codebase
+- **🗄️ Database Renamed**: Updated database from cv2web.db to resume2website.db
+- **📝 163 Files Updated**: Comprehensive rename across all code, documentation, and configuration files
+- **🎯 Upload Consistency**: Fixed all three upload methods (dropbox, navbar, button) to behave identically
+- **🚀 Animation Fixes**: Resolved handleFileSelect not defined error by lifting state to parent component
+- **⚡ Performance**: Removed 1-second delay in preview animation, making it more responsive
+- **🔄 State Management**: Implemented proper React state lifting for file selection across components
+
+### OAuth Authentication Implementation (2025-01-11)
 - **🔐 Google OAuth Integration**: Successfully implemented Google OAuth 2.0 with authorization code flow
 - **💼 LinkedIn OAuth Integration**: Added LinkedIn OAuth with OpenID Connect support
 - **🔧 Backend Authentication Router**: Created comprehensive user_auth.py router with register/login/OAuth endpoints
@@ -1204,4 +1213,4 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **2025-01-13**: Moved test files from scripts to /tests/
 
 ---
-*Last updated: 2025-08-07 | Version: 5.1*
+*Last updated: 2025-01-12 | Version: 5.2*
