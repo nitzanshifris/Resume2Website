@@ -1,5 +1,5 @@
 """
-Unified CV data schemas with all fields nullable for CV2WEB.
+Unified CV data schemas with all fields nullable for RESUME2WEBSITE.
 
 This module defines comprehensive Pydantic models for representing CV/resume data
 in a structured format where ALL fields are nullable (can be null in JSON).

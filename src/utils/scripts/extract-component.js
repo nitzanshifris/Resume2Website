@@ -41,8 +41,8 @@ async function extractComponent(componentName, targetPath) {
     }
 
     // Load dependency information
-    const { CV2WEB_COMPONENTS } = require('../registry/cv2web-components.ts');
-    const component = CV2WEB_COMPONENTS[componentName];
+    const { RESUME2WEBSITE_COMPONENTS } = require('../registry/resume2website-components.ts');
+    const component = RESUME2WEBSITE_COMPONENTS[componentName];
     
     if (component) {
       console.log(`📦 Dependencies needed:`);

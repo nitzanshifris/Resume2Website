@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/admin/', '/private/'],
     },
-    sitemap: 'https://cv2web.com/sitemap.xml',
+    sitemap: 'https://resume2website.com/sitemap.xml',
   }
 } 

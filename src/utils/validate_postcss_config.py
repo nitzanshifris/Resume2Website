@@ -79,7 +79,7 @@ def fix_postcss_config(config_path: Path) -> bool:
 
 def main():
     """Main validation function."""
-    # Get project root (CV2WEB-V4)
+    # Get project root (RESUME2WEBSITE-V4)
     project_root = Path(__file__).parent.parent.parent
     
     print("🔍 Scanning for PostCSS configuration files...")

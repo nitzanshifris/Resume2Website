@@ -1,11 +1,11 @@
 #!/bin/bash
-# CV2WEB Portfolio Expert Command
+# RESUME2WEBSITE Portfolio Expert Command
 # Manages and improves the AI portfolio expert system
 
 claude -p prompts/portfolio-expert.md -- \
 "PORTFOLIO EXPERT TASK:
 
-Analyze and enhance the Portfolio Expert system for CV2WEB. Focus on:
+Analyze and enhance the Portfolio Expert system for RESUME2WEBSITE. Focus on:
 
 1. EXPERT CAPABILITIES: Review AI guidance quality and recommendations
 2. SESSION MANAGEMENT: Validate conversation history and context retention

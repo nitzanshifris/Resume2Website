@@ -9,10 +9,10 @@ import {
   AuthTabs,
   TechOrbitDisplay,
 } from '@/components/ui/modern-animated-sign-in';
-import CV2WebAuthHero from '@/components/ui/cv2web-auth-hero';
+import Resume2WebsiteAuthHero from '@/components/ui/resume2website-auth-hero';
 import { useToast } from '@/components/ui/toast-container';
 
-// Legacy CV2WEB icons array removed - now using enhanced CV2WebAuthHero component
+// Legacy RESUME2WEBSITE icons array removed - now using enhanced Resume2WebsiteAuthHero component
 
 type AuthMode = 'signin' | 'signup';
 
@@ -98,15 +98,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       if (response.ok) {
         // Store session data
         if (data.session_id) {
-          localStorage.setItem('cv2web_session_id', data.session_id);
+          localStorage.setItem('resume2website_session_id', data.session_id);
         }
         if (data.user) {
-          localStorage.setItem('cv2web_user', JSON.stringify(data.user));
+          localStorage.setItem('resume2website_user', JSON.stringify(data.user));
         }
 
         // Show welcome message
         if (authMode === 'signup') {
-          showToast(`🎉 Welcome to CV2WEB, ${data.user?.name || 'there'}! We're excited to help you create an amazing portfolio.`, 'success');
+          showToast(`🎉 Welcome to RESUME2WEBSITE, ${data.user?.name || 'there'}! We're excited to help you create an amazing portfolio.`, 'success');
         } else {
           showToast(`Welcome back, ${data.user?.name || 'there'}! Ready to continue building your portfolio?`, 'success');
         }
@@ -156,12 +156,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     googleAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/google/callback`);
     googleAuthUrl.searchParams.append('response_type', 'code');
     googleAuthUrl.searchParams.append('scope', 'openid email profile');
-    googleAuthUrl.searchParams.append('state', 'cv2web_google_auth');
+    googleAuthUrl.searchParams.append('state', 'resume2website_google_auth');
     googleAuthUrl.searchParams.append('access_type', 'offline');
     googleAuthUrl.searchParams.append('prompt', 'consent');
 
     // Store auth modal state to restore after callback
-    localStorage.setItem('cv2web_auth_return', 'true');
+    localStorage.setItem('resume2website_auth_return', 'true');
 
     // Redirect to Google OAuth
     window.location.href = googleAuthUrl.toString();
@@ -221,7 +221,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const formFields = {
     header: authMode === 'signin' ? 'Welcome back' : 'Create your account',
     subHeader: authMode === 'signin' 
-      ? 'Sign in to your CV2WEB account' 
+      ? 'Sign in to your RESUME2WEBSITE account' 
       : 'Start building your professional portfolio',
     fields: getFormFields(),
     submitButton: isLoading 
@@ -261,8 +261,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
           </button>
 
           <div className="flex h-full">
-            {/* Left Side - Enhanced CV2WEB Hero */}
-            <CV2WebAuthHero />
+            {/* Left Side - Enhanced RESUME2WEBSITE Hero */}
+            <Resume2WebsiteAuthHero />
 
             {/* Right Side - Auth Form */}
             <div className="w-1/2 max-lg:w-full h-full flex flex-col justify-center items-center px-12 py-8">

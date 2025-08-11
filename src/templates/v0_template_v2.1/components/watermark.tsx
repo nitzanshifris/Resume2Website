@@ -16,7 +16,7 @@ export function Watermark() {
     )}>
       <div className="flex items-center gap-1">
         <span>Powered by</span>
-        <span className="font-semibold">CV2WEB</span>
+        <span className="font-semibold">RESUME2WEBSITE</span>
       </div>
     </div>
   )

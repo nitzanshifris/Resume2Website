@@ -6,7 +6,7 @@
 
 import { mapCvDataToSections } from './data-mapper'
 
-// CV Data from extraction (CV2WEB format)
+// CV Data from extraction (RESUME2WEBSITE format)
 const extractedCVData = {
   "hero": {
     "fullName": "Your Name",

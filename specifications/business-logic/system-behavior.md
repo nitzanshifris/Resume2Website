@@ -1,6 +1,6 @@
 # Business Logic Specification
 
-*Rules, constraints, and behaviors that govern CV2WEB system operations*
+*Rules, constraints, and behaviors that govern RESUME2WEBSITE system operations*
 
 ## Processing Rules
 
@@ -226,4 +226,4 @@
 
 ---
 
-*These business logic rules ensure CV2WEB operates reliably, securely, and sustainably while delivering consistent value to users.*
+*These business logic rules ensure RESUME2WEBSITE operates reliably, securely, and sustainably while delivering consistent value to users.*

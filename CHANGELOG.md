@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CV2WEB will be documented in this file.
+All notable changes to RESUME2WEBSITE will be documented in this file.
 
 ## [1.0.0] - 2025-07-03
 

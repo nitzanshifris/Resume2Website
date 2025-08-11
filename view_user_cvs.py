@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-View CV data associated with users in the CV2WEB database
+View CV data associated with users in the RESUME2WEBSITE database
 """
 import sqlite3
 import json
@@ -8,7 +8,7 @@ from datetime import datetime
 
 def view_user_cvs():
     """Display all users and their associated CVs"""
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -83,7 +83,7 @@ def view_cv_data(job_id=None):
     if not job_id:
         job_id = input("\nEnter Job ID to view CV data: ")
     
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -162,7 +162,7 @@ def view_cv_data(job_id=None):
 
 def check_orphan_cvs():
     """Check for CVs without user associations (should be none)"""
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -191,7 +191,7 @@ def check_orphan_cvs():
 
 def get_user_statistics():
     """Get statistics about user CV associations"""
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     

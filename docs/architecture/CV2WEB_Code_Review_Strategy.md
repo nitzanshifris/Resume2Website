@@ -1,7 +1,7 @@
-# CV2WEB – Comprehensive Code Review, Refactor & Reset Strategy
+# RESUME2WEBSITE – Comprehensive Code Review, Refactor & Reset Strategy
 
 ## 1. Purpose & Scope
-This guide provides a linear, end-to-end roadmap for a senior engineer to audit, clean, and future-proof the **CV2WEB** codebase.  
+This guide provides a linear, end-to-end roadmap for a senior engineer to audit, clean, and future-proof the **RESUME2WEBSITE** codebase.  
 Goals:
 1. **Detach** all legacy dependencies ensuring a fully self-contained solution.  
 2. **Stabilise** functionality by eliminating bugs, logic errors, and edge-case failures.  
@@ -28,7 +28,7 @@ Goals:
 ## 3. Prerequisites & Environment
 ```bash
 # Clone fresh and install deps
-git clone <repo-url> cv2web && cd cv2web
+git clone <repo-url> resume2website && cd resume2website
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 npm ci # for frontend workspaces (if using npm)

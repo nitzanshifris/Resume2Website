@@ -1,7 +1,7 @@
 # Resume2Web Branded Template - Go Live Pack PRD
 
 ## Executive Summary
-Create a new portfolio template for the "Go Live" pricing tier that includes CV2WEB/Resume2Web branding. This template provides users with a more affordable option while promoting brand visibility and potentially driving new customer acquisition through the branded footer/watermark.
+Create a new portfolio template for the "Go Live" pricing tier that includes RESUME2WEBSITE/Resume2Web branding. This template provides users with a more affordable option while promoting brand visibility and potentially driving new customer acquisition through the branded footer/watermark.
 
 ## Problem Statement
 - Current templates are unbranded and don't provide a cost-effective entry point for budget-conscious users
@@ -10,7 +10,7 @@ Create a new portfolio template for the "Go Live" pricing tier that includes CV2
 
 ## Solution Overview
 Design and implement a professionally branded portfolio template that:
-1. Includes tasteful CV2WEB/Resume2Web branding in the footer
+1. Includes tasteful RESUME2WEBSITE/Resume2Web branding in the footer
 2. Maintains high quality and professional appearance
 3. Offers full functionality at a lower price point
 4. Drives brand awareness through deployed portfolios
@@ -20,7 +20,7 @@ Design and implement a professionally branded portfolio template that:
 ### Functional Requirements
 1. **Branding Elements**
    - Professional footer with "Powered by Resume2Web" text and logo
-   - Link back to CV2WEB main website
+   - Link back to RESUME2WEBSITE main website
    - Optional watermark on PDF export (if applicable)
    - Brand colors integrated subtly into design
 
@@ -60,7 +60,7 @@ Design and implement a professionally branded portfolio template that:
 ├─────────────────────────────────────────────────────────┤
 │  Powered by Resume2Web | Create your portfolio today   │
 │  [Logo] Professional portfolios in minutes              │
-│         © 2025 CV2WEB. All rights reserved.            │
+│         © 2025 RESUME2WEBSITE. All rights reserved.            │
 └─────────────────────────────────────────────────────────┘
 ```
 

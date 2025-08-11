@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# CV2WEB Cleanup Command
+# RESUME2WEBSITE Cleanup Command
 # Removes common build artifacts and temporary files
 
-echo "🧹 Starting CV2WEB cleanup..."
+echo "🧹 Starting RESUME2WEBSITE cleanup..."
 
 # Remove .DS_Store files
 echo "  Removing .DS_Store files..."

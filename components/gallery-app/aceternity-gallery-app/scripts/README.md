@@ -9,10 +9,10 @@ Scripts for running various parts of the application:
 - `run_backend.sh` - Starts the backend server
 - `run_gallery_app.py` - Runs the gallery application
 - `run_model_router.sh` - Starts the model router
-- `start_cv2web.sh` - Main startup script
+- `start_resume2website.sh` - Main startup script
 - `start_gallery.sh` - Gallery startup script
 - `start-dev.sh` - Development environment startup
-- `stop_cv2web.sh` - Stops all services
+- `stop_resume2website.sh` - Stops all services
 
 ### `/utilities/`
 Utility scripts for maintenance and fixes:
@@ -24,7 +24,7 @@ Utility scripts for maintenance and fixes:
 
 To run any script from the project root:
 ```bash
-./scripts/runners/start_cv2web.sh
+./scripts/runners/start_resume2website.sh
 ```
 
 For utilities:

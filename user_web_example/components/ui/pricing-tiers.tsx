@@ -39,7 +39,7 @@ const plans: Array<Plan> = [
       "1 generation attempt"
     ],
     limitations: [
-      "CV2WEB branding included",
+      "RESUME2WEBSITE branding included",
       "Limited template customization"
     ],
     buttonText: "Start with Go Live",

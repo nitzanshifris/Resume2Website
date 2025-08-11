@@ -1,5 +1,5 @@
 """
-Database functions for CV2WEB MVP
+Database functions for RESUME2WEBSITE MVP
 """
 import os
 import sqlite3
@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Database configuration
-DB_PATH = os.getenv('DATABASE_URL', 'data/cv2web.db').replace('sqlite:///', '')
+DB_PATH = os.getenv('DATABASE_URL', 'data/resume2website.db').replace('sqlite:///', '')
 
 
 def get_db_connection():

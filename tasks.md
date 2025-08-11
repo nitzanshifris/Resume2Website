@@ -1,4 +1,4 @@
-# CV2WEB V4 - Complete Task List (TaskMaster + Strategic Tasks)
+# RESUME2WEBSITE V4 - Complete Task List (TaskMaster + Strategic Tasks)
 
 ## TaskMaster Tasks Overview
 
@@ -44,7 +44,7 @@
 
 ## Detailed Task Specifications
 
-# CV2WEB V4 - Strategic & UX Tasks
+# RESUME2WEBSITE V4 - Strategic & UX Tasks
 
 ## 1. Onboarding & Value Proposition Enhancement
 
@@ -594,7 +594,7 @@
 
 ### 5.8 Best Use Cases Definition [TASKMASTER #29]
 **Files**: Create documentation in `docs/use-cases.md`
-- [ ] Define 8 best use cases for CV2WEB
+- [ ] Define 8 best use cases for RESUME2WEBSITE
 - [ ] Example: Developer → GitHub project showcase
 - [ ] Create user persona mapping
 - **Top 8 Use Cases**:
@@ -931,6 +931,6 @@ All tasks with [TASKMASTER #XX] references are tracked in the TaskMaster AI syst
 ---
 
 *Last updated: 2025-01-21*
-*Aligned with CV2WEB V4 project structure and codebase*
+*Aligned with RESUME2WEBSITE V4 project structure and codebase*
 *Enhanced with performance, analytics, strategic considerations, and critical code quality fixes*
 *Integrated with TaskMaster AI task management system*

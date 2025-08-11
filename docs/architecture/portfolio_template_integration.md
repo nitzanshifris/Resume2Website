@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide explains how to use the CV2WEB portfolio template integration to transform CV data into a beautiful, interactive portfolio website.
+This guide explains how to use the RESUME2WEBSITE portfolio template integration to transform CV data into a beautiful, interactive portfolio website.
 
 ## Architecture
 

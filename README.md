@@ -1,4 +1,4 @@
-# CV2WEB - AI-Powered CV to Portfolio Generator
+# RESUME2WEBSITE - AI-Powered CV to Portfolio Generator
 
 Transform your CV into a stunning portfolio website powered by AI and Aceternity UI components.
 
@@ -38,7 +38,7 @@ npm run dev
 ## 🏗️ Architecture
 
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── api/                          # FastAPI backend
 │   ├── routes/
 │   │   ├── cv.py                # CV upload & processing

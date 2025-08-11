@@ -22,7 +22,7 @@ from src.utils.enhanced_sse_logger import EnhancedSSELogger
 
 
 class DeepValidationTester:
-    """Deep validation test runner for all CV2WEB components"""
+    """Deep validation test runner for all RESUME2WEBSITE components"""
     
     def __init__(self, base_url: str = "http://localhost:2000"):
         self.base_url = base_url
@@ -955,7 +955,7 @@ async def main():
     
     try:
         print("🚀 Starting Comprehensive Deep Validation")
-        print("🔍 Testing all implemented CV2WEB components...")
+        print("🔍 Testing all implemented RESUME2WEBSITE components...")
         print("⚡ This will test SSE, logging, metrics, correlation, workflows, and more!")
         print()
         

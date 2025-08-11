@@ -161,7 +161,7 @@ def test_password_hashing():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("CV2WEB Email Authentication Test Suite")
+    print("RESUME2WEBSITE Email Authentication Test Suite")
     print("=" * 60)
     
     # Test password hashing

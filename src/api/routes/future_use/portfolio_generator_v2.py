@@ -37,8 +37,8 @@ AVAILABLE_TEMPLATES = {
         "path": TEMPLATES_DIR / "v0_template_1"
     },
     "resume2web_branded": {
-        "name": "CV2WEB Branded",
-        "description": "Portfolio with CV2WEB branding - perfect for Go Live tier",
+        "name": "RESUME2WEBSITE Branded",
+        "description": "Portfolio with RESUME2WEBSITE branding - perfect for Go Live tier",
         "tier": "go-live",
         "path": TEMPLATES_DIR / "resume2web_branded"
     }
@@ -151,13 +151,13 @@ async def generate_portfolio_with_template(
  * Template: {request.template}
  */
 
-import {{ adaptCV2WebToTemplate }} from './cv-data-adapter'
+import {{ adaptResume2WebsiteToTemplate }} from './cv-data-adapter'
 
 // CV Data from extraction
 const extractedCVData = {json.dumps(cv_data, indent=2)}
 
 // Convert CV data to template format
-export const portfolioData = adaptCV2WebToTemplate(extractedCVData)
+export const portfolioData = adaptResume2WebsiteToTemplate(extractedCVData)
 
 // Force use of real data instead of sample data
 export const useRealData = true

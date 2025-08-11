@@ -1,6 +1,6 @@
-# Contributing to CV2WEB
+# Contributing to RESUME2WEBSITE
 
-Thank you for your interest in contributing to CV2WEB! This guide will help you get started.
+Thank you for your interest in contributing to RESUME2WEBSITE! This guide will help you get started.
 
 ## 🚀 Quick Start
 
@@ -204,4 +204,4 @@ Any other relevant information
 - Discussions for questions
 - Check existing issues first
 
-Thank you for contributing to CV2WEB! 🎉
+Thank you for contributing to RESUME2WEBSITE! 🎉

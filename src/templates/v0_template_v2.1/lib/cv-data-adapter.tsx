@@ -1,8 +1,8 @@
 /**
- * CV Data Adapter - Extends v2.1's data mapper with CV2WEB integration
+ * CV Data Adapter - Extends v2.1's data mapper with RESUME2WEBSITE integration
  * 
  * This adapter provides:
- * 1. CV2WEB data format compatibility
+ * 1. RESUME2WEBSITE data format compatibility
  * 2. Session-based CV data fetching
  * 3. Fallback to existing demo data
  */
@@ -31,8 +31,8 @@ const getSkillIcon = (categoryName: string) => {
   return icons.default
 }
 
-// CV2WEB API types (matching backend schema)
-interface CV2WebData {
+// RESUME2WEBSITE API types (matching backend schema)
+interface Resume2WebsiteData {
   hero?: {
     fullName?: string | null
     professionalTitle?: string | null
@@ -219,41 +219,41 @@ interface CV2WebData {
 }
 
 /**
- * Transform CV2WEB data to v2.1 format
+ * Transform RESUME2WEBSITE data to v2.1 format
  */
-export function adaptCV2WebData(cv2webData: CV2WebData): any {
+export function adaptResume2WebsiteData(resume2websiteData: Resume2WebsiteData): any {
   // Start with empty data structure
   const adaptedData = {
     hero: {
-      name: cv2webData.hero?.fullName || "Your Name",
-      title: cv2webData.hero?.professionalTitle || "Professional Title",
-      tagline: cv2webData.hero?.summaryTagline || "Your Tagline",
-      availability: cv2webData.contact?.availability || "Available for opportunities",
-      email: cv2webData.contact?.email || "",
-      profilePhotoUrl: cv2webData.hero?.profilePhotoUrl || null
+      name: resume2websiteData.hero?.fullName || "Your Name",
+      title: resume2websiteData.hero?.professionalTitle || "Professional Title",
+      tagline: resume2websiteData.hero?.summaryTagline || "Your Tagline",
+      availability: resume2websiteData.contact?.availability || "Available for opportunities",
+      email: resume2websiteData.contact?.email || "",
+      profilePhotoUrl: resume2websiteData.hero?.profilePhotoUrl || null
     },
     sections: []
   }
 
   // Add summary section if available
-  if (cv2webData.summary?.summaryText) {
+  if (resume2websiteData.summary?.summaryText) {
     adaptedData.sections.push({
       id: 'summary',
       type: 'paragraph',
       title: 'About Me',
       data: {
-        description: cv2webData.summary.summaryText
+        description: resume2websiteData.summary.summaryText
       }
     })
   }
 
   // Add experience section
-  if (cv2webData.experience?.experienceItems?.length) {
+  if (resume2websiteData.experience?.experienceItems?.length) {
     adaptedData.sections.push({
       id: 'experience',
       type: 'timeline',
-      title: cv2webData.experience.sectionTitle || 'Experience',
-      data: cv2webData.experience.experienceItems.map(item => ({
+      title: resume2websiteData.experience.sectionTitle || 'Experience',
+      data: resume2websiteData.experience.experienceItems.map(item => ({
         title: item?.jobTitle || '',
         subtitle: `${item?.companyName || ''}${item?.location ? ', ' + formatLocation(item.location) : ''}`,
         period: formatDateRange(item?.dateRange),
@@ -263,12 +263,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add education section
-  if (cv2webData.education?.educationItems?.length) {
+  if (resume2websiteData.education?.educationItems?.length) {
     adaptedData.sections.push({
       id: 'education',
       type: 'timeline',
-      title: cv2webData.education.sectionTitle || 'Education',
-      data: cv2webData.education.educationItems.map(item => ({
+      title: resume2websiteData.education.sectionTitle || 'Education',
+      data: resume2websiteData.education.educationItems.map(item => ({
         title: `${item?.degree || ''}${item?.fieldOfStudy ? ', ' + item.fieldOfStudy : ''}`,
         subtitle: `${item?.institution || ''}${item?.location ? ', ' + formatLocation(item.location) : ''}`,
         period: formatDateRange(item?.dateRange),
@@ -278,11 +278,11 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add skills section
-  if (cv2webData.skills?.skillCategories?.length || cv2webData.skills?.ungroupedSkills?.length) {
+  if (resume2websiteData.skills?.skillCategories?.length || resume2websiteData.skills?.ungroupedSkills?.length) {
     const skills = []
     
     // Add categorized skills
-    cv2webData.skills.skillCategories?.forEach(category => {
+    resume2websiteData.skills.skillCategories?.forEach(category => {
       const IconComponent = getSkillIcon(category.categoryName || '')
       skills.push({
         categoryName: category.categoryName || 'Skills',
@@ -292,11 +292,11 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
     })
     
     // Add ungrouped skills
-    if (cv2webData.skills.ungroupedSkills?.length) {
+    if (resume2websiteData.skills.ungroupedSkills?.length) {
       const IconComponent = getSkillIcon('Other Skills')
       skills.push({
         categoryName: 'Other Skills',
-        skills: cv2webData.skills.ungroupedSkills,
+        skills: resume2websiteData.skills.ungroupedSkills,
         icon: <IconComponent className="w-20 h-20 text-foreground transition-colors duration-300" />
       })
     }
@@ -304,18 +304,18 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
     adaptedData.sections.push({
       id: 'skills',
       type: 'bento',
-      title: cv2webData.skills.sectionTitle || 'Skills',
+      title: resume2websiteData.skills.sectionTitle || 'Skills',
       data: skills
     })
   }
 
   // Add projects section
-  if (cv2webData.projects?.projectItems?.length) {
+  if (resume2websiteData.projects?.projectItems?.length) {
     adaptedData.sections.push({
       id: 'projects',
       type: 'projects',
-      title: cv2webData.projects.sectionTitle || 'Projects',
-      data: cv2webData.projects.projectItems.map(item => ({
+      title: resume2websiteData.projects.sectionTitle || 'Projects',
+      data: resume2websiteData.projects.projectItems.map(item => ({
         title: item?.title || '',
         description: item?.description || '',
         link: item?.projectUrl || '#',
@@ -325,12 +325,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add achievements section
-  if (cv2webData.achievements?.achievements?.length) {
+  if (resume2websiteData.achievements?.achievements?.length) {
     adaptedData.sections.push({
       id: 'accomplishments',
       type: 'accomplishments',
-      title: cv2webData.achievements.sectionTitle || 'Achievements',
-      data: cv2webData.achievements.achievements.map(item => {
+      title: resume2websiteData.achievements.sectionTitle || 'Achievements',
+      data: resume2websiteData.achievements.achievements.map(item => {
         // Match the exact format expected by v2.1
         let title = item?.value || ''
         let description = item?.label || ''
@@ -351,12 +351,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add certifications section
-  if (cv2webData.certifications?.certificationItems?.length) {
+  if (resume2websiteData.certifications?.certificationItems?.length) {
     adaptedData.sections.push({
       id: 'certifications',
       type: 'certifications',
-      title: cv2webData.certifications.sectionTitle || 'Certifications',
-      data: cv2webData.certifications.certificationItems.map(item => ({
+      title: resume2websiteData.certifications.sectionTitle || 'Certifications',
+      data: resume2websiteData.certifications.certificationItems.map(item => ({
         title: item?.title || '',
         subtitle: item?.issuingOrganization || '',
         date: item?.issueDate || '',
@@ -368,12 +368,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add languages section
-  if (cv2webData.languages?.languageItems?.length) {
+  if (resume2websiteData.languages?.languageItems?.length) {
     adaptedData.sections.push({
       id: 'languages',
       type: 'languages',
-      title: cv2webData.languages.sectionTitle || 'Languages',
-      data: cv2webData.languages.languageItems.map(item => ({
+      title: resume2websiteData.languages.sectionTitle || 'Languages',
+      data: resume2websiteData.languages.languageItems.map(item => ({
         name: item?.language || '',
         proficiency: item?.proficiency || ''
       }))
@@ -381,12 +381,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add courses section
-  if (cv2webData.courses?.courseItems?.length) {
+  if (resume2websiteData.courses?.courseItems?.length) {
     adaptedData.sections.push({
       id: 'courses',
       type: 'courses',
-      title: cv2webData.courses.sectionTitle || 'Courses',
-      data: cv2webData.courses.courseItems.map(item => ({
+      title: resume2websiteData.courses.sectionTitle || 'Courses',
+      data: resume2websiteData.courses.courseItems.map(item => ({
         title: item?.title || '',
         institution: item?.institution || '',
         date: item?.completionDate || ''
@@ -395,12 +395,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add volunteer section
-  if (cv2webData.volunteer?.volunteerItems?.length) {
+  if (resume2websiteData.volunteer?.volunteerItems?.length) {
     adaptedData.sections.push({
       id: 'volunteer',
       type: 'timeline',
-      title: cv2webData.volunteer.sectionTitle || 'Volunteer Experience',
-      data: cv2webData.volunteer.volunteerItems.map(item => ({
+      title: resume2websiteData.volunteer.sectionTitle || 'Volunteer Experience',
+      data: resume2websiteData.volunteer.volunteerItems.map(item => ({
         title: item?.role || '',
         subtitle: item?.organization || '',
         period: formatDateRange(item?.dateRange),
@@ -410,12 +410,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add publications section
-  if (cv2webData.publications?.publications?.length) {
+  if (resume2websiteData.publications?.publications?.length) {
     adaptedData.sections.push({
       id: 'publications',
       type: 'publications',
-      title: cv2webData.publications.sectionTitle || 'Publications',
-      data: cv2webData.publications.publications.map(item => ({
+      title: resume2websiteData.publications.sectionTitle || 'Publications',
+      data: resume2websiteData.publications.publications.map(item => ({
         title: item?.title || '',
         journal: item?.publicationType || item?.publicationVenue || '',
         date: item?.publicationDate || '',
@@ -425,12 +425,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add speaking engagements (using timeline since v2.1 doesn't have dedicated speaking section)
-  if (cv2webData.speaking?.speakingEngagements?.length) {
+  if (resume2websiteData.speaking?.speakingEngagements?.length) {
     adaptedData.sections.push({
       id: 'speaking',
       type: 'timeline',
-      title: cv2webData.speaking.sectionTitle || 'Speaking Engagements',
-      data: cv2webData.speaking.speakingEngagements.map(item => ({
+      title: resume2websiteData.speaking.sectionTitle || 'Speaking Engagements',
+      data: resume2websiteData.speaking.speakingEngagements.map(item => ({
         title: item?.topic || '',
         subtitle: `${item?.eventName || ''}${item?.venue ? ', ' + item.venue : ''}`,
         period: item?.date || '',
@@ -440,12 +440,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add patents section
-  if (cv2webData.patents?.patents?.length) {
+  if (resume2websiteData.patents?.patents?.length) {
     adaptedData.sections.push({
       id: 'patents',
       type: 'patents',
-      title: cv2webData.patents.sectionTitle || 'Patents',
-      data: cv2webData.patents.patents.map(item => ({
+      title: resume2websiteData.patents.sectionTitle || 'Patents',
+      data: resume2websiteData.patents.patents.map(item => ({
         title: item?.title || '',
         patentNumber: item?.patentNumber || '',
         status: item?.status || '',
@@ -456,12 +456,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add memberships section
-  if (cv2webData.memberships?.memberships?.length) {
+  if (resume2websiteData.memberships?.memberships?.length) {
     adaptedData.sections.push({
       id: 'memberships',
       type: 'memberships',
-      title: cv2webData.memberships.sectionTitle || 'Professional Memberships',
-      data: cv2webData.memberships.memberships.map(item => ({
+      title: resume2websiteData.memberships.sectionTitle || 'Professional Memberships',
+      data: resume2websiteData.memberships.memberships.map(item => ({
         organization: item?.organization || '',
         role: item?.role || '',
         type: item?.membershipType || '',
@@ -471,12 +471,12 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
   }
 
   // Add hobbies section
-  if (cv2webData.hobbies?.hobbies?.length) {
+  if (resume2websiteData.hobbies?.hobbies?.length) {
     adaptedData.sections.push({
       id: 'hobbies',
       type: 'hobbies',
-      title: cv2webData.hobbies.sectionTitle || 'Hobbies & Interests',
-      data: cv2webData.hobbies.hobbies
+      title: resume2websiteData.hobbies.sectionTitle || 'Hobbies & Interests',
+      data: resume2websiteData.hobbies.hobbies
     })
   }
 
@@ -486,10 +486,10 @@ export function adaptCV2WebData(cv2webData: CV2WebData): any {
     type: 'contact',
     title: 'Contact',
     data: {
-      email: cv2webData.contact?.email || '',
-      phone: cv2webData.contact?.phone || '',
-      location: formatLocation(cv2webData.contact?.location),
-      socialLinks: cv2webData.contact?.professionalLinks?.map(link => ({
+      email: resume2websiteData.contact?.email || '',
+      phone: resume2websiteData.contact?.phone || '',
+      location: formatLocation(resume2websiteData.contact?.location),
+      socialLinks: resume2websiteData.contact?.professionalLinks?.map(link => ({
         platform: link?.platform || '',
         url: link?.url || ''
       })) || []
@@ -525,7 +525,7 @@ function formatLocation(location?: any): string {
 }
 
 /**
- * Fetch CV data from CV2WEB API
+ * Fetch CV data from RESUME2WEBSITE API
  */
 export async function fetchCVData(jobId: string, sessionId: string): Promise<any> {
   try {
@@ -541,7 +541,7 @@ export async function fetchCVData(jobId: string, sessionId: string): Promise<any
     }
 
     const data = await response.json()
-    return adaptCV2WebData(data.cv_data)
+    return adaptResume2WebsiteData(data.cv_data)
   } catch (error) {
     console.error('Error fetching CV data:', error)
     // Return null to indicate fetch failure
@@ -588,14 +588,14 @@ export async function fetchLatestCVData(sessionId: string): Promise<any> {
       return null
     }
 
-    const cv2webData = JSON.parse(latestCV.cv_data)
-    return adaptCV2WebData(cv2webData)
+    const resume2websiteData = JSON.parse(latestCV.cv_data)
+    return adaptResume2WebsiteData(resume2websiteData)
   } catch (error: any) {
     // Better error messages for common issues
     if (error.name === 'AbortError') {
       console.error('CV fetch timeout after 3s')
     } else if (error.message.includes('Failed to fetch')) {
-      console.error('Network error - CV2WEB backend may not be running on port 2000')
+      console.error('Network error - RESUME2WEBSITE backend may not be running on port 2000')
     } else {
       console.error('Error fetching CV data:', error.message)
     }
@@ -630,6 +630,6 @@ export function getSessionId(): string | null {
  * Main adapter function for portfolio generator to use
  * This is what gets called from injected-data.tsx
  */
-export function adaptCV2WebToTemplate(cv2webData: CV2WebData) {
-  return adaptCV2WebData(cv2webData)
+export function adaptResume2WebsiteToTemplate(resume2websiteData: Resume2WebsiteData) {
+  return adaptResume2WebsiteData(resume2websiteData)
 }

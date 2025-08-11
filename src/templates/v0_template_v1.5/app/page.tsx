@@ -6,7 +6,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { toast } from "sonner"
 
 import { initialData, contentIconMap, type PortfolioData } from "@/lib/data"
-import { fetchLatestCVData, adaptCV2WebToTemplate } from "@/lib/cv-data-adapter"
+import { fetchLatestCVData, adaptResume2WebsiteToTemplate } from "@/lib/cv-data-adapter"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme/theme-provider"
 import { useEditMode } from "@/contexts/edit-mode-context"

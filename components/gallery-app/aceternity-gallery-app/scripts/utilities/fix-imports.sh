@@ -8,13 +8,13 @@ echo "Fixing import issues in generated project..."
 # Check if Timeline component exists
 if [ ! -f "$PROJECT_PATH/components/ui/timeline/timeline.tsx" ]; then
     echo "Timeline component missing, copying from template..."
-    cp -r ../apps/backend/templates/cv2web-react-template/components/ui/timeline "$PROJECT_PATH/components/ui/"
+    cp -r ../apps/backend/templates/resume2website-react-template/components/ui/timeline "$PROJECT_PATH/components/ui/"
 fi
 
 # Check if BackgroundGradient component exists
 if [ ! -f "$PROJECT_PATH/components/ui/background-gradient/background-gradient.tsx" ]; then
     echo "BackgroundGradient component missing, copying from template..."
-    cp -r ../apps/backend/templates/cv2web-react-template/components/ui/background-gradient "$PROJECT_PATH/components/ui/"
+    cp -r ../apps/backend/templates/resume2website-react-template/components/ui/background-gradient "$PROJECT_PATH/components/ui/"
 fi
 
 # Check if FloatingNavbar component exists  

@@ -1,8 +1,8 @@
-# CV2WEB Component Selection Guide
+# RESUME2WEBSITE Component Selection Guide
 
 ## Overview
 
-This comprehensive guide covers the CV2WEB component selection system, which intelligently maps CV content to Aceternity UI components. The system analyzes CV data richness and automatically selects the most appropriate components from our library of 85 components (56 MVP-suitable).
+This comprehensive guide covers the RESUME2WEBSITE component selection system, which intelligently maps CV content to Aceternity UI components. The system analyzes CV data richness and automatically selects the most appropriate components from our library of 85 components (56 MVP-suitable).
 
 ## Architecture
 
@@ -372,7 +372,7 @@ const ComponentWithFallback = ({ data, section }) => {
 
 ## Conclusion
 
-The CV2WEB component selection system provides intelligent, adaptive portfolio generation by:
+The RESUME2WEBSITE component selection system provides intelligent, adaptive portfolio generation by:
 - Analyzing CV content richness
 - Selecting appropriate components from 56 MVP-suitable options
 - Optimizing layout density

@@ -1,8 +1,8 @@
-# Lovable Clone Analysis for CV2WEB Integration
+# Lovable Clone Analysis for RESUME2WEBSITE Integration
 
 ## Executive Summary
 
-After analyzing the lovable-clone project and researching Daytona SDK documentation, I've identified several key patterns and technologies that could significantly enhance CV2WEB's architecture. The lovable-clone demonstrates professional patterns for AI-powered code generation with proper isolation, real-time feedback, and scalable architecture.
+After analyzing the lovable-clone project and researching Daytona SDK documentation, I've identified several key patterns and technologies that could significantly enhance RESUME2WEBSITE's architecture. The lovable-clone demonstrates professional patterns for AI-powered code generation with proper isolation, real-time feedback, and scalable architecture.
 
 ## Key Technologies & Patterns
 
@@ -10,7 +10,7 @@ After analyzing the lovable-clone project and researching Daytona SDK documentat
 
 The lovable-clone uses Daytona SDK to create isolated Docker containers for code execution. This provides complete isolation from the host system.
 
-**Benefits for CV2WEB:**
+**Benefits for RESUME2WEBSITE:**
 - **Security**: Portfolio generation happens in isolated containers
 - **Scalability**: Each user gets their own sandbox
 - **Preview URLs**: Public URLs for generated portfolios
@@ -46,7 +46,7 @@ The project uses `@anthropic-ai/claude-code` SDK with advanced features:
 - Multi-turn conversations
 - Built-in abort controller
 
-**CV2WEB Integration:**
+**RESUME2WEBSITE Integration:**
 ```python
 from anthropic import AsyncAnthropic
 
@@ -70,7 +70,7 @@ The lovable-clone implements SSE for streaming updates from backend to frontend:
 - Live feedback during portfolio generation
 - Better user experience with visual progress
 
-**Implementation for CV2WEB:**
+**Implementation for RESUME2WEBSITE:**
 ```python
 # Backend (FastAPI)
 from fastapi import Response
@@ -98,7 +98,7 @@ The project supports both direct and sandboxed execution:
 1. **Direct Mode**: Fast local development
 2. **Sandboxed Mode**: Production-safe isolated execution
 
-**CV2WEB Implementation:**
+**RESUME2WEBSITE Implementation:**
 ```python
 class PortfolioGenerator:
     def __init__(self, mode: str = "sandbox"):
@@ -144,7 +144,7 @@ class StructuredLogger:
         print(f"__PROGRESS__{json.dumps({'message': message, 'percentage': percentage})}__PROGRESS__")
 ```
 
-## Recommended Implementation Plan for CV2WEB
+## Recommended Implementation Plan for RESUME2WEBSITE
 
 ### Phase 1: Enhanced Logging & Real-time Feedback (Week 1)
 1. Implement SSE endpoints for CV processing pipeline
@@ -170,7 +170,7 @@ class StructuredLogger:
 
 ## Architecture Comparison
 
-| Feature | Current CV2WEB | Lovable Clone | Recommended for CV2WEB |
+| Feature | Current RESUME2WEBSITE | Lovable Clone | Recommended for RESUME2WEBSITE |
 |---------|---------------|---------------|------------------------|
 | Code Generation | Template-based | AI-powered (Claude) | Hybrid (Templates + AI) |
 | Isolation | None | Daytona sandboxes | Daytona for previews |
@@ -179,7 +179,7 @@ class StructuredLogger:
 | Preview System | Local only | Public URLs | Sandboxed previews |
 | Error Handling | Basic | Comprehensive | Enhanced with recovery |
 
-## Code Examples for CV2WEB
+## Code Examples for RESUME2WEBSITE
 
 ### 1. SSE Endpoint for CV Processing
 ```python
@@ -339,7 +339,7 @@ class HybridPortfolioGenerator:
 
 ## Conclusion
 
-The lovable-clone project demonstrates several advanced patterns that would significantly enhance CV2WEB:
+The lovable-clone project demonstrates several advanced patterns that would significantly enhance RESUME2WEBSITE:
 
 1. **Daytona sandboxing** for secure, isolated portfolio generation
 2. **Claude Code SDK** for more sophisticated AI-powered generation
@@ -347,7 +347,7 @@ The lovable-clone project demonstrates several advanced patterns that would sign
 4. **Structured logging** for better debugging and monitoring
 5. **Two-mode architecture** for flexible deployment
 
-By implementing these patterns, CV2WEB can offer:
+By implementing these patterns, RESUME2WEBSITE can offer:
 - **Better security** through isolation
 - **Enhanced user experience** with real-time progress
 - **More creative portfolios** using Claude's capabilities

@@ -13,10 +13,10 @@
 - ✅ run_backend.sh
 - ✅ run_gallery_app.py
 - ✅ run_model_router.sh
-- ✅ start_cv2web.sh
+- ✅ start_resume2website.sh
 - ✅ start_gallery.sh
 - ✅ start-dev.sh
-- ✅ stop_cv2web.sh
+- ✅ stop_resume2website.sh
 
 #### To `/scripts/utilities/`:
 - ✅ fix-imports.sh

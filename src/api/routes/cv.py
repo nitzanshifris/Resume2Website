@@ -408,7 +408,7 @@ async def google_oauth_callback(request: Dict[str, Any]) -> SessionResponse:
             logger.info(f"Google OAuth registration for new user: {email}")
             
             return SessionResponse(
-                message="Welcome to CV2WEB! Account created successfully with Google.",
+                message="Welcome to RESUME2WEBSITE! Account created successfully with Google.",
                 session_id=session_id,
                 user_id=user_id,
                 user={

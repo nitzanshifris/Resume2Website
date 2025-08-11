@@ -1,7 +1,7 @@
 # Aceternity UI Component System - Project Structure
 
 ## Overview
-This project integrates the Aceternity UI component library into the CV2WEB-V3 application. It provides a comprehensive set of animated UI components built with React, TypeScript, Framer Motion, and Tailwind CSS.
+This project integrates the Aceternity UI component library into the RESUME2WEBSITE-V3 application. It provides a comprehensive set of animated UI components built with React, TypeScript, Framer Motion, and Tailwind CSS.
 
 ## Directory Structure
 

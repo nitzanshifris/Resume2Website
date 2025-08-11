@@ -73,7 +73,7 @@ Each component now includes:
 
 ## Next Steps
 
-1. **Update cv2web-components.ts** to include the 5 new MVP-suitable components
+1. **Update resume2website-components.ts** to include the 5 new MVP-suitable components
 2. **Create adapter functions** for each component
 3. **Build component preview tool**
 4. **Test each component** with sample CV data

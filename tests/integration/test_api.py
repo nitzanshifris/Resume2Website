@@ -38,7 +38,7 @@ def test_app_info():
     print(f"✅ Docs URL: {app.docs_url}")
 
 if __name__ == "__main__":
-    print("CV2WEB API Test")
+    print("RESUME2WEBSITE API Test")
     print("=" * 50)
     
     if test_imports():

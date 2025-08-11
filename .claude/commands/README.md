@@ -1,4 +1,4 @@
-# TaskMaster Slash Commands for CV2WEB
+# TaskMaster Slash Commands for RESUME2WEBSITE
 
 Custom slash commands to streamline TaskMaster workflows in Claude Code.
 

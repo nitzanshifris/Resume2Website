@@ -1,7 +1,7 @@
-# Top 20 CV2WEB Components - Priority Implementation Guide
+# Top 20 RESUME2WEBSITE Components - Priority Implementation Guide
 
 ## Overview
-Based on comprehensive analysis of 85 Aceternity components, these are the 20 most essential components for CV2WEB MVP, prioritized by CV section coverage, visual impact, and implementation value.
+Based on comprehensive analysis of 85 Aceternity components, these are the 20 most essential components for RESUME2WEBSITE MVP, prioritized by CV section coverage, visual impact, and implementation value.
 
 ## 🎯 Core CV Sections Priority
 1. **Hero** (name, title, summary) - ESSENTIAL

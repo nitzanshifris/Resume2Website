@@ -68,12 +68,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     googleAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/google/callback`);
     googleAuthUrl.searchParams.append('response_type', 'code');
     googleAuthUrl.searchParams.append('scope', 'openid email profile');
-    googleAuthUrl.searchParams.append('state', 'cv2web_google_auth');
+    googleAuthUrl.searchParams.append('state', 'resume2website_google_auth');
     googleAuthUrl.searchParams.append('access_type', 'offline');
     googleAuthUrl.searchParams.append('prompt', 'consent');
 
     // Store auth modal state to restore after callback
-    localStorage.setItem('cv2web_auth_return', 'true');
+    localStorage.setItem('resume2website_auth_return', 'true');
 
     // Redirect to Google OAuth
     window.location.href = googleAuthUrl.toString();
@@ -108,10 +108,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     facebookAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/facebook/callback`);
     facebookAuthUrl.searchParams.append('response_type', 'code');
     facebookAuthUrl.searchParams.append('scope', 'email');  // Only request email, public_profile is automatic
-    facebookAuthUrl.searchParams.append('state', 'cv2web_facebook_auth');
+    facebookAuthUrl.searchParams.append('state', 'resume2website_facebook_auth');
 
     // Store auth modal state to restore after callback
-    localStorage.setItem('cv2web_auth_return', 'true');
+    localStorage.setItem('resume2website_auth_return', 'true');
 
     // Redirect to Facebook OAuth
     window.location.href = facebookAuthUrl.toString();
@@ -136,11 +136,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     linkedinAuthUrl.searchParams.append('response_type', 'code');
     linkedinAuthUrl.searchParams.append('client_id', linkedinClientId);
     linkedinAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/linkedin/callback`);
-    linkedinAuthUrl.searchParams.append('state', 'cv2web_linkedin_auth');
+    linkedinAuthUrl.searchParams.append('state', 'resume2website_linkedin_auth');
     linkedinAuthUrl.searchParams.append('scope', 'openid profile email');
 
     // Store auth modal state to restore after callback
-    localStorage.setItem('cv2web_auth_return', 'true');
+    localStorage.setItem('resume2website_auth_return', 'true');
 
     // Redirect to LinkedIn OAuth
     window.location.href = linkedinAuthUrl.toString();
@@ -191,7 +191,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             {/* Header */}
             <div className="text-center mb-8">
               <h2 className="text-2xl font-semibold text-white mb-2">
-                Welcome to CV2Web
+                Welcome to Resume2Website
               </h2>
               <p className="text-gray-400 text-sm">
                 Unlock all features by logging in
@@ -292,7 +292,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
               </a>
             </p>
             <p className="text-xs text-gray-600 text-center mt-2">
-              © 2025 CV2Web · Powered by Open WebUI
+              © 2025 Resume2Website · Powered by Open WebUI
             </p>
           </div>
         </motion.div>

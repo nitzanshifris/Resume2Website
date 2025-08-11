@@ -8,7 +8,7 @@ import getpass
 
 
 def main():
-    print("CV2WEB Keychain Setup")
+    print("RESUME2WEBSITE Keychain Setup")
     print("=" * 50)
     print("This will store your credentials securely in macOS Keychain")
     print("Your keys will NEVER appear in files or logs")
@@ -105,7 +105,7 @@ def main():
     print("You can now run the application without exposing any keys.")
     print()
     print("To verify your credentials are stored, you can check in:")
-    print("Keychain Access app > login > search for 'cv2web'")
+    print("Keychain Access app > login > search for 'resume2website'")
 
 
 if __name__ == "__main__":

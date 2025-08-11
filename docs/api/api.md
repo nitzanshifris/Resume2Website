@@ -1,9 +1,9 @@
-# CV2WEB API Documentation
+# RESUME2WEBSITE API Documentation
 
 ## Base URL
 ```
 Development: http://localhost:2000
-Production: https://api.cv2web.com (update when deployed)
+Production: https://api.resume2website.com (update when deployed)
 ```
 
 ## Request Format

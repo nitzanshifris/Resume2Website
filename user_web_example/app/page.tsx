@@ -789,8 +789,8 @@ const VerticalProgressBar = ({
   )
 }
 
-// CV2Web Demo Component - Mobile-First WOW Experience
-function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect }: { 
+// Resume2Website Demo Component - Mobile-First WOW Experience
+function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect }: { 
   onOpenModal: () => void; 
   setShowPricing: (value: boolean) => void;
   uploadedFile: File | null;
@@ -1044,7 +1044,7 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
         const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
           method: 'POST',
           headers: {
-            'X-Session-ID': localStorage.getItem('cv2web_session_id') || ''
+            'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
           },
           signal: controller.signal
         })
@@ -1104,7 +1104,7 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Session-ID': localStorage.getItem('cv2web_session_id') || ''
+          'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
         },
         body: JSON.stringify({
           template: randomTemplate
@@ -2070,7 +2070,7 @@ const AppleNavbar = ({
                 </svg>
               </div>
               <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
-                CV2Web
+                Resume2Website
               </div>
             </div>
           </motion.div>
@@ -2660,7 +2660,7 @@ export default function Home() {
   }
 
   const handleCVCardClick = (file: File) => {
-    // The CV2WebDemo component will handle everything internally
+    // The Resume2WebsiteDemo component will handle everything internally
     // This is just a placeholder for the prop
   }
 
@@ -2867,7 +2867,7 @@ export default function Home() {
       />
       <section id="hero" className="pt-16 relative min-h-screen">
         <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-white/50 to-gray-100 z-20"></div>
-        <CV2WebDemo 
+        <Resume2WebsiteDemo 
           onOpenModal={handleOpenModal} 
           setShowPricing={setShowPricing}
           uploadedFile={uploadedFile}
@@ -2972,7 +2972,7 @@ export default function Home() {
             Convert your Resume now
           </button>
         </div>
-        <div className="text-xs text-gray-400 mt-6 relative">&copy; {new Date().getFullYear()} CV2Web. All rights reserved.</div>
+        <div className="text-xs text-gray-400 mt-6 relative">&copy; {new Date().getFullYear()} Resume2Website. All rights reserved.</div>
       </footer>
 
       {/* Resume Flow Modal */}

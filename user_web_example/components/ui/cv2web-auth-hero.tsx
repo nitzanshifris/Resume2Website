@@ -22,7 +22,7 @@ const cn = (...classes: (string | undefined | null | false)[]): string => {
   return classes.filter(Boolean).join(' ');
 };
 
-// Particles Component for CV2WEB
+// Particles Component for RESUME2WEBSITE
 interface ParticlesProps {
   className?: string;
   quantity?: number;
@@ -78,7 +78,7 @@ function hexToRgb(hex: string): number[] {
   return [red, green, blue];
 }
 
-const CV2WebParticles: React.FC<ParticlesProps> = ({
+const Resume2WebsiteParticles: React.FC<ParticlesProps> = ({
   className = "",
   quantity = 120,
   staticity = 50,
@@ -296,8 +296,8 @@ const CV2WebParticles: React.FC<ParticlesProps> = ({
   );
 };
 
-// CV2WEB Orbiting Icons Component
-interface CV2WebOrbitingIconsProps {
+// RESUME2WEBSITE Orbiting Icons Component
+interface Resume2WebsiteOrbitingIconsProps {
   className?: string;
   children: React.ReactNode;
   reverse?: boolean;
@@ -307,7 +307,7 @@ interface CV2WebOrbitingIconsProps {
   path?: boolean;
 }
 
-const CV2WebOrbitingIcons: React.FC<CV2WebOrbitingIconsProps> = ({
+const Resume2WebsiteOrbitingIcons: React.FC<Resume2WebsiteOrbitingIconsProps> = ({
   className,
   children,
   reverse = false,
@@ -353,8 +353,8 @@ const CV2WebOrbitingIcons: React.FC<CV2WebOrbitingIconsProps> = ({
   );
 };
 
-// Main CV2Web Auth Hero Component
-const CV2WebAuthHero: React.FC = () => {
+// Main Resume2Website Auth Hero Component
+const Resume2WebsiteAuthHero: React.FC = () => {
   const [isTransformed, setIsTransformed] = useState(false);
   const [currentCVIndex, setCurrentCVIndex] = useState(0);
   const [activeCardSet, setActiveCardSet] = useState(0);
@@ -510,7 +510,7 @@ const CV2WebAuthHero: React.FC = () => {
   return (
     <div className="w-1/2 max-lg:hidden relative bg-gradient-to-br from-slate-900 via-emerald-900 via-sky-900 to-slate-900">
       {/* Particles Background */}
-      <CV2WebParticles
+      <Resume2WebsiteParticles
         className="absolute inset-0"
         quantity={100}
         ease={60}
@@ -814,11 +814,11 @@ const CV2WebAuthHero: React.FC = () => {
         />
       </div>
       
-      {/* CV2WEB Gradient Overlays */}
+      {/* RESUME2WEBSITE Gradient Overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/10 via-sky-500/10 to-transparent" />
       
-      {/* CV2WEB Content */}
+      {/* RESUME2WEBSITE Content */}
       <div className="relative z-10 flex flex-col justify-center p-8 text-white">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -842,11 +842,11 @@ const CV2WebAuthHero: React.FC = () => {
               ))}
             </div>
             <span className="text-base text-gray-300">
-              Join 10,000+ professionals already using CV2WEB
+              Join 10,000+ professionals already using RESUME2WEBSITE
             </span>
           </div>
           
-          {/* CV2WEB Features */}
+          {/* RESUME2WEBSITE Features */}
           <div className="space-y-3">
             <div className="flex items-center space-x-3 text-emerald-300">
               <Sparkles className="w-5 h-5" />
@@ -868,7 +868,7 @@ const CV2WebAuthHero: React.FC = () => {
 };
 
 // CSS for animations (will be injected)
-const CV2WebAuthStyles = `
+const Resume2WebsiteAuthStyles = `
   @keyframes orbit {
     0% {
       transform: rotate(0deg) translateY(calc(var(--radius) * 1px)) rotate(0deg);
@@ -885,14 +885,14 @@ const CV2WebAuthStyles = `
 
 // Inject styles if in browser
 if (typeof document !== 'undefined') {
-  const existingStyle = document.getElementById('cv2web-auth-styles');
+  const existingStyle = document.getElementById('resume2website-auth-styles');
   if (!existingStyle) {
     const styleSheet = document.createElement('style');
-    styleSheet.id = 'cv2web-auth-styles';
-    styleSheet.textContent = CV2WebAuthStyles;
+    styleSheet.id = 'resume2website-auth-styles';
+    styleSheet.textContent = Resume2WebsiteAuthStyles;
     document.head.appendChild(styleSheet);
   }
 }
 
-export default CV2WebAuthHero;
-export { CV2WebParticles, CV2WebOrbitingIcons };
+export default Resume2WebsiteAuthHero;
+export { Resume2WebsiteParticles, Resume2WebsiteOrbitingIcons };

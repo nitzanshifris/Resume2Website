@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Error Handling Tests for CV2WEB
+Error Handling Tests for RESUME2WEBSITE
 Tests edge cases and error scenarios
 """
 import requests
@@ -221,7 +221,7 @@ def test_nonexistent_user_login():
 
 def main():
     """Run all error handling tests"""
-    print("🔥 CV2WEB Error Handling Tests")
+    print("🔥 RESUME2WEBSITE Error Handling Tests")
     print("=" * 50)
     
     # Check if API is running

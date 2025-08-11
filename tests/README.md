@@ -1,6 +1,6 @@
-# CV2WEB Tests
+# RESUME2WEBSITE Tests
 
-This directory contains test files for the CV2WEB application.
+This directory contains test files for the RESUME2WEBSITE application.
 
 ## Test Categories
 

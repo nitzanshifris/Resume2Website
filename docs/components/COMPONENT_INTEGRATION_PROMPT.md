@@ -89,7 +89,7 @@ Output:
 - Organized component files with descriptive names
 - Visual gallery at `/components-gallery`
 - Each variant accessible and previewable
-- Ready for integration into CV2WEB project
+- Ready for integration into RESUME2WEBSITE project
 
 ## STYLING GUIDELINES
 - Use Tailwind CSS classes

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class KeychainManager:
     """Manage credentials securely using macOS Keychain"""
     
-    SERVICE_NAME = "cv2web"
+    SERVICE_NAME = "resume2website"
     
     @staticmethod
     def get_credential(key_name: str) -> str:
@@ -182,7 +182,7 @@ def get_pinecone_credentials() -> dict:
 
 # Setup script to help users store credentials
 if __name__ == "__main__":
-    print("CV2WEB Keychain Setup")
+    print("RESUME2WEBSITE Keychain Setup")
     print("=" * 50)
     print("This will help you store credentials securely in macOS Keychain")
     print()

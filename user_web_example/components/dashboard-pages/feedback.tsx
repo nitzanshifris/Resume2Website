@@ -52,7 +52,7 @@ export default function Feedback({ userName = "Alex" }: FeedbackProps) {
     {
       id: "1",
       type: "bot",
-      content: "Hi there! 👋 I'm here to help you share feedback about your experience with CV2Web. What would you like to tell us?",
+      content: "Hi there! 👋 I'm here to help you share feedback about your experience with Resume2Website. What would you like to tell us?",
       timestamp: new Date()
     }
   ])
@@ -126,7 +126,7 @@ export default function Feedback({ userName = "Alex" }: FeedbackProps) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Feedback</h1>
-            <p className="text-gray-600">Help us improve CV2Web with your thoughts and suggestions</p>
+            <p className="text-gray-600">Help us improve Resume2Website with your thoughts and suggestions</p>
           </div>
         </div>
       </motion.div>
@@ -139,7 +139,7 @@ export default function Feedback({ userName = "Alex" }: FeedbackProps) {
       >
         <Card className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Feedback</h2>
-          <p className="text-gray-600 mb-6">How was your experience with CV2Web?</p>
+          <p className="text-gray-600 mb-6">How was your experience with Resume2Website?</p>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {quickFeedbackOptions.map((option) => {

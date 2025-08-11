@@ -50,7 +50,7 @@ Storage.get_upload_path("file.pdf")
 # In storage.py, switch from LocalStorage to S3Storage
 
 # 2. Set environment variables in K8s:
-kubectl create configmap cv2web-config --from-env-file=.env
+kubectl create configmap resume2website-config --from-env-file=.env
 
 # 3. Mount volumes for persistent data:
 # Only needed for database if using SQLite

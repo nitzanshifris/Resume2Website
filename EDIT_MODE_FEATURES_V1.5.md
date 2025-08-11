@@ -1,4 +1,4 @@
-# CV2WEB v1.5 Template - Edit Mode Features Specification
+# RESUME2WEBSITE v1.5 Template - Edit Mode Features Specification
 
 ## **Core Edit Mode Controls**
 - ✅ **Edit Mode Toggle Button**: Floating button to enable/disable edit mode

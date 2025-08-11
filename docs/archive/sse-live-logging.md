@@ -1,8 +1,8 @@
-# 🚀 CV2WEB Enhanced System - User Guide
+# 🚀 RESUME2WEBSITE Enhanced System - User Guide
 
 ## What We Built For You
 
-We've upgraded CV2WEB with a **real-time streaming system** that provides live updates as CVs are processed. Think of it like watching a YouTube video upload - you see the progress in real-time!
+We've upgraded RESUME2WEBSITE with a **real-time streaming system** that provides live updates as CVs are processed. Think of it like watching a YouTube video upload - you see the progress in real-time!
 
 ## 🎯 Key Features
 

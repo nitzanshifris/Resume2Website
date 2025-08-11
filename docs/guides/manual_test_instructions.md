@@ -3,16 +3,16 @@
 ## Step 1: Start the API Server
 Open a new terminal and run:
 ```bash
-cd /Users/nitzan_shifris/Desktop/CV2WEB-V4
+cd /Users/nitzan_shifris/Desktop/RESUME2WEBSITE-V4
 python3 main.py
 ```
 
-Wait until you see: "Starting CV2WEB API on 127.0.0.1:2000"
+Wait until you see: "Starting RESUME2WEBSITE API on 127.0.0.1:2000"
 
 ## Step 2: Run the Test Script
 In another terminal, run:
 ```bash
-cd /Users/nitzan_shifris/Desktop/CV2WEB-V4
+cd /Users/nitzan_shifris/Desktop/RESUME2WEBSITE-V4
 python3 test_pdf_to_portfolio.py
 ```
 
@@ -20,7 +20,7 @@ python3 test_pdf_to_portfolio.py
 After the script completes successfully, it will show you commands like:
 
 ```bash
-cd /Users/nitzan_shifris/Desktop/CV2WEB-V4/portfolio_output
+cd /Users/nitzan_shifris/Desktop/RESUME2WEBSITE-V4/portfolio_output
 npm install
 npm run dev
 ```

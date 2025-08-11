@@ -17,7 +17,7 @@
 
 ## 🚀 Introduction
 
-Aceternity is a comprehensive React/Next.js component library designed specifically for CV2WEB-V3 application. It contains 70+ beautifully animated UI components that automatically transform CV/resume data into stunning web presentations.
+Aceternity is a comprehensive React/Next.js component library designed specifically for RESUME2WEBSITE-V3 application. It contains 70+ beautifully animated UI components that automatically transform CV/resume data into stunning web presentations.
 
 ### Key Features
 - 🎨 **70+ Animated Components** - Pre-built, production-ready UI components
@@ -549,4 +549,4 @@ We welcome contributions! Please see our contributing guidelines for more inform
 
 ---
 
-Built with ❤️ by the CV2WEB team
+Built with ❤️ by the RESUME2WEBSITE team

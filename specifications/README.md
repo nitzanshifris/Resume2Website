@@ -1,10 +1,10 @@
-# CV2WEB Specifications
+# RESUME2WEBSITE Specifications
 
 > "The new scarce skill is writing specifications that fully capture intent and values" - Sean, OpenAI
 
 ## What This Is
 
-Following Sean's "specifications as code" methodology, this directory contains the **primary artifacts** that define CV2WEB's intentions, values, and behavior. The code is a secondary downstream artifact of these specifications.
+Following Sean's "specifications as code" methodology, this directory contains the **primary artifacts** that define RESUME2WEBSITE's intentions, values, and behavior. The code is a secondary downstream artifact of these specifications.
 
 ## Core Principle
 

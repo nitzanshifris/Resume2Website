@@ -12,7 +12,7 @@ specifications:
     required_by: [UI01, UI02, UI03, UI04, UI05, UI06, UI07, CV02, PQ01, UX01, SC01]
     
     description: |
-      CV2WEB prioritizes genuine value for job seekers above all else. 
+      RESUME2WEBSITE prioritizes genuine value for job seekers above all else. 
       Every feature, every optimization, every decision must demonstrably 
       improve a candidate's chances of getting hired.
       
@@ -191,7 +191,7 @@ specifications:
     required_by: [UI09, PQ03, UX08, UX15, CV07]
     
     description: |
-      Job seeking is stressful enough. CV2WEB should work for everyone 
+      Job seeking is stressful enough. RESUME2WEBSITE should work for everyone 
       regardless of CV format, language proficiency, career stage, or 
       technical skill level.
       

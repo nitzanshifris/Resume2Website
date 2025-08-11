@@ -1,12 +1,12 @@
-# CV2WEB Payment System Future Tasks - Product Requirements Document
+# RESUME2WEBSITE Payment System Future Tasks - Product Requirements Document
 
 ## Executive Summary
 
-This PRD outlines the future development tasks for enhancing the CV2WEB payment system after the initial MVP launch. These features will expand the monetization capabilities, improve user experience, and provide additional value through hosting, branding, and refund mechanisms.
+This PRD outlines the future development tasks for enhancing the RESUME2WEBSITE payment system after the initial MVP launch. These features will expand the monetization capabilities, improve user experience, and provide additional value through hosting, branding, and refund mechanisms.
 
 ## Background & Context
 
-The CV2WEB platform currently offers two main products:
+The RESUME2WEBSITE platform currently offers two main products:
 1. **Go Live Pack ($97)** - One-time website generation with custom domain and 6 months free hosting
 2. **Get Hired Pack ($67)** - Up to 3 portfolio generations with refund if not hired
 
@@ -301,4 +301,4 @@ GET    /api/v1/hosting/invoice         - Get latest invoice
 
 *Created: 2025-01-17*
 *Status: Planning*
-*Owner: CV2WEB Development Team*
+*Owner: RESUME2WEBSITE Development Team*

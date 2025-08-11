@@ -196,7 +196,7 @@ async def main():
     """Run all tests"""
     
     print(f"{BOLD}{'='*60}{RESET}")
-    print(f"{BOLD}CV2WEB ENHANCED SYSTEM - REAL TESTING{RESET}")
+    print(f"{BOLD}RESUME2WEBSITE ENHANCED SYSTEM - REAL TESTING{RESET}")
     print(f"{BOLD}{'='*60}{RESET}")
     
     print("\nThis will test the REAL CV processing with our enhanced tracking system.")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Full CV2WEB Pipeline
+Test Full RESUME2WEBSITE Pipeline
 Tests the complete automatic processing pipeline
 """
 import asyncio
@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../apps/backend'))
 
 async def test_full_pipeline():
     """Test the complete pipeline"""
-    print("🧪 Testing Full CV2WEB Pipeline")
+    print("🧪 Testing Full RESUME2WEBSITE Pipeline")
     print("=" * 50)
     
     try:

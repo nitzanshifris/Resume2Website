@@ -144,7 +144,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
       setIsLoadingPortfolios(true)
       setPortfolioError(null)
       
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       if (!sessionId) {
         console.log('No session ID found, user needs to login')
         setPortfolios([])
@@ -195,7 +195,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
     try {
       setIsRestartingServer(true)
       
-      const sessionId = localStorage.getItem('cv2web_session_id') || 'dev-session'
+      const sessionId = localStorage.getItem('resume2website_session_id') || 'dev-session'
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/portfolio/${selectedPortfolio.portfolio_id}/restart`, {
         method: 'POST',
         headers: {
@@ -250,7 +250,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
   // Load CV data for the selected portfolio
   const loadPortfolioCVData = async (portfolioId: string) => {
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id') || 'dev-session'
+      const sessionId = localStorage.getItem('resume2website_session_id') || 'dev-session'
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/portfolio/${portfolioId}/cv-data`,
         {
@@ -285,7 +285,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
       // The currentCVData is already updated through the individual field onChange handlers
       // So we just need to send it to the API
       
-      const sessionId = localStorage.getItem('cv2web_session_id') || 'dev-session'
+      const sessionId = localStorage.getItem('resume2website_session_id') || 'dev-session'
       // Update the CV data for the job associated with this portfolio
       const jobId = selectedPortfolio.job_id
       const response = await fetch(

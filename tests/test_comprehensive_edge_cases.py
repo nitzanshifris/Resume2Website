@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive edge case tests for CV2WEB MVP
+Comprehensive edge case tests for RESUME2WEBSITE MVP
 Tests all components with various problematic inputs
 """
 import asyncio
@@ -311,7 +311,7 @@ async def test_timeout_handling():
 
 async def main():
     """Run all edge case tests"""
-    print("🔍 CV2WEB Comprehensive Edge Case Testing")
+    print("🔍 RESUME2WEBSITE Comprehensive Edge Case Testing")
     print("=" * 80)
     
     all_results = {}

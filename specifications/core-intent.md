@@ -1,15 +1,15 @@
-# CV2WEB Core Intent Specification
+# RESUME2WEBSITE Core Intent Specification
 
 *Version 1.0 - Living document that defines our fundamental values and intentions*
 
 ## Mission Statement
 
-**CV2WEB exists to eliminate the "no" pile - transforming every job seeker's CV into a compelling portfolio that gets noticed.**
+**RESUME2WEBSITE exists to eliminate the "no" pile - transforming every job seeker's CV into a compelling portfolio that gets noticed.**
 
 ## Core Values
 
 ### CI01: User-Centric Value Creation
-CV2WEB prioritizes genuine value for job seekers above all else. Every feature, every optimization, every decision must demonstrably improve a candidate's chances of getting hired.
+RESUME2WEBSITE prioritizes genuine value for job seekers above all else. Every feature, every optimization, every decision must demonstrably improve a candidate's chances of getting hired.
 
 ### CI02: Preserve Human Intent  
 We extract and present information exactly as the user intended. Never paraphrase, rewrite, or "improve" the user's language. Their words carry their personality and should be preserved authentically.
@@ -18,7 +18,7 @@ We extract and present information exactly as the user intended. Never paraphras
 A portfolio that accurately represents the candidate is more valuable than a fast but inaccurate one. We optimize for correctness first, performance second.
 
 ### CI04: Accessibility and Inclusion
-Job seeking is stressful enough. CV2WEB should work for everyone regardless of CV format, language proficiency, career stage, or technical skill level.
+Job seeking is stressful enough. RESUME2WEBSITE should work for everyone regardless of CV format, language proficiency, career stage, or technical skill level.
 
 ### CI05: Transparency and Trust
 Users should always understand what's happening with their data. Progress should be clear, failures should be explained, and success should be measurable.
@@ -46,7 +46,7 @@ Success is measured by user outcomes, not technical metrics:
 Each interaction should improve the system for all users. Better extraction leads to better portfolios. Better portfolios create better feedback loops.
 
 ### CI08: Sustainable Growth
-Growth through user value, not manipulation. Users should recommend CV2WEB because it genuinely helped them, not because of dark patterns or artificial incentives.
+Growth through user value, not manipulation. Users should recommend RESUME2WEBSITE because it genuinely helped them, not because of dark patterns or artificial incentives.
 
 ## Quality Standards
 
@@ -71,7 +71,7 @@ Growth through user value, not manipulation. Users should recommend CV2WEB becau
 ## Constraints and Boundaries
 
 ### CI12: Privacy Protection
-User data is sacred. It belongs to the user, not to CV2WEB. Data processing is for the user's direct benefit only, never for secondary purposes without explicit consent.
+User data is sacred. It belongs to the user, not to RESUME2WEBSITE. Data processing is for the user's direct benefit only, never for secondary purposes without explicit consent.
 
 ### CI13: Professional Standards
 All generated portfolios must meet professional presentation standards suitable for corporate environments, while allowing personality to show through authentic content.

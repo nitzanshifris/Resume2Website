@@ -1,4 +1,4 @@
-# CV2WEB Current Pipeline - Updated January 2025
+# RESUME2WEBSITE Current Pipeline - Updated January 2025
 
 ```mermaid
 graph TD

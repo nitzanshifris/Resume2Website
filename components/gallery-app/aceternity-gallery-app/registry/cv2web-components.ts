@@ -1,7 +1,7 @@
-// CV2WEB Component Registry
-// Maps CV2WEB component needs to Aceternity components
+// RESUME2WEBSITE Component Registry
+// Maps RESUME2WEBSITE component needs to Aceternity components
 
-export const CV2WEB_COMPONENTS = {
+export const RESUME2WEBSITE_COMPONENTS = {
   // Hero sections - always used
   'hero-parallax': {
     path: 'components/core/hero-parallax',
@@ -98,14 +98,14 @@ export const CV2WEB_COMPONENTS = {
   }
 } as const;
 
-export type CV2WebComponentKey = keyof typeof CV2WEB_COMPONENTS;
+export type Resume2WebsiteComponentKey = keyof typeof RESUME2WEBSITE_COMPONENTS;
 
 // Get all dependencies for a set of components
-export function getComponentDependencies(componentKeys: CV2WebComponentKey[]): string[] {
+export function getComponentDependencies(componentKeys: Resume2WebsiteComponentKey[]): string[] {
   const allDeps = new Set<string>();
   
   componentKeys.forEach(key => {
-    const component = CV2WEB_COMPONENTS[key];
+    const component = RESUME2WEBSITE_COMPONENTS[key];
     component.dependencies.forEach(dep => allDeps.add(dep));
     component.externalDeps.forEach(dep => allDeps.add(dep));
   });
@@ -114,13 +114,13 @@ export function getComponentDependencies(componentKeys: CV2WebComponentKey[]): s
 }
 
 // Get components by usage frequency
-export function getComponentsByFrequency(frequency: 'always' | 'common' | 'occasional'): CV2WebComponentKey[] {
-  return Object.keys(CV2WEB_COMPONENTS).filter(
-    key => CV2WEB_COMPONENTS[key as CV2WebComponentKey].usageFrequency === frequency
-  ) as CV2WebComponentKey[];
+export function getComponentsByFrequency(frequency: 'always' | 'common' | 'occasional'): Resume2WebsiteComponentKey[] {
+  return Object.keys(RESUME2WEBSITE_COMPONENTS).filter(
+    key => RESUME2WEBSITE_COMPONENTS[key as Resume2WebsiteComponentKey].usageFrequency === frequency
+  ) as Resume2WebsiteComponentKey[];
 }
 
-// Core components that should be included in every CV2WEB bundle
+// Core components that should be included in every RESUME2WEBSITE bundle
 export const ALWAYS_INCLUDED = getComponentsByFrequency('always');
 export const COMMONLY_INCLUDED = getComponentsByFrequency('common');
 export const OCCASIONALLY_INCLUDED = getComponentsByFrequency('occasional');

@@ -1,7 +1,7 @@
 # Portfolio Generation Comparison
 
 ## Overview
-This document compares the responsibilities and features of different portfolio generation implementations in CV2WEB.
+This document compares the responsibilities and features of different portfolio generation implementations in RESUME2WEBSITE.
 
 ## Comparison Table
 

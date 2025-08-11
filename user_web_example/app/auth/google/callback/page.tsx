@@ -22,7 +22,7 @@ function GoogleCallbackContent() {
           return;
         }
 
-        if (!code || state !== 'cv2web_google_auth') {
+        if (!code || state !== 'resume2website_google_auth') {
           setStatus('error');
           setMessage('Invalid authentication response.');
           return;
@@ -46,10 +46,10 @@ function GoogleCallbackContent() {
         if (response.ok) {
           // Store session data
           if (data.session_id) {
-            localStorage.setItem('cv2web_session_id', data.session_id);
+            localStorage.setItem('resume2website_session_id', data.session_id);
           }
           if (data.user) {
-            localStorage.setItem('cv2web_user', JSON.stringify(data.user));
+            localStorage.setItem('resume2website_user', JSON.stringify(data.user));
           }
 
           setStatus('success');
@@ -57,7 +57,7 @@ function GoogleCallbackContent() {
           
           // Trigger storage change event for other tabs/contexts
           window.dispatchEvent(new StorageEvent('storage', {
-            key: 'cv2web_session_id',
+            key: 'resume2website_session_id',
             newValue: data.session_id
           }));
           

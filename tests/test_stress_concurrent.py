@@ -209,7 +209,7 @@ async def test_rate_limiting():
 
 async def main():
     """Run all stress tests"""
-    print("🚀 CV2WEB Stress Testing Suite")
+    print("🚀 RESUME2WEBSITE Stress Testing Suite")
     print("=" * 80)
     
     # Test 1: Concurrent uploads

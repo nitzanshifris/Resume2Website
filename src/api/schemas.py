@@ -1,7 +1,7 @@
 """
 Pydantic schemas for request/response validation.
 
-This module defines all request and response models for the CV2WEB API.
+This module defines all request and response models for the RESUME2WEBSITE API.
 """
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Dict, Any

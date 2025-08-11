@@ -1,10 +1,10 @@
-# CV2WEB V4 - Claude Code Development Guide
+# RESUME2WEBSITE V4 - Claude Code Development Guide
 
 ## Project Overview
 
-CV2WEB is an AI-powered CV to portfolio website converter that transforms resumes into stunning portfolio websites using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo.
+RESUME2WEBSITE is an AI-powered CV to portfolio website converter that transforms resumes into stunning portfolio websites using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo.
 
-### What CV2WEB Does
+### What RESUME2WEBSITE Does
 - **Extracts** CV data using Claude 4 Opus for maximum determinism (temperature 0.0)
 - **Supports** multiple file uploads including PNG/JPEG images processed together
 - **Generates** beautiful portfolio websites with 100+ animated components in isolated sandbox environments
@@ -47,7 +47,7 @@ git                    # Version control
 ### One-Command Setup
 ```bash
 # Clone and setup everything
-git clone <repo-url> && cd CV2WEB-V4
+git clone <repo-url> && cd RESUME2WEBSITE-V4
 ./quickstart.sh
 
 # This script will:
@@ -121,7 +121,7 @@ gh pr create --title "feat: description" --body "Closes #123"
 
 ### Project Structure
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── src/                    # Backend (FastAPI)
 │   ├── api/               # API routes and endpoints
 │   │   └── routes/        # Individual route modules
@@ -285,7 +285,7 @@ User: "Add dark mode to the app"
 Claude: [Automatically creates PRD → generates tasks → analyzes → starts implementation]
 ```
 
-### CV2WEB Specific TaskMaster Usage
+### RESUME2WEBSITE Specific TaskMaster Usage
 - **CV Extraction**: `create tasks for improving CV extraction with Claude 4 Opus`
 - **UI Components**: `break down portfolio templates focusing on Aceternity components`
 - **API Features**: `create tasks for new FastAPI endpoint with authentication`
@@ -296,7 +296,7 @@ Claude: [Automatically creates PRD → generates tasks → analyzes → starts i
 ### What is Magic MCP?
 Magic Component Platform (MCP) is an AI-powered tool that generates beautiful UI components through natural language descriptions. It integrates with Cursor IDE and creates production-ready React/TypeScript components.
 
-### Setup for CV2WEB Development
+### Setup for RESUME2WEBSITE Development
 1. **Install in Cursor**:
    ```bash
    # Get API key from https://21st.dev
@@ -311,11 +311,11 @@ Magic Component Platform (MCP) is an AI-powered tool that generates beautiful UI
    /ui create a timeline component for work experience
    ```
 
-### Benefits for CV2WEB
+### Benefits for RESUME2WEBSITE
 - **Rapid Prototyping**: Generate portfolio components instantly
 - **Modern Design**: Access to 21st.dev's component library
 - **TypeScript Ready**: All components are fully typed
-- **Customizable**: Generated components can be modified to match CV2WEB's design system
+- **Customizable**: Generated components can be modified to match RESUME2WEBSITE's design system
 
 ### Example Use Cases
 ```bash
@@ -334,7 +334,7 @@ Magic Component Platform (MCP) is an AI-powered tool that generates beautiful UI
 1. Use `/ui` in Cursor to generate component
 2. Review and customize the generated code
 3. Move component to appropriate directory (`components/` or `src/templates/`)
-4. Integrate with CV2WEB's data structures
+4. Integrate with RESUME2WEBSITE's data structures
 5. Apply consistent styling with Tailwind CSS
 
 ## 🛠️ Common Development Tasks
@@ -505,7 +505,7 @@ curl -X POST http://localhost:2000/api/v1/portfolio-expert/start-session \
   -d '{"cv_data": null}'
 
 # View logs
-docker logs cv2web-backend -f        # Backend logs
+docker logs resume2website-backend -f        # Backend logs
 pnpm run dev --verbose               # Frontend verbose logs
 
 # Database issues
@@ -721,7 +721,7 @@ To ensure security and prevent direct code pollution, ALL portfolio generation M
 
 ```bash
 # Sandbox directory structure
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── sandboxes/              # Isolated environment for code generation
 │   ├── .gitignore          # Ignore all sandbox contents
 │   └── portfolios/         # Generated portfolio sandboxes
@@ -992,7 +992,7 @@ POST /api/v1/payments/refund
 ### Pricing Tiers & Features
 | Plan | Price | Features | Limitations |
 |------|-------|----------|-------------|
-| **Go Live** | $14.90 | • Professional portfolio<br>• Mobile responsive<br>• SEO optimized<br>• Direct deploy<br>• 1 generation | • CV2WEB branding included<br>• Limited customization |
+| **Go Live** | $14.90 | • Professional portfolio<br>• Mobile responsive<br>• SEO optimized<br>• Direct deploy<br>• 1 generation | • RESUME2WEBSITE branding included<br>• Limited customization |
 | **Get Hired** | $19.90 | • Premium portfolio<br>• No watermarks<br>• Full customization<br>• 3 generations<br>• Multiple templates<br>• 1 month free hosting | • Then $7.90/month hosting<br>• Refund if unsatisfied |
 | **Turn Heads** | $89.90 | • Custom design by experts<br>• Recruiter optimization<br>• Unlimited revisions<br>• Priority support<br>• 1 year free hosting | • Then $7.90/year hosting |
 
@@ -1075,7 +1075,7 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **🌿 Branch Management**: All changes in cv.py-improvements branch for safe review
 
 ### Comprehensive Codebase Analysis & Major Cleanup (2025-08-05)
-- **🔍 Complete System Analysis**: Systematic analysis of entire CV2WEB-V4 codebase folder by folder
+- **🔍 Complete System Analysis**: Systematic analysis of entire RESUME2WEBSITE-V4 codebase folder by folder
 - **📚 Documentation Overhaul**: Updated all docs to reflect Claude 4 Opus as ONLY AI model, removed outdated Gemini references
 - **🗂️ Archive Management**: Moved historical files to archive-only-2025-08-05 branch (TaskMaster logs, archived API routes)
 - **🧹 Space Optimization**: Freed over 167GB total storage:

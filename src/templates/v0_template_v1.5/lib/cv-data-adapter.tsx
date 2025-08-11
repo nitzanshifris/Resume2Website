@@ -1,5 +1,5 @@
 /**
- * CV Data Adapter - Maps CV2WEB CV Editor data to v0_template_1 format
+ * CV Data Adapter - Maps RESUME2WEBSITE CV Editor data to v0_template_1 format
  * 
  * This adapter transforms the CV data from our extraction system 
  * to the format expected by the v0_template_1 portfolio template.
@@ -7,80 +7,80 @@
 
 import type { PortfolioData, HeroData, ContactData, ContactLink } from './data'
 
-// ===== CV2WEB TYPES (matching our backend schema) =====
+// ===== RESUME2WEBSITE TYPES (matching our backend schema) =====
 
-interface CV2WebLocation {
+interface Resume2WebsiteLocation {
   city?: string | null
   state?: string | null  
   country?: string | null
 }
 
-interface CV2WebProfessionalLink {
+interface Resume2WebsiteProfessionalLink {
   platform?: string | null
   url?: string | null
 }
 
-interface CV2WebDateRange {
+interface Resume2WebsiteDateRange {
   startDate?: string | null
   endDate?: string | null
   isCurrent?: boolean | null
 }
 
-interface CV2WebHero {
+interface Resume2WebsiteHero {
   fullName?: string | null
   professionalTitle?: string | null
   summaryTagline?: string | null
   profilePhotoUrl?: string | null
 }
 
-interface CV2WebContact {
+interface Resume2WebsiteContact {
   email?: string | null
   phone?: string | null
-  location?: CV2WebLocation | null
-  professionalLinks?: CV2WebProfessionalLink[] | null
+  location?: Resume2WebsiteLocation | null
+  professionalLinks?: Resume2WebsiteProfessionalLink[] | null
   availability?: string | null
 }
 
-interface CV2WebSummary {
+interface Resume2WebsiteSummary {
   summaryText?: string | null
   yearsOfExperience?: number | null
   keySpecializations?: string[] | null
   careerHighlights?: string[] | null
 }
 
-interface CV2WebExperienceItem {
+interface Resume2WebsiteExperienceItem {
   jobTitle?: string | null
   companyName?: string | null
-  location?: CV2WebLocation | null
-  dateRange?: CV2WebDateRange | null
+  location?: Resume2WebsiteLocation | null
+  dateRange?: Resume2WebsiteDateRange | null
   responsibilitiesAndAchievements?: string[] | null
   technologiesUsed?: string[] | null
   summary?: string | null
 }
 
-interface CV2WebEducationItem {
+interface Resume2WebsiteEducationItem {
   degree?: string | null
   fieldOfStudy?: string | null
   institution?: string | null
-  location?: CV2WebLocation | null
-  dateRange?: CV2WebDateRange | null
+  location?: Resume2WebsiteLocation | null
+  dateRange?: Resume2WebsiteDateRange | null
   gpa?: string | null
   honors?: string[] | null
   relevantCoursework?: string[] | null
 }
 
-interface CV2WebSkillCategory {
+interface Resume2WebsiteSkillCategory {
   categoryName?: string | null
   skills?: string[] | null
 }
 
-interface CV2WebSkills {
+interface Resume2WebsiteSkills {
   sectionTitle?: string | null
-  skillCategories?: CV2WebSkillCategory[] | null
+  skillCategories?: Resume2WebsiteSkillCategory[] | null
   ungroupedSkills?: string[] | null
 }
 
-interface CV2WebProjectItem {
+interface Resume2WebsiteProjectItem {
   title?: string | null
   description?: string | null
   technologiesUsed?: string[] | null
@@ -91,13 +91,13 @@ interface CV2WebProjectItem {
   videoUrl?: string | null
 }
 
-interface CV2WebLanguageItem {
+interface Resume2WebsiteLanguageItem {
   language?: string | null
   proficiency?: string | null
   certification?: string | null
 }
 
-interface CV2WebCertificationItem {
+interface Resume2WebsiteCertificationItem {
   title?: string | null
   issuingOrganization?: string | null
   issueDate?: string | null
@@ -106,27 +106,27 @@ interface CV2WebCertificationItem {
   verificationUrl?: string | null
 }
 
-interface CV2WebAchievementItem {
+interface Resume2WebsiteAchievementItem {
   value?: string | null
   label?: string | null
   contextOrDetail?: string | null
   timeframe?: string | null
 }
 
-interface CV2WebVolunteerItem {
+interface Resume2WebsiteVolunteerItem {
   role?: string | null
   organization?: string | null
-  dateRange?: CV2WebDateRange | null
+  dateRange?: Resume2WebsiteDateRange | null
   description?: string | null
 }
 
-interface CV2WebCourseItem {
+interface Resume2WebsiteCourseItem {
   title?: string | null
   institution?: string | null
   completionDate?: string | null
 }
 
-interface CV2WebPublicationItem {
+interface Resume2WebsitePublicationItem {
   title?: string | null
   publicationType?: string | null
   publicationVenue?: string | null
@@ -134,7 +134,7 @@ interface CV2WebPublicationItem {
   url?: string | null
 }
 
-interface CV2WebSpeakingItem {
+interface Resume2WebsiteSpeakingItem {
   eventName?: string | null
   topic?: string | null
   date?: string | null
@@ -143,62 +143,62 @@ interface CV2WebSpeakingItem {
   audienceSize?: number | null
 }
 
-interface CV2WebMembershipItem {
+interface Resume2WebsiteMembershipItem {
   organization?: string | null
   role?: string | null
   membershipType?: string | null
-  dateRange?: CV2WebDateRange | null
+  dateRange?: Resume2WebsiteDateRange | null
 }
 
 // Main CV Data Interface (from our extraction system)
-interface CV2WebData {
-  hero?: CV2WebHero | null
-  contact?: CV2WebContact | null
-  summary?: CV2WebSummary | null
+interface Resume2WebsiteData {
+  hero?: Resume2WebsiteHero | null
+  contact?: Resume2WebsiteContact | null
+  summary?: Resume2WebsiteSummary | null
   experience?: {
     sectionTitle?: string | null
-    experienceItems?: CV2WebExperienceItem[] | null
+    experienceItems?: Resume2WebsiteExperienceItem[] | null
   } | null
   education?: {
     sectionTitle?: string | null
-    educationItems?: CV2WebEducationItem[] | null
+    educationItems?: Resume2WebsiteEducationItem[] | null
   } | null
-  skills?: CV2WebSkills | null
+  skills?: Resume2WebsiteSkills | null
   projects?: {
     sectionTitle?: string | null
-    projectItems?: CV2WebProjectItem[] | null
+    projectItems?: Resume2WebsiteProjectItem[] | null
   } | null
   languages?: {
     sectionTitle?: string | null
-    languageItems?: CV2WebLanguageItem[] | null
+    languageItems?: Resume2WebsiteLanguageItem[] | null
   } | null
   certifications?: {
     sectionTitle?: string | null
-    certificationItems?: CV2WebCertificationItem[] | null
+    certificationItems?: Resume2WebsiteCertificationItem[] | null
   } | null
   achievements?: {
     sectionTitle?: string | null
-    achievements?: CV2WebAchievementItem[] | null
+    achievements?: Resume2WebsiteAchievementItem[] | null
   } | null
   volunteer?: {
     sectionTitle?: string | null
-    volunteerItems?: CV2WebVolunteerItem[] | null
+    volunteerItems?: Resume2WebsiteVolunteerItem[] | null
   } | null
   courses?: {
     sectionTitle?: string | null
-    courseItems?: CV2WebCourseItem[] | null
+    courseItems?: Resume2WebsiteCourseItem[] | null
   } | null
   publications?: {
     sectionTitle?: string | null
-    publications?: CV2WebPublicationItem[] | null
+    publications?: Resume2WebsitePublicationItem[] | null
   } | null
   speaking?: {
     sectionTitle?: string | null
-    speakingEngagements?: CV2WebSpeakingItem[] | null
+    speakingEngagements?: Resume2WebsiteSpeakingItem[] | null
   } | null
   memberships?: {
     sectionTitle?: string | null
-    memberships?: CV2WebMembershipItem[] | null
+    memberships?: Resume2WebsiteMembershipItem[] | null
   } | null
   hobbies?: {
     sectionTitle?: string | null
@@ -208,21 +208,21 @@ interface CV2WebData {
 
 // ===== ADAPTER FUNCTIONS =====
 
-function adaptHero(cv2webHero?: CV2WebHero | null): HeroData {
+function adaptHero(resume2websiteHero?: Resume2WebsiteHero | null): HeroData {
   return {
-    fullName: cv2webHero?.fullName || "Portfolio Owner",
-    professionalTitle: cv2webHero?.professionalTitle || "Professional",
-    summaryTagline: cv2webHero?.summaryTagline || "Creating amazing experiences",
-    profilePhotoUrl: cv2webHero?.profilePhotoUrl || null
+    fullName: resume2websiteHero?.fullName || "Portfolio Owner",
+    professionalTitle: resume2websiteHero?.professionalTitle || "Professional",
+    summaryTagline: resume2websiteHero?.summaryTagline || "Creating amazing experiences",
+    profilePhotoUrl: resume2websiteHero?.profilePhotoUrl || null
   }
 }
 
-function adaptContact(cv2webContact?: CV2WebContact | null): ContactData {
+function adaptContact(resume2websiteContact?: Resume2WebsiteContact | null): ContactData {
   // Map professional links to template format
   const professionalLinks: ContactLink[] = []
   
-  if (cv2webContact?.professionalLinks) {
-    for (const link of cv2webContact.professionalLinks) {
+  if (resume2websiteContact?.professionalLinks) {
+    for (const link of resume2websiteContact.professionalLinks) {
       if (link?.platform && link?.url) {
         // Map platform names to template format
         const platformMap: Record<string, keyof typeof import('./data').socialIconMap> = {
@@ -243,19 +243,19 @@ function adaptContact(cv2webContact?: CV2WebContact | null): ContactData {
   }
 
   return {
-    email: cv2webContact?.email || "",
-    phone: cv2webContact?.phone || "",
+    email: resume2websiteContact?.email || "",
+    phone: resume2websiteContact?.phone || "",
     location: {
-      city: cv2webContact?.location?.city || "",
-      country: cv2webContact?.location?.country || ""
+      city: resume2websiteContact?.location?.city || "",
+      country: resume2websiteContact?.location?.country || ""
     },
     professionalLinks,
-    availability: cv2webContact?.availability || "Available for new opportunities",
+    availability: resume2websiteContact?.availability || "Available for new opportunities",
     copyright: `© ${new Date().getFullYear()} Portfolio. All Rights Reserved.`
   }
 }
 
-function formatDateRange(dateRange?: CV2WebDateRange | null): string {
+function formatDateRange(dateRange?: Resume2WebsiteDateRange | null): string {
   if (!dateRange) return ""
   
   const start = dateRange.startDate || ""
@@ -379,21 +379,21 @@ function determineViewMode(item: {
 }
 
 /**
- * Main adapter function - converts CV2WEB data to template format
+ * Main adapter function - converts RESUME2WEBSITE data to template format
  */
-export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
+export function adaptResume2WebsiteToTemplate(resume2websiteData: Resume2WebsiteData): PortfolioData {
   return {
-    hero: adaptHero(cv2webData.hero),
-    contact: adaptContact(cv2webData.contact),
+    hero: adaptHero(resume2websiteData.hero),
+    contact: adaptContact(resume2websiteData.contact),
     
     summary: {
-      sectionTitle: cv2webData.summary?.summaryText ? "Professional Summary" : "About Me",
-      summaryText: cv2webData.summary?.summaryText || "Passionate professional dedicated to excellence and innovation."
+      sectionTitle: resume2websiteData.summary?.summaryText ? "Professional Summary" : "About Me",
+      summaryText: resume2websiteData.summary?.summaryText || "Passionate professional dedicated to excellence and innovation."
     },
 
     experience: {
-      sectionTitle: cv2webData.experience?.sectionTitle || "Experience",
-      experienceItems: (cv2webData.experience?.experienceItems || []).map(item => ({
+      sectionTitle: resume2websiteData.experience?.sectionTitle || "Experience",
+      experienceItems: (resume2websiteData.experience?.experienceItems || []).map(item => ({
         title: item?.jobTitle || "Professional Role",
         company: item?.companyName || "Company",
         location: `${item?.location?.city || ""} ${item?.location?.country || ""}`.trim() || "Location",
@@ -404,8 +404,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     education: {
-      sectionTitle: cv2webData.education?.sectionTitle || "Education",
-      educationItems: (cv2webData.education?.educationItems || []).map(item => ({
+      sectionTitle: resume2websiteData.education?.sectionTitle || "Education",
+      educationItems: (resume2websiteData.education?.educationItems || []).map(item => ({
         institution: item?.institution || "Educational Institution",
         degree: item?.degree || "Degree",
         years: formatDateRange(item?.dateRange),
@@ -414,8 +414,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     skills: {
-      sectionTitle: cv2webData.skills?.sectionTitle || "Skills",
-      skillCategories: (cv2webData.skills?.skillCategories || []).map(category => ({
+      sectionTitle: resume2websiteData.skills?.sectionTitle || "Skills",
+      skillCategories: (resume2websiteData.skills?.skillCategories || []).map(category => ({
         categoryName: category?.categoryName || "Skills",
         skills: (category?.skills || []).map(skill => {
           // Check if the skill string contains detailed text (e.g., "Python - Expert level with 5+ years experience")
@@ -430,7 +430,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
           return { name: skillStr }
         })
       })),
-      ungroupedSkills: (cv2webData.skills?.ungroupedSkills || []).map(skill => {
+      ungroupedSkills: (resume2websiteData.skills?.ungroupedSkills || []).map(skill => {
         const skillStr = skill || "Skill"
         const dashIndex = skillStr.indexOf(' - ')
         if (dashIndex > -1) {
@@ -444,8 +444,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     projects: {
-      sectionTitle: cv2webData.projects?.sectionTitle || "Projects",
-      projectItems: (cv2webData.projects?.projectItems || []).map((item, index) => {
+      sectionTitle: resume2websiteData.projects?.sectionTitle || "Projects",
+      projectItems: (resume2websiteData.projects?.projectItems || []).map((item, index) => {
         // Determine the best view mode based on available URLs
         const viewModeData = determineViewMode({
           projectUrl: item?.projectUrl,
@@ -475,16 +475,16 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     languages: {
-      sectionTitle: cv2webData.languages?.sectionTitle || "Languages",
-      languageItems: (cv2webData.languages?.languageItems || []).map(item => ({
+      sectionTitle: resume2websiteData.languages?.sectionTitle || "Languages",
+      languageItems: (resume2websiteData.languages?.languageItems || []).map(item => ({
         language: item?.language || "Language",
         proficiency: item?.proficiency || "Proficient"
       }))
     },
 
     certifications: {
-      sectionTitle: cv2webData.certifications?.sectionTitle || "Certifications",
-      certificationItems: (cv2webData.certifications?.certificationItems || []).map((item, index) => ({
+      sectionTitle: resume2websiteData.certifications?.sectionTitle || "Certifications",
+      certificationItems: (resume2websiteData.certifications?.certificationItems || []).map((item, index) => ({
         title: item?.title || "Certification",
         issuingBody: item?.issuingOrganization || "Issuing Body",
         year: item?.issueDate || "",
@@ -496,8 +496,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     achievements: {
-      sectionTitle: cv2webData.achievements?.sectionTitle || "Achievements",
-      achievementItems: (cv2webData.achievements?.achievements || []).map((item, index) => ({
+      sectionTitle: resume2websiteData.achievements?.sectionTitle || "Achievements",
+      achievementItems: (resume2websiteData.achievements?.achievements || []).map((item, index) => ({
         title: item?.label || "Achievement",
         description: `${item?.value || ""} ${item?.contextOrDetail || ""}`.trim() || "Professional achievement.",
         year: item?.timeframe || "",
@@ -508,8 +508,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     volunteer: {
-      sectionTitle: cv2webData.volunteer?.sectionTitle || "Volunteer Experience",
-      volunteerItems: (cv2webData.volunteer?.volunteerItems || []).map((item, index) => ({
+      sectionTitle: resume2websiteData.volunteer?.sectionTitle || "Volunteer Experience",
+      volunteerItems: (resume2websiteData.volunteer?.volunteerItems || []).map((item, index) => ({
         role: item?.role || "Volunteer Role",
         organization: item?.organization || "Organization",
         period: formatDateRange(item?.dateRange),
@@ -521,8 +521,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     courses: {
-      sectionTitle: cv2webData.courses?.sectionTitle || "Courses",
-      courseItems: (cv2webData.courses?.courseItems || []).map((item, index) => ({
+      sectionTitle: resume2websiteData.courses?.sectionTitle || "Courses",
+      courseItems: (resume2websiteData.courses?.courseItems || []).map((item, index) => ({
         title: item?.title || "Course",
         institution: item?.institution || "Institution",
         year: item?.completionDate || "",
@@ -533,8 +533,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     publications: {
-      sectionTitle: cv2webData.publications?.sectionTitle || "Publications",
-      publicationItems: (cv2webData.publications?.publications || []).map((item, index) => {
+      sectionTitle: resume2websiteData.publications?.sectionTitle || "Publications",
+      publicationItems: (resume2websiteData.publications?.publications || []).map((item, index) => {
         // Check if the publication URL is a video or special link
         const hasUrl = item?.url && item.url !== "#"
         let viewMode: string = "text"
@@ -562,8 +562,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     speakingEngagements: {
-      sectionTitle: cv2webData.speaking?.sectionTitle || "Speaking Engagements",
-      engagementItems: (cv2webData.speaking?.speakingEngagements || []).map((item, index) => {
+      sectionTitle: resume2websiteData.speaking?.sectionTitle || "Speaking Engagements",
+      engagementItems: (resume2websiteData.speaking?.speakingEngagements || []).map((item, index) => {
         // Check if venue contains a video URL (sometimes speakers put YouTube links in venue)
         const venueIsVideoUrl = item?.venue && isVideoUrl(item.venue)
         
@@ -581,8 +581,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     memberships: {
-      sectionTitle: cv2webData.memberships?.sectionTitle || "Professional Memberships",
-      membershipItems: (cv2webData.memberships?.memberships || []).map(item => ({
+      sectionTitle: resume2websiteData.memberships?.sectionTitle || "Professional Memberships",
+      membershipItems: (resume2websiteData.memberships?.memberships || []).map(item => ({
         organization: item?.organization || "Organization",
         role: item?.role || "Member",
         period: formatDateRange(item?.dateRange),
@@ -594,8 +594,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     hobbies: {
-      sectionTitle: cv2webData.hobbies?.sectionTitle || "Hobbies & Interests",
-      hobbyItems: (cv2webData.hobbies?.hobbies || []).map((hobby, index) => ({
+      sectionTitle: resume2websiteData.hobbies?.sectionTitle || "Hobbies & Interests",
+      hobbyItems: (resume2websiteData.hobbies?.hobbies || []).map((hobby, index) => ({
         title: hobby || "Interest",
         icon: getRandomIcon(),
         viewMode: "text" as const,
@@ -613,7 +613,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 }
 
 /**
- * Fetches CV data from CV2WEB API and adapts it to template format
+ * Fetches CV data from RESUME2WEBSITE API and adapts it to template format
  */
 export async function fetchAndAdaptCVData(jobId: string, sessionId: string): Promise<PortfolioData> {
   try {
@@ -628,13 +628,13 @@ export async function fetchAndAdaptCVData(jobId: string, sessionId: string): Pro
     }
 
     const data = await response.json()
-    const cv2webData: CV2WebData = data.cv_data
+    const resume2websiteData: Resume2WebsiteData = data.cv_data
 
-    return adaptCV2WebToTemplate(cv2webData)
+    return adaptResume2WebsiteToTemplate(resume2websiteData)
   } catch (error) {
     console.error('Error fetching CV data:', error)
     // Return fallback data if fetch fails
-    return adaptCV2WebToTemplate({})
+    return adaptResume2WebsiteToTemplate({})
   }
 }
 
@@ -691,11 +691,11 @@ export async function fetchLatestCVData(sessionId: string): Promise<PortfolioDat
       throw new Error('No completed CVs found')
     }
 
-    const cv2webData: CV2WebData = JSON.parse(latestCV.cv_data)
-    return adaptCV2WebToTemplate(cv2webData)
+    const resume2websiteData: Resume2WebsiteData = JSON.parse(latestCV.cv_data)
+    return adaptResume2WebsiteToTemplate(resume2websiteData)
   } catch (error) {
     console.error('Error fetching latest CV data:', error)
     // Return fallback data if fetch fails
-    return adaptCV2WebToTemplate({})
+    return adaptResume2WebsiteToTemplate({})
   }
 }

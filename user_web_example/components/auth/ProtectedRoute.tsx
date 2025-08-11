@@ -32,8 +32,8 @@ export default function ProtectedRoute({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const sessionId = localStorage.getItem('cv2web_session_id')
-        const userData = localStorage.getItem('cv2web_user')
+        const sessionId = localStorage.getItem('resume2website_session_id')
+        const userData = localStorage.getItem('resume2website_user')
         
         if (!sessionId || !userData) {
           setAuthState({
@@ -60,8 +60,8 @@ export default function ProtectedRoute({
           })
         } else {
           // Session is invalid, clear it
-          localStorage.removeItem('cv2web_session_id')
-          localStorage.removeItem('cv2web_user')
+          localStorage.removeItem('resume2website_session_id')
+          localStorage.removeItem('resume2website_user')
           setAuthState({
             isAuthenticated: false,
             isLoading: false,
@@ -71,8 +71,8 @@ export default function ProtectedRoute({
       } catch (error) {
         console.error('Authentication check failed:', error)
         // Clear potentially corrupted auth data
-        localStorage.removeItem('cv2web_session_id')
-        localStorage.removeItem('cv2web_user')
+        localStorage.removeItem('resume2website_session_id')
+        localStorage.removeItem('resume2website_user')
         setAuthState({
           isAuthenticated: false,
           isLoading: false,

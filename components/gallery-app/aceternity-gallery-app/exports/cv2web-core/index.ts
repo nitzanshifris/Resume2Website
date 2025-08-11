@@ -1,5 +1,5 @@
-// CV2WEB Core Components Bundle
-// Ready-to-use components for CV2WEB portfolio generation
+// RESUME2WEBSITE Core Components Bundle
+// Ready-to-use components for RESUME2WEBSITE portfolio generation
 
 // Hero Components
 export { HeroParallax } from './components/hero-parallax';
@@ -29,8 +29,8 @@ export { AnimatedTooltip } from './components/animated-tooltip';
 // Utilities
 export { cn } from './lib/utils';
 
-// Types - Common interfaces for CV2WEB
-export interface CV2WebTimelineEntry {
+// Types - Common interfaces for RESUME2WEBSITE
+export interface Resume2WebsiteTimelineEntry {
   title: string;      // Company/School name
   subtitle: string;   // Position/Degree
   date: string;       // Date range
@@ -38,7 +38,7 @@ export interface CV2WebTimelineEntry {
   bullets?: string[];
 }
 
-export interface CV2WebHeroData {
+export interface Resume2WebsiteHeroData {
   title: string;
   subtitle: string;
   description: string;
@@ -49,7 +49,7 @@ export interface CV2WebHeroData {
   }[];
 }
 
-export interface CV2WebSkillsData {
+export interface Resume2WebsiteSkillsData {
   title: string;
   description: string;
   items: {
@@ -61,7 +61,7 @@ export interface CV2WebSkillsData {
   }[];
 }
 
-export interface CV2WebProjectData {
+export interface Resume2WebsiteProjectData {
   title: string;
   description: string;
   link: string;

@@ -105,7 +105,7 @@ export default function CVEditor({ userName }: CVEditorProps) {
 
   const fetchLatestCV = async () => {
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       if (!sessionId) {
         setIsLoading(false)
         return
@@ -165,7 +165,7 @@ export default function CVEditor({ userName }: CVEditorProps) {
     setSaveStatus('saving')
 
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/cv/${currentJobId}`, {
         method: 'PUT',
         headers: {
@@ -207,7 +207,7 @@ export default function CVEditor({ userName }: CVEditorProps) {
       await handleSave()
 
       // Call portfolio generation API
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/portfolio/generate/${currentJobId}`, {
         method: 'POST',
         headers: {

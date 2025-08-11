@@ -10,7 +10,7 @@
 | **Priority** | 🔴 High |
 | **Complexity** | ⚫ 6/10 |
 | **Dependencies** | None |
-| **File Path** | `CV2WEB-V4/user_web_example/app/page.tsx` |
+| **File Path** | `RESUME2WEBSITE-V4/user_web_example/app/page.tsx` |
 
 ## 🎯 Current State
 
@@ -25,7 +25,7 @@
 
 ### 1️⃣ Update Homepage Headlines in page.tsx
 
-**📁 Path:** `CV2WEB-V4/user_web_example/app/page.tsx`
+**📁 Path:** `RESUME2WEBSITE-V4/user_web_example/app/page.tsx`
 
 **📝 Implementation:** Replace existing headline text with conversion-focused copy
 
@@ -40,9 +40,9 @@ const headlines = {
 
 ---
 
-### 2️⃣ Update CV2WebDemo Component Headlines
+### 2️⃣ Update Resume2WebsiteDemo Component Headlines
 
-**📁 Path:** `CV2WEB-V4/user_web_example/app/page.tsx` (Lines 482-1179)
+**📁 Path:** `RESUME2WEBSITE-V4/user_web_example/app/page.tsx` (Lines 482-1179)
 
 **📝 Current Implementation:**
 
@@ -68,7 +68,7 @@ const headlines = {
 
 ### 3️⃣ Gradient Text Effects
 
-**📁 Path:** Lines 699, 910, 989 in `CV2WEB-V4/user_web_example/app/page.tsx`
+**📁 Path:** Lines 699, 910, 989 in `RESUME2WEBSITE-V4/user_web_example/app/page.tsx`
 
 **✅ Current State:** Already implemented using Tailwind CSS classes
 - `bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600`
@@ -84,7 +84,7 @@ To: 🔴{PLACEHOLDER: gradient-color-1}, 🔴{PLACEHOLDER: gradient-color-2}, �
 
 ### 4️⃣ Create A/B Testing Infrastructure
 
-**📁 Path:** To be added to `CV2WEB-V4/user_web_example/app/page.tsx`
+**📁 Path:** To be added to `RESUME2WEBSITE-V4/user_web_example/app/page.tsx`
 
 **🆕 New functionality required**
 
@@ -109,7 +109,7 @@ const headlineVariants = {
 
 ### 5️⃣ Animation Considerations
 
-**📁 Path:** Lines 979-996 in `CV2WEB-V4/user_web_example/app/page.tsx`
+**📁 Path:** Lines 979-996 in `RESUME2WEBSITE-V4/user_web_example/app/page.tsx`
 
 **✅ Current State:** Post-animation headline already exists with transitions
 
@@ -127,7 +127,7 @@ useEffect(() => {
 
 ### 6️⃣ Responsive Design Updates
 
-**📁 Path:** Lines 647+ in `CV2WEB-V4/user_web_example/app/page.tsx`
+**📁 Path:** Lines 647+ in `RESUME2WEBSITE-V4/user_web_example/app/page.tsx`
 
 **✅ Current State:** Responsive design is already implemented
 - Mobile-first design with different layouts

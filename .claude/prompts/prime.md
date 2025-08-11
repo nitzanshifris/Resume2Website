@@ -1,10 +1,10 @@
-    # CV2WEB Project Understanding Prompt
+    # RESUME2WEBSITE Project Understanding Prompt
 
-    When starting a new session with CV2WEB, follow this systematic approach to understand the AI-powered portfolio generation platform:
+    When starting a new session with RESUME2WEBSITE, follow this systematic approach to understand the AI-powered portfolio generation platform:
 
     ## 1. Project Overview & Core Architecture
-    - **READ** the CLAUDE.md file in the project's root folder - this is the primary source of truth for CV2WEB's architecture, workflows, and development guidelines
-    - **UNDERSTAND** CV2WEB's purpose: AI-powered CV to portfolio website converter using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo
+    - **READ** the CLAUDE.md file in the project's root folder - this is the primary source of truth for RESUME2WEBSITE's architecture, workflows, and development guidelines
+    - **UNDERSTAND** RESUME2WEBSITE's purpose: AI-powered CV to portfolio website converter using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo
     - **EXAMINE** the project structure:
       - `src/` - Backend (FastAPI) with API routes, CV extraction, and portfolio generation
       - `src/templates/` - Portfolio templates (v1.5, v2.1) with data adapters and SmartCard system
@@ -67,7 +67,7 @@
 
     ## 9. Knowledge Validation
     Before proceeding with any work, confirm understanding:
-    - How does CV2WEB's AI extraction pipeline work with Claude 4 Opus only?
+    - How does RESUME2WEBSITE's AI extraction pipeline work with Claude 4 Opus only?
     - What are the two portfolio templates (v1.5, v2.1) and their SmartCard system?
     - How are portfolio instances managed in isolated npm sandbox environments?
     - What is the CV data adapter system and why is it critical for templates?

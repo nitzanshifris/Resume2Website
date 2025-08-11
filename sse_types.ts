@@ -1,5 +1,5 @@
 /**
- * TypeScript interfaces for CV2WEB SSE integration
+ * TypeScript interfaces for RESUME2WEBSITE SSE integration
  * Use these types in your frontend application
  */
 
