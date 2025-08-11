@@ -40,11 +40,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
   const handleGoogleLogin = async () => {
     if (!googleStatus.available) {
-      showToast({
-        title: "Google Sign-in Unavailable",
-        description: googleStatus.message || "Google sign-in is currently not available",
-        variant: "warning"
-      });
+      showToast(
+        googleStatus.message || "Google sign-in is currently not available",
+        "error"
+      );
       return;
     }
     
@@ -53,11 +52,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     // Check if Google Client ID is configured
     const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!googleClientId) {
-      showToast({
-        title: "Configuration Error",
-        description: "Google Sign-In is not configured. Please use email/password instead.",
-        variant: "error"
-      });
+      showToast(
+        "Google Sign-In is not configured. Please use email/password instead.",
+        "error"
+      );
       setIsLoading(false);
       return;
     }
@@ -81,11 +79,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
   const handleEmailLogin = () => {
     // For now, we'll just show a toast. You can implement email auth later
-    showToast({
-      title: "Email Sign-in",
-      description: "Email authentication coming soon!",
-      variant: "info"
-    });
+    showToast(
+      "Email authentication coming soon!",
+      "info"
+    );
   };
 
   const handleFacebookLogin = async () => {
@@ -95,11 +92,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
     if (!facebookAppId) {
       // For now, just use a placeholder since we haven't added it to env yet
-      showToast({
-        title: "Configuration Needed",
-        description: "Please add your Facebook App ID to continue",
-        variant: "info"
-      });
+      showToast(
+        "Please add your Facebook App ID to continue",
+        "info"
+      );
       setIsLoading(false);
       return;
     }
@@ -120,16 +116,32 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   };
 
   const handleLinkedInLogin = async () => {
-    // LinkedIn OAuth implementation
     setIsLoading(true);
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000';
-    // You'll need to implement the LinkedIn OAuth endpoint in your backend
-    showToast({
-      title: "LinkedIn Sign-in",
-      description: "LinkedIn authentication coming soon!",
-      variant: "info"
-    });
-    setIsLoading(false);
+    
+    // Check if LinkedIn Client ID is configured
+    const linkedinClientId = process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID;
+    if (!linkedinClientId) {
+      showToast(
+        "Please add your LinkedIn Client ID to continue",
+        "info"
+      );
+      setIsLoading(false);
+      return;
+    }
+    
+    // Initialize LinkedIn OAuth flow
+    const linkedinAuthUrl = new URL('https://www.linkedin.com/oauth/v2/authorization');
+    linkedinAuthUrl.searchParams.append('response_type', 'code');
+    linkedinAuthUrl.searchParams.append('client_id', linkedinClientId);
+    linkedinAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/linkedin/callback`);
+    linkedinAuthUrl.searchParams.append('state', 'cv2web_linkedin_auth');
+    linkedinAuthUrl.searchParams.append('scope', 'openid profile email');
+
+    // Store auth modal state to restore after callback
+    localStorage.setItem('cv2web_auth_return', 'true');
+
+    // Redirect to LinkedIn OAuth
+    window.location.href = linkedinAuthUrl.toString();
   };
 
   const handleSkip = () => {
