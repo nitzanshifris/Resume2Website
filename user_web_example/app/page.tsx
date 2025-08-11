@@ -883,6 +883,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // Main animation sequence
   useEffect(() => {
     if (!isPlaying) return
+    
+    // Don't restart animation if already complete
+    if (stage === "complete") return
 
     const sequence = async () => {
       // Stage 1: CV Display (keep original content visible)
