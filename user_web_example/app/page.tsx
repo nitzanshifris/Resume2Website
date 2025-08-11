@@ -1227,34 +1227,30 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
     console.log('⏳ Waiting for CV to appear in card...')
     
     setTimeout(() => {
-      // Step 2: CV is now visible, wait 1 more second
-      console.log('✅ CV visible in card, waiting 1 second...')
+      // Step 2: CV is now visible, start MacBook animation immediately
+      console.log('✅ CV visible in card, starting MacBook animation immediately...')
+      console.log('🎬 Starting MacBook animation...')
+      setIsPlaying(true)
       
+      // Keep progress at 0% - it should NOT animate until user signs up
+      setRealProgress(0)
+      
+      // DO NOT animate progress bar - keep it at 0% while waiting for auth
+      
+      // The animation sequence takes about 6 seconds to reach "materializing" stage
+      // where the MacBook appears and opens
       setTimeout(() => {
-        // Step 3: Start the MacBook animation
-        console.log('🎬 Starting MacBook animation...')
-        setIsPlaying(true)
+        // Step 3: MacBook should be fully open now
+        console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
+        setShowPortfolioInMacBook(true) // Ensure MacBook content is visible
         
-        // Keep progress at 0% - it should NOT animate until user signs up
-        setRealProgress(0)
-        
-        // DO NOT animate progress bar - keep it at 0% while waiting for auth
-        
-        // The animation sequence takes about 6 seconds to reach "materializing" stage
-        // where the MacBook appears and opens
+        // Step 4: Wait 3 seconds with progress bar visible
         setTimeout(() => {
-          // Step 4: MacBook should be fully open now
-          console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
-          setShowPortfolioInMacBook(true) // Ensure MacBook content is visible
-          
-          // Step 5: Wait 3 seconds with progress bar visible
-          setTimeout(() => {
-            // Step 6: Now show the signup modal
-            console.log('⏰ Showing signup modal after full preview')
-            setShowSignupModal(true)
-          }, 3000)
-        }, 6000) // Time for animation to reach MacBook stage
-      }, 1000) // 1 second after CV appears
+          // Step 5: Now show the signup modal
+          console.log('⏰ Showing signup modal after full preview')
+          setShowSignupModal(true)
+        }, 3000)
+      }, 6000) // Time for animation to reach MacBook stage
     }, 1500) // 1.5 seconds for CV to appear
   }
 
