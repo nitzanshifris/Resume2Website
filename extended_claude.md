@@ -11,7 +11,7 @@ CV2WEB is an AI-powered CV to portfolio website converter that transforms resume
 - **Provides** AI-powered portfolio expert guidance using Claude 4 for personalized recommendations
 - **Offers** full CV editing capabilities with CRUD operations and original file preservation
 - **Manages** multiple portfolio instances with real-time health monitoring and server management
-- **Authenticates** users with both email/password and Google OAuth
+- **Authenticates** users with email/password, Google OAuth, and LinkedIn OAuth
 - **Deploys** to Vercel with one click
 - **Supports** multiple file formats (PDF, DOCX, images, etc.)
 
@@ -25,7 +25,7 @@ CV2WEB is an AI-powered CV to portfolio website converter that transforms resume
 ### Tech Stack at a Glance
 - **Backend**: FastAPI + Python 3.11+ with SQLite database
 - **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4
-- **Authentication**: Google OAuth 2.0 + Email/Password with bcrypt
+- **Authentication**: Google OAuth 2.0 + LinkedIn OAuth + Email/Password with bcrypt
 - **AI Services**: Claude 4 Opus ONLY (deterministic CV extraction at temperature 0.0)
 - **UI Libraries**: Aceternity UI, Magic UI (100+ animated components)
 - **Infrastructure**: Vercel deployment, Railway, local development
@@ -128,6 +128,7 @@ CV2WEB-V4/
 │   │       ├── portfolio_generator.py # Main portfolio creation & management
 │   │       ├── cv.py                  # CV CRUD operations
 │   │       ├── auth.py                # Authentication endpoints
+│   │       ├── user_auth.py           # OAuth authentication (Google, LinkedIn)
 │   │       ├── archived/              # Deprecated/unused routes
 │   │       └── future_use/            # Ready but not yet active
 │   │           └── portfolio_expert.py # AI portfolio guidance (not mounted)
@@ -876,6 +877,23 @@ POST /api/v1/auth/logout
 # Get current user
 GET /api/v1/auth/me
 Headers: X-Session-ID: <session_id>
+
+# Google OAuth callback
+POST /api/v1/auth/google/callback
+{
+    "code": str,
+    "state": str
+}
+
+# LinkedIn OAuth callback
+POST /api/v1/auth/linkedin/callback
+{
+    "code": str,
+    "state": str
+}
+
+# Check Google OAuth availability
+GET /api/v1/auth/google/status
 ```
 
 ### API Endpoints for CV Management
@@ -1032,6 +1050,18 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **Reason**: pnpm workspace conflicts in isolated environments
 
 ## Recent Updates
+
+### OAuth Authentication Implementation (2025-08-11)
+- **🔐 Google OAuth Integration**: Successfully implemented Google OAuth 2.0 with authorization code flow
+- **💼 LinkedIn OAuth Integration**: Added LinkedIn OAuth with OpenID Connect support
+- **🔧 Backend Authentication Router**: Created comprehensive user_auth.py router with register/login/OAuth endpoints
+- **🎨 Frontend Auth Modal**: Dark-themed authentication modal with Google and LinkedIn sign-in buttons
+- **🔑 Session Management**: Enhanced database session handling with delete_session function
+- **🌐 OAuth Callback Pages**: Implemented callback pages for Google and LinkedIn OAuth flows
+- **🚫 Facebook OAuth Removed**: Attempted Facebook implementation but removed due to strict app requirements
+- **✅ Full Authentication Flow**: Complete authentication system with social logins and session persistence
+
+## Previous Updates
 
 ### CV.py Security & Code Quality Improvements (2025-08-07)
 - **🔒 Enhanced Security**: Added comprehensive filename validation to prevent path traversal attacks
