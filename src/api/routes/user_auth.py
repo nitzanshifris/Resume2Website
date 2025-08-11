@@ -515,10 +515,153 @@ async def facebook_auth_callback(request: FacebookCallbackRequest):
         raise HTTPException(status_code=500, detail="Facebook authentication failed")
 
 
-@router.post("/auth/linkedin")
-async def linkedin_auth():
-    """LinkedIn OAuth login (placeholder)"""
-    raise HTTPException(
-        status_code=501,
-        detail="LinkedIn authentication coming soon"
-    )
+@router.get("/auth/linkedin/status")
+async def linkedin_auth_status():
+    """Check if LinkedIn OAuth is available"""
+    client_id = os.getenv("LINKEDIN_CLIENT_ID")
+    client_secret = os.getenv("LINKEDIN_CLIENT_SECRET")
+    
+    if not client_id:
+        return {
+            "available": False,
+            "message": "LinkedIn OAuth not configured. Please set LINKEDIN_CLIENT_ID.",
+            "client_secret_configured": False
+        }
+    
+    if not client_secret:
+        return {
+            "available": False,
+            "message": "LinkedIn OAuth client ID configured but client secret missing.",
+            "client_secret_configured": False
+        }
+    
+    return {
+        "available": True,
+        "message": "LinkedIn OAuth is configured and ready.",
+        "client_secret_configured": True
+    }
+
+
+# LinkedIn OAuth callback request model
+class LinkedInCallbackRequest(BaseModel):
+    code: str
+    redirect_uri: str
+
+
+@router.post("/auth/linkedin/callback", response_model=AuthResponse)
+async def linkedin_auth_callback(request: LinkedInCallbackRequest):
+    """
+    Handle LinkedIn OAuth callback
+    Exchange authorization code for tokens and create/login user
+    """
+    try:
+        client_id = os.getenv("LINKEDIN_CLIENT_ID")
+        client_secret = os.getenv("LINKEDIN_CLIENT_SECRET")
+        
+        if not client_id or not client_secret:
+            raise HTTPException(
+                status_code=500,
+                detail="LinkedIn OAuth is not configured. Please contact support."
+            )
+        
+        # Exchange authorization code for access token
+        token_url = "https://www.linkedin.com/oauth/v2/accessToken"
+        token_data = {
+            "grant_type": "authorization_code",
+            "code": request.code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": request.redirect_uri
+        }
+        
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        
+        token_response = requests.post(token_url, data=token_data, headers=headers)
+        
+        if not token_response.ok:
+            logger.error(f"LinkedIn token exchange failed: {token_response.text}")
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to exchange authorization code"
+            )
+        
+        tokens = token_response.json()
+        access_token = tokens.get("access_token")
+        
+        if not access_token:
+            raise HTTPException(
+                status_code=400,
+                detail="No access token received from LinkedIn"
+            )
+        
+        # Get user info from LinkedIn
+        # Using LinkedIn API v2 with OpenID Connect
+        user_info_url = "https://api.linkedin.com/v2/userinfo"
+        headers = {
+            "Authorization": f"Bearer {access_token}"
+        }
+        user_info_response = requests.get(user_info_url, headers=headers)
+        
+        if not user_info_response.ok:
+            logger.error(f"Failed to get LinkedIn user info: {user_info_response.text}")
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to get user information from LinkedIn"
+            )
+        
+        linkedin_user = user_info_response.json()
+        email = linkedin_user.get("email")
+        name = linkedin_user.get("name")
+        linkedin_id = linkedin_user.get("sub")  # sub is the unique identifier in OpenID
+        
+        if not email:
+            # LinkedIn should always provide email with OpenID Connect
+            # But just in case, create a fallback
+            email = f"linkedin_{linkedin_id}@cv2web.local"
+            logger.info(f"LinkedIn user without email, using: {email}")
+        
+        # Check if user exists
+        existing_user = get_user_by_email(email)
+        
+        if existing_user:
+            # User exists, create session
+            user_id = existing_user["user_id"]
+            logger.info(f"Existing user logged in via LinkedIn: {email}")
+        else:
+            # Create new user with LinkedIn OAuth
+            # Generate a random password (user won't use it for LinkedIn login)
+            random_password = hashlib.sha256(f"{linkedin_id}{datetime.utcnow().isoformat()}".encode()).hexdigest()
+            
+            user_id = create_user(
+                email=email,
+                password_hash=random_password,  # Random password for LinkedIn users
+                name=name,
+                phone=None
+            )
+            logger.info(f"New user registered via LinkedIn: {email}")
+        
+        # Create session
+        session_id = create_session(user_id)
+        
+        # Get user data for response
+        user_data = get_user_by_email(email)
+        
+        return AuthResponse(
+            user=UserResponse(
+                user_id=user_data['user_id'],
+                email=user_data['email'],
+                name=user_data.get('name'),
+                phone=user_data.get('phone'),
+                created_at=user_data['created_at']
+            ),
+            session_id=session_id,
+            message="LinkedIn authentication successful"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"LinkedIn OAuth error: {str(e)}")
+        raise HTTPException(status_code=500, detail="LinkedIn authentication failed")
