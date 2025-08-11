@@ -30,15 +30,63 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
   const [showPortfolioPreview, setShowPortfolioPreview] = useState(false)
   const [hasScrolledEnough, setHasScrolledEnough] = useState(false)
   const [sectionsScrolled, setSectionsScrolled] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(false)
   const confettiRef = useRef<ConfettiRef>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Prevent body scroll when modal is open
+  // Linear progress animation
+  useEffect(() => {
+    if (!isProcessing) return
+    
+    // Start linear progress that goes from 0 to 90 over ~15 seconds
+    // Backend typically takes 12-15 seconds
+    let startTime = Date.now()
+    const duration = 15000 // 15 seconds to reach 90%
+    
+    progressIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min((elapsed / duration) * 90, 90)
+      
+      setCurrentProgress(progress)
+      
+      // Update message based on progress
+      if (progress < 10) {
+        setCurrentMessage("Uploading your CV...")
+      } else if (progress < 30) {
+        setCurrentMessage("Extracting information from your CV...")
+      } else if (progress < 50) {
+        setCurrentMessage("Analyzing your career highlights...")
+      } else if (progress < 70) {
+        setCurrentMessage("Creating your personalized portfolio...")
+      } else {
+        setCurrentMessage("Finalizing your portfolio...")
+      }
+    }, 50)
+    
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current)
+      }
+    }
+  }, [isProcessing])
+
+  // Prevent body scroll when modal is open and reset state when closing
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = 'unset'
+      // Reset states when modal closes
+      setCurrentProgress(0)
+      setIsProcessing(false)
+      setPortfolioUrl(null)
+      setShowPortfolioPreview(false)
+      setError(null)
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current)
+        progressIntervalRef.current = null
+      }
     }
 
     return () => {
@@ -48,13 +96,13 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
 
   // Handle file upload and portfolio generation
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen || isProcessing || portfolioUrl) return
 
     const processFile = async () => {
       try {
         setError(null)
         setCurrentProgress(0)
-        setCurrentMessage("Uploading your CV...")
+        setIsProcessing(true) // This starts the linear progress animation
 
         // Step 1: Upload file if we have one and no jobId
         let activeJobId = currentJobId
@@ -71,24 +119,21 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
               activeJobId = `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
               setCurrentJobId(activeJobId)
             }
-            setCurrentProgress(10)
-            setCurrentMessage("CV uploaded successfully!")
           } catch (error) {
             console.error('Upload error:', error)
             setError(error instanceof Error ? error.message : 'Failed to upload CV')
+            setIsProcessing(false)
             return
           }
         }
 
         if (!activeJobId) {
           setError('No job ID available')
+          setIsProcessing(false)
           return
         }
 
-        // Step 2: Extract CV data
-        setCurrentProgress(20)
-        setCurrentMessage("Extracting information from your CV...")
-        
+        // Step 2: Extract CV data (happens while progress animates)
         try {
           const sessionId = localStorage.getItem('resume2website_session_id')
           const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${activeJobId}`, {
@@ -103,17 +148,14 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
           }
 
           const extractData = await extractResponse.json()
-          setCurrentProgress(40)
-          setCurrentMessage("Analyzing your career highlights...")
         } catch (error) {
           console.error('Extraction error:', error)
           setError('Failed to extract CV data')
+          setIsProcessing(false)
           return
         }
 
-        // Step 3: Generate portfolio with random template selection
-        setCurrentProgress(60)
-        setCurrentMessage("Creating your personalized portfolio...")
+        // Step 3: Generate portfolio (happens while progress animates)
 
         try {
           const sessionId = localStorage.getItem('resume2website_session_id')
@@ -122,10 +164,8 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
           
           console.log(`🎯 Selected template: ${randomTemplate}`)
 
-          // Use anonymous endpoint if no session
-          const generateUrl = sessionId 
-            ? `${API_BASE_URL}/api/v1/portfolio/generate/${activeJobId}`
-            : `${API_BASE_URL}/api/v1/portfolio/generate-anonymous/${activeJobId}`
+          // Use the same endpoint for all users
+          const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate/${activeJobId}`
           
           const generateResponse = await fetch(generateUrl, {
             method: 'POST',
@@ -145,6 +185,12 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
 
           const generateData = await generateResponse.json()
           setPortfolioUrl(generateData.portfolio_url)
+          
+          // Stop linear progress and jump to 100%
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current)
+            progressIntervalRef.current = null
+          }
           setCurrentProgress(100)
           setCurrentMessage("Portfolio generated successfully!")
 
@@ -165,16 +211,20 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
         } catch (error) {
           console.error('Generation error:', error)
           setError(error instanceof Error ? error.message : 'Failed to generate portfolio')
+          setIsProcessing(false)
           return
         }
+        
+        setIsProcessing(false)
       } catch (error) {
         console.error('Processing error:', error)
         setError(error instanceof Error ? error.message : 'An error occurred during processing')
+        setIsProcessing(false)
       }
     }
 
     processFile()
-  }, [isOpen, file, currentJobId, onComplete])
+  }, [isOpen, file, currentJobId])
 
   const handleTemplateSelect = (templateId: string) => {
     onTemplateSelect?.(templateId)
