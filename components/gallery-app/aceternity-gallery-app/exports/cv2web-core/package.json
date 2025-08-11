@@ -1,7 +1,7 @@
 {
-  "name": "@aceternity/cv2web-core",
+  "name": "@aceternity/resume2website-core",
   "version": "1.0.0",
-  "description": "Core Aceternity components optimized for CV2WEB portfolio generation",
+  "description": "Core Aceternity components optimized for RESUME2WEBSITE portfolio generation",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
@@ -16,7 +16,7 @@
     "components",
     "ui",
     "portfolio",
-    "cv2web",
+    "resume2website",
     "aceternity"
   ],
   "dependencies": {
@@ -31,7 +31,7 @@
     "motion": "^12.0.0",
     "@tabler/icons-react": "^3.0.0"
   },
-  "cv2web": {
+  "resume2website": {
     "ready": true,
     "components": [
       "hero-parallax",

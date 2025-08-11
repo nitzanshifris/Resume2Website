@@ -82,8 +82,8 @@ export default function EmailAuthForm({ mode, onBack, onAuthSuccess, onClose }: 
       
       // Store session
       if (data.session_id) {
-        localStorage.setItem('cv2web_session_id', data.session_id);
-        localStorage.setItem('cv2web_user', JSON.stringify(data.user));
+        localStorage.setItem('resume2website_session_id', data.session_id);
+        localStorage.setItem('resume2website_user', JSON.stringify(data.user));
       }
       
       showToast(

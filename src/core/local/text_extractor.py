@@ -1,5 +1,5 @@
 """
-Text Extractor Service for CV2WEB MVP
+Text Extractor Service for RESUME2WEBSITE MVP
 Smart extraction with local processing first, then Google Vision OCR, fallback to AWS Textract
 """
 import logging

@@ -1,8 +1,8 @@
-# Product Requirements Document: CV2WEB Lovable Integration
+# Product Requirements Document: RESUME2WEBSITE Lovable Integration
 
 ## Executive Summary
 
-This PRD outlines the comprehensive integration of advanced patterns and technologies from the lovable-clone project into CV2WEB. The goal is to transform CV2WEB from a template-based portfolio generator into a sophisticated, AI-powered platform with real-time feedback, isolated execution environments, and enhanced user experience.
+This PRD outlines the comprehensive integration of advanced patterns and technologies from the lovable-clone project into RESUME2WEBSITE. The goal is to transform RESUME2WEBSITE from a template-based portfolio generator into a sophisticated, AI-powered platform with real-time feedback, isolated execution environments, and enhanced user experience.
 
 ## Project Overview
 
@@ -292,7 +292,7 @@ GET /api/sandbox/status/{job_id}
 Response:
 {
   "status": "running",
-  "preview_url": "https://preview.cv2web.com/abc123",
+  "preview_url": "https://preview.resume2website.com/abc123",
   "progress": 100,
   "created_at": "2025-01-14T10:00:00Z",
   "expires_at": "2025-01-14T11:00:00Z"
@@ -485,4 +485,4 @@ CREATE INDEX idx_ai_generations_cache_key ON ai_generations(cache_key);
 
 *PRD Version: 1.0*  
 *Created: 2025-01-14*  
-*Author: CV2WEB Development Team*
+*Author: RESUME2WEBSITE Development Team*

@@ -1,13 +1,13 @@
 # Success Criteria Specification
 
-*Measurable outcomes that define success for CV2WEB*
+*Measurable outcomes that define success for RESUME2WEBSITE*
 
 ## Primary Success Metrics
 
 ### User Outcome Metrics
 
 **SC01: Interview Rate Improvement**
-- Target: 40%+ increase in interview callbacks within 30 days of using CV2WEB
+- Target: 40%+ increase in interview callbacks within 30 days of using RESUME2WEBSITE
 - Measurement: User self-reported surveys + optional email tracking integration
 - Success Threshold: Statistical significance across 100+ users
 

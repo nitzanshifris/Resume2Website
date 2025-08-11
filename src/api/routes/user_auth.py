@@ -1,5 +1,5 @@
 """
-User authentication endpoints for CV2WEB
+User authentication endpoints for RESUME2WEBSITE
 Handles registration, login, logout, and session management
 """
 from fastapi import APIRouter, HTTPException, Header
@@ -482,7 +482,7 @@ async def facebook_auth_callback(request: FacebookCallbackRequest):
         
         if not email:
             # Facebook doesn't always provide email, create one from ID
-            email = f"fb_{facebook_id}@cv2web.local"
+            email = f"fb_{facebook_id}@resume2website.local"
             logger.info(f"Facebook user without email, using: {email}")
         
         # Check if user exists
@@ -634,7 +634,7 @@ async def linkedin_auth_callback(request: LinkedInCallbackRequest):
         if not email:
             # LinkedIn should always provide email with OpenID Connect
             # But just in case, create a fallback
-            email = f"linkedin_{linkedin_id}@cv2web.local"
+            email = f"linkedin_{linkedin_id}@resume2website.local"
             logger.info(f"LinkedIn user without email, using: {email}")
         
         # Check if user exists

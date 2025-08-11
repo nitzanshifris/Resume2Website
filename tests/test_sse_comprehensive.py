@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive SSE Testing Suite for CV2WEB
+Comprehensive SSE Testing Suite for RESUME2WEBSITE
 Tests all SSE endpoints and functionality
 """
 

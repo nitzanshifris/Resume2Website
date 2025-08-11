@@ -1,7 +1,7 @@
 // Aceternity Components Library - Complete Export
 // Self-contained library with all components and packs
 
-// Core CV2WEB Components (always used)
+// Core RESUME2WEBSITE Components (always used)
 export { HeroParallax } from './hero-parallax';
 export { default as HeroHighlight } from './hero-highlight';
 export { Timeline } from './timeline';

@@ -3,10 +3,10 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-async function buildCV2WebBundle() {
-  console.log('🚀 Building CV2WEB component bundle...');
+async function buildResume2WebsiteBundle() {
+  console.log('🚀 Building RESUME2WEBSITE component bundle...');
   
-  const outputDir = 'exports/cv2web-core';
+  const outputDir = 'exports/resume2website-core';
   const componentsDir = 'components/core';
   
   try {
@@ -15,7 +15,7 @@ async function buildCV2WebBundle() {
     await fs.ensureDir(`${outputDir}/components`);
     await fs.ensureDir(`${outputDir}/lib`);
 
-    // Core components needed by CV2WEB
+    // Core components needed by RESUME2WEBSITE
     const coreComponents = [
       'hero-parallax',
       'hero-highlight', 
@@ -54,9 +54,9 @@ async function buildCV2WebBundle() {
     // Generate unified package.json with calculated dependencies
     console.log('📋 Generating package.json...');
     const packageJson = {
-      "name": "@aceternity/cv2web-core",
+      "name": "@aceternity/resume2website-core",
       "version": "1.0.0",
-      "description": "Core Aceternity components optimized for CV2WEB portfolio generation",
+      "description": "Core Aceternity components optimized for RESUME2WEBSITE portfolio generation",
       "main": "index.js",
       "types": "index.d.ts",
       "dependencies": {
@@ -71,7 +71,7 @@ async function buildCV2WebBundle() {
         "motion": "^12.0.0",
         "@tabler/icons-react": "^3.0.0"
       },
-      "cv2web": {
+      "resume2website": {
         "ready": true,
         "bundleDate": new Date().toISOString(),
         "components": coreComponents
@@ -82,41 +82,41 @@ async function buildCV2WebBundle() {
     console.log('✓ Generated package.json');
 
     // Create README
-    const readme = `# Aceternity CV2WEB Core Bundle
+    const readme = `# Aceternity RESUME2WEBSITE Core Bundle
 
-This bundle contains all the core Aceternity components needed for CV2WEB portfolio generation.
+This bundle contains all the core Aceternity components needed for RESUME2WEBSITE portfolio generation.
 
 ## Components Included
 ${coreComponents.map(c => `- ${c}`).join('\n')}
 
-## Usage in CV2WEB
+## Usage in RESUME2WEBSITE
 
 \`\`\`typescript
-import { Timeline, HeroParallax, BentoGrid } from '@aceternity/cv2web-core';
+import { Timeline, HeroParallax, BentoGrid } from '@aceternity/resume2website-core';
 \`\`\`
 
 ## Bundle Info
 - Built: ${new Date().toISOString()}
 - Components: ${coreComponents.length}
-- Ready for CV2WEB integration: ✅
+- Ready for RESUME2WEBSITE integration: ✅
 `;
 
     await fs.writeFile(`${outputDir}/README.md`, readme);
     console.log('✓ Generated README.md');
 
-    console.log('\n✅ CV2WEB bundle built successfully!');
+    console.log('\n✅ RESUME2WEBSITE bundle built successfully!');
     console.log(`📁 Bundle location: ${outputDir}/`);
     console.log(`📊 Components included: ${coreComponents.length}`);
     
   } catch (error) {
-    console.error('❌ Error building CV2WEB bundle:', error);
+    console.error('❌ Error building RESUME2WEBSITE bundle:', error);
     process.exit(1);
   }
 }
 
 // Run if called directly
 if (require.main === module) {
-  buildCV2WebBundle();
+  buildResume2WebsiteBundle();
 }
 
-module.exports = { buildCV2WebBundle };
+module.exports = { buildResume2WebsiteBundle };

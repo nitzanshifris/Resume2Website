@@ -11,7 +11,7 @@
    - Go to APIs & Services → OAuth consent screen
    - Choose "External" user type
    - Fill in required fields:
-     - App name: "CV2WEB"
+     - App name: "RESUME2WEBSITE"
      - User support email: your email
      - Developer contact: your email
    - Add scopes: `email`, `profile`, `openid`
@@ -21,7 +21,7 @@
    - Go to APIs & Services → Credentials
    - Click "Create Credentials" → "OAuth 2.0 Client ID"
    - Application type: "Web application"
-   - Name: "CV2WEB Frontend"
+   - Name: "RESUME2WEBSITE Frontend"
    - Authorized redirect URIs:
      - `http://localhost:3019/auth/google/callback` (development)
      - `https://yourdomain.com/auth/google/callback` (production)

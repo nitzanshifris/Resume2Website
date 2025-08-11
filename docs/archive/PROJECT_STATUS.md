@@ -1,4 +1,4 @@
-# CV2WEB Project Status - Updated 2025-07-03
+# RESUME2WEBSITE Project Status - Updated 2025-07-03
 
 ## 🎉 MVP Complete!
 

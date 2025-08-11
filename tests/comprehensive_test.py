@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive test of CV2WEB MVP
+Comprehensive test of RESUME2WEBSITE MVP
 Tests all components and integrations
 """
 import requests
@@ -240,7 +240,7 @@ def test_schema_validation():
 
 def main():
     """Run all tests"""
-    print("\n🚀 CV2WEB Comprehensive Test Suite")
+    print("\n🚀 RESUME2WEBSITE Comprehensive Test Suite")
     print("="*60)
     
     # Check if API is running

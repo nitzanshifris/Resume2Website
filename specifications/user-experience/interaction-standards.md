@@ -1,6 +1,6 @@
 # User Experience Specification
 
-*Standards for user interaction throughout the CV2WEB journey*
+*Standards for user interaction throughout the RESUME2WEBSITE journey*
 
 ## Core UX Principles
 

@@ -1,5 +1,5 @@
 """
-Server-Sent Events (SSE) Service for CV2WEB
+Server-Sent Events (SSE) Service for RESUME2WEBSITE
 Handles real-time streaming of CV processing updates
 """
 
@@ -80,7 +80,7 @@ class ConnectionManager:
 
 
 class SSEService:
-    """Main SSE service for CV2WEB"""
+    """Main SSE service for RESUME2WEBSITE"""
     
     def __init__(self):
         self.connection_manager = ConnectionManager()

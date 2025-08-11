@@ -443,7 +443,7 @@ async def execute_portfolio_generation_workflow(logger: EnhancedSSELogger, confi
     await asyncio.sleep(1)
     logger.step_complete("Deployment package ready")
     
-    logger.end_phase({"package_size": "2.3MB", "preview_url": "https://preview.cv2web.dev/abc123"})
+    logger.end_phase({"package_size": "2.3MB", "preview_url": "https://preview.resume2website.dev/abc123"})
 
 
 async def execute_generic_workflow(logger: EnhancedSSELogger, config: Dict[str, Any]):

@@ -1,8 +1,8 @@
-# CV2WEB - Complete Automatic System Guide
+# RESUME2WEBSITE - Complete Automatic System Guide
 
 ## 🏗️ Full Architecture Overview
 
-CV2WEB עכשיו מערכת מלאה ואוטומטית עם כל הרכיבים המתוחכמים:
+RESUME2WEBSITE עכשיו מערכת מלאה ואוטומטית עם כל הרכיבים המתוחכמים:
 
 ### 🔧 Core Components
 
@@ -26,7 +26,7 @@ Website Generation → Preview Server → Analytics
 ### 1. Start Complete System
 ```bash
 # Start everything automatically
-./start_cv2web.sh
+./start_resume2website.sh
 ```
 
 ### 2. Manual Startup (if needed)
@@ -197,7 +197,7 @@ The system supports:
 
 ## 🛑 Shutdown
 ```bash
-./stop_cv2web.sh
+./stop_resume2website.sh
 ```
 
 ## 🚨 Troubleshooting
@@ -227,7 +227,7 @@ The system supports:
    python3 test_full_pipeline.py
    
    # Verify template files exist
-   ls ../apps/backend/templates/cv2web-react-template/
+   ls ../apps/backend/templates/resume2website-react-template/
    ```
 
 ## 📱 Integration with Frontend

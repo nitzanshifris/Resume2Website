@@ -1,5 +1,5 @@
 """
-Data Extraction Service for CV2WEB MVP
+Data Extraction Service for RESUME2WEBSITE MVP
 Primary: Claude 4 Opus ONLY (deterministic extraction at temperature 0.0)
 """
 import asyncio

@@ -1,4 +1,4 @@
-// API utility functions for CV2WEB backend integration
+// API utility functions for RESUME2WEBSITE backend integration
 
 // API Configuration
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'
@@ -190,7 +190,7 @@ export function createSSEConnection(
   onMessage: (data: ProcessingStatus) => void,
   onError?: (error: Error) => void
 ): EventSource {
-  const sessionId = typeof window !== 'undefined' ? localStorage.getItem('cv2web_session_id') : null
+  const sessionId = typeof window !== 'undefined' ? localStorage.getItem('resume2website_session_id') : null
   
   // EventSource doesn't support custom headers, so we'll append session ID as query param
   const url = `${API_BASE_URL}${API_ENDPOINTS.SSE_PROGRESS}/${jobId}?session_id=${sessionId}`
@@ -251,20 +251,20 @@ export async function healthCheck(): Promise<{ status: string }> {
 // Session management
 export function getSessionId(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('cv2web_session_id')
+    return localStorage.getItem('resume2website_session_id')
   }
   return null
 }
 
 export function setSessionId(sessionId: string): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('cv2web_session_id', sessionId)
+    localStorage.setItem('resume2website_session_id', sessionId)
   }
 }
 
 export function clearSession(): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('cv2web_session_id')
+    localStorage.removeItem('resume2website_session_id')
   }
 }
 

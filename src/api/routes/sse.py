@@ -359,7 +359,7 @@ async def generate_portfolio_streaming(
             # Send completion
             result = {
                 "job_id": job_id,
-                "portfolio_url": f"https://preview.cv2web.com/{job_id}",
+                "portfolio_url": f"https://preview.resume2website.com/{job_id}",
                 "status": "ready",
                 "processing_time": live_logger.get_total_time()
             }
@@ -453,7 +453,7 @@ async def sandbox_status_streaming(
             result = {
                 "sandbox_id": sandbox_id,
                 "status": "running",
-                "preview_url": f"https://sandbox.cv2web.com/{sandbox_id}",
+                "preview_url": f"https://sandbox.resume2website.com/{sandbox_id}",
                 "created_at": datetime.now().isoformat(),
                 "expires_at": datetime.now().isoformat()  # TODO: Add actual expiration
             }

@@ -1,5 +1,5 @@
 {
-  "documentType": "CV2WEB Portfolio Template Data Contract",
+  "documentType": "RESUME2WEBSITE Portfolio Template Data Contract",
   "version": "1.0.0",
   "description": "This document describes the data structure that will be injected into your portfolio template. Your template should be able to handle and display all these data sections appropriately.",
   "dataStructure": {
@@ -589,7 +589,7 @@
     },
     "dataAdapter": {
       "description": "You must create an adapter that transforms our data structure to your template's needs",
-      "example": "export function adaptCV2WebToTemplate(cv2webData: CV2WebData): YourTemplateData"
+      "example": "export function adaptResume2WebsiteToTemplate(resume2websiteData: Resume2WebsiteData): YourTemplateData"
     }
   },
   "importantNotes": [

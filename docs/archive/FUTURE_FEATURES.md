@@ -1,4 +1,4 @@
-# CV2WEB Future Features & Roadmap - Updated 2025-07-03
+# RESUME2WEBSITE Future Features & Roadmap - Updated 2025-07-03
 
 ## Current State: MVP Complete! ✅
 

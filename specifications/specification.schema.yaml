@@ -1,5 +1,5 @@
 # Specification Schema Definition
-# This schema defines the structure for all CV2WEB specifications
+# This schema defines the structure for all RESUME2WEBSITE specifications
 
 specification:
   id:

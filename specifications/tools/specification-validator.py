@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Specification Validator
-Validates CV2WEB specifications for consistency, completeness, and dependencies
+Validates RESUME2WEBSITE specifications for consistency, completeness, and dependencies
 """
 
 import yaml
@@ -192,7 +192,7 @@ class SpecificationValidator:
         
     def validate_all(self) -> bool:
         """Run all validations"""
-        print("🔍 Validating CV2WEB Specifications...")
+        print("🔍 Validating RESUME2WEBSITE Specifications...")
         
         self.load_specifications()
         

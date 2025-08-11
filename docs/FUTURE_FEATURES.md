@@ -1,7 +1,7 @@
-# CV2WEB Future Features & Roadmap
+# RESUME2WEBSITE Future Features & Roadmap
 
 ## Current State
-CV2WEB has a working pipeline that transforms CVs into portfolios using Claude 4 Opus extraction and modern UI components. The focus now is on completing the payment system and enhancing user experience.
+RESUME2WEBSITE has a working pipeline that transforms CVs into portfolios using Claude 4 Opus extraction and modern UI components. The focus now is on completing the payment system and enhancing user experience.
 
 ## Priority Scale
 - 🔴 **Critical** - Core functionality

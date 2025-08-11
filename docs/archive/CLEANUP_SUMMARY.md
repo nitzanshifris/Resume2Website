@@ -1,4 +1,4 @@
-# CV2WEB Cleanup Summary
+# RESUME2WEBSITE Cleanup Summary
 
 ## Cleanup Completed on 2025-07-10
 
@@ -44,7 +44,7 @@
 ## 📁 Current Project Structure
 
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── api/                         # API endpoints
 ├── backend/                     # Data models and schemas
 ├── services/                    # Core services (LLM, portfolio)

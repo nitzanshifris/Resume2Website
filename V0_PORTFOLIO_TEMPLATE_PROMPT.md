@@ -477,4 +477,4 @@ Generate a complete, interactive portfolio website that:
 9. **Edit mode** with visual indicators and controls
 10. **Performance optimized** meeting all benchmarks
 
-The result should maintain the original template's visual design while adding full CV2WEB interactive functionality. Every piece of text should be editable, every section draggable, and every content item should support multiple view modes through the smart card system.
+The result should maintain the original template's visual design while adding full RESUME2WEBSITE interactive functionality. Every piece of text should be editable, every section draggable, and every content item should support multiple view modes through the smart card system.

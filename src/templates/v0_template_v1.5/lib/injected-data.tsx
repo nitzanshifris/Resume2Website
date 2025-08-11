@@ -5,7 +5,7 @@
  * Job ID: michelle_enhanced_demo
  */
 
-import { adaptCV2WebToTemplate } from './cv-data-adapter'
+import { adaptResume2WebsiteToTemplate } from './cv-data-adapter'
 
 // CV Data from extraction
 const extractedCVData = {
@@ -561,7 +561,7 @@ const extractedCVData = {
 }
 
 // Convert CV data to template format
-export const portfolioData = adaptCV2WebToTemplate(extractedCVData)
+export const portfolioData = adaptResume2WebsiteToTemplate(extractedCVData)
 
 // Force use of real data instead of sample data
 export const useRealData = true

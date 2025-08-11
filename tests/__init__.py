@@ -1,3 +1,3 @@
 """
-Test suite for CV2WEB
+Test suite for RESUME2WEBSITE
 """

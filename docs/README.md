@@ -1,4 +1,4 @@
-# CV2WEB Documentation Hub
+# RESUME2WEBSITE Documentation Hub
 
 Transform CVs into stunning portfolio websites using AI-powered extraction and modern UI components.
 
@@ -64,7 +64,7 @@ Portfolio Expert (AI Guidance) → Template Selection → Sandbox Generation →
 
 1. **Clone and setup**:
    ```bash
-   git clone <repo-url> && cd CV2WEB-V4
+   git clone <repo-url> && cd RESUME2WEBSITE-V4
    ./quickstart.sh  # If available, or follow manual steps below
    ```
 
@@ -96,7 +96,7 @@ Portfolio Expert (AI Guidance) → Template Selection → Sandbox Generation →
 ## 📁 Project Structure
 
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── src/                    # Backend (FastAPI)
 │   ├── api/               # API routes
 │   ├── core/              # Business logic

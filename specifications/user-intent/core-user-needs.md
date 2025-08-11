@@ -1,6 +1,6 @@
 # User Intent Specification
 
-*Defining what users want to achieve and why they choose CV2WEB*
+*Defining what users want to achieve and why they choose RESUME2WEBSITE*
 
 ## Primary User Intents
 

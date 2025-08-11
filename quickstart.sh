@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 CV2WEB Quick Start Setup"
+echo "🚀 RESUME2WEBSITE Quick Start Setup"
 echo "=========================="
 
 # Check Python version

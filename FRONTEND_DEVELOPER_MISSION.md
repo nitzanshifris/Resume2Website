@@ -1,8 +1,8 @@
-# 🎨 Frontend Developer Mission: Create New Portfolio Template for CV2WEB V4
+# 🎨 Frontend Developer Mission: Create New Portfolio Template for RESUME2WEBSITE V4
 
 ## 📋 Mission Overview
 
-**Objective:** Create a brand new portfolio template for CV2WEB - an AI-powered platform that transforms CVs into stunning portfolio websites.
+**Objective:** Create a brand new portfolio template for RESUME2WEBSITE - an AI-powered platform that transforms CVs into stunning portfolio websites.
 
 **Your Role:** Design and implement a complete portfolio template with a unique visual style while maintaining all existing functionality and interactive features.
 
@@ -25,7 +25,7 @@
 ## 📁 Project Structure
 
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── src/templates/v0_template_1.4/          # 🎯 YOUR REFERENCE TEMPLATE
 │   ├── app/
 │   │   ├── page.tsx                        # Main portfolio page with edit functionality
@@ -267,7 +267,7 @@ The `cv-data-adapter.tsx` transforms CV data into template-compatible format:
 
 ```typescript
 // Key adapter functions you need to understand
-export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData
+export function adaptResume2WebsiteToTemplate(resume2websiteData: Resume2WebsiteData): PortfolioData
 export function determineViewMode(item: any): { viewMode: ViewMode, ...otherProps }
 export function getRandomIcon(): string
 export async function fetchLatestCVData(sessionId: string): Promise<PortfolioData>
@@ -592,7 +592,7 @@ Your mission is successful when:
 2. ✅ **All edit functionality preserved** - Every feature from v0_template_1.4 works
 3. ✅ **Unique visual design** - Clearly different aesthetic from existing templates  
 4. ✅ **Production ready** - Performant, accessible, responsive
-5. ✅ **Backend compatible** - Integrates seamlessly with CV2WEB API
+5. ✅ **Backend compatible** - Integrates seamlessly with RESUME2WEBSITE API
 6. ✅ **Documentation complete** - Clear setup and usage instructions
 
 ### 🎉 **Bonus Points**
@@ -607,10 +607,10 @@ Your mission is successful when:
 
 ## 🎊 Ready to Begin?
 
-Your mission, should you choose to accept it, is to create the next generation of CV2WEB portfolio templates. You have all the tools, data, and knowledge needed to build something amazing.
+Your mission, should you choose to accept it, is to create the next generation of RESUME2WEBSITE portfolio templates. You have all the tools, data, and knowledge needed to build something amazing.
 
 **Good luck, and may your code be bug-free and your designs be stunning!** 🚀
 
 ---
 
-*This document is your complete guide to mastering CV2WEB template development. Refer back to it often, and don't hesitate to ask questions. Happy coding!*
+*This document is your complete guide to mastering RESUME2WEBSITE template development. Refer back to it often, and don't hesitate to ask questions. Happy coding!*

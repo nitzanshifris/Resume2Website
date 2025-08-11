@@ -1,6 +1,6 @@
 """
 Log Aggregation Service
-Advanced log aggregation, analysis, and monitoring system for CV2WEB
+Advanced log aggregation, analysis, and monitoring system for RESUME2WEBSITE
 """
 
 import asyncio

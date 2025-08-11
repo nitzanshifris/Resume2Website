@@ -1,5 +1,5 @@
 """
-Simple configuration for CV2WEB MVP
+Simple configuration for RESUME2WEBSITE MVP
 """
 import os
 
@@ -35,7 +35,7 @@ ALLOWED_EXTENSIONS = {
 }
 
 # Database
-DATABASE_PATH = os.getenv("DATABASE_PATH", "data/cv2web.db")
+DATABASE_PATH = os.getenv("DATABASE_PATH", "data/resume2website.db")
 SESSION_EXPIRY_DAYS = int(os.getenv("SESSION_EXPIRY_DAYS", "7"))
 
 # Paths - Configurable for K8s volume mounts

@@ -87,7 +87,7 @@ aceternity/
 ├── test_result.json        ❌
 ├── fix-imports.sh          ❌
 ├── monitor_system.py       ❌
-├── start_cv2web.sh         ❌
+├── start_resume2website.sh         ❌
 ├── [40+ more files in root]
 └── [proper directories]
 ```

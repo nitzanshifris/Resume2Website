@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-View all registered users in the CV2WEB database
+View all registered users in the RESUME2WEBSITE database
 """
 import sqlite3
 from datetime import datetime
@@ -8,7 +8,7 @@ import json
 
 def view_users():
     """Display all users in the database"""
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -22,7 +22,7 @@ def view_users():
     users = cursor.fetchall()
     
     print("\n" + "="*100)
-    print("CV2WEB REGISTERED USERS")
+    print("RESUME2WEBSITE REGISTERED USERS")
     print("="*100)
     print(f"\nTotal Users: {len(users)}")
     print("-"*100)
@@ -100,7 +100,7 @@ def view_users():
 
 def view_recent_sessions():
     """Display recent active sessions"""
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -130,7 +130,7 @@ def search_user(email=None):
     if not email:
         email = input("\nEnter email to search: ")
     
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -167,7 +167,7 @@ def export_users_to_csv():
     """Export users to CSV file"""
     import csv
     
-    conn = sqlite3.connect('data/cv2web.db')
+    conn = sqlite3.connect('data/resume2website.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     

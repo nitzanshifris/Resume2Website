@@ -1,4 +1,4 @@
-# 🚀 CV2WEB Setup Guide for Reef
+# 🚀 RESUME2WEBSITE Setup Guide for Reef
 
 Hey Reef! Here's everything you need to get both the main website and portfolio template running on your Mac.
 
@@ -44,8 +44,8 @@ brew install git
 ### 1. Clone the Repository
 ```bash
 cd ~/Desktop  # or wherever you want to put the project
-git clone https://github.com/nitzanshifris/cv2web-v4.git
-cd cv2web-v4
+git clone https://github.com/nitzanshifris/resume2website-v4.git
+cd resume2website-v4
 ```
 
 ### 2. Create Required Directories
@@ -80,7 +80,7 @@ These files contain sensitive data or are user-specific, so they're not in the r
 
 ### 2. Database Files
 - The SQLite database will be created automatically when you run the backend
-- Location: `cv2web.db` in the root directory
+- Location: `resume2website.db` in the root directory
 
 ### 3. User Data Directories (already created above)
 - `data/uploads/` - Where uploaded CVs are stored
@@ -151,7 +151,7 @@ Keep the user website running in the first terminal.
 
 ### Step 2: Navigate to the template directory
 ```bash
-cd ~/Desktop/cv2web-v4  # Go back to root
+cd ~/Desktop/resume2website-v4  # Go back to root
 cd src/templates/v0_template_1.3  # Latest template version
 ```
 
@@ -176,7 +176,7 @@ The portfolio template should now be running at: **http://localhost:3001** (or a
 
 ### Step 2: Go to project root
 ```bash
-cd ~/Desktop/cv2web-v4
+cd ~/Desktop/resume2website-v4
 ```
 
 ### Step 3: Create Python Virtual Environment
@@ -204,7 +204,7 @@ OPENAI_API_KEY=your_openai_key
 GOOGLE_APPLICATION_CREDENTIALS=path_to_google_credentials.json
 
 # Database
-DATABASE_URL=sqlite:///./cv2web.db
+DATABASE_URL=sqlite:///./resume2website.db
 
 # Session Secret
 SECRET_KEY=your_secret_key_here

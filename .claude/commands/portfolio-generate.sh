@@ -1,11 +1,11 @@
 #!/bin/bash
-# CV2WEB Portfolio Generation Command  
+# RESUME2WEBSITE Portfolio Generation Command  
 # Manages portfolio generation system and sandbox environments
 
 claude -p prompts/portfolio-generation.md -- \
 "PORTFOLIO GENERATION TASK:
 
-Analyze and optimize the portfolio generation system for CV2WEB. Focus on:
+Analyze and optimize the portfolio generation system for RESUME2WEBSITE. Focus on:
 
 1. SANDBOX MANAGEMENT: Review isolated environment creation and management
 2. TEMPLATE SYSTEM: Validate template architecture and data adapters  

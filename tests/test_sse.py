@@ -44,7 +44,7 @@ def test_sse_with_curl():
     print("curl -N -H 'Accept: text/event-stream' http://localhost:2000/api/v1/sse/heartbeat")
 
 if __name__ == "__main__":
-    print("🚀 CV2WEB SSE Infrastructure Test")
+    print("🚀 RESUME2WEBSITE SSE Infrastructure Test")
     print("=" * 50)
     
     # Check if server is running

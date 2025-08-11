@@ -7,7 +7,7 @@ This is a React/Next.js component library with 65+ animated UI components. Your 
 
 ### Root Directory Structure
 ```
-/Users/nitzan_shifris/Desktop/CV2WEB-V3/aceternity/
+/Users/nitzan_shifris/Desktop/RESUME2WEBSITE-V3/aceternity/
 ├── app/                      # Next.js App Router
 ├── components/               # Source components (development)
 ├── component-library/        # Distributable components (production mirror)

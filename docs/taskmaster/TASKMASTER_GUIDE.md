@@ -1,4 +1,4 @@
-# TaskMaster AI - Complete Guide for CV2WEB
+# TaskMaster AI - Complete Guide for RESUME2WEBSITE
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -10,7 +10,7 @@
 
 ## Overview
 
-TaskMaster helps break complex CV2WEB development into manageable tasks for higher AI accuracy. It automatically activates when you request features, manages task complexity, and ensures systematic implementation.
+TaskMaster helps break complex RESUME2WEBSITE development into manageable tasks for higher AI accuracy. It automatically activates when you request features, manages task complexity, and ensures systematic implementation.
 
 ### When TaskMaster Activates
 
@@ -31,7 +31,7 @@ TaskMaster automatically activates when you say:
 
 ### Initial Configuration
 ```bash
-# TaskMaster is integrated into CV2WEB and requires no additional setup
+# TaskMaster is integrated into RESUME2WEBSITE and requires no additional setup
 # Configuration is stored in .taskmaster/config.json
 ```
 
@@ -50,7 +50,7 @@ TaskMaster automatically activates when you say:
 ### 1. Create a PRD for New Features
 ```bash
 # Example: OAuth Authentication
-claude> Create a PRD for OAuth authentication for CV2WEB. Include:
+claude> Create a PRD for OAuth authentication for RESUME2WEBSITE. Include:
 - Support for Google, GitHub OAuth
 - JWT token management
 - Protected API routes
@@ -139,7 +139,7 @@ taskmaster show --id=1
 ```
 User: Add dark mode to the app
 
-Claude: I'll help you add dark mode to CV2WEB. Let me use TaskMaster to ensure high-quality implementation.
+Claude: I'll help you add dark mode to RESUME2WEBSITE. Let me use TaskMaster to ensure high-quality implementation.
 
 First, let me understand your requirements:
 1. Should dark mode toggle affect just the portfolio output or the entire app?
@@ -151,7 +151,7 @@ First, let me understand your requirements:
 Creating a comprehensive Product Requirements Document for dark mode...
 
 [PRD Content]
-Title: Dark Mode Implementation for CV2WEB
+Title: Dark Mode Implementation for RESUME2WEBSITE
 Version: 1.0
 Date: [Current Date]
 
@@ -266,7 +266,7 @@ taskmaster report --type=completion --task-id=X
 - Update status immediately after completion
 - Document any blockers or changes
 
-### 4. CV2WEB Specific Usage
+### 4. RESUME2WEBSITE Specific Usage
 
 #### CV Extraction Tasks
 ```bash
@@ -292,7 +292,7 @@ claude> Create tasks for new FastAPI endpoint with authentication. Consider:
 - Error handling
 ```
 
-## Integration with CV2WEB Development
+## Integration with RESUME2WEBSITE Development
 
 ### Quick Reference for Common Features
 

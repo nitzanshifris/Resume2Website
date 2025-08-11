@@ -815,7 +815,7 @@
     "settingsPanel": "Each SmartCard has 9 view modes accessible via settings button"
   },
   "notes": {
-    "dataAdapter": "cv-data-adapter.tsx handles mapping from CV2WEB extraction format to template format",
+    "dataAdapter": "cv-data-adapter.tsx handles mapping from RESUME2WEBSITE extraction format to template format",
     "autoDetection": "Template automatically detects video URLs, GitHub repos, and tweets for optimal display",
     "testimonials": "Currently no CV extraction data maps to testimonials - always empty",
     "icons": "Icons are randomly assigned from contentIconMap during data adaptation"

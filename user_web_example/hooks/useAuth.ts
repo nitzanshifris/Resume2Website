@@ -27,8 +27,8 @@ export function useAuth() {
   // Check authentication status
   const checkAuth = useCallback(async () => {
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id')
-      const userData = localStorage.getItem('cv2web_user')
+      const sessionId = localStorage.getItem('resume2website_session_id')
+      const userData = localStorage.getItem('resume2website_user')
       
       if (!sessionId || !userData) {
         setAuthState({
@@ -58,8 +58,8 @@ export function useAuth() {
         return true
       } else {
         // Session is invalid, clear it
-        localStorage.removeItem('cv2web_session_id')
-        localStorage.removeItem('cv2web_user')
+        localStorage.removeItem('resume2website_session_id')
+        localStorage.removeItem('resume2website_user')
         setAuthState({
           isAuthenticated: false,
           isLoading: false,
@@ -71,8 +71,8 @@ export function useAuth() {
     } catch (error) {
       console.error('Authentication check failed:', error)
       // Clear potentially corrupted auth data
-      localStorage.removeItem('cv2web_session_id')
-      localStorage.removeItem('cv2web_user')
+      localStorage.removeItem('resume2website_session_id')
+      localStorage.removeItem('resume2website_user')
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
@@ -85,8 +85,8 @@ export function useAuth() {
 
   // Sign out function
   const signOut = useCallback(() => {
-    localStorage.removeItem('cv2web_session_id')
-    localStorage.removeItem('cv2web_user')
+    localStorage.removeItem('resume2website_session_id')
+    localStorage.removeItem('resume2website_user')
     setAuthState({
       isAuthenticated: false,
       isLoading: false,
@@ -97,8 +97,8 @@ export function useAuth() {
 
   // Sign in function
   const signIn = useCallback(async (sessionId: string, userData: User) => {
-    localStorage.setItem('cv2web_session_id', sessionId)
-    localStorage.setItem('cv2web_user', JSON.stringify(userData))
+    localStorage.setItem('resume2website_session_id', sessionId)
+    localStorage.setItem('resume2website_user', JSON.stringify(userData))
     setAuthState({
       isAuthenticated: true,
       isLoading: false,
@@ -113,7 +113,7 @@ export function useAuth() {
 
     // Listen for storage changes (e.g., auth in another tab)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'cv2web_session_id' || e.key === 'cv2web_user') {
+      if (e.key === 'resume2website_session_id' || e.key === 'resume2website_user') {
         checkAuth()
       }
     }

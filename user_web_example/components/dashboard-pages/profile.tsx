@@ -45,7 +45,7 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
 
   const fetchUserProfile = async () => {
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       if (!sessionId) {
         setIsLoading(false)
         return
@@ -80,7 +80,7 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
 
   const fetchLatestCVData = async () => {
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       if (!sessionId) return
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/my-cvs`, {
@@ -132,7 +132,7 @@ export default function Profile({ userName = "Alex Rodriguez" }: ProfileProps) {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       if (!sessionId) {
         throw new Error('Not authenticated')
       }

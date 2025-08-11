@@ -1,6 +1,6 @@
 # Aceternity UI Component System
 
-A comprehensive collection of animated UI components built with React, TypeScript, Framer Motion, and Tailwind CSS for the CV2WEB-V3 application.
+A comprehensive collection of animated UI components built with React, TypeScript, Framer Motion, and Tailwind CSS for the RESUME2WEBSITE-V3 application.
 
 ## 📚 Documentation Index
 
@@ -17,7 +17,7 @@ A comprehensive collection of animated UI components built with React, TypeScrip
 - **[NAMING_CONVENTIONS.md](./docs/project-docs/NAMING_CONVENTIONS.md)** - Coding standards and naming rules
 
 ### Other Documentation
-- **[CV2WEB_COMPLETE_GUIDE.md](./docs/CV2WEB_COMPLETE_GUIDE.md)** - CV integration system documentation
+- **[RESUME2WEBSITE_COMPLETE_GUIDE.md](./docs/RESUME2WEBSITE_COMPLETE_GUIDE.md)** - CV integration system documentation
 - **[COMPONENT_INTEGRATION_PROMPT.md](./docs/COMPONENT_INTEGRATION_PROMPT.md)** - Component integration checklist
 
 ## 🚀 Quick Links

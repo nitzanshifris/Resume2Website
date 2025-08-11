@@ -1,6 +1,6 @@
 # Deployment Documentation
 
-This directory contains documentation and templates for deploying CV2WEB to production.
+This directory contains documentation and templates for deploying RESUME2WEBSITE to production.
 
 ## Contents
 

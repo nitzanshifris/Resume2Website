@@ -1,4 +1,4 @@
-# CV2WEB Specifications Implementation Guide
+# RESUME2WEBSITE Specifications Implementation Guide
 
 *How to use these specifications following Sean's "specifications as code" methodology*
 
@@ -6,7 +6,7 @@
 
 > "The new scarce skill is writing specifications that fully capture intent and values. Whoever masters that becomes the most valuable programmer." - Sean, OpenAI
 
-These specifications are the **primary artifacts** of CV2WEB. Code is a secondary downstream artifact generated from these specifications.
+These specifications are the **primary artifacts** of RESUME2WEBSITE. Code is a secondary downstream artifact generated from these specifications.
 
 ## What We've Built
 
@@ -53,7 +53,7 @@ Following Sean's methodology from the OpenAI Model Spec, we've created:
 When prompting Claude or other AI models for implementation:
 
 ```
-System: You are implementing CV2WEB following these specifications:
+System: You are implementing RESUME2WEBSITE following these specifications:
 
 [Include relevant specification clauses]
 

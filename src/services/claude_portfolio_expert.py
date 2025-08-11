@@ -905,7 +905,7 @@ class ClaudePortfolioExpert:
     async def _generate_package_json(self, plan: Dict[str, Any]) -> Dict[str, Any]:
         """Generate package.json for the portfolio."""
         return {
-            "name": "cv2web-portfolio",
+            "name": "resume2website-portfolio",
             "version": "1.0.0",
             "private": True,
             "scripts": {

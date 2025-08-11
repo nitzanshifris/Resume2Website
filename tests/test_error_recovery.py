@@ -117,7 +117,7 @@ class ErrorSimulator:
         
         # Test 1: Database file permissions (simulate)
         print("\n1. Testing read-only database scenario...")
-        db_path = Path("data/cv2web.db")
+        db_path = Path("data/resume2website.db")
         if db_path.exists():
             original_perms = db_path.stat().st_mode
             try:
@@ -274,7 +274,7 @@ async def test_graceful_degradation():
 
 async def main():
     """Run all error recovery tests"""
-    print("🛡️  CV2WEB Error Recovery Testing")
+    print("🛡️  RESUME2WEBSITE Error Recovery Testing")
     print("=" * 80)
     
     simulator = ErrorSimulator()

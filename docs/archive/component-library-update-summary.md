@@ -67,7 +67,7 @@ Documented why each was excluded:
 
 ## Files Created/Updated
 
-1. **cv2web-components.ts** - Comprehensive component registry with 51 MVP components
+1. **resume2website-components.ts** - Comprehensive component registry with 51 MVP components
 2. **component-verification-report.md** - Detailed verification of all components
 3. **component-library-update-summary.md** - This summary
 

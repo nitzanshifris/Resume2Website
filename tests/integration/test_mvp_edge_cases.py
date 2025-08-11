@@ -340,7 +340,7 @@ def test_database_integrity():
 
 def main():
     """Run all MVP edge case tests"""
-    print("🔍 CV2WEB MVP Edge Case Tests")
+    print("🔍 RESUME2WEBSITE MVP Edge Case Tests")
     print("=" * 60)
     print("Testing scenarios most likely to break in production...")
     

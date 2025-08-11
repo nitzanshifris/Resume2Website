@@ -1,9 +1,9 @@
 #!/bin/bash
-# CV2WEB Git Workflow - MANDATORY BRANCH-BASED DEVELOPMENT
+# RESUME2WEBSITE Git Workflow - MANDATORY BRANCH-BASED DEVELOPMENT
 # ⚠️ CRITICAL: Follows CLAUDE.md git safety requirements
 
 claude -p prime.md -- \
-"⚠️ MANDATORY CV2WEB GIT WORKFLOW:
+"⚠️ MANDATORY RESUME2WEBSITE GIT WORKFLOW:
 
 1. SAFETY CHECK: Ensure we are NOT on main branch (git branch --show-current)
 2. TYPECHECK: Run 'pnpm run typecheck' and ensure no TypeScript errors

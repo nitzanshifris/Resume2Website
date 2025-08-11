@@ -1,7 +1,7 @@
 ## Product Requirements Document: CLAUDE.md Restructuring and Enhancement
 
 ### 1. PROJECT OVERVIEW
-Transform the existing CV2WEB CLAUDE.md documentation into a professional, well-structured guide that follows best practices from professional examples and improves developer experience through better organization, visual hierarchy, and practical workflows.
+Transform the existing RESUME2WEBSITE CLAUDE.md documentation into a professional, well-structured guide that follows best practices from professional examples and improves developer experience through better organization, visual hierarchy, and practical workflows.
 
 ### 2. OBJECTIVES
 - Restructure CLAUDE.md with clear information hierarchy
@@ -20,7 +20,7 @@ Transform the existing CV2WEB CLAUDE.md documentation into a professional, well-
 - Consolidate all IMPORTANT warnings into relevant sections
 
 #### 3.2 Section Improvements
-- Add clear project overview explaining what CV2WEB does
+- Add clear project overview explaining what RESUME2WEBSITE does
 - Create dedicated Prerequisites & Setup section
 - Implement workflow-based sections
 - Move TaskMaster to its own major section
@@ -51,9 +51,9 @@ Transform the existing CV2WEB CLAUDE.md documentation into a professional, well-
 
 #### 4.1 Document Structure
 ```
-# CV2WEB V4 - Claude Code Development Guide
+# RESUME2WEBSITE V4 - Claude Code Development Guide
 ## Project Overview
-### What CV2WEB Does
+### What RESUME2WEBSITE Does
 ### Tech Stack at a Glance
 ## 🚀 Quick Start
 ### Prerequisites

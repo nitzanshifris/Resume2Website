@@ -427,7 +427,7 @@
 		},
 		{
 			"taskId": 1,
-			"taskTitle": "Implement Server-Sent Events (SSE) Infrastructure for CV2WEB",
+			"taskTitle": "Implement Server-Sent Events (SSE) Infrastructure for RESUME2WEBSITE",
 			"complexityScore": 7,
 			"recommendedSubtasks": 8,
 			"expansionPrompt": "Break down the SSE infrastructure setup, endpoint creation, message type definitions, connection management, error handling, authentication, rate limiting, and client integration into separate subtasks for focused implementation and testing.",

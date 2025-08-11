@@ -9,7 +9,7 @@
 
 ### Scenario 1: First-Time User with Large CV File
 **Input Conditions**:
-- New user, never used CV2WEB before
+- New user, never used RESUME2WEBSITE before
 - CV file: 8MB PDF with complex formatting
 - Mobile device on 3G network connection
 - User has no context about what to expect
@@ -129,7 +129,7 @@
 ## Success Validation
 
 ### Behavioral Indicators:
-- User stays focused on CV2WEB tab/window
+- User stays focused on RESUME2WEBSITE tab/window
 - User doesn't attempt to interrupt or restart process
 - User shows positive body language and engagement
 - User continues to completion rather than abandoning
@@ -148,4 +148,4 @@
 
 ---
 
-*This test case ensures that CV2WEB delivers on its promise of immediate value, creating user confidence and engagement from the very first interaction.*
+*This test case ensures that RESUME2WEBSITE delivers on its promise of immediate value, creating user confidence and engagement from the very first interaction.*

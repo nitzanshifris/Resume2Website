@@ -11,7 +11,7 @@ import json
 
 
 class SSEMessageType(Enum):
-    """Standard SSE message types for CV2WEB"""
+    """Standard SSE message types for RESUME2WEBSITE"""
     
     # Basic logging messages
     LOG_INFO = "log_info"

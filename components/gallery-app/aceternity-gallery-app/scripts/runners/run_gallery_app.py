@@ -8,7 +8,7 @@ def run_gallery():
     """Run the component gallery Next.js application"""
     
     # Path to the template directory
-    template_dir = os.path.abspath("../apps/backend/templates/cv2web-react-template")
+    template_dir = os.path.abspath("../apps/backend/templates/resume2website-react-template")
     
     print("🚀 Starting Component Gallery Application...")
     print(f"📁 Directory: {template_dir}")

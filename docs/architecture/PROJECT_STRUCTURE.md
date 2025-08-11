@@ -1,12 +1,12 @@
-# CV2WEB-V4 Project Structure
+# RESUME2WEBSITE-V4 Project Structure
 
 ## Overview
-This document provides a comprehensive overview of the CV2WEB-V4 project structure, explaining the purpose and contents of each directory.
+This document provides a comprehensive overview of the RESUME2WEBSITE-V4 project structure, explaining the purpose and contents of each directory.
 
 ## Root Directory Structure
 
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── src/                        # All backend source code
 │   ├── api/                    # API routes and database
 │   ├── core/                   # Core business logic
@@ -75,7 +75,7 @@ CV2WEB-V4/
   - `package.json` - Dependencies
 
 ### `/user_web_example` - Frontend Application
-Main Next.js application for CV2WEB interface.
+Main Next.js application for RESUME2WEBSITE interface.
 
 - **`app/`** - App router pages
   - `page.tsx` - Landing page
@@ -109,7 +109,7 @@ Main Next.js application for CV2WEB interface.
   - `text_examples/` - Text samples
 - **`uploads/`** - User uploaded files
 - **`generated_portfolios/`** - Generated sites
-- **`cv2web.db`** - SQLite database
+- **`resume2website.db`** - SQLite database
 
 ### `/sandboxes` - Portfolio Sandboxes
 Isolated environments for each generated portfolio.
@@ -137,7 +137,7 @@ Isolated environments for each generated portfolio.
 - Individual test files for specific features
 
 ### `/scripts` - Utility Scripts
-- `start_cv2web.sh` - Start all services
+- `start_resume2website.sh` - Start all services
 - `cleanup.sh` - Clean generated files
 - `quickstart.sh` - One-command setup
 
@@ -177,7 +177,7 @@ GOOGLE_CLOUD_PROJECT    # Google Vision OCR
 AWS_ACCESS_KEY_ID       # AWS Textract
 
 # Database
-DATABASE_URL=data/cv2web.db
+DATABASE_URL=data/resume2website.db
 
 # Ports
 BACKEND_PORT=2000       # FastAPI

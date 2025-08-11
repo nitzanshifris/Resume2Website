@@ -5,7 +5,7 @@ Quick test runner from root directory
 import subprocess
 import sys
 
-print("🧪 Running CV2WEB Tests\n")
+print("🧪 Running RESUME2WEBSITE Tests\n")
 
 tests = [
     ("Comprehensive Integration Test", "tests/comprehensive_test.py"),

@@ -90,7 +90,7 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
         setCurrentMessage("Extracting information from your CV...")
         
         try {
-          const sessionId = localStorage.getItem('cv2web_session_id')
+          const sessionId = localStorage.getItem('resume2website_session_id')
           const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${activeJobId}`, {
             method: 'POST',
             headers: {
@@ -116,7 +116,7 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
         setCurrentMessage("Creating your personalized portfolio...")
 
         try {
-          const sessionId = localStorage.getItem('cv2web_session_id')
+          const sessionId = localStorage.getItem('resume2website_session_id')
           const templates = ['v0_template_v1.5', 'v0_template_v2.1']
           const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
           

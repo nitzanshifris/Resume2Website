@@ -399,9 +399,9 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
                     <CardContent className="space-y-4">
                       {/* Default Domain */}
                       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Default CV2Web Domain</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Default Resume2Website Domain</p>
                         <p className="font-mono text-sm text-gray-900 dark:text-white">
-                          cv2web.com/alex-johnson
+                          resume2website.com/alex-johnson
                         </p>
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200">
@@ -511,7 +511,7 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
                 <Card>
                   <CardHeader>
                     <CardTitle>Connect Your Custom Domain</CardTitle>
-                    <CardDescription>Point your domain to your CV2Web website</CardDescription>
+                    <CardDescription>Point your domain to your Resume2Website website</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
@@ -942,7 +942,7 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
         <Card>
           <CardHeader>
             <CardTitle>Send Feedback</CardTitle>
-            <CardDescription>Help us improve CV2Web</CardDescription>
+            <CardDescription>Help us improve Resume2Website</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -1029,7 +1029,7 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
               </div>
               <div>
                 <h1 className="font-bold text-xl bg-gradient-to-r from-emerald-600 via-sky-600 to-blue-600 bg-clip-text text-transparent">
-                  CV2Web
+                  Resume2Website
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Professional Dashboard</p>
               </div>
@@ -1130,7 +1130,7 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            <p>© 2024 CV2Web</p>
+            <p>© 2024 Resume2Website</p>
             <p className="mt-1">Version 2.1.0</p>
           </div>
         </div>

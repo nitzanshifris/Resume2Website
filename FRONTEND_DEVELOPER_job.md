@@ -2,11 +2,11 @@
 
 Hey there! 👋 
 
-We need your help creating a **brand new portfolio template** for our CV2WEB platform. 
+We need your help creating a **brand new portfolio template** for our RESUME2WEBSITE platform. 
 
-## What is CV2WEB?
+## What is RESUME2WEBSITE?
 
-CV2WEB is an AI-powered platform that transforms CVs into portfolio react websites. Users upload their resume, our AI extracts all the information, and then we generate a beautiful portfolio website for them.
+RESUME2WEBSITE is an AI-powered platform that transforms CVs into portfolio react websites. Users upload their resume, our AI extracts all the information, and then we generate a beautiful portfolio website for them.
 
 
 ## Your Mission 🎯
@@ -648,7 +648,7 @@ Each content item displays in versatile cards supporting:
   Setup Commands
 
   # 1. Navigate to project root
-  cd CV2WEB-V4
+  cd RESUME2WEBSITE-V4
 
   # 2. Install dependencies (use pnpm, NOT npm/yarn)
   pnpm install

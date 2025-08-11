@@ -23,7 +23,7 @@ For EACH subtask, you must:
 - Document the ACTUAL current state (not what the task says it should be)
 
 **c) Assess Relevance**
-- Confirm the subtask is related to the CV2WEB project
+- Confirm the subtask is related to the RESUME2WEBSITE project
 - Ensure it's not referencing unrelated functionality
 - Mark any subtasks that seem unrelated or incorrect
 

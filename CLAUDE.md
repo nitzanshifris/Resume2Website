@@ -1,9 +1,9 @@
-# CV2WEB V4 - Claude Code Instructions
+# RESUME2WEBSITE V4 - Claude Code Instructions
 
 ## Project Overview
-CV2WEB is an AI-powered platform that transforms CVs into stunning portfolio websites using FastAPI backend + Next.js frontend with Claude 4 Opus for deterministic data extraction.
+RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portfolio websites using FastAPI backend + Next.js frontend with Claude 4 Opus for deterministic data extraction.
 
-### What CV2WEB Does
+### What RESUME2WEBSITE Does
 - **Extracts** CV data using Claude 4 Opus (temperature 0.0) into 18 structured sections
 - **Generates** portfolio websites in isolated sandbox environments 
 - **Manages** multiple portfolio instances with real-time health monitoring
@@ -167,7 +167,7 @@ python >= 3.11
 pnpm >= 8.0.0
 
 # Setup
-git clone <repo> && cd CV2WEB-V4
+git clone <repo> && cd RESUME2WEBSITE-V4
 pnpm install                           # Install frontend deps
 python3 -m venv venv                   # Create Python venv
 source venv/bin/activate               # Activate venv
@@ -229,7 +229,7 @@ pnpm run dev --verbose                         # Frontend verbose logs
 
 ## Directory Structure
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── src/                        # Backend (FastAPI)
 │   ├── api/                   # API routes and endpoints
 │   │   ├── routes/           # Individual route modules

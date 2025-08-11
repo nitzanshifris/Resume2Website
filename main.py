@@ -1,5 +1,5 @@
 """
-CV2WEB API - Main Application (MVP)
+RESUME2WEBSITE API - Main Application (MVP)
 """
 import logging
 from fastapi import FastAPI
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
-    title="CV2WEB MVP",
+    title="RESUME2WEBSITE MVP",
     version="0.1.0",
     description="Convert CVs to Portfolio Websites"
 )
@@ -56,7 +56,7 @@ app.include_router(cv_enhanced.router)  # Enhanced CV with real-time tracking
 def read_root():
     """Root endpoint - health check"""
     return {
-        "message": "CV2WEB API is running",
+        "message": "RESUME2WEBSITE API is running",
         "version": "0.1.0",
         "docs": "/docs"
     }
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     host = config.HOST
     port = config.PORT
     
-    logger.info(f"Starting CV2WEB API on {host}:{port}")
+    logger.info(f"Starting RESUME2WEBSITE API on {host}:{port}")
     
     # Configure reload with exclusions to prevent watchfiles overload
     def get_reload_excludes():

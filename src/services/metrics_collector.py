@@ -1,6 +1,6 @@
 """
 Performance Metrics Collection System
-Advanced metrics collection, aggregation, and monitoring for CV2WEB
+Advanced metrics collection, aggregation, and monitoring for RESUME2WEBSITE
 """
 
 import time

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Real CV2WEB Pipeline with API
+Test Real RESUME2WEBSITE Pipeline with API
 """
 
 import requests
@@ -12,7 +12,7 @@ from pathlib import Path
 BASE_URL = "http://127.0.0.1:2000/api/v1"
 
 def test_pipeline():
-    print("🚀 Testing Real CV2WEB Pipeline")
+    print("🚀 Testing Real RESUME2WEBSITE Pipeline")
     print("=" * 50)
     
     # Step 1: Register/Login

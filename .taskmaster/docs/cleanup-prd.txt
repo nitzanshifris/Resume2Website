@@ -1,8 +1,8 @@
-# PRD: CV2WEB V4 Project Cleanup
+# PRD: RESUME2WEBSITE V4 Project Cleanup
 Created: 2025-07-13
 
 ## Objective
-Perform a comprehensive cleanup of the CV2WEB V4 project structure to improve maintainability, reduce clutter, and establish consistent organization patterns.
+Perform a comprehensive cleanup of the RESUME2WEBSITE V4 project structure to improve maintainability, reduce clutter, and establish consistent organization patterns.
 
 ## Goals
 1. Remove all unnecessary files and directories

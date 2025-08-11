@@ -51,7 +51,7 @@ export default function MyResume({ userName = "Alex" }: MyResumeProps) {
       if (cvUploads.length > 0) {
         const upload = cvUploads[0]
         try {
-          const sessionId = localStorage.getItem('cv2web_session_id')
+          const sessionId = localStorage.getItem('resume2website_session_id')
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/download/${upload.job_id}/all`,
             {
@@ -99,7 +99,7 @@ export default function MyResume({ userName = "Alex" }: MyResumeProps) {
           setFilePreviewError(null)
           
           try {
-            const sessionId = localStorage.getItem('cv2web_session_id')
+            const sessionId = localStorage.getItem('resume2website_session_id')
             const response = await fetch(downloadUrl, {
               headers: {
                 'X-Session-ID': sessionId || ''
@@ -157,7 +157,7 @@ export default function MyResume({ userName = "Alex" }: MyResumeProps) {
 
   const fetchCVUploads = async () => {
     try {
-      const sessionId = localStorage.getItem('cv2web_session_id')
+      const sessionId = localStorage.getItem('resume2website_session_id')
       if (!sessionId) {
         setIsLoading(false)
         return
@@ -255,7 +255,7 @@ export default function MyResume({ userName = "Alex" }: MyResumeProps) {
               size="sm"
               onClick={() => {
                 if (cvUploads[0]?.job_id) {
-                  const sessionId = localStorage.getItem('cv2web_session_id')
+                  const sessionId = localStorage.getItem('resume2website_session_id')
                   // Create a temporary link to download
                   const link = document.createElement('a')
                   link.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/download/${cvUploads[0].job_id}`
@@ -440,7 +440,7 @@ export default function MyResume({ userName = "Alex" }: MyResumeProps) {
                           <p className="text-gray-600 mb-4 text-sm">{filePreviewError}</p>
                           <Button
                             onClick={() => {
-                              const sessionId = localStorage.getItem('cv2web_session_id')
+                              const sessionId = localStorage.getItem('resume2website_session_id')
                               fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/download/${cvUploads[0].job_id}`, {
                                 headers: { 'X-Session-ID': sessionId || '' }
                               })
@@ -512,7 +512,7 @@ export default function MyResume({ userName = "Alex" }: MyResumeProps) {
                           </p>
                           <Button
                             onClick={() => {
-                              const sessionId = localStorage.getItem('cv2web_session_id')
+                              const sessionId = localStorage.getItem('resume2website_session_id')
                               fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/download/${cvUploads[0].job_id}`, {
                                 headers: { 'X-Session-ID': sessionId || '' }
                               })
@@ -804,7 +804,7 @@ export default function MyResume({ userName = "Alex" }: MyResumeProps) {
                             variant="outline" 
                             size="sm"
                             onClick={() => {
-                              const sessionId = localStorage.getItem('cv2web_session_id')
+                              const sessionId = localStorage.getItem('resume2website_session_id')
                               fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/download/${upload.job_id}`, {
                                 headers: { 'X-Session-ID': sessionId || '' }
                               })

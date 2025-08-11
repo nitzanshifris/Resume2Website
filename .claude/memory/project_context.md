@@ -1,7 +1,7 @@
-# CV2WEB Project Context
+# RESUME2WEBSITE Project Context
 
 ## Project Overview
-CV2WEB is an AI-powered CV to portfolio website converter that transforms resumes into stunning portfolio websites using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo.
+RESUME2WEBSITE is an AI-powered CV to portfolio website converter that transforms resumes into stunning portfolio websites using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo.
 
 ## Key Technologies
 - **Backend**: FastAPI (Python 3.11+)
@@ -24,7 +24,7 @@ CV2WEB is an AI-powered CV to portfolio website converter that transforms resume
 
 ## Current Project Structure
 ```
-CV2WEB-V4/
+RESUME2WEBSITE-V4/
 ├── src/
 │   ├── api/             # FastAPI backend
 │   ├── templates/       # Portfolio templates (v1.5, v2.1)
