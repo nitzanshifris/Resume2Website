@@ -790,12 +790,13 @@ const VerticalProgressBar = ({
 }
 
 // CV2Web Demo Component - Mobile-First WOW Experience
-function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick }: { 
+function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect }: { 
   onOpenModal: () => void; 
   setShowPricing: (value: boolean) => void;
   uploadedFile: File | null;
   setUploadedFile: (file: File | null) => void;
   onFileClick: (file: File) => void;
+  handleFileSelect: (file: File) => void;
 }) {
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
@@ -1290,21 +1291,22 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
     // 3. Navigate away and come back
   }
 
-  const handleFileSelect = (file: File) => {
-    // Set the uploaded file - this will trigger CV to appear in the card
-    console.log('📁 File selected, showing CV in card:', file.name)
-    setUploadedFile(file)
-    setShowCVCard(true) // Ensure CV card is visible
+  // Wrapper for handleFileSelect that also sets showCVCard
+  const handleLocalFileSelect = (file: File) => {
+    // Call the parent's handleFileSelect
+    handleFileSelect(file)
     
-    // Don't start animation immediately - follow the timeline
-    // Check if user is authenticated
+    // Also set showCVCard to true
+    setShowCVCard(true)
+    
+    // Check if user is authenticated and trigger appropriate animation
     if (isAuthenticated) {
       // User is signed in - wait for CV to appear then start full process
       console.log('✅ User authenticated, will start full process after CV appears')
       setTimeout(() => {
         console.log('🚀 Starting full process for authenticated user')
         handleStartDemo()
-      }, 1500) // Wait for CV to appear first (reduced by 0.5s to match preview)
+      }, 1500) // Wait for CV to appear first
     } else {
       // User is not signed in - start preview animation sequence
       console.log('⚠️ User not authenticated, starting preview sequence')
@@ -1445,7 +1447,7 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
               >
                 <InteractiveCVPile 
                   className="w-full h-full" 
-                  onFileSelect={handleFileSelect}
+                  onFileSelect={handleLocalFileSelect}
                   onFileClick={handleFileClick}
                   uploadedFile={uploadedFile}
                   isProcessing={isPlaying}
@@ -1769,7 +1771,7 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
                   {/* Interactive CV Pile - Upload area */}
                   <InteractiveCVPile 
                     className="relative z-5 w-[268px] xs:w-[308px] sm:w-[344px] md:w-[384px] lg:w-[424px] xl:w-[460px] 2xl:w-[500px] h-[344px] xs:h-[384px] sm:h-[460px] md:h-[500px] lg:h-[540px] xl:h-[576px]" 
-                    onFileSelect={handleFileSelect}
+                    onFileSelect={handleLocalFileSelect}
                     onFileClick={handleFileClick}
                     uploadedFile={uploadedFile}
                     isProcessing={isPlaying}
@@ -2638,6 +2640,19 @@ export default function Home() {
     setShowAuthModal(false)
   }
 
+  const handleFileSelect = (file: File) => {
+    // Set the uploaded file - this will trigger CV to appear in the card
+    console.log('📁 File selected, showing CV in card:', file.name)
+    setUploadedFile(file)
+    
+    // Don't open auth modal here - just store the file
+    // The auth modal will open when user clicks "Transform into portfolio"
+    if (!isAuthenticated) {
+      // Store the file for later use after authentication
+      setDroppedFile(file)
+    }
+  }
+
   const handleCVCardClick = (file: File) => {
     // The CV2WebDemo component will handle everything internally
     // This is just a placeholder for the prop
@@ -2852,6 +2867,7 @@ export default function Home() {
           uploadedFile={uploadedFile}
           setUploadedFile={setUploadedFile}
           onFileClick={handleCVCardClick}
+          handleFileSelect={handleFileSelect}
         />
       </section>
       <section id="demo" className="min-h-screen">
