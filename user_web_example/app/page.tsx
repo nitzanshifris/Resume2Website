@@ -1588,7 +1588,19 @@ function CV2WebDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile
                             transition={{ duration: 0.8, delay: 1.0, ease: "easeOut" }}
                           >
                             <Button
-                              onClick={onOpenModal}
+                              onClick={() => {
+                                // For consistency, use the same file upload flow as the dropbox
+                                const fileInput = document.createElement('input')
+                                fileInput.type = 'file'
+                                fileInput.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg'
+                                fileInput.onchange = (e) => {
+                                  const target = e.target as HTMLInputElement
+                                  if (target.files && target.files[0]) {
+                                    handleFileSelect(target.files[0])
+                                  }
+                                }
+                                fileInput.click()
+                              }}
                               className="group relative bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 px-12 py-6 rounded-full text-xl md:text-2xl font-bold shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_40px_rgba(16,185,129,0.3)] cursor-pointer overflow-hidden"
                               style={{
                                 minWidth: '320px',
@@ -1961,13 +1973,15 @@ const AppleNavbar = ({
   isAuthenticated, 
   user, 
   onLogout,
-  onShowDashboard 
+  onShowDashboard,
+  onFileSelect 
 }: { 
   onOpenModal: () => void
   isAuthenticated: boolean
   user: any
   onLogout: () => void
   onShowDashboard: () => void
+  onFileSelect: (file: File) => void
 }) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -1994,8 +2008,18 @@ const AppleNavbar = ({
       // Show dashboard with resume page
       onShowDashboard()
     } else {
-      // Open auth modal
-      onOpenModal()
+      // For non-authenticated users, trigger file upload like the dropbox
+      // This will create a consistent experience across all upload methods
+      const fileInput = document.createElement('input')
+      fileInput.type = 'file'
+      fileInput.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg'
+      fileInput.onchange = (e) => {
+        const target = e.target as HTMLInputElement
+        if (target.files && target.files[0]) {
+          onFileSelect(target.files[0])
+        }
+      }
+      fileInput.click()
     }
   }
 
@@ -2818,6 +2842,7 @@ export default function Home() {
         user={user}
         onLogout={handleLogout}
         onShowDashboard={() => setShowDashboard(true)}
+        onFileSelect={handleFileSelect}
       />
       <section id="hero" className="pt-16 relative min-h-screen">
         <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-white/50 to-gray-100 z-20"></div>
