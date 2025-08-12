@@ -61,10 +61,18 @@ function GoogleCallbackContent() {
             newValue: data.session_id
           }));
           
-          // Redirect to main page after success
-          setTimeout(() => {
-            router.push('/');
-          }, 2000);
+          // Check if we're in a popup window
+          if (window.opener && !window.opener.closed) {
+            // We're in a popup, close it after success
+            setTimeout(() => {
+              window.close();
+            }, 1500);
+          } else {
+            // Redirect to main page after success
+            setTimeout(() => {
+              router.push('/');
+            }, 2000);
+          }
         } else {
           setStatus('error');
           const errorMessage = data.detail || data.message || 'Authentication failed.';
@@ -124,10 +132,17 @@ function GoogleCallbackContent() {
             
             {status === 'error' && (
               <button
-                onClick={() => router.push('/')}
+                onClick={() => {
+                  // Check if we're in a popup window
+                  if (window.opener && !window.opener.closed) {
+                    window.close();
+                  } else {
+                    router.push('/');
+                  }
+                }}
                 className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Return to Home
+                {window.opener && !window.opener.closed ? 'Close' : 'Return to Home'}
               </button>
             )}
           </div>
