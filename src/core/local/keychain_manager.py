@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class KeychainManager:
     """Manage credentials securely using macOS Keychain"""
     
-    SERVICE_NAME = "resume2website"
+    SERVICE_NAME = "cv2web"
     
     @staticmethod
     def get_credential(key_name: str) -> str:

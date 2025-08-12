@@ -898,7 +898,7 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
     )
 
 
-@router.post("/cv/extract/{job_id}")
+@router.post("/extract/{job_id}")
 async def extract_cv_data_endpoint(
     job_id: str,
     current_user_id: Optional[str] = Depends(get_current_user_optional)

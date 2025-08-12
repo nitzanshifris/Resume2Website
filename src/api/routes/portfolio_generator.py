@@ -644,6 +644,14 @@ async def generate_portfolio(
         try:
             logger.info("💉 Injecting CV data into template...")
             
+            # Debug: Check if we have CV data
+            if not cv_data:
+                logger.error("❌ No CV data available to inject!")
+                raise HTTPException(status_code=500, detail="No CV data available. Please ensure CV extraction was completed.")
+            
+            logger.info(f"📊 CV data available: {list(cv_data.keys()) if cv_data else 'None'}")
+            logger.info(f"📊 Hero name: {cv_data.get('hero', {}).get('fullName', 'NOT FOUND')}")
+            
             # Create the injected-data.tsx file with actual CV data
             injected_data_file = sandbox_path / "lib" / "injected-data.tsx"
             injected_data_file.parent.mkdir(exist_ok=True)
