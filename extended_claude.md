@@ -633,15 +633,30 @@ NODE_ENV=production pnpm run start
 
 ### Deploy to Vercel
 ```bash
-# Automatic deployment on push to main
-git push origin main
+# Deploy portfolio from sandbox to Vercel
+python3 deploy_using_cli.py
 
-# Manual deployment
+# This script:
+# 1. Fixes package.json dependencies
+# 2. Uses Vercel CLI (no 10MB limit)
+# 3. Deploys to your team account
+# 4. Returns live URL
+
+# Manual deployment from project root
 vercel --prod
 
 # Preview deployment
 vercel
 ```
+
+### Vercel Deployment Issues & Solutions
+| Issue | Solution |
+|-------|----------|
+| "Request body too large. Limit: 10mb" | Use `deploy_using_cli.py` which uses Vercel CLI |
+| "Cannot find module 'tailwindcss'" | Move tailwindcss, postcss, autoprefixer to `dependencies` |
+| "Module not found: Can't resolve '@/lib/data'" | Ensure all lib files are included in deployment |
+| Build fails with peer dep errors | Add `.npmrc` with `legacy-peer-deps=true` |
+| date-fns version conflict | Downgrade to `^3.6.0` for react-day-picker compatibility |
 
 ### GitHub Integration
 - **PR Reviews**: Mention `@claude` in PR comments for AI review

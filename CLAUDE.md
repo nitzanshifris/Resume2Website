@@ -227,6 +227,24 @@ pnpm run dev --verbose                         # Frontend verbose logs
 - **Auto-cleanup**: Runs every 5 minutes for portfolios >24h old
 - **Health Checks**: Server status monitoring, startup time tracking
 
+## Vercel Deployment
+### Deploy Portfolios to Production
+```bash
+# Deploy portfolio to Vercel (handles >10MB projects)
+python3 deploy_using_cli.py
+
+# Fix dependencies before deployment
+# Move build deps from devDependencies to dependencies:
+# - tailwindcss, postcss, autoprefixer
+# - typescript, @types/*
+```
+
+### Key Points
+- **10MB API Limit**: REST API limited, use CLI for larger projects
+- **Team Deployment**: Auto-detects team ID from account
+- **Build Dependencies**: Must be in `dependencies` for Vercel builds
+- **Keychain Required**: Run `python3 src/utils/setup_keychain.py` first
+
 ## Directory Structure
 ```
 Resume2Website-V4/

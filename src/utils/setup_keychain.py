@@ -3,6 +3,10 @@
 Setup script to store credentials in macOS Keychain
 Run this once to securely store your credentials
 """
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from src.core.local.keychain_manager import KeychainManager
 import getpass
 
@@ -79,12 +83,14 @@ def main():
     print("-" * 30)
     vercel_setup = input("Setup Vercel credentials? (y/n): ").lower()
     if vercel_setup == 'y':
-        vercel_id = input("Vercel ID: ").strip()
-        vercel_secret = getpass.getpass("Vercel Secret: ").strip()
-        if vercel_id and vercel_secret:
-            KeychainManager.set_credential('vercel_id', vercel_id)
-            KeychainManager.set_credential('vercel_secret', vercel_secret)
-            print("✅ Vercel credentials stored in Keychain")
+        vercel_token = getpass.getpass("Vercel API Token: ").strip()
+        vercel_team_id = input("Vercel Team ID (optional, press Enter to skip): ").strip()
+        if vercel_token:
+            KeychainManager.set_credential('vercel_api_token', vercel_token)
+            print("✅ Vercel API token stored in Keychain")
+            if vercel_team_id:
+                KeychainManager.set_credential('vercel_team_id', vercel_team_id)
+                print("✅ Vercel Team ID stored in Keychain")
     print()
     
     # Pinecone Setup

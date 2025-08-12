@@ -70,6 +70,35 @@ def init_db():
             # Column already exists, ignore
             pass
         
+        # Add portfolio persistence columns
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN active_portfolio_id TEXT")
+            conn.commit()
+            logger.info("Added active_portfolio_id column to users table")
+        except sqlite3.OperationalError:
+            pass
+        
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN active_portfolio_url TEXT")
+            conn.commit()
+            logger.info("Added active_portfolio_url column to users table")
+        except sqlite3.OperationalError:
+            pass
+        
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN portfolio_created_at TEXT")
+            conn.commit()
+            logger.info("Added portfolio_created_at column to users table")
+        except sqlite3.OperationalError:
+            pass
+        
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN portfolio_expires_at TEXT")
+            conn.commit()
+            logger.info("Added portfolio_expires_at column to users table")
+        except sqlite3.OperationalError:
+            pass
+        
         # Create sessions table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
@@ -471,5 +500,84 @@ def cleanup_old_cache_entries(days: int = 30) -> int:
         )
         conn.commit()
         return cursor.rowcount
+    finally:
+        conn.close()
+
+
+# ========== PORTFOLIO PERSISTENCE FUNCTIONS ==========
+
+def update_user_portfolio(user_id: str, portfolio_id: str, portfolio_url: str) -> bool:
+    """Update user's active portfolio information"""
+    conn = get_db_connection()
+    try:
+        now = datetime.utcnow()
+        expires_at = now + timedelta(days=30)  # Portfolio expires in 30 days
+        
+        conn.execute(
+            """UPDATE users 
+            SET active_portfolio_id = ?, 
+                active_portfolio_url = ?, 
+                portfolio_created_at = ?, 
+                portfolio_expires_at = ?
+            WHERE user_id = ?""",
+            (portfolio_id, portfolio_url, now.isoformat(), expires_at.isoformat(), user_id)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to update user portfolio: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def get_user_portfolio(user_id: str) -> Optional[Dict[str, Any]]:
+    """Get user's active portfolio if not expired"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute(
+            """SELECT active_portfolio_id, active_portfolio_url, 
+                      portfolio_created_at, portfolio_expires_at
+            FROM users WHERE user_id = ?""",
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        
+        if row and row['active_portfolio_url']:
+            # Check if portfolio is still valid (not expired)
+            expires_at = row['portfolio_expires_at']
+            if expires_at:
+                expiry_date = datetime.fromisoformat(expires_at)
+                if expiry_date > datetime.utcnow():
+                    return {
+                        'portfolio_id': row['active_portfolio_id'],
+                        'portfolio_url': row['active_portfolio_url'],
+                        'created_at': row['portfolio_created_at'],
+                        'expires_at': row['portfolio_expires_at']
+                    }
+        
+        return None
+    finally:
+        conn.close()
+
+
+def clear_user_portfolio(user_id: str) -> bool:
+    """Clear user's active portfolio (when uploading new CV)"""
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            """UPDATE users 
+            SET active_portfolio_id = NULL, 
+                active_portfolio_url = NULL, 
+                portfolio_created_at = NULL, 
+                portfolio_expires_at = NULL
+            WHERE user_id = ?""",
+            (user_id,)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to clear user portfolio: {e}")
+        return False
     finally:
         conn.close()
