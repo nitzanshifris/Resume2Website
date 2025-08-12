@@ -29,7 +29,8 @@ import config
 
 # Import authentication dependency
 from src.api.routes.auth import get_current_user, get_current_user_optional
-from src.api.db import get_user_cv_uploads
+from src.api.db import get_user_cv_uploads, update_user_portfolio
+from src.services.vercel_deployer import VercelDeployer
 
 logger = logging.getLogger(__name__)
 
@@ -879,240 +880,107 @@ export {{ extractedCVData }}
             shutil.rmtree(sandbox_path, ignore_errors=True)
             raise HTTPException(status_code=500, detail=f"Failed to install dependencies: {str(e)}")
         
-        # === 8. START DEVELOPMENT SERVER WITH DYNAMIC PORT ALLOCATION ===
-        max_retries = 5
-        for attempt in range(max_retries):
-            try:
-                # Find available port right before starting server (prevents race conditions)
-                port = find_available_port()
-                logger.info(f"🔌 Attempt {attempt + 1}: Found available port: {port}")
-                
-                # Create .env.local file with port configuration
-                env_file = sandbox_path / ".env.local"
-                with open(env_file, 'w') as f:
-                    f.write(f"PORT={port}\n")
-                
-                # Start the Next.js development server with multiple fallback approaches
-                # Try npx first (most reliable), then pnpm run dev, then direct node
-                start_commands = [
-                    (["npm", "run", "dev"], "npm run dev"),
-                    (["npx", "next", "dev", "-p", str(port)], "npx next dev"),
-                    (["node", "node_modules/.bin/next", "dev", "--port", str(port)], "direct node")
-                ]
-                
-                # Create environment with PORT and NODE_ENV
-                env = {
-                    **os.environ,
-                    "PORT": str(port),
-                    "NODE_ENV": "development",
-                    # Add memory limit to prevent runaway processes
-                    "NODE_OPTIONS": "--max-old-space-size=1536"  # Increased to 1.5GB for Next.js compilation
-                }
-                
-                process = None
-                used_command = None
-                
-                for start_cmd, cmd_name in start_commands:
-                    try:
-                        logger.info(f"🚀 Trying {cmd_name}: {' '.join(start_cmd)}")
-                        logger.info(f"📁 Working directory: {sandbox_path}")
-                        logger.info(f"🔌 Server will run on port: {port}")
-                        
-                        process = subprocess.Popen(
-                            start_cmd,
-                            cwd=str(sandbox_path),
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            text=True,
-                            env=env
-                        )
-                        
-                        # Give it a moment to start
-                        time.sleep(2)
-                        
-                        # Check if it started successfully
-                        if process.poll() is None:
-                            logger.info(f"✅ {cmd_name} started successfully")
-                            used_command = cmd_name
-                            break
-                        else:
-                            logger.warning(f"⚠️ {cmd_name} failed with code {process.returncode}")
-                            stdout, stderr = process.communicate()
-                            if stderr:
-                                logger.warning(f"Error: {stderr}")
-                            process = None
-                            continue
-                            
-                    except Exception as cmd_error:
-                        logger.warning(f"⚠️ {cmd_name} failed with exception: {cmd_error}")
-                        if process:
-                            try:
-                                process.terminate()
-                            except:
-                                pass
-                        process = None
-                        continue
-                
-                if not process:
-                    raise Exception("All Next.js startup methods failed")
-                
-                # Store process info
-                PORTFOLIO_PROCESSES[portfolio_id] = {
-                    "process": process,
-                    "port": port,
-                    "sandbox_path": str(sandbox_path),
-                    "created_at": datetime.now(),
-                    "user_id": current_user_id,
-                    "job_id": job_id,
-                    "template": template_id,
-                    "start_method": used_command,
-                    "status": "starting"
-                }
-                
-                # Start monitoring server output in background
-                def monitor_output():
-                    try:
-                        for line in iter(process.stdout.readline, ''):
-                            if line:
-                                logger.info(f"[Next.js stdout]: {line.strip()}")
-                    except Exception as e:
-                        logger.error(f"Error monitoring stdout: {e}")
-                        
-                def monitor_errors():
-                    try:
-                        for line in iter(process.stderr.readline, ''):
-                            if line:
-                                logger.error(f"[Next.js stderr]: {line.strip()}")
-                    except Exception as e:
-                        logger.error(f"Error monitoring stderr: {e}")
-                
-                import threading
-                threading.Thread(target=monitor_output, daemon=True).start()
-                threading.Thread(target=monitor_errors, daemon=True).start()
-                
-                # Give the process a moment to start before checking
-                time.sleep(2)
-                
-                # Check if process is still running
-                if process.poll() is not None:
-                    logger.error(f"❌ Process died immediately with code: {process.returncode}")
-                    # Read any remaining output
-                    stdout, stderr = process.communicate()
-                    if stdout:
-                        logger.error(f"Final stdout: {stdout}")
-                    if stderr:
-                        logger.error(f"Final stderr: {stderr}")
-                    
-                    # If it's a port conflict, retry with different port
-                    if "EADDRINUSE" in stderr:
-                        logger.warning(f"⚠️ Port {port} was in use, retrying with different port...")
-                        if portfolio_id in PORTFOLIO_PROCESSES:
-                            del PORTFOLIO_PROCESSES[portfolio_id]
-                        continue  # Retry with new port
-                    elif "Cannot find module '../server/require-hook'" in stderr or "MODULE_NOT_FOUND" in stderr:
-                        # Next.js installation issue - try direct node command as fallback
-                        logger.warning("⚠️ Next.js module issue detected, trying direct node command...")
-                        
-                        # Kill the failed process
-                        if portfolio_id in PORTFOLIO_PROCESSES:
-                            del PORTFOLIO_PROCESSES[portfolio_id]
-                        
-                        # Try direct node command
-                        try:
-                            direct_cmd = ["node", "node_modules/.bin/next", "dev", "-p", str(port)]
-                            logger.info(f"🔄 Fallback: Starting with direct node command: {' '.join(direct_cmd)}")
-                            
-                            process = subprocess.Popen(
-                                direct_cmd,
-                                cwd=str(sandbox_path),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                text=True,
-                                env=env
-                            )
-                            
-                            # Store process info for the retry
-                            PORTFOLIO_PROCESSES[portfolio_id] = {
-                                'process': process,
-                                'port': port,
-                                'template': template_name,
-                                'created_at': time.time(),
-                                'status': 'starting'
-                            }
-                            
-                            # Give it a moment and check again
-                            time.sleep(3)
-                            
-                            if process.poll() is not None:
-                                logger.error(f"❌ Direct node command also failed with code: {process.returncode}")
-                                if portfolio_id in PORTFOLIO_PROCESSES:
-                                    del PORTFOLIO_PROCESSES[portfolio_id]
-                                raise Exception(f"Both pnpm and direct node commands failed")
-                            else:
-                                logger.info("✅ Direct node command seems to be working, continuing...")
-                                # Continue with the existing process monitoring
-                                
-                        except Exception as fallback_error:
-                            logger.error(f"❌ Direct node fallback failed: {fallback_error}")
-                            if portfolio_id in PORTFOLIO_PROCESSES:
-                                del PORTFOLIO_PROCESSES[portfolio_id]
-                            raise Exception(f"Server process died immediately with code {process.returncode}")
-                    else:
-                        # Different error, don't retry
-                        if portfolio_id in PORTFOLIO_PROCESSES:
-                            del PORTFOLIO_PROCESSES[portfolio_id]
-                        raise Exception(f"Server process died immediately with code {process.returncode}")
-                
-                # Wait for server to start (check if port is listening)
-                logger.info(f"⏳ Waiting for server to be ready on port {port}...")
-                if not wait_for_server(port):
-                    # Get final output before terminating
-                    logger.error("❌ Server failed to start within timeout")
-                    process.terminate()
-                    stdout, stderr = process.communicate(timeout=5)
-                    if stdout:
-                        logger.error(f"Final stdout: {stdout}")
-                    if stderr:
-                        logger.error(f"Final stderr: {stderr}")
-                    
-                    # If timeout, could be port issue, retry
-                    logger.warning(f"⚠️ Server timeout on port {port}, retrying with different port...")
-                    if portfolio_id in PORTFOLIO_PROCESSES:
-                        del PORTFOLIO_PROCESSES[portfolio_id]
-                    continue  # Retry with new port
-                
-                # Success! Break out of retry loop
-                break
-                
-            except Exception as e:
-                logger.error(f"❌ Attempt {attempt + 1} failed: {e}")
-                if attempt == max_retries - 1:
-                    # Last attempt failed
-                    shutil.rmtree(sandbox_path, ignore_errors=True)
-                    raise HTTPException(status_code=500, detail=f"Failed to start portfolio server after {max_retries} attempts: {str(e)}")
-                # Continue to next attempt
-                time.sleep(1)  # Brief pause before retry
+        # === 8. FIX DEPENDENCIES FOR VERCEL AND DEPLOY ===
+        try:
+            logger.info("🚀 Preparing for Vercel deployment...")
             
-        # If we get here, server started successfully
-        PORTFOLIO_PROCESSES[portfolio_id]["status"] = "running"
-        
-        # Record metrics
-        startup_time = time.time() - start_time
-        portfolio_metrics.record_creation(portfolio_id, startup_time)
-        logger.info(f"📊 Portfolio created in {startup_time:.2f} seconds")
-        
-        portfolio_url = f"http://localhost:{port}"
-        logger.info(f"✅ Portfolio server started at {portfolio_url}")
-        
-        return {
-            "success": True,
-            "portfolio_id": portfolio_id,
-            "portfolio_url": portfolio_url,
-            "message": f"Portfolio generated successfully and running on port {port}",
-            "template": template_id,
-            "sandbox_path": str(sandbox_path)
-        }
+            # Fix package.json dependencies for Vercel build
+            package_json_path = sandbox_path / "package.json"
+            with open(package_json_path, 'r') as f:
+                package_data = json.load(f)
             
+            # Get original dependencies
+            deps = package_data.get("dependencies", {})
+            dev_deps = package_data.get("devDependencies", {})
+            
+            # Move build dependencies to dependencies for Vercel
+            build_deps = ["tailwindcss", "autoprefixer", "postcss", "typescript", 
+                          "@types/node", "@types/react", "@types/react-dom"]
+            
+            for dep in build_deps:
+                if dep in dev_deps and dep not in deps:
+                    deps[dep] = dev_deps[dep]
+                    logger.info(f"   ✅ Moved {dep} to dependencies")
+            
+            # Fix date-fns version for compatibility
+            if "date-fns" in deps:
+                deps["date-fns"] = "^3.6.0"
+                logger.info("   ✅ Fixed date-fns to ^3.6.0")
+            
+            package_data["dependencies"] = deps
+            
+            # Save fixed package.json
+            with open(package_json_path, 'w') as f:
+                json.dump(package_data, f, indent=2)
+            logger.info("   ✅ Updated package.json for Vercel")
+            
+            # Create .npmrc for legacy peer deps
+            npmrc_path = sandbox_path / ".npmrc"
+            with open(npmrc_path, 'w') as f:
+                f.write("legacy-peer-deps=true\n")
+            logger.info("   ✅ Created .npmrc")
+            
+            # Deploy to Vercel
+            logger.info("🌐 Deploying to Vercel...")
+            deployer = VercelDeployer()
+            
+            deployment_result = deployer.deploy_portfolio(
+                portfolio_path=str(sandbox_path),
+                project_name=f"portfolio-{job_id[:8]}",
+                custom_domain=None  # Can be added later for paid plans
+            )
+            
+            if not deployment_result or not deployment_result.get('url'):
+                raise Exception("Vercel deployment failed - no URL returned")
+            
+            vercel_url = deployment_result['url']
+            deployment_id = deployment_result.get('id', '')
+            
+            logger.info(f"✅ Portfolio deployed to Vercel: {vercel_url}")
+            
+            # Store deployment info for tracking
+            PORTFOLIO_PROCESSES[portfolio_id] = {
+                "portfolio_id": portfolio_id,
+                "job_id": job_id,
+                "vercel_url": vercel_url,
+                "deployment_id": deployment_id,
+                "sandbox_path": str(sandbox_path),
+                "created_at": datetime.now(),
+                "user_id": current_user_id,
+                "template": template_id,
+                "status": "deployed",
+                "is_local": False
+            }
+            
+            # Update user's portfolio in database if authenticated
+            if current_user_id and not current_user_id.startswith("anonymous_"):
+                update_user_portfolio(current_user_id, portfolio_id, vercel_url)
+            
+            # Record metrics
+            startup_time = time.time() - start_time
+            portfolio_metrics.record_creation(portfolio_id, startup_time)
+            
+            logger.info(f"🎉 Portfolio generation completed in {startup_time:.1f}s")
+            logger.info(f"🌐 Live at: {vercel_url}")
+            
+            return {
+                "status": "success",
+                "portfolio_id": portfolio_id,
+                "url": vercel_url,
+                "deployment_id": deployment_id,
+                "template": template_id,
+                "is_local": False,
+                "deployment_time": startup_time,
+                "message": "Portfolio deployed to Vercel successfully"
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Vercel deployment failed: {e}")
+            # Clean up sandbox on failure
+            shutil.rmtree(sandbox_path, ignore_errors=True)
+            portfolio_metrics.record_failure()
+            raise HTTPException(status_code=500, detail=f"Failed to deploy portfolio: {str(e)}")
+    
     except HTTPException:
         portfolio_metrics.record_failure()
         raise
@@ -1120,26 +988,43 @@ export {{ extractedCVData }}
         portfolio_metrics.record_failure()
         logger.error(f"❌ Portfolio generation failed: {e}")
         raise HTTPException(status_code=500, detail=f"Portfolio generation failed: {str(e)}")
-
-
 @router.get("/list")
 async def list_user_portfolios(current_user_id: str = Depends(get_current_user)):
     """
-    List all portfolios for the current user
+    List all portfolios for the current user (both local and Vercel deployed)
     """
     try:
         portfolios = []
-        user_portfolio_pattern = f"{current_user_id}_*"
         
-        for portfolio_dir in PORTFOLIOS_DIR.glob(user_portfolio_pattern):
-            if portfolio_dir.is_dir():
-                metadata_file = portfolio_dir / "portfolio_metadata.json"
-                if metadata_file.exists():
-                    try:
-                        metadata = json.loads(metadata_file.read_text())
-                        portfolios.append(metadata)
-                    except Exception as e:
-                        logger.warning(f"Failed to read metadata for {portfolio_dir}: {e}")
+        # Get portfolios from in-memory store (includes Vercel deployments)
+        for portfolio_id, info in PORTFOLIO_PROCESSES.items():
+            if info.get('user_id') == current_user_id:
+                # Convert to frontend-friendly format
+                portfolio_data = {
+                    "portfolio_id": portfolio_id,
+                    "job_id": info.get('job_id'),
+                    "url": info.get('vercel_url') or info.get('url') or f"http://localhost:{info.get('port')}",
+                    "port": info.get('port'),
+                    "created_at": info.get('created_at').isoformat() if isinstance(info.get('created_at'), datetime) else info.get('created_at'),
+                    "template": info.get('template'),
+                    "status": info.get('status'),
+                    "is_local": info.get('is_local', True),
+                    "deployment_id": info.get('deployment_id'),
+                    "cv_filename": info.get('cv_filename', 'Unknown')
+                }
+                portfolios.append(portfolio_data)
+        
+        # Also check database for persisted portfolios
+        from src.api.db import get_user_portfolio
+        db_portfolio = get_user_portfolio(current_user_id)
+        if db_portfolio and not any(p['portfolio_id'] == db_portfolio.get('portfolio_id') for p in portfolios):
+            portfolios.append({
+                "portfolio_id": db_portfolio.get('portfolio_id'),
+                "url": db_portfolio.get('portfolio_url'),
+                "created_at": db_portfolio.get('created_at'),
+                "status": "deployed",
+                "is_local": False
+            })
         
         # Sort by creation date (newest first)
         portfolios.sort(key=lambda x: x.get('created_at', ''), reverse=True)
@@ -1161,9 +1046,22 @@ async def restart_portfolio_server(
     current_user_id: str = Depends(get_current_user)
 ):
     """
-    Restart a portfolio server if it's not responding
+    Restart a portfolio server (only for local portfolios, not Vercel)
     """
     try:
+        # Check if this is a Vercel deployment
+        if portfolio_id in PORTFOLIO_PROCESSES:
+            portfolio_info = PORTFOLIO_PROCESSES[portfolio_id]
+            if not portfolio_info.get('is_local', True):
+                # This is a Vercel deployment, no restart needed
+                return {
+                    "status": "success",
+                    "message": "Vercel portfolios don't need restarting",
+                    "url": portfolio_info.get('vercel_url'),
+                    "is_local": False
+                }
+        
+        # For backward compatibility with local portfolios
         portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
         
         if not portfolio_dir.exists():

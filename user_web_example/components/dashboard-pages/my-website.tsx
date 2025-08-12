@@ -597,7 +597,7 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                     onClick={() => window.open(selectedPortfolio.url, '_blank')}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
-                    Open in New Tab
+                    {selectedPortfolio.is_local === false ? 'Visit Live Site' : 'Open in New Tab'}
                   </Button>
                   <Button 
                     variant="outline" 
@@ -610,19 +610,29 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
                     <Share2 className="w-4 h-4 mr-2" />
                     Copy URL
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={restartPortfolioServer}
-                    disabled={isRestartingServer}
-                  >
-                    {isRestartingServer ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Settings className="w-4 h-4 mr-2" />
-                    )}
-                    {isRestartingServer ? 'Restarting...' : 'Restart Server'}
-                  </Button>
+                  {/* Only show restart button for local portfolios */}
+                  {selectedPortfolio.is_local !== false && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={restartPortfolioServer}
+                      disabled={isRestartingServer}
+                    >
+                      {isRestartingServer ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Settings className="w-4 h-4 mr-2" />
+                      )}
+                      {isRestartingServer ? 'Restarting...' : 'Restart Server'}
+                    </Button>
+                  )}
+                  {/* Show deployment badge for Vercel portfolios */}
+                  {selectedPortfolio.is_local === false && (
+                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                      <Globe className="w-3 h-3 mr-1" />
+                      Deployed on Vercel
+                    </Badge>
+                  )}
                 </>
               )}
               {!selectedPortfolio && (
