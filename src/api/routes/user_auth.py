@@ -10,6 +10,7 @@ from datetime import datetime
 import os
 import requests
 import json
+import hashlib
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 

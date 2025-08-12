@@ -150,7 +150,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       return;
     }
     
-    // Initialize Google OAuth flow
+    // Initialize Google OAuth flow with popup
     const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     googleAuthUrl.searchParams.append('client_id', googleClientId);
     googleAuthUrl.searchParams.append('redirect_uri', `${window.location.origin}/auth/google/callback`);
@@ -158,13 +158,49 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     googleAuthUrl.searchParams.append('scope', 'openid email profile');
     googleAuthUrl.searchParams.append('state', 'resume2website_google_auth');
     googleAuthUrl.searchParams.append('access_type', 'offline');
-    googleAuthUrl.searchParams.append('prompt', 'consent');
+    // Remove prompt=consent for existing users to avoid re-consent
+    // googleAuthUrl.searchParams.append('prompt', 'consent');
+    googleAuthUrl.searchParams.append('prompt', 'select_account');
+
+    // Open in popup window for better UX
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    
+    const popup = window.open(
+      googleAuthUrl.toString(),
+      'google-oauth',
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
+    );
+
+    if (!popup) {
+      // Fallback to redirect if popup is blocked
+      window.location.href = googleAuthUrl.toString();
+      return;
+    }
+
+    // Check if popup is closed or auth is complete
+    const checkPopup = setInterval(() => {
+      try {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          setIsLoading(false);
+          
+          // Check if authentication was successful by looking for session
+          const sessionId = localStorage.getItem('resume2website_session_id');
+          if (sessionId) {
+            // Auth successful, close modal
+            onClose();
+          }
+        }
+      } catch (e) {
+        // Cross-origin error is expected, ignore
+      }
+    }, 500);
 
     // Store auth modal state to restore after callback
     localStorage.setItem('resume2website_auth_return', 'true');
-
-    // Redirect to Google OAuth
-    window.location.href = googleAuthUrl.toString();
   };
 
   const switchMode = () => {
