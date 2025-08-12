@@ -241,7 +241,8 @@ export default function CVEditor({ userName }: CVEditorProps) {
       }
       
       // Show success message
-      alert(`Portfolio generated successfully! 🎉\n\nYour portfolio is now available at: ${result.url}\n\nYou can view it in the "My Website" section.`)
+      const isVercel = result.url && !result.url.includes('localhost')
+      alert(`Portfolio ${isVercel ? 'deployed' : 'generated'} successfully! 🎉\n\n${isVercel ? 'Your portfolio is now live at:' : 'Your portfolio is now available at:'} ${result.url}\n\n${isVercel ? 'The site is building on Vercel and will be ready in 2-3 minutes.' : ''}\n\nYou can view it in the "My Website" section.`)
       
       // Emit event to notify other components
       const event = new CustomEvent('portfolioGenerated', { 
@@ -3025,7 +3026,7 @@ export default function CVEditor({ userName }: CVEditorProps) {
             {isGeneratingPortfolio ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Generating Portfolio...
+                Deploying to Vercel... (2-3 min)
               </>
             ) : (
               <>
