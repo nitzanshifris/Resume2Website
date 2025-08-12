@@ -339,7 +339,7 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
             }}
           />
           
-          {!fileToDisplay && !isProcessing ? (
+          {!fileToDisplay ? (
             /* Upload State */
             <div className="w-full h-full relative">
               {/* Animated gradient border */}
@@ -541,18 +541,19 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
                 </div>
               </motion.div>
             </div>
-          ) : isProcessing ? (
-            /* Processing State */
-            <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-white">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-lg font-medium text-gray-700">Processing your CV...</p>
-            </div>
           ) : (
-            /* Uploaded File State - Show actual file */
+            /* Uploaded File State - Show actual file with optional processing overlay */
             <div className="w-full h-full relative bg-white rounded-xl overflow-hidden">
               {fileToDisplay && (
                 <>
-                  {/* Removed hover overlay - no click to transform */}
+                  {/* Processing overlay - shows on top of the file without hiding it */}
+                  {isProcessing && (
+                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-30">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                      <p className="text-lg font-medium text-gray-700">Processing your CV...</p>
+                    </div>
+                  )}
+                  
                   {/* File type indicator and navigation */}
                   {displayFiles.length > 1 && (
                     <div className="absolute top-2 right-2 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
