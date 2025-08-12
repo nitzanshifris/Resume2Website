@@ -1019,24 +1019,35 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const uploadResponse = await uploadFile(file)
       const jobId = uploadResponse.job_id
       setCurrentJobId(jobId)
-      animateProgress(PROGRESS_MILESTONES.UPLOAD_START, PROGRESS_MILESTONES.UPLOAD_COMPLETE, TIMINGS.UPLOAD_ANIMATION)
       console.log('✅ Upload complete, job_id:', jobId)
       
-      // Step 2: Extract CV data (15-45%) - major processing step
+      // Step 2: Extract CV data (5-45%) - major processing step
       console.log('🔍 Extracting CV data...')
-      // Start progress animation immediately  
-      animateProgress(PROGRESS_MILESTONES.UPLOAD_COMPLETE, PROGRESS_MILESTONES.EXTRACTION_START, 500)
       
-      // Simulate progress during extraction
-      const progressInterval = setInterval(() => {
-        setRealProgress(prev => {
-          if (prev >= PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5) {
-            clearInterval(progressInterval)
-            return prev
-          }
-          return Math.min(prev + 1, PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5)
-        })
-      }, 800) // Update every 800ms
+      // Start smooth linear progress from 5 to 20 (like we do for 20-60)
+      // This will increment smoothly: 5, 6, 7, 8... up to 20
+      let currentProgress = PROGRESS_MILESTONES.UPLOAD_START // Start from 5
+      const progressTo20Interval = setInterval(() => {
+        currentProgress++
+        setRealProgress(currentProgress)
+        if (currentProgress >= PROGRESS_MILESTONES.EXTRACTION_START) {
+          clearInterval(progressTo20Interval)
+        }
+      }, 200) // Update every 200ms for smooth progression from 5 to 20 (15 steps * 200ms = 3 seconds)
+      
+      // Continue with extraction progress from 20 to 45
+      let progressInterval: NodeJS.Timeout | null = null
+      setTimeout(() => {
+        progressInterval = setInterval(() => {
+          setRealProgress(prev => {
+            if (prev >= PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5) {
+              if (progressInterval) clearInterval(progressInterval)
+              return prev
+            }
+            return Math.min(prev + 1, PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5)
+          })
+        }, 800) // Update every 800ms
+      }, 3000) // Start after the 5-20 animation completes
       
       // Start extraction with proper timeout handling
       const extractStartTime = Date.now()
@@ -1064,13 +1075,15 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         const extractData = await extractResponse.json()
         console.log('✅ CV extraction response received:', extractData)
         
-        // Clear the progress interval and complete extraction
-        clearInterval(progressInterval)
+        // Clear the progress intervals and complete extraction
+        clearInterval(progressTo20Interval) // Clear first interval if still running
+        if (progressInterval) clearInterval(progressInterval) // Clear second interval
         setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
         console.log('✅ CV extraction complete')
       } catch (error) {
         clearTimeout(timeoutId)
-        clearInterval(progressInterval)
+        clearInterval(progressTo20Interval)
+        if (progressInterval) clearInterval(progressInterval)
         if (error instanceof Error && error.name === 'AbortError') {
           throw new Error('CV extraction timed out after 60 seconds')
         }
