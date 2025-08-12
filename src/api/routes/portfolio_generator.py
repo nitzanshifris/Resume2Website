@@ -924,11 +924,20 @@ export {{ extractedCVData }}
             logger.info("🌐 Deploying to Vercel...")
             deployer = VercelDeployer()
             
-            deployment_result = deployer.deploy_portfolio(
+            success, deployment_url, deployment_id = deployer.create_deployment(
                 portfolio_path=str(sandbox_path),
                 project_name=f"portfolio-{job_id[:8]}",
-                custom_domain=None  # Can be added later for paid plans
+                user_id=current_user_id,
+                job_id=job_id
             )
+            
+            if not success or not deployment_url:
+                raise Exception(f"Vercel deployment failed: {deployment_id}")  # deployment_id contains error message on failure
+            
+            deployment_result = {
+                'url': deployment_url,
+                'id': deployment_id
+            }
             
             if not deployment_result or not deployment_result.get('url'):
                 raise Exception("Vercel deployment failed - no URL returned")
