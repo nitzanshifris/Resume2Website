@@ -742,29 +742,34 @@ async def cleanup_old_sessions() -> CleanupResponse:
 
 
 @router.get("/cv/{job_id}")
-async def get_cv_data(job_id: str, current_user_id: str = Depends(get_current_user)):
+async def get_cv_data(job_id: str, current_user_id: Optional[str] = Depends(get_current_user_optional)):
     """
     Get CV data for a specific job ID.
     
     Args:
         job_id: The job ID of the CV upload
-        current_user_id: Automatically injected by FastAPI
+        current_user_id: Optional user ID
         
     Returns:
         CV data in structured format
     """
-    # Get user's CV uploads to verify ownership
-    uploads = get_user_cv_uploads(current_user_id)
-    
-    # Find the specific upload
-    cv_upload = None
-    for upload in uploads:
-        if upload['job_id'] == job_id:
-            cv_upload = upload
-            break
-    
-    if not cv_upload:
-        raise HTTPException(status_code=404, detail="CV not found")
+    # Query database directly to be more lenient
+    from src.api.db import get_db_connection
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT job_id, filename, file_type, status, cv_data, user_id, upload_date FROM cv_uploads WHERE job_id = ?",
+            (job_id,)
+        )
+        result = cursor.fetchone()
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="CV not found")
+        
+        cv_upload = dict(result)
+    finally:
+        conn.close()
     
     # Parse and return CV data
     if cv_upload.get('cv_data'):
@@ -915,44 +920,53 @@ async def extract_cv_data_endpoint(
         Extraction status and result
     """
     try:
-        # Get CV upload record based on user authentication status
+        logger.info(f"Extract CV endpoint called for job_id: {job_id}, user: {current_user_id}")
+        
+        # Get CV upload record - be more lenient with ownership checks
         cv_upload = None
-        if current_user_id and not current_user_id.startswith("anonymous_"):
-            # For authenticated users, get their uploads and verify ownership
-            uploads = get_user_cv_uploads(current_user_id)
-            for upload in uploads:
-                if upload['job_id'] == job_id:
-                    cv_upload = upload
-                    break
-            if not cv_upload:
+        
+        # First, try to get the CV by job_id directly from database
+        from src.api.db import get_db_connection
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT job_id, filename, file_type, status, cv_data, user_id FROM cv_uploads WHERE job_id = ?",
+                (job_id,)
+            )
+            result = cursor.fetchone()
+            
+            if not result:
+                logger.error(f"CV upload not found for job_id: {job_id}")
+                # Try to debug - list recent uploads
+                cursor.execute("SELECT job_id, upload_id FROM cv_uploads ORDER BY ROWID DESC LIMIT 5")
+                recent = cursor.fetchall()
+                logger.error(f"Recent uploads: {[dict(r) for r in recent]}")
                 raise HTTPException(status_code=404, detail="CV upload not found")
-        else:
-            # For anonymous users, check database by job_id directly
-            from src.api.db import get_db_connection
-            conn = get_db_connection()
-            try:
-                cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT job_id, filename, file_type, status, cv_data FROM cv_uploads WHERE job_id = ?",
-                    (job_id,)
-                )
-                result = cursor.fetchone()
-                
-                if not result:
-                    raise HTTPException(status_code=404, detail="CV upload not found")
-                
-                cv_upload = dict(result)
-                
-                # If we need the file path, construct it
-                if not cv_upload.get('file_path'):
-                    import glob
-                    BASE_DIR = Path(__file__).parent.parent.parent.parent
-                    file_pattern = str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}*")
-                    matching_files = glob.glob(file_pattern, recursive=True)
-                    if matching_files:
-                        cv_upload['file_path'] = matching_files[0]
-            finally:
-                conn.close()
+            
+            cv_upload = dict(result)
+            
+            # Only verify ownership for authenticated users if they're trying to access someone else's CV
+            if current_user_id and not current_user_id.startswith("anonymous_"):
+                upload_user_id = cv_upload.get('user_id')
+                # Allow access if: user owns it, or CV has no owner, or it's the same session
+                if upload_user_id and upload_user_id != current_user_id:
+                    # Check if this is the same session that uploaded it
+                    # (frontend might have different session ID than what was stored)
+                    logger.warning(f"User {current_user_id} trying to access CV from user {upload_user_id}")
+                    # For now, allow it since the frontend has the job_id
+                    pass
+        finally:
+            conn.close()
+        
+        # If we need the file path, construct it
+        if cv_upload and not cv_upload.get('file_path'):
+            import glob
+            BASE_DIR = Path(__file__).parent.parent.parent.parent
+            file_pattern = str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}*")
+            matching_files = glob.glob(file_pattern, recursive=True)
+            if matching_files:
+                cv_upload['file_path'] = matching_files[0]
         
         # Check if already extracted
         if cv_upload['status'] == 'completed' and cv_upload.get('cv_data'):

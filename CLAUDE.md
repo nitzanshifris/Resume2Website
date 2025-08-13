@@ -30,8 +30,8 @@ pnpm run start                 # Start production build
 
 # Backend Development  
 source venv/bin/activate       # Activate Python environment
-python main.py                 # Start FastAPI with optimizations (localhost:2000)
-uvicorn main:app --reload --port 2000  # Alternative start method
+python3 -m uvicorn main:app --host 127.0.0.1 --port 2000  # Start FastAPI (localhost:2000)
+python main.py                 # Alternative with optimizations
 
 # Testing & Quality
 pytest                         # Run backend tests
@@ -122,20 +122,20 @@ GET /api/v1/auth/google/status            # Check Google OAuth availability
 ```
 
 ## Architecture Essentials
-- **CV Extraction**: 18 sections, cached in SQLite, deduplication enabled
-- **Portfolio Generation**: Isolated Next.js sandboxes (ports 4000-5000)
+- **CV Extraction**: 18 sections, cached in SQLite, hash-based deduplication
+- **Portfolio Generation**: Deployed to Vercel via CLI (bypasses 10MB API limit)
 - **Templates**: 2 active (v0_template_v1.5, v0_template_v2.1)
 - **Authentication**: Email/password + Google OAuth + LinkedIn OAuth, session-based
 - **File Storage**: Preserved in data/uploads/ with hash-based deduplication
-- **Resource Management**: Auto-cleanup portfolios >24h, max 20 active portfolios
-- **Monitoring**: Portfolio metrics tracking, health checks, performance stats
+- **Deployment**: Vercel CLI with real-time progress, ~2-3 min build time
+- **Build Optimization**: .npmrc for legacy-peer-deps, no recursive install scripts
 
 ## Development Workflow Patterns
 ### CV Processing Flow
 ```
 1. User uploads CV → Text extraction → Claude 4 Opus analysis → SQLite storage
 2. CV Editor → User edits extracted data → CRUD operations
-3. Portfolio generation → Isolated sandbox → Template injection → Live preview
+3. Portfolio generation → Isolated sandbox → Template injection → Vercel deployment
 4. Resource management → Health monitoring → Auto-cleanup → Metrics tracking
 ```
 
@@ -197,6 +197,8 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 - **Port conflicts**: Backend=2000, Frontend=3000, Portfolios=4000-5000 range
 - **CV extraction hangs**: Check Claude API quota/credentials in keychain
 - **Portfolio stuck at 55%**: Check API response format, server startup logs
+- **Vercel deployment hangs**: Check `ps aux | grep vercel`, may be building
+- **Infinite npm install loop**: Remove `"install": "npm install"` from scripts
 - **"Cannot find module"**: Run `pnpm install` in project root
 - **TypeScript errors**: Run `pnpm run typecheck` to see all errors
 - **Python venv issues**: Check `which python` shows venv path
@@ -227,23 +229,22 @@ pnpm run dev --verbose                         # Frontend verbose logs
 - **Auto-cleanup**: Runs every 5 minutes for portfolios >24h old
 - **Health Checks**: Server status monitoring, startup time tracking
 
-## Vercel Deployment
-### Deploy Portfolios to Production
-```bash
-# Deploy portfolio to Vercel (handles >10MB projects)
-python3 deploy_using_cli.py
+## Vercel Deployment (Automatic)
+### Portfolio Deployment Flow
+Portfolios are automatically deployed to Vercel when generated:
+1. User uploads CV → Extract → Generate → **Deploy to Vercel**
+2. Real-time progress monitoring during deployment (~2-3 min)
+3. Returns live URL: `https://portfolio-xxxxx.vercel.app`
 
-# Fix dependencies before deployment
-# Move build deps from devDependencies to dependencies:
-# - tailwindcss, postcss, autoprefixer
-# - typescript, @types/*
-```
-
-### Key Points
-- **10MB API Limit**: REST API limited, use CLI for larger projects
-- **Team Deployment**: Auto-detects team ID from account
-- **Build Dependencies**: Must be in `dependencies` for Vercel builds
-- **Keychain Required**: Run `python3 src/utils/setup_keychain.py` first
+### Key Implementation Details
+- **CLI Integration**: Uses `vercel` CLI to bypass 10MB API limit
+- **Build Optimization**: 
+  - `.npmrc` with `legacy-peer-deps=true`
+  - Build deps moved to `dependencies`
+  - NO recursive install scripts (causes infinite loops!)
+- **Prerequisites**: 
+  - Vercel CLI: `npm install -g vercel`
+  - API token: `python3 src/utils/setup_keychain.py`
 
 ## Directory Structure
 ```
@@ -287,7 +288,8 @@ Resume2Website-V4/
 ## Important Files to Know
 - **config.py** - Backend configuration, environment variables, AI model settings
 - **main.py** - FastAPI application entry point with routing
-- **src/api/routes/portfolio_generator.py** - PRIMARY portfolio generation script
+- **src/api/routes/portfolio_generator.py** - Portfolio generation + Vercel deployment
+- **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
 - **src/api/routes/cv.py** - CV upload, extraction, CRUD operations
 - **src/api/routes/user_auth.py** - OAuth authentication endpoints (Google, LinkedIn)
 - **src/api/db.py** - SQLite database operations, user management, session handling
