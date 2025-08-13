@@ -618,7 +618,8 @@ async def generate_portfolio(
         portfolio_id = f"{current_user_id}_{job_id}_{uuid.uuid4().hex[:8]}"
         
         # === 4. CREATE SANDBOX DIRECTORY ===
-        sandbox_path = Path(config.SANDBOXES_DIR) / "portfolios" / portfolio_id
+        # Make sure to use absolute path
+        sandbox_path = (Path(config.SANDBOXES_DIR) / "portfolios" / portfolio_id).resolve()
         sandbox_path.mkdir(parents=True, exist_ok=True)
         
         logger.info(f"📁 Created sandbox directory: {sandbox_path}")
@@ -918,7 +919,13 @@ export {{ extractedCVData }}
             npmrc_path = sandbox_path / ".npmrc"
             with open(npmrc_path, 'w') as f:
                 f.write("legacy-peer-deps=true\n")
-            logger.info("   ✅ Created .npmrc")
+                f.write("strict-peer-deps=false\n")
+            logger.info("   ✅ Created .npmrc with legacy-peer-deps")
+            
+            # Save updated package.json (without modifying install script - that causes infinite loop!)
+            with open(package_json_path, 'w') as f:
+                json.dump(package_data, f, indent=2)
+            logger.info("   ✅ Updated package.json for Vercel")
             
             # Deploy to Vercel
             logger.info("🌐 Deploying to Vercel...")

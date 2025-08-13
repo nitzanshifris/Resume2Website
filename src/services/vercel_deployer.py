@@ -48,7 +48,7 @@ class VercelDeployer:
         job_id: str
     ) -> Tuple[bool, Optional[str], Optional[str]]:
         """
-        Deploy a portfolio to Vercel
+        Deploy a portfolio to Vercel using CLI to bypass 10MB API limit
         
         Args:
             portfolio_path: Path to the portfolio directory
@@ -65,76 +65,9 @@ class VercelDeployer:
             # Sanitize project name for Vercel (must be lowercase, alphanumeric with hyphens)
             safe_name = self._sanitize_project_name(project_name)
             
-            # Prepare files for deployment using simpler approach
-            files = self._prepare_files_simple(portfolio_path)
-            if not files:
-                return False, None, "No files found to deploy"
-            
-            # Create deployment payload with inline file data
-            payload = {
-                "name": safe_name,
-                "files": files,  # Array of {file: path, data: content} objects
-                "projectSettings": {
-                    "framework": "nextjs",
-                    "buildCommand": "npm run build",
-                    "devCommand": "npm run dev",
-                    "installCommand": "npm install",
-                    "outputDirectory": ".next"
-                },
-                "target": "production",
-                "meta": {
-                    "user_id": user_id,
-                    "job_id": job_id,
-                    "created_at": datetime.utcnow().isoformat()
-                }
-            }
-            
-            # Add team ID and slug for team deployments
-            params = {}
-            if self.team_id:
-                params['teamId'] = self.team_id
-                # Also add slug for better API compatibility
-                params['slug'] = self._get_team_slug()
-            
-            # Create deployment
-            logger.info(f"📤 Creating deployment with {len(files)} files...")
-            response = requests.post(
-                f"{self.api_base}/v13/deployments",
-                headers=self.headers,
-                json=payload,
-                params=params,
-                timeout=300  # 5 minutes timeout for build
-            )
-            
-            if response.status_code in [200, 201]:
-                deployment_data = response.json()
-                deployment_url = deployment_data.get('url', '')
-                if not deployment_url.startswith('http'):
-                    deployment_url = f"https://{deployment_url}"
-                deployment_id = deployment_data.get('id')
+            # Use CLI deployment to bypass 10MB API limit
+            return self._deploy_with_cli(portfolio_path, safe_name, user_id, job_id)
                 
-                logger.info(f"✅ Deployment created successfully!")
-                logger.info(f"📍 URL: {deployment_url}")
-                logger.info(f"🆔 Deployment ID: {deployment_id}")
-                
-                # Wait for deployment to be ready
-                if self._wait_for_deployment(deployment_id):
-                    logger.info(f"🎉 Deployment is ready at: {deployment_url}")
-                    return True, deployment_url, None
-                else:
-                    # Still return the URL even if not immediately ready
-                    logger.warning("⚠️ Deployment created but may still be building")
-                    return True, deployment_url, None
-                
-            else:
-                error_msg = f"Deployment failed: {response.status_code} - {response.text[:500]}"
-                logger.error(f"❌ {error_msg}")
-                return False, None, error_msg
-                
-        except requests.exceptions.Timeout:
-            error_msg = "Deployment timed out after 5 minutes"
-            logger.error(f"⏱️ {error_msg}")
-            return False, None, error_msg
         except Exception as e:
             error_msg = f"Deployment error: {str(e)}"
             logger.error(f"❌ {error_msg}")
@@ -625,6 +558,179 @@ class VercelDeployer:
         except Exception as e:
             logger.error(f"Error checking deployment status: {e}")
             return {}
+    
+    def _deploy_with_cli(self, portfolio_path: str, project_name: str, user_id: str, job_id: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Deploy using Vercel CLI to handle projects >10MB
+        """
+        import subprocess
+        import json
+        import os
+        import tempfile
+        
+        try:
+            logger.info("📦 Using Vercel CLI for deployment (handles large projects)")
+            
+            # Ensure portfolio directory exists and is absolute
+            portfolio_path = os.path.abspath(portfolio_path)
+            if not os.path.exists(portfolio_path):
+                logger.error(f"🔴 Portfolio directory not found: {portfolio_path}")
+                logger.error(f"🔴 Current working directory: {os.getcwd()}")
+                logger.error(f"🔴 Directory contents: {os.listdir('.')[:10]}")
+                raise FileNotFoundError(f"Portfolio directory not found: {portfolio_path}")
+            
+            # Create vercel.json with project settings
+            vercel_config = {
+                "name": project_name,
+                "framework": "nextjs",
+                "buildCommand": "npm run build",
+                "devCommand": "npm run dev",
+                # Remove installCommand - Vercel will use default npm install with .npmrc settings
+                "outputDirectory": ".next",
+                "public": True
+            }
+            
+            vercel_json_path = os.path.join(portfolio_path, 'vercel.json')
+            with open(vercel_json_path, 'w') as f:
+                json.dump(vercel_config, f, indent=2)
+            logger.info(f"📝 Created vercel.json in {portfolio_path}")
+            
+            # Use the globally installed Vercel CLI
+            cmd = [
+                'vercel',
+                '--prod',  # Deploy to production
+                '--yes',   # Skip confirmation
+                '--token', self.api_token
+                # Note: --name is deprecated and handled via vercel.json
+                # Note: --no-clipboard is now default behavior
+            ]
+            
+            # Add team flag if applicable
+            if self.team_id:
+                # Get team slug for CLI
+                team_slug = self._get_team_slug()
+                if team_slug:
+                    cmd.extend(['--scope', team_slug])
+            
+            logger.info(f"🚀 Running: {' '.join(cmd[:3])}... (token hidden)")
+            logger.info(f"📂 In directory: {portfolio_path}")
+            
+            # Run deployment with real-time output monitoring
+            logger.info(f"📂 Running deployment from: {portfolio_path}")
+            
+            # Use Popen for real-time output
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Combine stderr with stdout
+                text=True,
+                cwd=portfolio_path,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            output_lines = []
+            deployment_url = None
+            
+            # Read output line by line for real-time monitoring
+            try:
+                for line in iter(process.stdout.readline, ''):
+                    if not line:
+                        break
+                    
+                    line = line.strip()
+                    if line:
+                        output_lines.append(line)
+                        
+                        # Log progress lines
+                        if any(keyword in line.lower() for keyword in 
+                               ['uploading', 'building', 'ready', 'error', 'deployed', 
+                                'inspecting', 'queued', 'created', 'production']):
+                            logger.info(f"⏳ Vercel: {line[:200]}")
+                        
+                        # Look for deployment URL
+                        if 'https://' in line and '.vercel.app' in line:
+                            import re
+                            url_match = re.search(r'https://[\w\-]+\.vercel\.app', line)
+                            if url_match:
+                                deployment_url = url_match.group(0)
+                                logger.info(f"🎯 Found deployment URL: {deployment_url}")
+                
+                # Wait for process to complete
+                return_code = process.wait(timeout=30)  # Additional 30s for cleanup
+                
+            except subprocess.TimeoutExpired:
+                process.kill()
+                logger.error("⏱️ Deployment process timed out")
+                return_code = -1
+            
+            # Create result object compatible with subprocess.run
+            class ProcessResult:
+                def __init__(self, returncode, stdout):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = ''
+            
+            result = ProcessResult(return_code, '\n'.join(output_lines))
+            
+            # Check if deployment succeeded by looking for URL in output
+            # Vercel CLI may return non-zero for warnings, but still deploy successfully
+            output_text = result.stdout
+            
+            # First check if URL was found during streaming
+            if not deployment_url:
+                # Look for URL in all output
+                import re
+                url_matches = re.findall(r'https://[\w\-]+\.vercel\.app', output_text)
+                if url_matches:
+                    deployment_url = url_matches[-1]  # Use the last URL found (usually the production URL)
+                    logger.info(f"🎯 Found deployment URL in output: {deployment_url}")
+            
+            # Deployment is successful if we have a URL, regardless of return code
+            if deployment_url:
+                logger.info(f"✅ Deployment successful!")
+                logger.info(f"📍 URL: {deployment_url}")
+                return True, deployment_url, None
+            
+            # Check for actual errors
+            if result.returncode != 0:
+                # Log the output for debugging
+                logger.error(f"❌ CLI returned non-zero exit code: {result.returncode}")
+                logger.error(f"📝 Output: {output_text[:1000]}")
+                
+                # Still check if there's a URL in the output (sometimes succeeds despite warnings)
+                if 'https://' in output_text and '.vercel.app' in output_text:
+                    logger.warning("⚠️ Deployment may have succeeded despite warnings")
+                    # Try one more time to extract URL
+                    url_matches = re.findall(r'https://[\w\-]+\.vercel\.app', output_text)
+                    if url_matches:
+                        deployment_url = url_matches[-1]
+                        logger.info(f"🎆 Found URL despite error code: {deployment_url}")
+                        return True, deployment_url, None
+                
+                return False, None, f"Deployment failed with exit code {result.returncode}"
+            
+            # No URL found and no error - shouldn't happen
+            logger.error("❌ No deployment URL found in output")
+            logger.error(f"📝 Full output: {output_text[:2000]}")
+            return False, None, "No deployment URL found"
+                
+        except subprocess.TimeoutExpired:
+            error_msg = "CLI deployment timed out after 10 minutes"
+            logger.error(f"⏱️ {error_msg}")
+            return False, None, error_msg
+        except Exception as e:
+            error_msg = f"CLI deployment error: {str(e)}"
+            logger.error(f"❌ {error_msg}")
+            return False, None, error_msg
+        finally:
+            # Clean up vercel.json if created
+            if 'vercel_json_path' in locals() and os.path.exists(vercel_json_path):
+                try:
+                    os.remove(vercel_json_path)
+                    logger.debug("🧽 Cleaned up vercel.json")
+                except Exception as e:
+                    logger.warning(f"⚠️ Could not remove vercel.json: {e}")
     
     def delete_deployment(self, deployment_id: str) -> bool:
         """

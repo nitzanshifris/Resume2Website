@@ -3026,7 +3026,7 @@ export default function CVEditor({ userName }: CVEditorProps) {
             {isGeneratingPortfolio ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Deploying to Vercel... (2-3 min)
+                Deploying to Vercel... (3-5 min)
               </>
             ) : (
               <>

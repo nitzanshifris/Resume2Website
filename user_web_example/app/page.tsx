@@ -1021,8 +1021,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       setCurrentJobId(jobId)
       console.log('✅ Upload complete, job_id:', jobId)
       
-      // Step 2: Extract CV data (5-45%) - major processing step
-      console.log('🔍 Extracting CV data...')
+      // Step 2: Check if extraction is needed (might already be done during upload)
+      // For cached uploads, extraction happens during upload, so we can skip this step
+      console.log('🔍 Checking if CV extraction is needed...')
       
       // Start smooth linear progress from 5 to 20 (like we do for 20-60)
       // This will increment smoothly: 5, 6, 7, 8... up to 20
@@ -1052,42 +1053,71 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       // Start extraction with proper timeout handling
       const extractStartTime = Date.now()
       
-      // Set a longer timeout for CV extraction (60 seconds)
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 60000)
-      
+      // Check if CV was already extracted during upload (common for cached files)
+      let extractionNeeded = true
       try {
-        const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
-          method: 'POST',
+        // First check if CV data already exists
+        const checkResponse = await fetch(`${API_BASE_URL}/api/v1/cv/${jobId}`, {
+          method: 'GET',
           headers: {
             'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
-          },
-          signal: controller.signal
+          }
         })
         
-        clearTimeout(timeoutId)
-        
-        if (!extractResponse.ok) {
-          throw new Error('Failed to extract CV data')
+        if (checkResponse.ok) {
+          const cvData = await checkResponse.json()
+          if (cvData && cvData.cv_data && cvData.status === 'completed') {
+            console.log('✅ CV already extracted during upload (cached), skipping extraction')
+            extractionNeeded = false
+            // Jump progress to extraction complete
+            clearInterval(progressTo20Interval)
+            if (progressInterval) clearInterval(progressInterval)
+            setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
+          }
         }
+      } catch (e) {
+        console.log('Could not check CV status, will proceed with extraction')
+      }
+      
+      // Only extract if needed
+      if (extractionNeeded) {
+        // Set a longer timeout for CV extraction (60 seconds)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 60000)
         
-        // Wait for response to ensure extraction completed
-        const extractData = await extractResponse.json()
-        console.log('✅ CV extraction response received:', extractData)
+        try {
+          const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
+            method: 'POST',
+            headers: {
+              'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
+            },
+            signal: controller.signal
+          })
+          
+          clearTimeout(timeoutId)
+          
+          if (!extractResponse.ok) {
+            throw new Error('Failed to extract CV data')
+          }
         
-        // Clear the progress intervals and complete extraction
-        clearInterval(progressTo20Interval) // Clear first interval if still running
-        if (progressInterval) clearInterval(progressInterval) // Clear second interval
-        setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
-        console.log('✅ CV extraction complete')
-      } catch (error) {
-        clearTimeout(timeoutId)
-        clearInterval(progressTo20Interval)
-        if (progressInterval) clearInterval(progressInterval)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('CV extraction timed out after 60 seconds')
+          // Wait for response to ensure extraction completed
+          const extractData = await extractResponse.json()
+          console.log('✅ CV extraction response received:', extractData)
+          
+          // Clear the progress intervals and complete extraction
+          clearInterval(progressTo20Interval) // Clear first interval if still running
+          if (progressInterval) clearInterval(progressInterval) // Clear second interval
+          setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
+          console.log('✅ CV extraction complete')
+        } catch (error) {
+          clearTimeout(timeoutId)
+          clearInterval(progressTo20Interval)
+          if (progressInterval) clearInterval(progressInterval)
+          if (error instanceof Error && error.name === 'AbortError') {
+            throw new Error('CV extraction timed out after 60 seconds')
+          }
+          throw error
         }
-        throw error
       }
       
       // Step 3: Generate portfolio (45-60%) - final step
@@ -1113,9 +1143,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const generateStartTime = Date.now()
       const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate/${jobId}`
       
-      // Set timeout for portfolio generation (90 seconds)
+      // Set timeout for portfolio generation (5 minutes for Vercel CLI deployment)
       const generateController = new AbortController()
-      const generateTimeoutId = setTimeout(() => generateController.abort(), 90000)
+      const generateTimeoutId = setTimeout(() => generateController.abort(), 300000) // 5 minutes
       
       try {
         const generateResponse = await fetch(generateUrl, {
@@ -1144,12 +1174,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const generateElapsed = Date.now() - generateStartTime
       const remainingGenerationTime = Math.max(200, TIMINGS.GENERATION_ANIMATION - generateElapsed)
       
-      if (generateData.portfolio_url) {
-        setPortfolioUrl(generateData.portfolio_url)
+      if (generateData.url || generateData.portfolio_url) {
+        const portfolioUrl = generateData.url || generateData.portfolio_url
+        setPortfolioUrl(portfolioUrl)
         // Clear progress interval and jump to completion
         clearInterval(generateProgressInterval)
         setRealProgress(PROGRESS_MILESTONES.GENERATION_COMPLETE)
-        console.log('✅ Portfolio generated successfully:', generateData.portfolio_url)
+        console.log('✅ Portfolio generated successfully:', portfolioUrl)
         
         // Show portfolio immediately with a small delay for UX
         setTimeout(() => {
@@ -1160,9 +1191,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       } else {
         console.error('❌ No portfolio URL in response:', generateData)
         // Check if generation was successful but URL format is different
-        if (generateData.success && generateData.portfolio_id) {
+        if (generateData.status === 'success' && generateData.portfolio_id) {
           // Construct URL from available data - use the actual generated URL if available
-          const baseUrl = generateData.portfolio_url || 'http://localhost:4000'
+          const baseUrl = generateData.url || generateData.portfolio_url || 'http://localhost:4000'
           setPortfolioUrl(baseUrl)
           animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, remainingGenerationTime)
           console.log('✅ Portfolio generated successfully (constructed URL):', baseUrl)
@@ -1180,7 +1211,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         clearTimeout(generateTimeoutId)
         clearInterval(generateProgressInterval)
         if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Portfolio generation timed out after 90 seconds')
+          throw new Error('Portfolio generation timed out after 5 minutes')
         }
         throw error
       }
