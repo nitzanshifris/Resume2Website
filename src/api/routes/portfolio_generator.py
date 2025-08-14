@@ -939,45 +939,45 @@ export {{ extractedCVData }}
             )
             
             if not success or not deployment_url:
-                raise Exception(f"Vercel deployment failed: {deployment_id}")  # deployment_id contains error message on failure
+                # When failed, deployment_id contains error message
+                raise Exception(f"Vercel deployment failed: {deployment_id}")
             
-            deployment_result = {
-                'url': deployment_url,
-                'id': deployment_id
-            }
+            # deployment_id is now the actual deployment ID when successful
+            vercel_url = deployment_url
             
-            if not deployment_result or not deployment_result.get('url'):
-                raise Exception("Vercel deployment failed - no URL returned")
-            
-            vercel_url = deployment_result['url']
-            deployment_id = deployment_result.get('id', '')
+            logger.info(f"🔍 Deployment URL: {vercel_url}, ID: {deployment_id}")
             
             # Map to custom domain for iframe support
-            # Extract the project name from vercel URL (e.g., portfolio-abc123 from https://portfolio-abc123.vercel.app)
-            custom_domain_url = vercel_url
-            custom_subdomain = None
-            if '.vercel.app' in vercel_url:
+            custom_domain_url = vercel_url  # Default fallback
+            
+            if deployment_id:
+                # Extract fallback slug from vercel URL
                 import re
+                fallback_slug = 'portfolio'
                 match = re.search(r'https://([^.]+)\.vercel\.app', vercel_url)
                 if match:
-                    project_name = match.group(1)
-                    custom_subdomain = f"{project_name}.portfolios.resume2website.com"
-                    
-                    # Create the alias mapping
-                    logger.info(f"🔗 Creating custom domain alias: {custom_subdomain}")
-                    alias_success, alias_url, alias_error = deployer.create_alias(
-                        deployment_url=vercel_url,
-                        alias_domain=custom_subdomain
-                    )
-                    
-                    if alias_success:
-                        custom_domain_url = alias_url
-                        logger.info(f"✅ Custom domain active: {custom_domain_url}")
-                    else:
-                        logger.warning(f"⚠️ Could not create alias: {alias_error}")
-                        logger.warning(f"⚠️ Iframe embedding may not work until alias is created")
-                        # Keep the theoretical URL even if alias creation failed
-                        custom_domain_url = f"https://{custom_subdomain}"
+                    fallback_slug = match.group(1)
+                
+                # Get the full name from CV data to use as subdomain
+                full_name = cv_data.get('hero', {}).get('fullName', '')
+                
+                # Generate custom domain using the person's name
+                custom_fqdn = deployer.to_subdomain_from_name(full_name, fallback_slug)
+                logger.info(f"🔍 Generated custom domain: {custom_fqdn} from name: {full_name or '(empty)'}")
+                
+                # Attach domain and create alias using the API
+                ok, msg = deployer.attach_domain_and_alias(deployment_id, custom_fqdn)
+                logger.info(f"📍 Alias result: {ok} — {msg}")
+                
+                if ok:
+                    custom_domain_url = f"https://{custom_fqdn}"
+                    logger.info(f"✅ Custom domain active: {custom_domain_url}")
+                else:
+                    logger.warning(f"⚠️ Could not create alias: {msg}")
+                    logger.warning(f"⚠️ Falling back to Vercel URL, iframe may not work")
+            else:
+                logger.error("❌ Could not extract deployment_id; cannot create custom domain alias")
+                logger.warning("⚠️ Falling back to Vercel URL, iframe may not work")
             
             logger.info(f"✅ Portfolio deployed to Vercel: {vercel_url}")
             

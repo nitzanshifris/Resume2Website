@@ -692,10 +692,19 @@ class VercelDeployer:
             # Vercel CLI may return non-zero for warnings, but still deploy successfully
             output_text = result.stdout
             
+            # Extract deployment ID from CLI output
+            import re
+            deployment_id = None
+            
+            # Common "Inspect" line: https://vercel.com/.../deployments/<DEPLOYMENT_ID>
+            m = re.search(r'/deployments/([A-Za-z0-9]+)', output_text)
+            if m:
+                deployment_id = m.group(1)
+                logger.info(f"🎯 Found deployment ID: {deployment_id}")
+            
             # First check if URL was found during streaming
             if not deployment_url:
                 # Look for URL in all output
-                import re
                 url_matches = re.findall(r'https://[\w\-]+\.vercel\.app', output_text)
                 if url_matches:
                     deployment_url = url_matches[-1]  # Use the last URL found (usually the production URL)
@@ -705,7 +714,8 @@ class VercelDeployer:
             if deployment_url:
                 logger.info(f"✅ Deployment successful!")
                 logger.info(f"📍 URL: {deployment_url}")
-                return True, deployment_url, None
+                # Return deployment_id as the third element (was error message placeholder)
+                return True, deployment_url, deployment_id
             
             # Check for actual errors
             if result.returncode != 0:
@@ -772,6 +782,106 @@ class VercelDeployer:
             logger.error(f"Error deleting deployment: {e}")
             return False
     
+    def to_subdomain_from_name(self, full_name: str, fallback_slug: str) -> str:
+        """
+        Convert a full name to a valid subdomain
+        
+        Args:
+            full_name: The person's full name
+            fallback_slug: Fallback if name can't be converted (e.g., 'portfolio-abc123')
+            
+        Returns:
+            Full domain like 'john-doe.portfolios.resume2website.com'
+        """
+        import re
+        
+        if not full_name:
+            # Use fallback
+            candidate = re.sub(r'[^a-z0-9-]', '-', fallback_slug.lower())[:63].strip('-') or 'portfolio'
+            return f"{candidate}.portfolios.resume2website.com"
+        
+        # Simple conversion: lowercase, replace spaces with hyphens, remove special chars
+        sanitized = full_name.lower()
+        sanitized = re.sub(r'[^a-z0-9\s-]', '', sanitized)  # Remove special chars
+        sanitized = re.sub(r'\s+', '-', sanitized)  # Replace spaces with hyphens
+        sanitized = re.sub(r'-+', '-', sanitized)  # Remove multiple hyphens
+        sanitized = sanitized.strip('-')[:63]  # Remove leading/trailing hyphens and limit length
+        
+        if not sanitized:
+            # Fallback if sanitization resulted in empty string
+            sanitized = re.sub(r'[^a-z0-9-]', '-', fallback_slug.lower())[:63].strip('-') or 'portfolio'
+            
+        return f"{sanitized}.portfolios.resume2website.com"
+    
+    def attach_domain_and_alias(self, deployment_id: str, fqdn: str) -> Tuple[bool, str]:
+        """
+        Attach domain to project and create alias using Vercel API
+        
+        Args:
+            deployment_id: The deployment ID from Vercel
+            fqdn: Full domain name (e.g., john-doe.portfolios.resume2website.com)
+            
+        Returns:
+            Tuple of (success, message)
+        """
+        import requests
+        import time
+        
+        headers = {
+            "Authorization": f"Bearer {self.api_token}",
+            "Content-Type": "application/json"
+        }
+        scope = {"teamId": self.team_id} if self.team_id else {}
+        
+        # 1) Add domain to project (idempotent)
+        logger.info(f"📝 Adding domain {fqdn} to project...")
+        r = requests.post(
+            "https://api.vercel.com/v9/projects/_/domains",
+            params=scope,
+            headers=headers,
+            json={"name": fqdn},
+            timeout=30
+        )
+        
+        if r.status_code not in (200, 201, 409):  # 409 = already exists
+            logger.error(f"❌ Add domain failed {r.status_code}: {r.text[:200]}")
+            return False, f"add-domain failed {r.status_code}: {r.text[:200]}"
+        
+        logger.info(f"✅ Domain {fqdn} added to project")
+        
+        # 2) Create alias to deployment with retries
+        logger.info(f"🔗 Creating alias {fqdn} -> deployment {deployment_id}")
+        
+        for attempt in range(5):
+            a = requests.post(
+                f"https://api.vercel.com/v2/deployments/{deployment_id}/aliases",
+                params=scope,
+                headers=headers,
+                json={"alias": fqdn},
+                timeout=30
+            )
+            
+            if a.status_code in (200, 201):
+                logger.info(f"✅ Alias created successfully: https://{fqdn}")
+                return True, fqdn
+            
+            if a.status_code == 409:  # Already aliased
+                logger.info(f"ℹ️ Alias already exists: https://{fqdn}")
+                return True, fqdn
+            
+            if a.status_code == 422:  # Domain not verified (DNS lag)
+                logger.warning(f"⚠️ Domain not verified yet, retrying in {6 * (attempt + 1)}s...")
+                time.sleep(6 * (attempt + 1))
+                continue
+            
+            # Transient error? Retry
+            logger.warning(f"⚠️ Alias attempt {attempt + 1} failed: {a.status_code}")
+            time.sleep(3 * (attempt + 1))
+        
+        error_msg = f"alias failed after retries: {a.status_code}: {a.text[:200]}"
+        logger.error(f"❌ {error_msg}")
+        return False, error_msg
+    
     def create_alias(self, deployment_url: str, alias_domain: str) -> Tuple[bool, Optional[str], Optional[str]]:
         """
         Create an alias (custom domain) for a deployment
@@ -785,6 +895,11 @@ class VercelDeployer:
         """
         try:
             logger.info(f"🔗 Creating alias: {alias_domain} -> {deployment_url}")
+            
+            # First, add the domain to the project
+            domain_added = self.add_domain_to_project(alias_domain)
+            if not domain_added:
+                logger.warning(f"⚠️ Domain might not be added to project, continuing anyway...")
             
             # Extract deployment ID from URL if needed
             import re
