@@ -771,6 +771,85 @@ class VercelDeployer:
         except Exception as e:
             logger.error(f"Error deleting deployment: {e}")
             return False
+    
+    def create_alias(self, deployment_url: str, alias_domain: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Create an alias (custom domain) for a deployment
+        
+        Args:
+            deployment_url: The Vercel deployment URL (e.g., https://portfolio-abc.vercel.app)
+            alias_domain: The custom domain to map (e.g., portfolio-abc.portfolios.resume2website.com)
+            
+        Returns:
+            Tuple of (success, final_url, error_message)
+        """
+        try:
+            logger.info(f"🔗 Creating alias: {alias_domain} -> {deployment_url}")
+            
+            # Extract deployment ID from URL if needed
+            import re
+            deployment_id = None
+            
+            # Try to extract from URL pattern
+            if '.vercel.app' in deployment_url:
+                # For URLs like https://portfolio-abc-123.vercel.app
+                match = re.search(r'https://([^.]+)\.vercel\.app', deployment_url)
+                if match:
+                    # The deployment ID might be in the URL, but we need the actual deployment ID
+                    # We'll use the URL directly
+                    pass
+            
+            # Use CLI to create alias (more reliable than API for this)
+            import subprocess
+            cmd = [
+                'vercel',
+                'alias',
+                'set',
+                deployment_url,
+                alias_domain,
+                '--token', self.api_token
+            ]
+            
+            # Add team scope if applicable
+            if self.team_id:
+                team_slug = self._get_team_slug()
+                if team_slug:
+                    cmd.extend(['--scope', team_slug])
+            
+            logger.info(f"🚀 Running alias command...")
+            
+            try:
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    cwd='/'  # Run from root to avoid any path issues
+                )
+                
+                # Check if successful
+                if result.returncode == 0 or 'Success' in result.stdout or alias_domain in result.stdout:
+                    logger.info(f"✅ Alias created successfully: https://{alias_domain}")
+                    return True, f"https://{alias_domain}", None
+                else:
+                    # Sometimes vercel alias returns non-zero but still works
+                    if 'already exists' in result.stdout.lower() or 'already exists' in result.stderr.lower():
+                        logger.info(f"ℹ️ Alias already exists: https://{alias_domain}")
+                        return True, f"https://{alias_domain}", None
+                    
+                    error_msg = f"Failed to create alias: {result.stderr or result.stdout}"
+                    logger.error(f"❌ {error_msg}")
+                    return False, None, error_msg
+                    
+            except subprocess.TimeoutExpired:
+                error_msg = "Alias creation timed out after 30 seconds"
+                logger.error(f"⏱️ {error_msg}")
+                return False, None, error_msg
+                
+        except Exception as e:
+            error_msg = f"Alias creation error: {str(e)}"
+            logger.error(f"❌ {error_msg}")
+            return False, None, error_msg
 
 
 # Create singleton instance

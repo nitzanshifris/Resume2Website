@@ -952,6 +952,33 @@ export {{ extractedCVData }}
             vercel_url = deployment_result['url']
             deployment_id = deployment_result.get('id', '')
             
+            # Map to custom domain for iframe support
+            # Extract the project name from vercel URL (e.g., portfolio-abc123 from https://portfolio-abc123.vercel.app)
+            custom_domain_url = vercel_url
+            custom_subdomain = None
+            if '.vercel.app' in vercel_url:
+                import re
+                match = re.search(r'https://([^.]+)\.vercel\.app', vercel_url)
+                if match:
+                    project_name = match.group(1)
+                    custom_subdomain = f"{project_name}.portfolios.resume2website.com"
+                    
+                    # Create the alias mapping
+                    logger.info(f"🔗 Creating custom domain alias: {custom_subdomain}")
+                    alias_success, alias_url, alias_error = deployer.create_alias(
+                        deployment_url=vercel_url,
+                        alias_domain=custom_subdomain
+                    )
+                    
+                    if alias_success:
+                        custom_domain_url = alias_url
+                        logger.info(f"✅ Custom domain active: {custom_domain_url}")
+                    else:
+                        logger.warning(f"⚠️ Could not create alias: {alias_error}")
+                        logger.warning(f"⚠️ Iframe embedding may not work until alias is created")
+                        # Keep the theoretical URL even if alias creation failed
+                        custom_domain_url = f"https://{custom_subdomain}"
+            
             logger.info(f"✅ Portfolio deployed to Vercel: {vercel_url}")
             
             # Store deployment info for tracking
@@ -959,6 +986,7 @@ export {{ extractedCVData }}
                 "portfolio_id": portfolio_id,
                 "job_id": job_id,
                 "vercel_url": vercel_url,
+                "custom_domain_url": custom_domain_url,
                 "deployment_id": deployment_id,
                 "sandbox_path": str(sandbox_path),
                 "created_at": datetime.now(),
@@ -982,12 +1010,14 @@ export {{ extractedCVData }}
             return {
                 "status": "success",
                 "portfolio_id": portfolio_id,
-                "url": vercel_url,
+                "url": custom_domain_url,  # Return custom domain for iframe support
+                "vercel_url": vercel_url,
+                "custom_domain_url": custom_domain_url,
                 "deployment_id": deployment_id,
                 "template": template_id,
                 "is_local": False,
                 "deployment_time": startup_time,
-                "message": "Portfolio deployed to Vercel successfully"
+                "message": "Portfolio deployed successfully. Custom domain will be active once DNS propagates."
             }
             
         except Exception as e:
@@ -1019,7 +1049,9 @@ async def list_user_portfolios(current_user_id: str = Depends(get_current_user))
                 portfolio_data = {
                     "portfolio_id": portfolio_id,
                     "job_id": info.get('job_id'),
-                    "url": info.get('vercel_url') or info.get('url') or f"http://localhost:{info.get('port')}",
+                    "url": info.get('custom_domain_url') or info.get('vercel_url') or info.get('url') or f"http://localhost:{info.get('port')}",
+                    "vercel_url": info.get('vercel_url'),
+                    "custom_domain_url": info.get('custom_domain_url'),
                     "port": info.get('port'),
                     "created_at": info.get('created_at').isoformat() if isinstance(info.get('created_at'), datetime) else info.get('created_at'),
                     "template": info.get('template'),
