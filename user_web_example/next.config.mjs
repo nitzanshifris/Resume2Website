@@ -22,7 +22,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
               "img-src 'self' data: blob: https: http:",
               "font-src 'self' fonts.gstatic.com",
-              "connect-src 'self' http://localhost:2000 http://127.0.0.1:2000 https://*.ngrok-free.app https://*.ngrok.app https://*.ngrok.io fonts.googleapis.com fonts.gstatic.com",
+              "connect-src 'self' http://localhost:2000 http://127.0.0.1:2000 fonts.googleapis.com fonts.gstatic.com",
               "media-src 'self'",
               "object-src 'none'",
               "child-src 'self'",
