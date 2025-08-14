@@ -95,11 +95,20 @@ export function middleware(request: NextRequest) {
           }
           
           h1 {
-            font-size: clamp(32px, 5vw, 56px);
+            font-size: clamp(32px, 5vw, 60px);
             font-weight: 700;
-            line-height: 1.2;
+            line-height: 1.3;
             margin-bottom: 24px;
             color: #111827;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          
+          @media (min-width: 768px) {
+            h1 {
+              font-size: 60px;
+            }
           }
           
           .gradient-text {
@@ -108,6 +117,40 @@ export function middleware(request: NextRequest) {
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 800;
+          }
+          
+          .pdf-text {
+            position: relative;
+            display: inline-block;
+            color: #6b7280;
+          }
+          
+          .pdf-text::after {
+            content: '✕';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            color: #ef4444;
+            font-size: 80px;
+            font-weight: bold;
+            animation: crossAnimation 0.6s ease-out 1s forwards;
+            z-index: 10;
+          }
+          
+          @keyframes crossAnimation {
+            0% {
+              transform: translate(-50%, -50%) scale(0) rotate(0deg);
+              opacity: 0;
+            }
+            50% {
+              transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
+              opacity: 1;
+            }
+            100% {
+              transform: translate(-50%, -50%) scale(1) rotate(360deg);
+              opacity: 1;
+            }
           }
           
           .subheadline {
@@ -200,11 +243,15 @@ export function middleware(request: NextRequest) {
       </head>
       <body>
         <div class="container">
-          <img src="/logo.png" alt="R2W" class="logo" onerror="this.style.display='none'">
+          <svg class="logo" width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#2563eb" font-size="28" font-weight="bold" font-family="system-ui">
+              R2W
+            </text>
+          </svg>
           
           <h1>
-            There is a new way to get hired, and no, 
-            <span class="gradient-text">it's not a PDF resume</span>
+            There is a new way to get hired,<br/>
+            and no, it's not a <span class="pdf-text">PDF resume</span>
           </h1>
           
           <p class="subheadline">
