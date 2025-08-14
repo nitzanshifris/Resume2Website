@@ -90,6 +90,7 @@ interface Portfolio {
   template: string
   cv_filename: string
   status: string
+  is_local?: boolean
 }
 
 export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
