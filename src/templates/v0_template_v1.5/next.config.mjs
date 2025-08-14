@@ -1,4 +1,14 @@
 /** @type {import('next').NextConfig} */
+
+// SECURITY: Only allow embedding from trusted origins
+// Add your actual production domain here
+// EXACT parents that may frame this app:
+const allowedParents = [
+  'http://localhost:3019',                // your dev parent
+  'https://resume2website.com',           // production domain
+  'https://www.resume2website.com',       // www version
+];
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -15,28 +25,8 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          // Completely remove CSP restrictions for iframe embedding
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; frame-ancestors *; frame-src *;",
-          },
-          // Remove X-Frame-Options entirely (CSP takes precedence)
-          {
-            key: 'X-Frame-Options',
-            value: '',
-          },
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
-          },
+          { key: 'Content-Security-Policy', value: `frame-ancestors 'self' ${allowedParents.join(' ')};` },
+          // NOTE: do not include X-Frame-Options here at all
         ],
       },
     ]
