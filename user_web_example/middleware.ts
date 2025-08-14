@@ -26,7 +26,12 @@ export function middleware(request: NextRequest) {
   }
   
   // Not authenticated - redirect to coming soon page
-  return NextResponse.redirect(new URL('/coming-soon', request.url))
+  const redirectResponse = NextResponse.redirect(new URL('/coming-soon', request.url))
+  // Add cache headers to prevent caching
+  redirectResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+  redirectResponse.headers.set('Pragma', 'no-cache')
+  redirectResponse.headers.set('Expires', '0')
+  return redirectResponse
 }
 
 export const config = {
