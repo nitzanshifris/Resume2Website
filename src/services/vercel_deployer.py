@@ -579,7 +579,18 @@ class VercelDeployer:
                 logger.error(f"🔴 Directory contents: {os.listdir('.')[:10]}")
                 raise FileNotFoundError(f"Portfolio directory not found: {portfolio_path}")
             
-            # Create vercel.json with project settings
+            # Check if vercel.json already exists (from template)
+            vercel_json_path = os.path.join(portfolio_path, 'vercel.json')
+            existing_config = {}
+            if os.path.exists(vercel_json_path):
+                try:
+                    with open(vercel_json_path, 'r') as f:
+                        existing_config = json.load(f)
+                    logger.info(f"📄 Found existing vercel.json in template")
+                except:
+                    pass
+            
+            # Create/merge vercel.json with project settings
             vercel_config = {
                 "name": project_name,
                 "framework": "nextjs",
@@ -590,10 +601,14 @@ class VercelDeployer:
                 "public": True
             }
             
-            vercel_json_path = os.path.join(portfolio_path, 'vercel.json')
+            # Preserve headers configuration from template if exists
+            if 'headers' in existing_config:
+                vercel_config['headers'] = existing_config['headers']
+                logger.info(f"📋 Preserving headers configuration from template")
+            
             with open(vercel_json_path, 'w') as f:
                 json.dump(vercel_config, f, indent=2)
-            logger.info(f"📝 Created vercel.json in {portfolio_path}")
+            logger.info(f"📝 Created/updated vercel.json in {portfolio_path}")
             
             # Use the globally installed Vercel CLI
             cmd = [
