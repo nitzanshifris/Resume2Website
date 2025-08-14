@@ -7,6 +7,7 @@ import "../globals.css"
 export const metadata: Metadata = {
   title: "Coming Soon",
   description: "There is a new way to get hired, and no, it's not a PDF resume",
+  generator: "v0.app",
 }
 
 export default function RootLayout({

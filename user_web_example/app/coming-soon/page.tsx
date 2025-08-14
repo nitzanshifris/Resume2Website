@@ -29,7 +29,7 @@ export default function ComingSoonPage() {
         {/* Logo */}
         <div className="mb-12">
           <Image
-            src="/logo.png"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-W06bZ3SFofUK6WnxqgVriR6hMWwugE.png"
             alt="R2W Logo"
             width={180}
             height={120}
