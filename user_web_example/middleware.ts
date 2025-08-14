@@ -131,11 +131,12 @@ export function middleware(request: NextRequest) {
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%) scale(0) rotate(0deg);
-            color: #ef4444;
-            font-size: 80px;
-            font-weight: bold;
+            color: #dc2626;
+            font-size: 100px;
+            font-weight: 900;
             animation: crossAnimation 0.6s ease-out 1s forwards;
             z-index: 10;
+            text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
           }
           
           @keyframes crossAnimation {
@@ -250,8 +251,8 @@ export function middleware(request: NextRequest) {
           </svg>
           
           <h1>
-            There is a new way to get hired,<br/>
-            and no, it's not a <span class="pdf-text">PDF resume</span>
+            There is a new way to get hired, and no,<br/>
+            it's not a <span class="pdf-text"><span class="gradient-text">PDF resume</span></span>
           </h1>
           
           <p class="subheadline">
