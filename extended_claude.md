@@ -80,6 +80,8 @@ python3 main.py                              # Alternative start method
 2. **ALWAYS** create a feature branch before making changes
 3. **ALWAYS** ask for explicit approval before `git push`
 4. **ALWAYS** ask for explicit approval before `git commit`
+5. **ALWAYS** ask for explicit approval before `git merge` - NEVER merge without permission
+6. **ALWAYS** ask for explicit approval before `git rebase` - NEVER rebase without permission
 
 ```bash
 # 1. MANDATORY: Check current branch first

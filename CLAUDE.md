@@ -47,11 +47,13 @@ pnpm run typecheck            # TypeScript validation
 ## Git Workflow Rules (CRITICAL)
 1. **NEVER** work on `main` branch
 2. **ALWAYS** create feature branches: `git checkout -b feature/description`
-3. **Current branch**: nitzan-4
+3. **Current branch**: main (merged from nitzan-4)
 4. **ALWAYS** ask explicit approval before:
    - `git add .`
    - `git commit -m "message"`
    - `git push origin branch-name`
+   - `git merge` - **NEVER merge without explicit permission**
+   - `git rebase` - **NEVER rebase without explicit permission**
 
 ## Code Style Requirements
 ### TypeScript/React
