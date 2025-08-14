@@ -246,6 +246,14 @@ Portfolios are automatically deployed to Vercel when generated:
   - Vercel CLI: `npm install -g vercel`
   - API token: `python3 src/utils/setup_keychain.py`
 
+### Production Site Protection
+The main app at resume2website.com is protected with authentication middleware:
+- **Access with secret key**: `https://resume2website.com?key=YOUR_SECRET_KEY`
+- **Cookie authentication**: Valid for 7 days after first access
+- **Unauthorized visitors**: See "Coming Soon" page
+- **Configuration**: Edit `user_web_example/middleware.ts` to change secret key
+- **Testing protection**: Use incognito window or clear cookies
+
 ## Directory Structure
 ```
 Resume2Website-V4/
