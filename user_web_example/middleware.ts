@@ -45,24 +45,27 @@ export function middleware(request: NextRequest) {
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(to bottom right, transparent, white, #f9fafb);
+            color: #111827;
             position: relative;
             overflow: hidden;
           }
           
-          /* Animated background effect similar to hero */
+          /* Gradient overlay matching hero section */
           body::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: move 20s linear infinite;
-            opacity: 0.3;
+            inset: 0;
+            background: linear-gradient(to right, transparent, rgba(16, 185, 129, 0.08) 50%, rgba(56, 189, 248, 0.15));
+            pointer-events: none;
+          }
+          
+          body::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, transparent, rgba(37, 99, 235, 0.06) 50%, rgba(16, 185, 129, 0.09));
+            pointer-events: none;
           }
           
           @keyframes move {
@@ -96,11 +99,11 @@ export function middleware(request: NextRequest) {
             font-weight: 700;
             line-height: 1.2;
             margin-bottom: 24px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #111827;
           }
           
           .gradient-text {
-            background: linear-gradient(135deg, #FFE66D 0%, #FF6B6B 100%);
+            background: linear-gradient(to right, #10b981, #38bdf8, #2563eb);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -110,7 +113,7 @@ export function middleware(request: NextRequest) {
           .subheadline {
             font-size: clamp(18px, 3vw, 24px);
             margin-bottom: 48px;
-            opacity: 0.95;
+            color: #6b7280;
             font-weight: 400;
             line-height: 1.5;
           }
@@ -126,41 +129,42 @@ export function middleware(request: NextRequest) {
           .email-input {
             flex: 1;
             padding: 16px 20px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.1);
-            color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 9999px;
+            background: white;
+            color: #111827;
             font-size: 16px;
-            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
           }
           
           .email-input::placeholder {
-            color: rgba(255,255,255,0.6);
+            color: #9ca3af;
           }
           
           .email-input:focus {
             outline: none;
-            border-color: rgba(255,255,255,0.4);
-            background: rgba(255,255,255,0.15);
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
           }
           
           .submit-btn {
             padding: 16px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(to right, #10b981, #38bdf8, #2563eb);
             border: none;
-            border-radius: 12px;
+            border-radius: 9999px;
             color: white;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
           }
           
           .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            background: linear-gradient(to right, #059669, #0ea5e9, #1d4ed8);
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
           }
           
           .submit-btn:active {
