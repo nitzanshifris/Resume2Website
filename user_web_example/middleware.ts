@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
         <title>Coming Soon</title>
         <meta name="description" content="Coming Soon - A new way to get hired">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" href="/data/logo/logo.png" type="image/png">
+        <link rel="icon" href="/logo.png" type="image/png">
         <style>
           * {
             margin: 0;
@@ -200,7 +200,7 @@ export function middleware(request: NextRequest) {
       </head>
       <body>
         <div class="container">
-          <img src="/data/logo/logo.png" alt="Resume2Website" class="logo" onerror="this.style.display='none'">
+          <img src="/logo.png" alt="R2W" class="logo" onerror="this.style.display='none'">
           
           <h1>
             There is a new way to get hired, and no, 
