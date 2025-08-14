@@ -99,12 +99,11 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
   const [showFallback, setShowFallback] = useState(false)
   
   useEffect(() => {
-    // For localhost URLs, show fallback immediately since cross-origin won't work from production
+    // Check if URL is localhost
     const isLocalhost = src.includes('localhost')
     const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
     
-    // Only show fallback if portfolio is on localhost but viewer is NOT on localhost
-    // This allows viewing localhost portfolios when developing locally
+    // For localhost URLs from production, show fallback immediately
     if (isLocalhost && isProduction) {
       console.log('🌐 Cross-origin detected: production → localhost, showing fallback immediately')
       setLoadError(true)
@@ -113,7 +112,10 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
       return
     }
     
-    // Set a timeout to show fallback if iframe doesn't load
+    // For Vercel URLs, we now allow iframe embedding since we've configured CSP headers
+    // The templates have frame-ancestors * which allows embedding from anywhere
+    
+    // Set a timeout to show fallback if iframe doesn't load (for any reason)
     const timeout = setTimeout(() => {
       if (isLoading) {
         console.log('⏰ Iframe timeout - showing fallback')
@@ -121,7 +123,7 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
         setIsLoading(false)
         setShowFallback(true)
       }
-    }, isLocalhost ? TIMINGS.IFRAME_TIMEOUT_LOCAL : TIMINGS.IFRAME_TIMEOUT_REMOTE)
+    }, 8000) // Give Vercel deployments more time to load
     
     return () => clearTimeout(timeout)
   }, [isLoading, src])
@@ -135,11 +137,13 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
           className={className}
           style={{ backgroundColor: 'white' }}
           onLoad={() => {
-            console.log('✅ Iframe loaded successfully')
+            console.log('✅ Iframe loaded successfully for:', src)
             setIsLoading(false)
+            setLoadError(false)
+            setShowFallback(false)
           }}
-          onError={() => {
-            console.error('❌ Iframe failed to load')
+          onError={(e) => {
+            console.error('❌ Iframe failed to load:', src, e)
             setLoadError(true)
             setIsLoading(false)
             setShowFallback(true)
@@ -163,16 +167,51 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
       
       {/* Error/Timeout fallback */}
       {(loadError || showFallback) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-          <div className="text-center p-8 max-w-md">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+          <div className="text-center p-8 max-w-lg">
             <div className="mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                <span className="text-2xl text-white">🚀</span>
+              {/* Success checkmark animation */}
+              <div className="w-20 h-20 mx-auto mb-4 relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
+                <div className="relative w-full h-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">Portfolio Generated Successfully!</h3>
-              <p className="text-gray-600 mb-6">
-                Your portfolio is running on <span className="font-mono text-sm bg-gray-200 px-1 rounded">{src}</span><br/>
-                <span className="text-sm">Browser security prevents embedding localhost in frames</span>
+              
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                {src.includes('.vercel.app') ? '🎉 Deployed to Vercel!' : 'Portfolio Generated Successfully!'}
+              </h3>
+              
+              <p className="text-gray-600 mb-4">
+                Your portfolio is live and ready to share!
+              </p>
+              
+              {/* URL display with copy button */}
+              <div className="bg-gray-100 rounded-lg p-3 mb-4">
+                <p className="text-xs text-gray-500 mb-1">Portfolio URL:</p>
+                <div className="flex items-center justify-between bg-white rounded border border-gray-200 p-2">
+                  <span className="font-mono text-xs text-gray-700 truncate flex-1 mr-2">{src}</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(src)
+                      // Could add a toast notification here
+                    }}
+                    className="text-gray-500 hover:text-gray-700 p-1"
+                    title="Copy URL"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <p className="text-xs text-gray-500 mb-4">
+                {src.includes('.vercel.app') 
+                  ? '🔒 For security, Vercel blocks iframe embedding. Open in a new tab to view.' 
+                  : '🔒 Browser security prevents embedding localhost in frames.'}
               </p>
             </div>
             
@@ -183,11 +222,16 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
                 rel="noopener noreferrer"
                 className="block w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                Open Portfolio in New Tab ↗
+                <span className="inline-flex items-center">
+                  Open Portfolio in New Tab
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </span>
               </a>
               
-              <p className="text-xs text-gray-500">
-                Your portfolio is ready and running! Click above to view it.
+              <p className="text-xs text-gray-400">
+                Pro tip: Share this URL with anyone to showcase your portfolio!
               </p>
             </div>
           </div>
