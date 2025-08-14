@@ -89,6 +89,7 @@ git branch --show-current  # Must NOT be 'main'
 # 2. Create feature branch (REQUIRED)
 git checkout -b feature/description
 # Branch naming: feature/*, fix/*, docs/*, refactor/*
+# Current branch: nitzan-4
 
 # 3. Make changes and verify
 pnpm run typecheck      # No TypeScript errors
@@ -1065,6 +1066,16 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **Reason**: pnpm workspace conflicts in isolated environments
 
 ## Recent Updates
+
+### Coming Soon Page & Local Development Setup (2025-08-14)
+- **🎨 Coming Soon Page Created**: Professional landing page with gradient text and animated red X over "PDF resume"
+- **📧 Email Capture Added**: Newsletter signup form integrated with Coming Soon page
+- **🔒 Middleware Protection Working**: Redirects unauthenticated users to Coming Soon page
+- **🚀 Vercel Deployment Verified**: Site protection and Coming Soon page functioning correctly on production
+- **🔌 Removed ngrok Setup**: Cleaned up ngrok configuration, returned to pure local development
+- **🏠 Local Development Focus**: Backend on port 2000, Frontend on port 3000 for simplified development
+- **📦 Geist Font Package Added**: Installed missing font dependency for Coming Soon page
+- **🔄 Cache-Busting Headers**: Fixed middleware caching issues with proper headers
 
 ### Company Rebranding & UX Improvements (2025-01-12)
 - **🏢 Complete Rebranding**: Changed company name from CV2Web to Resume2Website across entire codebase

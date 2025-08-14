@@ -47,7 +47,8 @@ pnpm run typecheck            # TypeScript validation
 ## Git Workflow Rules (CRITICAL)
 1. **NEVER** work on `main` branch
 2. **ALWAYS** create feature branches: `git checkout -b feature/description`
-3. **ALWAYS** ask explicit approval before:
+3. **Current branch**: nitzan-4
+4. **ALWAYS** ask explicit approval before:
    - `git add .`
    - `git commit -m "message"`
    - `git push origin branch-name`
@@ -250,9 +251,11 @@ Portfolios are automatically deployed to Vercel when generated:
 The main app at resume2website.com is protected with authentication middleware:
 - **Access with secret key**: `https://resume2website.com?key=YOUR_SECRET_KEY`
 - **Cookie authentication**: Valid for 7 days after first access
-- **Unauthorized visitors**: See "Coming Soon" page
+- **Unauthorized visitors**: See "Coming Soon" page with animated red X over "PDF resume"
+- **Coming Soon page**: Custom landing with email capture and gradient text styling
 - **Configuration**: Edit `user_web_example/middleware.ts` to change secret key
 - **Testing protection**: Use incognito window or clear cookies
+- **Local development**: Frontend on port 3000, Backend on port 2000 (no ngrok needed)
 
 ## Directory Structure
 ```
