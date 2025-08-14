@@ -125,18 +125,21 @@ export function middleware(request: NextRequest) {
             color: #6b7280;
           }
           
-          .pdf-text::after {
-            content: '✕';
+          .x-mark {
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%) scale(0) rotate(0deg);
-            color: #dc2626;
-            font-size: 100px;
-            font-weight: 900;
+            width: 80px;
+            height: 80px;
             animation: crossAnimation 0.6s ease-out 1s forwards;
             z-index: 10;
-            text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+            pointer-events: none;
+          }
+          
+          .x-mark svg {
+            width: 100%;
+            height: 100%;
           }
           
           @keyframes crossAnimation {
@@ -252,7 +255,14 @@ export function middleware(request: NextRequest) {
           
           <h1>
             There is a new way to get hired, and no,<br/>
-            it's not a <span class="pdf-text"><span class="gradient-text">PDF resume</span></span>
+            it's not a <span class="pdf-text">
+              <span class="gradient-text">PDF resume</span>
+              <div class="x-mark">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </span>
           </h1>
           
           <p class="subheadline">
