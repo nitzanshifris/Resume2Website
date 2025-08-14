@@ -298,6 +298,19 @@ Resume2Website-V4/
 └── extended_claude.md     # Comprehensive documentation
 ```
 
+## Portfolio Iframe Embedding (CRITICAL)
+**NEVER use `frame-ancestors *`** - this is a security vulnerability!
+
+### Correct Approach:
+1. **Use custom domains** for portfolios (e.g., `*.portfolios.resume2website.com`)
+   - Vercel platform blocks iframes on `*.vercel.app` domains
+   - Custom domains allow full CSP control
+2. **Configure CSP properly** in portfolio templates:
+   - Use `FRAME_PARENTS` environment variable
+   - List exact parent origins only (no wildcards)
+   - Example: `http://localhost:3000,https://resume2website.com`
+3. **See full guide**: `docs/PORTFOLIO_IFRAME_SETUP.md`
+
 ## Important Files to Know
 - **config.py** - Backend configuration, environment variables, AI model settings
 - **main.py** - FastAPI application entry point with routing
@@ -311,6 +324,7 @@ Resume2Website-V4/
 - **package.json** - Frontend dependencies, scripts, workspace config
 - **requirements.txt** - Python backend dependencies
 - **.claude/commands/** - Development utility scripts
+- **docs/PORTFOLIO_IFRAME_SETUP.md** - Portfolio iframe embedding guide
 
 ---
 *For comprehensive documentation, architecture details, and troubleshooting guides, see: `extended_claude.md`*

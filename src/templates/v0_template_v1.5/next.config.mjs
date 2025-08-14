@@ -1,13 +1,10 @@
 /** @type {import('next').NextConfig} */
 
-// SECURITY: Only allow embedding from trusted origins
-// Add your actual production domain here
-// EXACT parents that may frame this app:
-const allowedParents = [
-  'http://localhost:3019',                // your dev parent
-  'https://resume2website.com',           // production domain
-  'https://www.resume2website.com',       // www version
-];
+// EXACT parents allowed (dev + prod). Use env to avoid committing domains.
+const allowedParents = (process.env.FRAME_PARENTS || 'http://localhost:3019,http://localhost:3000,https://resume2website.com,https://www.resume2website.com')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
 
 const nextConfig = {
   eslint: {
