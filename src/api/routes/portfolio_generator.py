@@ -1395,3 +1395,67 @@ async def get_portfolio_metrics():
             "cleanup_interval_seconds": PORTFOLIO_CLEANUP_INTERVAL
         }
     }
+
+@router.post("/{portfolio_id}/setup-custom-domain")
+async def setup_portfolio_custom_domain(
+    portfolio_id: str,
+    custom_domain: str,
+    current_user_id: str = Depends(get_current_user)
+):
+    """
+    TEST ENDPOINT: Set up a custom domain for an existing portfolio deployment
+    
+    Args:
+        portfolio_id: The portfolio ID (from the deployment URL)
+        custom_domain: The custom domain to use (e.g., "www.nitzanshifris.com")
+        
+    Returns:
+        Success status and the custom domain URL
+    """
+    try:
+        # Find the portfolio in our tracking
+        portfolio_info = None
+        for pid, info in PORTFOLIO_PROCESSES.items():
+            if pid == portfolio_id:
+                portfolio_info = info
+                break
+        
+        if not portfolio_info or not portfolio_info.get('deployment_url'):
+            raise HTTPException(status_code=404, detail="Portfolio not found or not deployed")
+        
+        # Verify ownership
+        if portfolio_info.get('user_id') != current_user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to modify this portfolio")
+        
+        # Initialize Vercel deployer
+        deployer = VercelDeployer()
+        
+        # Set up the custom domain
+        success, custom_url, error_msg = deployer.setup_custom_domain(
+            portfolio_info['deployment_url'],
+            custom_domain
+        )
+        
+        if success:
+            # Update portfolio info with custom domain
+            portfolio_info['custom_domain'] = custom_domain
+            portfolio_info['custom_url'] = custom_url
+            
+            logger.info(f"✅ Custom domain configured: {custom_domain} -> {portfolio_info['deployment_url']}")
+            
+            return {
+                "status": "success",
+                "message": f"Custom domain configured successfully",
+                "deployment_url": portfolio_info['deployment_url'],
+                "custom_domain": custom_domain,
+                "custom_url": custom_url,
+                "note": "DNS propagation may take a few minutes"
+            }
+        else:
+            raise HTTPException(status_code=500, detail=f"Failed to set up custom domain: {error_msg}")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up custom domain: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
