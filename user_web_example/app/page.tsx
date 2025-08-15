@@ -942,9 +942,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         setPortfolioUrl(urlPortfolioUrl)
         setRealProgress(60) // Show as completed
         setShowPortfolioInMacBook(true)
-        setStage("materializing") // This stage shows the MacBook
-        setShowNewTypewriter(true) // This enables the portfolio display logic
-        setIsPlaying(true) // Start the animation
+        setStage("complete") // Go directly to complete stage for restored portfolios
+        setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
+        setIsPlaying(false) // No animation needed for restoration
         setShowCVCard(false) // Hide the CV card
         
         // Clear restoration state after a short delay
@@ -970,6 +970,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               setRealProgress(60)
               setShowPortfolioInMacBook(true)
               setStage("complete")
+              setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
               console.log('📦 Restored portfolio from ID:', data.custom_domain_url || data.url)
             }
           }
@@ -996,9 +997,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               setPortfolioId(portfolio.id)
               setRealProgress(60)
               setShowPortfolioInMacBook(true)
-              setStage("materializing") // This stage shows the MacBook
-              setShowNewTypewriter(true) // This enables the portfolio display logic
-              setIsPlaying(true) // Start the animation
+              setStage("complete") // Go directly to complete stage for restored portfolios
+              setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
+              setIsPlaying(false) // No animation needed for restoration
               setShowCVCard(false) // Hide the CV card
               
               // Clear restoration state after a short delay
@@ -1054,6 +1055,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 setRealProgress(60)
                 setShowPortfolioInMacBook(true)
                 setStage("complete")
+                setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
                 console.log('📦 Portfolio state set, should display:', restoredUrl)
               }
             }
