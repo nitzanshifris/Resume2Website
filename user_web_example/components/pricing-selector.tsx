@@ -49,9 +49,18 @@ export default function PricingSelector({ portfolioId, onPaymentSuccess }: Prici
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
+    <div className="w-full max-w-4xl mx-auto p-6 relative">
+      {/* Background gradient similar to homepage */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-emerald-500/5 rounded-3xl"></div>
+        <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-sky-400/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-emerald-500/10 to-transparent rounded-full blur-3xl"></div>
+      </div>
+      
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-2">Choose Your Plan</h2>
+        <h2 className="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">
+          Choose Your Plan
+        </h2>
         <p className="text-gray-600 dark:text-gray-400">
           Deploy your portfolio to the web with our reliable hosting
         </p>
@@ -61,16 +70,16 @@ export default function PricingSelector({ portfolioId, onPaymentSuccess }: Prici
         {plans.map((plan) => (
           <div
             key={plan.id}
-            className={`relative rounded-2xl p-6 transition-all cursor-pointer ${
+            className={`relative rounded-2xl p-6 transition-all cursor-pointer backdrop-blur-sm ${
               selectedPlan === plan.id
-                ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/20"
-                : "border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-            } ${plan.highlighted ? "shadow-lg" : ""}`}
+                ? "ring-2 ring-sky-500 bg-gradient-to-br from-blue-50 via-sky-50/50 to-emerald-50/30 dark:from-blue-950/30 dark:via-sky-950/20 dark:to-emerald-950/10 shadow-xl"
+                : "bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700 hover:border-sky-400 dark:hover:border-sky-600 hover:shadow-lg"
+            } ${plan.highlighted ? "shadow-xl scale-105" : ""}`}
             onClick={() => setSelectedPlan(plan.id)}
           >
             {plan.badge && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                <span className="bg-gradient-to-r from-emerald-500 to-sky-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-lg">
                   {plan.badge}
                 </span>
               </div>
@@ -83,9 +92,9 @@ export default function PricingSelector({ portfolioId, onPaymentSuccess }: Prici
                   {plan.description}
                 </p>
               </div>
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                 selectedPlan === plan.id
-                  ? "border-blue-500 bg-blue-500"
+                  ? "border-sky-500 bg-gradient-to-br from-blue-500 to-emerald-500 shadow-md"
                   : "border-gray-300 dark:border-gray-600"
               }`}>
                 {selectedPlan === plan.id && (
@@ -104,8 +113,8 @@ export default function PricingSelector({ portfolioId, onPaymentSuccess }: Prici
             <ul className="space-y-3">
               {plan.features.map((feature, index) => (
                 <li key={index} className="flex items-start">
-                  <Check className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">{feature}</span>
+                  <Check className="w-5 h-5 text-emerald-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
                 </li>
               ))}
             </ul>
