@@ -28,9 +28,9 @@ router = APIRouter(
 
 class CreateCheckoutSessionRequest(BaseModel):
     """Request model for creating embedded checkout session"""
-    price_id: Optional[str] = None  # For subscription/product prices
-    amount: Optional[int] = None  # For one-time payments in cents
-    mode: str = "payment"  # "payment" for one-time, "subscription" for recurring
+    product_type: str  # "monthly" or "lifetime"
+    portfolio_id: Optional[str] = None  # Track which portfolio this payment is for
+    user_email: Optional[str] = None  # Pre-fill customer email
     
 class CreateCheckoutSessionResponse(BaseModel):
     """Response model for checkout session creation"""
@@ -51,13 +51,25 @@ class CreatePaymentIntentResponse(BaseModel):
     amount: int
     currency: str
 
+# Add these price IDs at the module level (replace with your actual price IDs from Stripe)
+# IMPORTANT: These must be TEST mode price IDs when using test API keys
+STRIPE_PRICE_IDS = {
+    "monthly_recurring": "price_TEST_MONTHLY_RECURRING",  # Replace with TEST mode $8/month price ID
+    "monthly_setup": "price_TEST_MONTHLY_SETUP",          # Replace with TEST mode $32 setup fee price ID  
+    "lifetime": "price_TEST_LIFETIME"                     # Replace with TEST mode $150 lifetime price ID
+}
+
+# For development/testing, use dynamic pricing if price IDs not set
+USE_DYNAMIC_PRICING = True  # Set to False when you have real TEST mode price IDs
+
 @router.post("/create-checkout-session", response_model=CreateCheckoutSessionResponse)
 async def create_checkout_session(request: CreateCheckoutSessionRequest):
     """
-    Create an embedded Stripe Checkout Session.
+    Create an embedded Stripe Checkout Session for portfolio payment.
     
-    This is the modern way to handle payments - creates an embedded checkout
-    that can be displayed directly in your app without redirecting to Stripe.
+    Supports two product types:
+    - monthly: $32 setup + $8/month subscription
+    - lifetime: $150 one-time payment
     """
     try:
         # Validate that Stripe is configured
@@ -65,41 +77,96 @@ async def create_checkout_session(request: CreateCheckoutSessionRequest):
             logger.error("Stripe API key not configured")
             raise HTTPException(status_code=500, detail="Payment system not configured")
         
-        # Build line items based on request
+        # Build line items based on product type
         line_items = []
+        checkout_mode = "payment"  # Default for one-time payments
         
-        if request.price_id:
-            # Using a pre-configured price from Stripe Dashboard
-            line_items.append({
-                "price": request.price_id,
-                "quantity": 1
-            })
-        elif request.amount:
-            # Creating a one-time price on the fly
-            line_items.append({
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {
-                        "name": "Portfolio Deployment",
-                        "description": "Deploy your portfolio to production"
+        if USE_DYNAMIC_PRICING:
+            # Use dynamic pricing for testing (creates prices on the fly)
+            if request.product_type == "monthly":
+                # For monthly, we need to create a one-time payment combining both fees
+                # Since dynamic pricing doesn't support subscriptions with setup fees easily
+                line_items.append({
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Portfolio Hosting - First Month",
+                            "description": "Initial setup ($32) + First month hosting ($8)"
+                        },
+                        "unit_amount": 4000,  # $40.00 in cents
                     },
-                    "unit_amount": request.amount,
-                },
-                "quantity": 1
-            })
+                    "quantity": 1
+                })
+                checkout_mode = "payment"
+                logger.warning("Using dynamic pricing for testing - monthly shown as one-time $40")
+                
+            elif request.product_type == "lifetime":
+                line_items.append({
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Portfolio Hosting - Lifetime Access",
+                            "description": "One-time payment for lifetime hosting"
+                        },
+                        "unit_amount": 15000,  # $150.00 in cents
+                    },
+                    "quantity": 1
+                })
+                checkout_mode = "payment"
         else:
-            raise HTTPException(status_code=400, detail="Either price_id or amount must be provided")
+            # Use real Stripe price IDs from dashboard
+            if request.product_type == "monthly":
+                # Monthly subscription with setup fee
+                # Add the recurring subscription
+                line_items.append({
+                    "price": STRIPE_PRICE_IDS["monthly_recurring"],
+                    "quantity": 1
+                })
+                # Add the one-time setup fee
+                line_items.append({
+                    "price": STRIPE_PRICE_IDS["monthly_setup"],
+                    "quantity": 1
+                })
+                checkout_mode = "subscription"
+                
+            elif request.product_type == "lifetime":
+                # Lifetime one-time payment
+                line_items.append({
+                    "price": STRIPE_PRICE_IDS["lifetime"],
+                    "quantity": 1
+                })
+                checkout_mode = "payment"
         
-        # Create the checkout session for embedded mode
-        session = stripe.checkout.Session.create(
-            ui_mode="embedded",  # This makes it embeddable!
-            payment_method_types=["card"],
-            line_items=line_items,
-            mode=request.mode,
-            return_url="http://localhost:3019/payment-return?session_id={CHECKOUT_SESSION_ID}",
-        )
+        if not line_items:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid product_type. Must be 'monthly' or 'lifetime'"
+            )
         
-        logger.info(f"Created checkout session: {session.id}")
+        # Prepare session parameters
+        session_params = {
+            "ui_mode": "embedded",  # Embedded checkout
+            "payment_method_types": ["card"],
+            "line_items": line_items,
+            "mode": checkout_mode,
+            "return_url": "http://localhost:3019/payment-return?session_id={CHECKOUT_SESSION_ID}",
+        }
+        
+        # Add customer email if provided
+        if request.user_email:
+            session_params["customer_email"] = request.user_email
+            
+        # Add metadata to track the portfolio
+        if request.portfolio_id:
+            session_params["metadata"] = {
+                "portfolio_id": request.portfolio_id,
+                "product_type": request.product_type
+            }
+        
+        # Create the checkout session
+        session = stripe.checkout.Session.create(**session_params)
+        
+        logger.info(f"Created {request.product_type} checkout session: {session.id}")
         
         return CreateCheckoutSessionResponse(
             session_id=session.id,

@@ -10,7 +10,7 @@ import { X } from "lucide-react";
 
 interface EmbeddedCheckoutModalProps {
   portfolioId?: string;
-  amount?: number; // Amount in cents
+  productType?: "monthly" | "lifetime"; // Which product to purchase
   onSuccess?: () => void;
 }
 
@@ -21,7 +21,7 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
 export default function EmbeddedCheckoutModal({ 
   portfolioId, 
-  amount = 999, // Default $9.99
+  productType = "monthly", // Default to monthly plan
   onSuccess 
 }: EmbeddedCheckoutModalProps) {
   useEffect(() => {
@@ -42,13 +42,14 @@ export default function EmbeddedCheckoutModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ 
-        amount: amount, // Amount in cents
-        mode: "payment" // One-time payment
+        product_type: productType, // "monthly" or "lifetime"
+        portfolio_id: portfolioId,
+        // TODO: Add user_email if available from auth context
       }),
     })
       .then((res) => res.json())
       .then((data) => data.client_secret);
-  }, [amount]);
+  }, [productType, portfolioId]);
 
   const options = { fetchClientSecret };
 
@@ -67,7 +68,9 @@ export default function EmbeddedCheckoutModal({
         onClick={handleCheckoutClick}
         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
       >
-        Unlock Edit Mode - ${(amount / 100).toFixed(2)}
+        {productType === "monthly" 
+          ? "Go Live - $40 + $8/month" 
+          : "Go Live - $150 Lifetime"}
       </button>
 
       {/* Modal Overlay */}
