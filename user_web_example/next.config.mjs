@@ -18,15 +18,15 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
               "img-src 'self' data: blob: https: http:",
               "font-src 'self' fonts.gstatic.com",
-              "connect-src 'self' http://localhost:2000 http://127.0.0.1:2000 fonts.googleapis.com fonts.gstatic.com",
+              "connect-src 'self' http://localhost:2000 http://127.0.0.1:2000 https://api.stripe.com fonts.googleapis.com fonts.gstatic.com",
               "media-src 'self'",
               "object-src 'none'",
               "child-src 'self'",
-              "frame-src * blob:", // Allow all frame sources including blob URLs
+              "frame-src * blob: https://checkout.stripe.com https://js.stripe.com", // Allow all frame sources including Stripe checkout
               "frame-ancestors *", // Critical: Allow iframe embedding from any origin
               "base-uri 'self'",
               "form-action 'self'",
