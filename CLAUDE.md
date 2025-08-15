@@ -298,18 +298,47 @@ Resume2Website-V4/
 └── extended_claude.md     # Comprehensive documentation
 ```
 
-## Portfolio Iframe Embedding (CRITICAL)
-**NEVER use `frame-ancestors *`** - this is a security vulnerability!
+## Portfolio Custom Domains & Iframe Embedding
 
-### Correct Approach:
-1. **Use custom domains** for portfolios (e.g., `*.portfolios.resume2website.com`)
-   - Vercel platform blocks iframes on `*.vercel.app` domains
-   - Custom domains allow full CSP control
-2. **Configure CSP properly** in portfolio templates:
-   - Use `FRAME_PARENTS` environment variable
-   - List exact parent origins only (no wildcards)
-   - Example: `http://localhost:3000,https://resume2website.com`
-3. **See full guide**: `docs/PORTFOLIO_IFRAME_SETUP.md`
+### ✅ AUTOMATIC Iframe Embedding (No Manual Steps!)
+Every portfolio now works in iframes automatically - no manual Vercel configuration needed!
+
+### Automatic Custom Domain Generation
+Every portfolio gets a custom subdomain based on the person's name:
+- **John Doe** → `https://john-doe.portfolios.resume2website.com`
+- **Michelle Lopez** → `https://michelle-lopez.portfolios.resume2website.com`
+
+### How It Works (Fully Automated):
+1. **Pre-configure project** before deployment with iframe settings
+2. **Deploy with `--public` flag** → Automatically disables all authentication
+3. **Extract deployment ID** from CLI output or API fallback
+4. **Add custom domain** to project via Vercel API
+5. **Create alias** pointing to production deployment
+6. **Verify headers** → Confirms iframe embedding works
+
+### Key Implementation Details:
+- **CLI Flag**: `vercel --prod --public` forces public deployment (no auth)
+- **Project Pre-configuration**: Settings applied BEFORE deployment
+- **Environment Variables**: FRAME_PARENTS set for iframe origins
+- **CSP Headers**: Handled by middleware, not vercel.json (avoids conflicts)
+- **No Manual Steps**: Protection is disabled automatically during generation
+
+### Verification:
+```bash
+# Check if portfolio is accessible (should return 200)
+curl -I https://your-name.portfolios.resume2website.com/
+
+# Good response (automatic public deployment):
+HTTP/2 200
+# NO X-Frame-Options header
+# CSP frame-ancestors present
+# NO authentication required
+```
+
+### Troubleshooting:
+- **If iframe still blocked**: Check backend logs for deployment errors
+- **DNS issues**: Wait 2-3 minutes for propagation
+- **Cache issues**: Clear browser cache if seeing old protected version
 
 ## Important Files to Know
 - **config.py** - Backend configuration, environment variables, AI model settings
