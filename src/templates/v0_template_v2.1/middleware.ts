@@ -13,7 +13,13 @@ export function middleware(request: NextRequest) {
   })
 
   // Content Security Policy
-  // Modified to allow iframe embedding from any origin
+  // Get allowed parents from environment variable
+  const allowedParents = (process.env.FRAME_PARENTS || 'http://localhost:3019,http://localhost:3000,https://resume2website.com,https://www.resume2website.com,https://nitzanshifris.com,https://www.nitzanshifris.com')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+    .join(' ');
+  
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval';
@@ -25,7 +31,7 @@ export function middleware(request: NextRequest) {
     object-src 'none';
     child-src 'self';
     frame-src *;
-    frame-ancestors *;
+    frame-ancestors 'self' ${allowedParents};
     base-uri 'self';
     form-action 'self';
     manifest-src 'self';
@@ -51,14 +57,6 @@ export function middleware(request: NextRequest) {
 
 // Configure which routes the middleware runs on
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  // Apply to all paths to ensure headers are present everywhere
+  matcher: '/:path*',
 }

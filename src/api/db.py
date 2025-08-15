@@ -581,3 +581,7 @@ def clear_user_portfolio(user_id: str) -> bool:
         return False
     finally:
         conn.close()
+
+
+# Alias for consistency with portfolio_generator.py
+remove_user_portfolio = clear_user_portfolio

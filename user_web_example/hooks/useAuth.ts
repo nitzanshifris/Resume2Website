@@ -85,8 +85,21 @@ export function useAuth() {
 
   // Sign out function
   const signOut = useCallback(() => {
+    // Clear auth data
     localStorage.removeItem('resume2website_session_id')
     localStorage.removeItem('resume2website_user')
+    
+    // CRITICAL: Clear portfolio data to prevent showing to next user
+    localStorage.removeItem('lastPortfolio')
+    
+    // Clear URL params if any
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('url')
+      url.searchParams.delete('portfolio_id')
+      window.history.replaceState({}, '', url.toString())
+    }
+    
     setAuthState({
       isAuthenticated: false,
       isLoading: false,

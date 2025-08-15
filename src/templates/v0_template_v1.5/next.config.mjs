@@ -17,17 +17,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // Allow this Next.js app to be embedded in iframes with proper CORS
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'Content-Security-Policy', value: `frame-ancestors 'self' ${allowedParents.join(' ')};` },
-          // NOTE: do not include X-Frame-Options here at all
-        ],
-      },
-    ]
-  },
+  // Let middleware set headers; avoid double headers in Next config
 }
 
 export default nextConfig

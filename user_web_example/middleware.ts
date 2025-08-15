@@ -13,10 +13,22 @@ export function middleware(request: NextRequest) {
   const SECRET_KEY = 'nitzan-secret-2024'
   
   if (secret === SECRET_KEY) {
-    // Set cookie and allow access
+    // Set long-lived cookie and allow access
     const response = NextResponse.next()
     response.cookies.set('authenticated', 'true', { 
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      httpOnly: true, // More secure
+      sameSite: 'lax', // CSRF protection
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      path: '/' // Available site-wide
+    })
+    // Also set a separate key for tracking the secret was used
+    response.cookies.set('auth_key_used', SECRET_KEY, {
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/'
     })
     return response
   }

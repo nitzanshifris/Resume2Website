@@ -343,8 +343,12 @@ class NextJSServerManager:
         # Validate that project_path is within expected directory
         try:
             project_path = project_path.resolve()
-            base_dir = PORTFOLIOS_DIR.resolve()
-            if not str(project_path).startswith(str(base_dir)):
+            # Check both possible locations for portfolios
+            sandboxes_dir = (Path(config.SANDBOXES_DIR) / "portfolios").resolve()
+            legacy_dir = PORTFOLIOS_DIR.resolve()
+            
+            if not (str(project_path).startswith(str(sandboxes_dir)) or 
+                    str(project_path).startswith(str(legacy_dir))):
                 raise ValueError("Invalid project path")
         except Exception:
             raise ValueError("Invalid project path")
@@ -947,8 +951,77 @@ export {{ extractedCVData }}
             # Save updated package.json (without modifying install script - that causes infinite loop!)
             with open(package_json_path, 'w') as f:
                 json.dump(package_data, f, indent=2)
-            logger.info("   ✅ Updated package.json for Vercel")
+            logger.info("   ✅ Updated package.json")
             
+            # === PHASE 1: LOCAL PREVIEW MODE ===
+            # Vercel deployment code moved to separate endpoint for "Go Live" action
+            # This allows users to preview portfolios locally before payment/deployment
+            
+            # Start local portfolio server instead of deploying to Vercel
+            logger.info(f"🌐 Starting local portfolio server for preview...")
+            
+            try:
+                # Use the enhanced server manager to start local server
+                server_config = server_manager.create_server_instance(
+                    portfolio_id=portfolio_id,
+                    project_path=str(sandbox_path)
+                )
+                
+                port = server_config['port']
+                local_url = f"http://localhost:{port}"
+                logger.info(f"✅ Portfolio server successfully started on port {port}")
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to start portfolio server: {e}")
+                shutil.rmtree(sandbox_path, ignore_errors=True)
+                portfolio_metrics.record_failure()
+                raise HTTPException(status_code=500, detail=f"Failed to start portfolio server: {str(e)}")
+            
+            # Store portfolio info for tracking (preview mode)
+            PORTFOLIO_PROCESSES[portfolio_id] = {
+                "portfolio_id": portfolio_id,
+                "job_id": job_id,
+                "local_url": local_url,
+                "port": port,
+                "sandbox_path": str(sandbox_path),
+                "created_at": datetime.now(),
+                "user_id": current_user_id,
+                "template": template_id,
+                "status": "preview",  # Mark as preview, not deployed
+                "is_local": True,
+                "deployment_status": "preview",  # Not yet deployed to Vercel
+                "cv_data_name": cv_data.get('hero', {}).get('fullName', '')  # Store for later deployment
+            }
+            
+            # Update user's portfolio in database if authenticated
+            if current_user_id and not current_user_id.startswith("anonymous_"):
+                # For now, store local URL in database
+                update_user_portfolio(current_user_id, portfolio_id, local_url)
+            
+            # Record metrics
+            startup_time = time.time() - start_time
+            portfolio_metrics.record_creation(portfolio_id, startup_time)
+            
+            logger.info(f"🎉 Portfolio preview ready in {startup_time:.1f}s")
+            logger.info(f"👁️ Preview at: {local_url}")
+            
+            return {
+                "status": "success",
+                "portfolio_id": portfolio_id,
+                "url": local_url,  # Return local URL for preview
+                "local_url": local_url,
+                "port": port,
+                "template": template_id,
+                "is_local": True,
+                "deployment_status": "preview",
+                "startup_time": startup_time,
+                "message": "Portfolio preview ready. You can view your portfolio locally before deploying."
+            }
+            
+            # === VERCEL DEPLOYMENT CODE (PRESERVED FOR LATER USE) ===
+            # This code will be moved to a separate endpoint: POST /portfolio/{portfolio_id}/deploy
+            # It will be triggered when user clicks "Go Live" after payment
+            """
             # Deploy to Vercel
             logger.info("🌐 Deploying to Vercel...")
             deployer = VercelDeployer()
@@ -1059,13 +1132,14 @@ export {{ extractedCVData }}
                 "deployment_time": startup_time,
                 "message": "Portfolio deployed successfully. Custom domain will be active once DNS propagates."
             }
+            """
             
         except Exception as e:
-            logger.error(f"❌ Vercel deployment failed: {e}")
+            logger.error(f"❌ Portfolio generation failed: {e}")
             # Clean up sandbox on failure
             shutil.rmtree(sandbox_path, ignore_errors=True)
             portfolio_metrics.record_failure()
-            raise HTTPException(status_code=500, detail=f"Failed to deploy portfolio: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to generate portfolio: {str(e)}")
     
     except HTTPException:
         portfolio_metrics.record_failure()
@@ -1126,6 +1200,144 @@ async def list_user_portfolios(current_user_id: str = Depends(get_current_user))
     except Exception as e:
         logger.error(f"Failed to list portfolios: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve portfolios")
+
+
+@router.post("/{portfolio_id}/deploy")
+async def deploy_portfolio_to_vercel(
+    portfolio_id: str,
+    current_user_id: str = Depends(get_current_user)
+):
+    """
+    Deploy an existing preview portfolio to Vercel (for 'Go Live' action after payment)
+    
+    This endpoint takes a portfolio that's running locally in preview mode
+    and deploys it to Vercel with custom domain setup.
+    
+    Args:
+        portfolio_id: The portfolio ID to deploy
+        current_user_id: Authenticated user ID
+        
+    Returns:
+        Deployment result with Vercel URL and custom domain
+    """
+    try:
+        # Check if portfolio exists and belongs to user
+        portfolio_info = PORTFOLIO_PROCESSES.get(portfolio_id)
+        if not portfolio_info:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+        
+        # Verify ownership
+        if portfolio_info.get('user_id') != current_user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to deploy this portfolio")
+        
+        # Check if already deployed
+        if portfolio_info.get('deployment_status') == 'deployed':
+            return {
+                "status": "already_deployed",
+                "vercel_url": portfolio_info.get('vercel_url'),
+                "custom_domain_url": portfolio_info.get('custom_domain_url'),
+                "message": "Portfolio is already deployed to Vercel"
+            }
+        
+        # Get sandbox path
+        sandbox_path = Path(portfolio_info.get('sandbox_path'))
+        if not sandbox_path.exists():
+            raise HTTPException(status_code=404, detail="Portfolio files not found. Please regenerate the portfolio.")
+        
+        job_id = portfolio_info.get('job_id')
+        cv_data_name = portfolio_info.get('cv_data_name', '')
+        
+        logger.info(f"🚀 Starting Vercel deployment for portfolio: {portfolio_id}")
+        logger.info(f"📁 Deploying from: {sandbox_path}")
+        
+        # === DEPLOY TO VERCEL (using preserved code) ===
+        deployer = VercelDeployer()
+        
+        success, deployment_url, deployment_id = deployer.create_deployment(
+            portfolio_path=str(sandbox_path),
+            project_name=f"portfolio-{job_id[:8]}",
+            user_id=current_user_id,
+            job_id=job_id
+        )
+        
+        if not success or not deployment_url:
+            # When failed, deployment_id contains error message
+            raise HTTPException(status_code=500, detail=f"Vercel deployment failed: {deployment_id}")
+        
+        # deployment_id is now the actual deployment ID when successful
+        vercel_url = deployment_url
+        
+        logger.info(f"🔍 Deployment URL: {vercel_url}, ID: {deployment_id}")
+        
+        # Map to custom domain for iframe support
+        custom_domain_url = vercel_url  # Default fallback
+        
+        # If no deployment_id from CLI, try to get it from API
+        if not deployment_id and vercel_url:
+            logger.info("🔍 No deployment ID from CLI, attempting to get from API...")
+            try:
+                deployment_id = deployer.get_deployment_id_from_url(vercel_url)
+                if deployment_id:
+                    logger.info(f"✅ Retrieved deployment ID from API: {deployment_id}")
+            except Exception as e:
+                logger.error(f"❌ API fallback failed: {e}")
+                deployment_id = None
+        
+        if deployment_id:
+            # Extract fallback slug from vercel URL
+            import re
+            fallback_slug = 'portfolio'
+            match = re.search(r'https://([^.]+)\.vercel\.app', vercel_url)
+            if match:
+                fallback_slug = match.group(1)
+            
+            # Generate custom domain using the person's name
+            custom_fqdn = deployer.to_subdomain_from_name(cv_data_name, fallback_slug)
+            logger.info(f"🔍 Generated custom domain: {custom_fqdn} from name: {cv_data_name or '(empty)'}")
+            
+            # Attach domain and create alias using the API
+            ok, msg = deployer.attach_domain_and_alias(deployment_id, custom_fqdn)
+            logger.info(f"📍 Alias result: {ok} — {msg}")
+            
+            if ok:
+                custom_domain_url = f"https://{custom_fqdn}"
+                logger.info(f"✅ Custom domain active: {custom_domain_url}")
+            else:
+                logger.warning(f"⚠️ Could not create alias: {msg}")
+                logger.warning(f"⚠️ Using Vercel URL instead")
+        
+        # Update portfolio info with deployment details
+        portfolio_info.update({
+            "vercel_url": vercel_url,
+            "custom_domain_url": custom_domain_url,
+            "deployment_id": deployment_id,
+            "deployment_status": "deployed",
+            "status": "deployed",
+            "is_local": False,
+            "deployed_at": datetime.now()
+        })
+        
+        # Update user's portfolio in database
+        update_user_portfolio(current_user_id, portfolio_id, custom_domain_url or vercel_url)
+        
+        logger.info(f"✅ Portfolio successfully deployed to Vercel")
+        logger.info(f"🌐 Live at: {custom_domain_url or vercel_url}")
+        
+        return {
+            "status": "success",
+            "portfolio_id": portfolio_id,
+            "url": custom_domain_url or vercel_url,
+            "vercel_url": vercel_url,
+            "custom_domain_url": custom_domain_url,
+            "deployment_id": deployment_id,
+            "message": "Portfolio successfully deployed to Vercel. Custom domain will be active once DNS propagates."
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to deploy portfolio: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to deploy portfolio: {str(e)}")
 
 
 @router.post("/{portfolio_id}/restart")
