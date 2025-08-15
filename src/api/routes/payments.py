@@ -37,19 +37,6 @@ class CreateCheckoutSessionResponse(BaseModel):
     session_id: str
     client_secret: str
 
-class CreatePaymentIntentRequest(BaseModel):
-    """Request model for creating payment intent (legacy)"""
-    amount: int  # Amount in cents (e.g., 1000 = $10.00)
-    currency: str = "usd"
-    description: Optional[str] = None
-    metadata: Optional[Dict[str, str]] = None
-
-class CreatePaymentIntentResponse(BaseModel):
-    """Response model for payment intent creation (legacy)"""
-    client_secret: str
-    payment_intent_id: str
-    amount: int
-    currency: str
 
 # Add these price IDs at the module level (replace with your actual price IDs from Stripe)
 # IMPORTANT: These must be TEST mode price IDs when using test API keys
@@ -204,100 +191,48 @@ async def get_session_status(session_id: str):
         logger.error(f"Error retrieving session: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve session")
 
-@router.post("/create-payment-intent")
-async def create_payment_intent(request: CreatePaymentIntentRequest):
-    """
-    Create a Stripe Payment Intent for the client to complete payment.
-    
-    This endpoint creates a payment intent that the frontend will use
-    with Stripe Elements to collect payment details.
-    """
-    try:
-        # Validate that Stripe is configured
-        if not stripe.api_key:
-            logger.error("Stripe API key not configured")
-            raise HTTPException(status_code=500, detail="Payment system not configured")
-        
-        # Create the payment intent
-        intent = stripe.PaymentIntent.create(
-            amount=request.amount,
-            currency=request.currency,
-            description=request.description,
-            metadata=request.metadata or {},
-            automatic_payment_methods={
-                "enabled": True,
-            },
-        )
-        
-        logger.info(f"Created payment intent: {intent.id} for amount: {request.amount}")
-        
-        return CreatePaymentIntentResponse(
-            client_secret=intent.client_secret,
-            payment_intent_id=intent.id,
-            amount=intent.amount,
-            currency=intent.currency
-        )
-        
-    except stripe.error.StripeError as e:
-        logger.error(f"Stripe error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error creating payment intent: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to create payment intent")
 
-@router.post("/confirm-payment")
-async def confirm_payment(payment_intent_id: str):
-    """
-    Confirm that a payment was successful by checking with Stripe.
-    
-    This endpoint verifies the payment status after the client completes
-    the payment process.
-    """
-    try:
-        # Retrieve the payment intent from Stripe
-        intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-        
-        if intent.status == "succeeded":
-            logger.info(f"Payment confirmed for intent: {payment_intent_id}")
-            
-            # TODO: Here you would typically:
-            # 1. Update user's subscription status in database
-            # 2. Enable premium features
-            # 3. Send confirmation email
-            
-            return {
-                "status": "success",
-                "payment_intent_id": payment_intent_id,
-                "amount": intent.amount,
-                "currency": intent.currency
-            }
-        else:
-            logger.warning(f"Payment not successful. Status: {intent.status}")
-            return {
-                "status": intent.status,
-                "payment_intent_id": payment_intent_id,
-                "message": "Payment not completed"
-            }
-            
-    except stripe.error.StripeError as e:
-        logger.error(f"Stripe error confirming payment: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error confirming payment: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to confirm payment")
-
-# Webhook endpoint for Stripe events (optional but recommended)
+# Webhook endpoint for Stripe events
 @router.post("/webhook")
 async def stripe_webhook(request: dict):
     """
-    Handle Stripe webhook events.
+    Handle Stripe webhook events for subscription and payment updates.
     
-    This endpoint receives events from Stripe when payment status changes.
-    You'll need to configure this URL in your Stripe dashboard.
+    Configure this URL in your Stripe dashboard:
+    https://yourdomain.com/api/v1/payments/webhook
+    
+    Important events to handle:
+    - checkout.session.completed: Payment successful
+    - customer.subscription.created: Monthly subscription started
+    - customer.subscription.deleted: Subscription cancelled
     """
-    # TODO: Implement webhook signature verification
-    # TODO: Handle different event types (payment_intent.succeeded, etc.)
+    # TODO: Implement webhook signature verification for security
+    # endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
     
-    logger.info(f"Received Stripe webhook: {request.get('type', 'unknown')}")
+    event_type = request.get('type', 'unknown')
+    logger.info(f"Received Stripe webhook: {event_type}")
+    
+    if event_type == "checkout.session.completed":
+        # Payment successful - enable portfolio deployment
+        session = request.get('data', {}).get('object', {})
+        portfolio_id = session.get('metadata', {}).get('portfolio_id')
+        product_type = session.get('metadata', {}).get('product_type')
+        
+        if portfolio_id:
+            logger.info(f"Payment completed for portfolio {portfolio_id} - {product_type} plan")
+            # TODO: Update database to mark portfolio as paid
+            # TODO: Trigger deployment to Vercel
+    
+    elif event_type == "customer.subscription.created":
+        # Monthly subscription started
+        subscription = request.get('data', {}).get('object', {})
+        logger.info(f"Subscription created: {subscription.get('id')}")
+        # TODO: Store subscription ID in database
+    
+    elif event_type == "customer.subscription.deleted":
+        # Subscription cancelled
+        subscription = request.get('data', {}).get('object', {})
+        logger.info(f"Subscription cancelled: {subscription.get('id')}")
+        # TODO: Update database to revoke access
     
     return {"status": "received"}

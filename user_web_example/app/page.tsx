@@ -22,7 +22,6 @@ import UploadResume from "@/components/upload-resume"
 import ResumeBuilder from "@/components/resume-builder"
 import InteractiveCVPile from "@/components/interactive-cv-pile"
 import ProcessingPage from "@/components/processing-page"
-import PricingModal from "@/components/pricing-modal"
 import SimpleDashboard from "@/components/simple-dashboard"
 import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal-new"
@@ -2898,7 +2897,6 @@ export default function Home() {
   const [showUpload, setShowUpload] = useState(false)
   const [showBuilder, setShowBuilder] = useState(false)
   const [showProcessing, setShowProcessing] = useState(false)
-  const [showPricing, setShowPricing] = useState(false)
   const [isPostPayment, setIsPostPayment] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -3413,12 +3411,6 @@ export default function Home() {
         }}
       />
 
-      {/* Pricing Modal */}
-      <PricingModal
-        isOpen={showPricing}
-        onPlanSelected={handlePlanSelected}
-        onClose={() => setShowPricing(false)}
-      />
 
       {/* Authentication Modal */}
       <AuthModal
