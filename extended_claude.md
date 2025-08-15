@@ -8,11 +8,14 @@ RESUME2WEBSITE is an AI-powered CV to portfolio website converter that transform
 - **Extracts** CV data using Claude 4 Opus for maximum determinism (temperature 0.0)
 - **Supports** multiple file uploads including PNG/JPEG images processed together
 - **Generates** beautiful portfolio websites with 100+ animated components in isolated sandbox environments
+- **Preview Mode**: Instant local portfolio preview without deployment (ports 4000-5000)
 - **Provides** AI-powered portfolio expert guidance using Claude 4 for personalized recommendations
 - **Offers** full CV editing capabilities with CRUD operations and original file preservation
 - **Manages** multiple portfolio instances with real-time health monitoring and server management
 - **Authenticates** users with email/password, Google OAuth, and LinkedIn OAuth
-- **Deploys** to Vercel with one click
+- **Payment Processing**: Integrated Stripe Embedded Checkout for premium features
+- **Portfolio Persistence**: Automatically restores user's last portfolio on login/refresh
+- **Deploys** to Vercel with one click (after preview approval and payment)
 - **Supports** multiple file formats (PDF, DOCX, images, etc.)
 
 ## Language Configuration 
@@ -28,9 +31,11 @@ RESUME2WEBSITE is an AI-powered CV to portfolio website converter that transform
 - **Authentication**: Google OAuth 2.0 + LinkedIn OAuth + Email/Password with bcrypt
 - **AI Services**: Claude 4 Opus ONLY (deterministic CV extraction at temperature 0.0)
 - **UI Libraries**: Aceternity UI, Magic UI (100+ animated components)
-- **Infrastructure**: Vercel deployment, Railway, local development
+- **Payment Processing**: Stripe SDK with Embedded Checkout
+- **Infrastructure**: Two-stage - Local preview first, then optional Vercel deployment
 - **Database**: SQLite with session-based authentication
 - **Package Manager**: pnpm for main project, npm for sandboxes only
+- **Portfolio Servers**: Next.js dev servers running on ports 4000-5000
 
 ## 🚀 Quick Start
 
@@ -962,12 +967,19 @@ GET /api/v1/portfolio-expert/session/{session_id}
 
 ### Portfolio Generation & Management API (PRIMARY - portfolio_generator.py)
 ```python
-# Generate new portfolio
+# Generate portfolio PREVIEW (local server, no deployment)
 POST /api/v1/portfolio/generate/{job_id}
-# Request body: template selection and config
+# Returns: local preview URL (http://localhost:4000-5000)
+# Status: Ready instantly for testing
+
+# Deploy portfolio to Vercel (after preview approval & payment)
+POST /api/v1/portfolio/deploy/{portfolio_id}
+# Returns: production URL (https://portfolio-xxxxx.vercel.app)
+# Duration: ~2-3 minutes
 
 # List user's portfolios
 GET /api/v1/portfolio/list
+# Returns both preview and deployed portfolios
 
 # Get portfolio metrics
 GET /api/v1/portfolio/portfolios/metrics
@@ -979,11 +991,24 @@ GET /api/v1/portfolio/{portfolio_id}/cv-data
 # Update portfolio CV data
 PUT /api/v1/portfolio/{portfolio_id}/cv-data
 
-# Restart portfolio server
+# Restart portfolio server (for preview mode)
 POST /api/v1/portfolio/{portfolio_id}/restart
 
-# Note: Additional endpoints like start/stop/delete may be available
 # Check http://localhost:2000/docs for complete API documentation
+```
+
+### Payment Processing API (Stripe Integration)
+```python
+# Create embedded checkout session
+POST /api/v1/payments/create-checkout-session
+{
+    "amount": 999,  # $9.99 in cents
+    "mode": "payment"  # or "subscription"
+}
+
+# Check payment status
+GET /api/v1/payments/session-status/{session_id}
+# Returns payment confirmation and details
 ```
 
 ### Payment System & Pricing API (TODO - Backend Implementation)
@@ -1220,6 +1245,16 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 - **🛡️ Added Watchfiles Protection**: Created .watchmanconfig to exclude heavy directories from file watching
 - **⚡ Uvicorn Performance**: Dynamic reload_excludes from .watchmanconfig prevents thousands of change detections
 - **📝 Improved Logging**: Next.js version checks now use debug level to reduce noise
+
+### Preview Mode & Payment Integration (2025-08-15)
+- **🚀 Two-Stage Portfolio Generation**: Implemented preview-first approach with optional deployment
+- **👁️ Instant Preview Mode**: Portfolios now generate locally on ports 4000-5000 for immediate testing
+- **💳 Stripe Embedded Checkout**: Integrated payment processing with test and live modes
+- **🔒 CSP Headers for Stripe**: Fixed Content Security Policy to allow Stripe.js and checkout frames
+- **💾 Portfolio Persistence**: Portfolios automatically restore on page refresh and re-login
+- **🐛 Fixed Portfolio Flickering**: Resolved issue where video carousel briefly appeared before portfolio
+- **✅ User Session Continuity**: Last generated portfolio persists across logout/login cycles
+- **📱 Payment Success Flow**: Created confirmation pages and proper redirect handling
 
 ### Critical CSP Iframe Fix & Full Pipeline Integration (2025-08-04)
 - **🔗 Connected Full Pipeline**: Integrated CV upload → extraction → portfolio generation with MacBook preview at 60% progress

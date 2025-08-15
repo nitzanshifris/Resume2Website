@@ -6,10 +6,13 @@ RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portf
 ### What RESUME2WEBSITE Does
 - **Extracts** CV data using Claude 4 Opus (temperature 0.0) into 18 structured sections
 - **Generates** portfolio websites in isolated sandbox environments 
+- **Preview Mode**: Instant local portfolio preview (ports 4000-5000) before deployment
 - **Manages** multiple portfolio instances with real-time health monitoring
 - **Provides** CV editing capabilities with CRUD operations
 - **Authenticates** users with email/password + Google OAuth + LinkedIn OAuth
 - **Preserves** original files with hash-based deduplication
+- **Payments**: Stripe Embedded Checkout for premium features
+- **Portfolio Persistence**: Automatically restores user's last portfolio on login
 
 ## Tech Stack Essentials
 - **Backend**: FastAPI + Python 3.11+ (port 2000)
@@ -108,11 +111,16 @@ GET /api/v1/my-cvs                        # List user's CVs
 GET /api/v1/download/{job_id}             # Download original file
 
 # Portfolio Generation (PRIMARY)
-POST /api/v1/portfolio/generate/{job_id}  # Generate portfolio
+POST /api/v1/portfolio/generate/{job_id}  # Generate portfolio preview (local)
+POST /api/v1/portfolio/deploy/{job_id}    # Deploy portfolio to Vercel (after preview)
 POST /api/v1/portfolio/generate-anonymous/{job_id}  # Anonymous generation
 GET /api/v1/portfolio/list                # List user portfolios
 GET /api/v1/portfolio/{id}/status         # Check portfolio status
 POST /api/v1/portfolio/{id}/restart       # Restart portfolio server
+
+# Payment Processing
+POST /api/v1/payments/create-checkout-session  # Create Stripe checkout
+GET /api/v1/payments/session-status/{id}       # Check payment status
 
 # Authentication
 POST /api/v1/auth/register                # Register user
@@ -126,12 +134,15 @@ GET /api/v1/auth/google/status            # Check Google OAuth availability
 
 ## Architecture Essentials
 - **CV Extraction**: 18 sections, cached in SQLite, hash-based deduplication
-- **Portfolio Generation**: Deployed to Vercel via CLI (bypasses 10MB API limit)
+- **Portfolio Generation**: Two-stage process - Preview first, then optional deployment
+- **Preview Mode**: Instant local preview on ports 4000-5000 (no deployment needed)
+- **Deployment**: Optional Vercel deployment after preview approval (~2-3 min)
 - **Templates**: 2 active (v0_template_v1.5, v0_template_v2.1)
 - **Authentication**: Email/password + Google OAuth + LinkedIn OAuth, session-based
 - **File Storage**: Preserved in data/uploads/ with hash-based deduplication
-- **Deployment**: Vercel CLI with real-time progress, ~2-3 min build time
 - **Build Optimization**: .npmrc for legacy-peer-deps, no recursive install scripts
+- **Payment Integration**: Stripe Embedded Checkout (test & live modes)
+- **Portfolio Restoration**: Automatic portfolio recovery on page refresh/re-login
 
 ## Development Workflow Patterns
 ### CV Processing Flow
@@ -232,12 +243,18 @@ pnpm run dev --verbose                         # Frontend verbose logs
 - **Auto-cleanup**: Runs every 5 minutes for portfolios >24h old
 - **Health Checks**: Server status monitoring, startup time tracking
 
-## Vercel Deployment (Automatic)
-### Portfolio Deployment Flow
-Portfolios are automatically deployed to Vercel when generated:
-1. User uploads CV → Extract → Generate → **Deploy to Vercel**
-2. Real-time progress monitoring during deployment (~2-3 min)
-3. Returns live URL: `https://portfolio-xxxxx.vercel.app`
+## Portfolio Generation Flow
+### Two-Stage Process
+1. **Preview Stage** (Default):
+   - User uploads CV → Extract → Generate → **Local Preview**
+   - Instant preview on `http://localhost:4000`
+   - No deployment, runs locally for testing
+   - Portfolio persists across page refreshes
+
+2. **Deployment Stage** (Optional - After Payment):
+   - User approves preview → Payment → **Deploy to Vercel**
+   - Real-time progress monitoring (~2-3 min)
+   - Returns live URL: `https://portfolio-xxxxx.vercel.app`
 
 ### Key Implementation Details
 - **CLI Integration**: Uses `vercel` CLI to bypass 10MB API limit
@@ -343,13 +360,16 @@ HTTP/2 200
 ## Important Files to Know
 - **config.py** - Backend configuration, environment variables, AI model settings
 - **main.py** - FastAPI application entry point with routing
-- **src/api/routes/portfolio_generator.py** - Portfolio generation + Vercel deployment
+- **src/api/routes/portfolio_generator.py** - Portfolio generation + optional Vercel deployment
+- **src/api/routes/payments.py** - Stripe payment processing endpoints
 - **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
 - **src/api/routes/cv.py** - CV upload, extraction, CRUD operations
 - **src/api/routes/user_auth.py** - OAuth authentication endpoints (Google, LinkedIn)
 - **src/api/db.py** - SQLite database operations, user management, session handling
 - **src/core/cv_extraction/data_extractor.py** - Claude 4 Opus integration
-- **user_web_example/app/page.tsx** - Main frontend entry point
+- **user_web_example/app/page.tsx** - Main frontend entry point with portfolio restoration
+- **user_web_example/components/embedded-checkout-modal.tsx** - Stripe payment modal
+- **user_web_example/app/payment-return/page.tsx** - Payment confirmation page
 - **package.json** - Frontend dependencies, scripts, workspace config
 - **requirements.txt** - Python backend dependencies
 - **.claude/commands/** - Development utility scripts
