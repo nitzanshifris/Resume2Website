@@ -642,6 +642,28 @@ async def generate_portfolio(
             shutil.rmtree(sandbox_path, ignore_errors=True)
             raise HTTPException(status_code=500, detail=f"Failed to copy template: {str(e)}")
         
+        # === 5.1 CREATE VERCEL.JSON WITH IFRAME SETTINGS ===
+        try:
+            logger.info("📝 Creating vercel.json with iframe configuration...")
+            vercel_config = {
+                "framework": "nextjs",
+                "buildCommand": "npm run build",
+                "devCommand": "npm run dev",
+                "installCommand": "npm install --legacy-peer-deps",
+                "outputDirectory": ".next",
+                "env": {
+                    "FRAME_PARENTS": "https://resume2website.com,http://localhost:3000,http://localhost:3019"
+                }
+                # No headers here - middleware handles frame-ancestors properly
+            }
+            
+            vercel_json_path = sandbox_path / "vercel.json"
+            vercel_json_path.write_text(json.dumps(vercel_config, indent=2))
+            logger.info(f"✅ Created vercel.json with env configuration (headers handled by middleware)")
+        except Exception as e:
+            logger.error(f"⚠️ Failed to create vercel.json: {e}")
+            # Non-critical, continue anyway
+        
         # === 6. INJECT CV DATA INTO TEMPLATE ===
         try:
             logger.info("💉 Injecting CV data into template...")
@@ -950,6 +972,23 @@ export {{ extractedCVData }}
             # Map to custom domain for iframe support
             custom_domain_url = vercel_url  # Default fallback
             
+            # Debug the deployment_id value
+            logger.info(f"🔑 Deployment ID type: {type(deployment_id)}, value: {repr(deployment_id)}")
+            
+            # If no deployment_id from CLI, try to get it from API
+            if not deployment_id and vercel_url:
+                logger.info("🔍 No deployment ID from CLI, attempting to get from API...")
+                logger.info(f"🔍 Calling get_deployment_id_from_url with: {vercel_url}")
+                try:
+                    deployment_id = deployer.get_deployment_id_from_url(vercel_url)
+                    if deployment_id:
+                        logger.info(f"✅ Retrieved deployment ID from API: {deployment_id}")
+                    else:
+                        logger.warning("⚠️ API fallback returned None - could not find deployment")
+                except Exception as e:
+                    logger.error(f"❌ API fallback failed with error: {e}")
+                    deployment_id = None
+            
             if deployment_id:
                 # Extract fallback slug from vercel URL
                 import re
@@ -976,7 +1015,8 @@ export {{ extractedCVData }}
                     logger.warning(f"⚠️ Could not create alias: {msg}")
                     logger.warning(f"⚠️ Falling back to Vercel URL, iframe may not work")
             else:
-                logger.error("❌ Could not extract deployment_id; cannot create custom domain alias")
+                logger.error("❌ Could not get deployment_id from CLI or API")
+                logger.error("❌ Cannot create custom domain alias without deployment ID")
                 logger.warning("⚠️ Falling back to Vercel URL, iframe may not work")
             
             logger.info(f"✅ Portfolio deployed to Vercel: {vercel_url}")
@@ -1382,21 +1422,47 @@ async def delete_portfolio(
     current_user_id: str = Depends(get_current_user)
 ):
     """
-    Delete a portfolio
+    Delete a portfolio (local and/or Vercel deployment)
     """
     try:
+        # Check if this is a Vercel deployment
+        if portfolio_id in PORTFOLIO_PROCESSES:
+            portfolio_info = PORTFOLIO_PROCESSES[portfolio_id]
+            
+            # Verify ownership
+            if portfolio_info.get('user_id') != current_user_id:
+                raise HTTPException(status_code=403, detail="Not authorized to delete this portfolio")
+            
+            # Delete from Vercel if it's a Vercel deployment
+            if portfolio_info.get('deployment_id'):
+                logger.info(f"🗑️ Deleting Vercel deployment: {portfolio_info['deployment_id']}")
+                deployer = VercelDeployer()
+                try:
+                    deployer.delete_deployment(portfolio_info['deployment_id'])
+                    logger.info(f"✅ Vercel deployment deleted: {portfolio_info['deployment_id']}")
+                except Exception as e:
+                    logger.error(f"Failed to delete Vercel deployment: {e}")
+                    # Continue with local cleanup even if Vercel deletion fails
+            
+            # Remove from in-memory store
+            del PORTFOLIO_PROCESSES[portfolio_id]
+        
+        # Check for local portfolio directory
         portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
         
-        if not portfolio_dir.exists():
-            raise HTTPException(status_code=404, detail="Portfolio not found")
+        if portfolio_dir.exists():
+            # Stop the server if running
+            server_manager.stop_server(portfolio_id)
+            
+            # Remove directory
+            shutil.rmtree(portfolio_dir)
+            logger.info(f"✅ Local portfolio directory deleted: {portfolio_id}")
         
-        # Stop the server if running
-        server_manager.stop_server(portfolio_id)
+        # Also remove from database if exists
+        from src.api.db import remove_user_portfolio
+        remove_user_portfolio(current_user_id)
         
-        # Remove directory
-        shutil.rmtree(portfolio_dir)
-        
-        logger.info(f"✅ Portfolio deleted: {portfolio_id}")
+        logger.info(f"✅ Portfolio fully deleted: {portfolio_id}")
         
         return {
             "status": "success",
@@ -1452,7 +1518,7 @@ async def setup_portfolio_custom_domain(
                 portfolio_info = info
                 break
         
-        if not portfolio_info or not portfolio_info.get('deployment_url'):
+        if not portfolio_info or not portfolio_info.get('vercel_url'):
             raise HTTPException(status_code=404, detail="Portfolio not found or not deployed")
         
         # Verify ownership
@@ -1461,24 +1527,31 @@ async def setup_portfolio_custom_domain(
         
         # Initialize Vercel deployer
         deployer = VercelDeployer()
-        
-        # Set up the custom domain
-        success, custom_url, error_msg = deployer.setup_custom_domain(
-            portfolio_info['deployment_url'],
-            custom_domain
-        )
+
+        # Obtain deployment id for aliasing
+        deployment_id = portfolio_info.get('deployment_id')
+        if not deployment_id:
+            # Fallback: try to retrieve from API using the Vercel URL
+            deployment_id = deployer.get_deployment_id_from_url(portfolio_info['vercel_url'])
+            if not deployment_id:
+                raise HTTPException(status_code=500, detail="Could not resolve deployment ID for this portfolio")
+
+        # Attach domain to project and create alias
+        success, msg = deployer.attach_domain_and_alias(deployment_id, custom_domain)
+        custom_url = f"https://{custom_domain}" if success else None
+        error_msg = None if success else msg
         
         if success:
             # Update portfolio info with custom domain
             portfolio_info['custom_domain'] = custom_domain
             portfolio_info['custom_url'] = custom_url
             
-            logger.info(f"✅ Custom domain configured: {custom_domain} -> {portfolio_info['deployment_url']}")
+            logger.info(f"✅ Custom domain configured: {custom_domain} -> {portfolio_info['vercel_url']}")
             
             return {
                 "status": "success",
                 "message": f"Custom domain configured successfully",
-                "deployment_url": portfolio_info['deployment_url'],
+                "deployment_url": portfolio_info['vercel_url'],
                 "custom_domain": custom_domain,
                 "custom_url": custom_url,
                 "note": "DNS propagation may take a few minutes"

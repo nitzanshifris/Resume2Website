@@ -70,6 +70,12 @@ export async function apiRequest<T>(
 // File upload function
 export async function uploadFile(file: File): Promise<UploadResponse> {
   const sessionId = getSessionId()
+  console.log('🔑 Session ID retrieved for upload:', sessionId)
+  console.log('📦 localStorage content:', {
+    session: localStorage.getItem('resume2website_session_id'),
+    user: localStorage.getItem('resume2website_user')
+  })
+  
   // Allow upload without authentication for demo purposes
   
   const formData = new FormData()
@@ -265,6 +271,53 @@ export function setSessionId(sessionId: string): void {
 export function clearSession(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('resume2website_session_id')
+  }
+}
+
+// Portfolio management functions
+export async function listUserPortfolios(): Promise<any> {
+  const sessionId = getSessionId()
+  if (!sessionId) {
+    throw new Error('Not authenticated')
+  }
+  
+  return apiRequest('/api/v1/portfolio/list', {
+    headers: {
+      'X-Session-ID': sessionId
+    }
+  })
+}
+
+export async function deletePortfolio(portfolioId: string): Promise<any> {
+  const sessionId = getSessionId()
+  if (!sessionId) {
+    throw new Error('Not authenticated')
+  }
+  
+  return apiRequest(`/api/v1/portfolio/${portfolioId}`, {
+    method: 'DELETE',
+    headers: {
+      'X-Session-ID': sessionId
+    }
+  })
+}
+
+export async function deleteAllUserPortfolios(): Promise<void> {
+  try {
+    const response = await listUserPortfolios()
+    if (response.portfolios && response.portfolios.length > 0) {
+      // Delete all portfolios in parallel
+      await Promise.all(
+        response.portfolios.map((portfolio: any) => 
+          deletePortfolio(portfolio.portfolio_id).catch(err => 
+            console.error(`Failed to delete portfolio ${portfolio.portfolio_id}:`, err)
+          )
+        )
+      )
+      console.log(`✅ Deleted ${response.portfolios.length} existing portfolios`)
+    }
+  } catch (error) {
+    console.error('Failed to delete existing portfolios:', error)
   }
 }
 

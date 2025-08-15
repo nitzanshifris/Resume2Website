@@ -99,6 +99,8 @@ const IframeWithFallback = ({ src, title, className }: { src: string; title: str
   const [showFallback, setShowFallback] = useState(false)
   
   useEffect(() => {
+    console.log('🖼️ IframeWithFallback initialized with URL:', src)
+    
     // Check if URL is localhost
     const isLocalhost = src.includes('localhost')
     const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
@@ -836,13 +838,14 @@ const VerticalProgressBar = ({
 }
 
 // Resume2Website Demo Component - Mobile-First WOW Experience
-function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect }: { 
+function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn }: { 
   onOpenModal: () => void; 
   setShowPricing: (value: boolean) => void;
   uploadedFile: File | null;
   setUploadedFile: (file: File | null) => void;
   onFileClick: (file: File) => void;
   handleFileSelect: (file: File) => void;
+  signIn?: (sessionId: string, userData: any) => Promise<void>;
 }) {
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
@@ -860,15 +863,17 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const [showNewTypewriter, setShowNewTypewriter] = useState(false)
   const headlineRef = useRef<HTMLDivElement>(null)
   const [headlineWidth, setHeadlineWidth] = useState<number | undefined>(undefined)
-  const { isAuthenticated } = useAuthContext()
+  const { isAuthenticated, sessionId } = useAuthContext()
   
   // Backend processing states
   const [portfolioUrl, setPortfolioUrl] = useState<string | null>(null)
+  const [portfolioId, setPortfolioId] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingError, setProcessingError] = useState<string | null>(null)
   const [currentJobId, setCurrentJobId] = useState<string | null>(null)
   const [realProgress, setRealProgress] = useState(0)
   const [showPortfolioInMacBook, setShowPortfolioInMacBook] = useState(false)
+  const [isRestoringPortfolio, setIsRestoringPortfolio] = useState(false)
   
   // Auth and signup modal states
   const [showSignupModal, setShowSignupModal] = useState(false)
@@ -897,6 +902,175 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [stage])
+
+  // Restore portfolio on page load - ONLY for authenticated users
+  useEffect(() => {
+    console.log('🔄 Portfolio restoration effect running. isHydrated:', isHydrated, 'sessionId:', sessionId)
+    
+    const restorePortfolio = async () => {
+      if (!isHydrated) {
+        console.log('⏳ Not hydrated yet, skipping restoration')
+        return
+      }
+      
+      // CRITICAL: Only restore portfolios for authenticated users
+      if (!sessionId) {
+        console.log('📦 No user session - skipping portfolio restoration')
+        // Clear any lingering portfolio data
+        localStorage.removeItem('lastPortfolio')
+        return
+      }
+      
+      console.log('✅ Authenticated user detected, proceeding with restoration')
+      
+      // Check URL params first (but still require auth)
+      const urlParams = new URLSearchParams(window.location.search)
+      const urlPortfolioId = urlParams.get('portfolio_id')
+      const urlPortfolioUrl = urlParams.get('url')
+      
+      console.log('🔍 Checking URL params for user:', { urlPortfolioUrl, urlPortfolioId, sessionId })
+      
+      if (urlPortfolioUrl && sessionId) {
+        // Direct URL in query params - verify it belongs to this user
+        console.log('📦 Found portfolio URL in params, verifying ownership...')
+        
+        // For now, restore it if user is authenticated
+        // TODO: Add backend validation to verify portfolio belongs to user
+        setIsRestoringPortfolio(true)
+        
+        // Set all necessary states to show the portfolio
+        setPortfolioUrl(urlPortfolioUrl)
+        setRealProgress(60) // Show as completed
+        setShowPortfolioInMacBook(true)
+        setStage("materializing") // This stage shows the MacBook
+        setShowNewTypewriter(true) // This enables the portfolio display logic
+        setIsPlaying(true) // Start the animation
+        setShowCVCard(false) // Hide the CV card
+        
+        // Clear restoration state after a short delay
+        setTimeout(() => {
+          setIsRestoringPortfolio(false)
+          setStage("complete") // Final stage
+        }, 500)
+        
+        console.log('📦 Restored portfolio from URL for user:', urlPortfolioUrl)
+        return
+      }
+      
+      if (urlPortfolioId) {
+        // Portfolio ID in query params - fetch details
+        setIsRestoringPortfolio(true)
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${urlPortfolioId}/status`)
+          if (response.ok) {
+            const data = await response.json()
+            if (data.custom_domain_url || data.url) {
+              setPortfolioUrl(data.custom_domain_url || data.url)
+              setPortfolioId(urlPortfolioId)
+              setRealProgress(60)
+              setShowPortfolioInMacBook(true)
+              setStage("complete")
+              console.log('📦 Restored portfolio from ID:', data.custom_domain_url || data.url)
+            }
+          }
+        } catch (error) {
+          console.error('Failed to restore portfolio from ID:', error)
+        }
+        setIsRestoringPortfolio(false)
+        return
+      }
+      
+      // Check localStorage - but only for authenticated users
+      if (sessionId) {
+        const savedPortfolio = localStorage.getItem('lastPortfolio')
+        if (savedPortfolio) {
+          try {
+            const portfolio = JSON.parse(savedPortfolio)
+            // TODO: Verify this portfolio belongs to current user
+            // For now, check if portfolio was saved with user ID
+            if (portfolio.url && portfolio.userId === sessionId) {
+              setIsRestoringPortfolio(true)
+              
+              // Set all necessary states to show the portfolio
+              setPortfolioUrl(portfolio.url)
+              setPortfolioId(portfolio.id)
+              setRealProgress(60)
+              setShowPortfolioInMacBook(true)
+              setStage("materializing") // This stage shows the MacBook
+              setShowNewTypewriter(true) // This enables the portfolio display logic
+              setIsPlaying(true) // Start the animation
+              setShowCVCard(false) // Hide the CV card
+              
+              // Clear restoration state after a short delay
+              setTimeout(() => {
+                setIsRestoringPortfolio(false)
+                setStage("complete")
+              }, 500)
+              
+              console.log('📦 Restored portfolio from localStorage for user:', portfolio.url)
+              return
+            } else if (portfolio.url && !portfolio.userId) {
+              // Old portfolio without user ID - clear it
+              console.log('📦 Clearing old portfolio without user association')
+              localStorage.removeItem('lastPortfolio')
+            }
+          } catch (error) {
+            console.error('Failed to parse saved portfolio:', error)
+            localStorage.removeItem('lastPortfolio')
+          }
+        }
+      }
+      
+      // Last resort: fetch from backend if we have a valid session
+      // The backend expects either a cookie-based session or X-Session-ID header
+      if (sessionId) {
+        setIsRestoringPortfolio(true)
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/list`, {
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Session-ID': sessionId // Pass the session ID in header
+            }
+          })
+          
+          // Only process if we get a successful response
+          if (response.ok) {
+            const data = await response.json()
+            // Backend returns { status, portfolios, count } - extract the portfolios array
+            const portfolios = data.portfolios
+            if (portfolios && portfolios.length > 0) {
+              const latest = portfolios[0] // Assuming sorted by date
+              if (latest.custom_domain_url || latest.url) {
+                const restoredUrl = latest.custom_domain_url || latest.url
+                console.log('📦 Restoring portfolio from backend:', {
+                  url: restoredUrl,
+                  id: latest.portfolio_id || latest.id,
+                  custom_domain: latest.custom_domain_url,
+                  vercel_url: latest.url
+                })
+                setPortfolioUrl(restoredUrl)
+                setPortfolioId(latest.portfolio_id || latest.id)
+                setRealProgress(60)
+                setShowPortfolioInMacBook(true)
+                setStage("complete")
+                console.log('📦 Portfolio state set, should display:', restoredUrl)
+              }
+            }
+          } else if (response.status === 401) {
+            // Session expired or invalid - this is expected sometimes
+            console.log('📦 Session invalid for portfolio fetch, skipping backend restoration')
+          }
+        } catch (error) {
+          // Network error or other issue - not critical
+          console.log('📦 Could not reach backend for portfolio restoration')
+        }
+        setIsRestoringPortfolio(false)
+      }
+    }
+    
+    restorePortfolio()
+  }, [isHydrated, sessionId])
 
   // Sequential loading for mobile
   useEffect(() => {
@@ -1218,9 +1392,29 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const generateElapsed = Date.now() - generateStartTime
       const remainingGenerationTime = Math.max(200, TIMINGS.GENERATION_ANIMATION - generateElapsed)
       
-      if (generateData.url || generateData.portfolio_url) {
-        const portfolioUrl = generateData.url || generateData.portfolio_url
+      if (generateData.url || generateData.portfolio_url || generateData.custom_domain_url) {
+        const portfolioUrl = generateData.custom_domain_url || generateData.url || generateData.portfolio_url
+        const portfolioIdValue = generateData.portfolio_id || generateData.id
+        
         setPortfolioUrl(portfolioUrl)
+        setPortfolioId(portfolioIdValue)
+        
+        // Save to localStorage with user association
+        localStorage.setItem('lastPortfolio', JSON.stringify({
+          url: portfolioUrl,
+          id: portfolioIdValue,
+          userId: sessionId, // Associate with current user
+          timestamp: Date.now()
+        }))
+        
+        // Update URL without reload
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.set('url', portfolioUrl)
+        if (portfolioIdValue) {
+          newUrl.searchParams.set('portfolio_id', portfolioIdValue)
+        }
+        window.history.pushState({}, '', newUrl)
+        
         // Clear progress interval and jump to completion
         clearInterval(generateProgressInterval)
         setRealProgress(PROGRESS_MILESTONES.GENERATION_COMPLETE)
@@ -1278,6 +1472,14 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setShowStrikeThrough(false)
     setShowCVCard(true)
     setPortfolioUrl(null)
+    setPortfolioId(null)
+    // Clear saved state
+    localStorage.removeItem('lastPortfolio')
+    // Clear URL params
+    const newUrl = new URL(window.location.href)
+    newUrl.searchParams.delete('url')
+    newUrl.searchParams.delete('portfolio_id')
+    window.history.pushState({}, '', newUrl)
     setProcessingError(null)
     setRealProgress(0)
     
@@ -1300,6 +1502,14 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setShowStrikeThrough(false)
     setShowCVCard(true)
     setPortfolioUrl(null)
+    setPortfolioId(null)
+    // Clear saved state
+    localStorage.removeItem('lastPortfolio')
+    // Clear URL params
+    const newUrl = new URL(window.location.href)
+    newUrl.searchParams.delete('url')
+    newUrl.searchParams.delete('portfolio_id')
+    window.history.pushState({}, '', newUrl)
     setProcessingError(null)
     setRealProgress(0)
     setShowPortfolioInMacBook(false)
@@ -1347,19 +1557,28 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }, 1500) // 1.5 seconds for CV to appear
   }
 
-  const handleAuthSuccess = (userData: any) => {
-    console.log('✅ User authenticated successfully:', userData)
+  const handleAuthSuccess = async (data: any) => {
+    console.log('✅ User authenticated successfully:', data)
+    
+    // Update auth context if signIn function is provided
+    if (signIn && data.session_id) {
+      await signIn(data.session_id, data)
+    }
+    
     setShowSignupModal(false)
     setIsWaitingForAuth(false)
     
-    // Now start the real backend processing with the pending file
-    if (pendingFile) {
-      // Start the actual portfolio generation - this will update realProgress from backend
-      processPortfolioGeneration(pendingFile)
-      // The progress bar will now animate based on real backend progress
-      // No need to manually set progress values - backend handles it
-      setIsPlaying(true)
-    }
+    // Wait a moment for auth context to update
+    setTimeout(() => {
+      // Now start the real backend processing with the pending file
+      if (pendingFile) {
+        // Start the actual portfolio generation - this will update realProgress from backend
+        processPortfolioGeneration(pendingFile)
+        // The progress bar will now animate based on real backend progress
+        // No need to manually set progress values - backend handles it
+        setIsPlaying(true)
+      }
+    }, 100)
   }
 
   const handleSignupModalClose = () => {
@@ -1573,16 +1792,24 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className="relative w-full max-w-[340px] h-[485px]"
               >
                 <IPhoneFrame>
-                  <iframe
-                    ref={iframeRef}
-                    src="https://dmfmjqvp.manus.space/#"
-                    className="w-full h-full border-0"
-                    title="Alex Morgan Portfolio"
-                    style={{
-                      transform: stage === 'complete' ? 'scale(1)' : 'scale(0.98)',
-                      transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    }}
-                  />
+                  {portfolioUrl ? (
+                    <IframeWithFallback
+                      src={portfolioUrl}
+                      title="Generated Portfolio"
+                      className="w-full h-full border-0"
+                    />
+                  ) : (
+                    <iframe
+                      ref={iframeRef}
+                      src="https://dmfmjqvp.manus.space/#"
+                      className="w-full h-full border-0"
+                      title="Alex Morgan Portfolio"
+                      style={{
+                        transform: stage === 'complete' ? 'scale(1)' : 'scale(0.98)',
+                        transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      }}
+                    />
+                  )}
                 </IPhoneFrame>
               </motion.div>
             )}
@@ -1956,9 +2183,19 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                           transition={{ duration: 0.8, delay: 1.6, ease: "easeOut" }}
                         >
                           
-                          {(showPortfolioInMacBook || realProgress >= 60) && portfolioUrl ? (
+                          {console.log('🔍 MacBook content state:', { isRestoringPortfolio, showPortfolioInMacBook, portfolioUrl, realProgress, stage })}
+                        {isRestoringPortfolio ? (
+                            // Show loading state while restoring portfolio
+                            <div className="absolute inset-0 w-full h-full bg-white z-50 flex items-center justify-center">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                                <p className="text-gray-600">Restoring your last portfolio...</p>
+                              </div>
+                            </div>
+                          ) : (showPortfolioInMacBook || realProgress >= 60) && portfolioUrl ? (
                             // Show the generated portfolio automatically when ready or when clicked
                             <div className="absolute inset-0 w-full h-full bg-white z-50">
+                              {console.log('🎯 Rendering IframeWithFallback with URL:', portfolioUrl, 'showPortfolioInMacBook:', showPortfolioInMacBook, 'realProgress:', realProgress)}
                               <IframeWithFallback 
                                 src={portfolioUrl}
                                 title="Generated Portfolio"
@@ -2036,6 +2273,15 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             }
                           }}
                         />
+                      ) : portfolioUrl ? (
+                        <div className="absolute inset-0 w-full h-full bg-white z-50">
+                          {console.log('🎯 Rendering IframeWithFallback with URL:', portfolioUrl, 'showPortfolioInMacBook:', showPortfolioInMacBook, 'realProgress:', realProgress)}
+                          <IframeWithFallback 
+                            src={portfolioUrl}
+                            title="Generated Portfolio"
+                            className="w-full h-full border-0"
+                          />
+                        </div>
                       ) : (
                         <iframe
                           ref={iframeRef}
@@ -2739,9 +2985,37 @@ export default function Home() {
     setShowAuthModal(false)
   }
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = async (file: File) => {
     // Set the uploaded file - this will trigger CV to appear in the card
     console.log('📁 File selected, showing CV in card:', file.name)
+    
+    // If user is authenticated and has an existing portfolio, clear it
+    if (isAuthenticated) {
+      console.log('🗑️ Clearing any existing portfolio data for new upload...')
+      
+      // Clear saved portfolio data
+      localStorage.removeItem('lastPortfolio')
+      
+      // Clear URL params
+      const url = new URL(window.location.href)
+      url.searchParams.delete('url')
+      url.searchParams.delete('portfolio_id')
+      window.history.replaceState({}, '', url.toString())
+      
+      // Delete all existing portfolios from backend and Vercel
+      console.log('🗑️ Deleting existing portfolios from backend...')
+      try {
+        const { deleteAllUserPortfolios } = await import('@/lib/api')
+        await deleteAllUserPortfolios()
+      } catch (error) {
+        console.log('⚠️ Could not delete existing portfolios:', error)
+        // Continue anyway - user might not have any portfolios
+      }
+      
+      // The Resume2WebsiteDemo component will reset its own state when
+      // it detects a new file upload
+    }
+    
     setUploadedFile(file)
     
     // Don't open auth modal here - just store the file
@@ -2757,9 +3031,32 @@ export default function Home() {
     // This is just a placeholder for the prop
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Call backend logout endpoint
+    try {
+      const sessionId = localStorage.getItem('resume2website_session_id')
+      if (sessionId) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/logout`, {
+          method: 'POST',
+          headers: {
+            'X-Session-ID': sessionId
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Logout API call failed:', error)
+    }
+    
+    // Clear auth state
     signOut()
+    
+    // Clear all component states
     setShowDashboard(false)
+    setUploadedFile(null)
+    setDroppedFile(null)
+    
+    // Force page refresh to reset everything to initial state
+    window.location.href = window.location.origin + '?key=nitzan-secret-2024'
   }
 
   // Builder flow handlers
@@ -2967,6 +3264,7 @@ export default function Home() {
           setUploadedFile={setUploadedFile}
           onFileClick={handleCVCardClick}
           handleFileSelect={handleFileSelect}
+          signIn={signIn}
         />
       </section>
       <section id="demo" className="min-h-screen">

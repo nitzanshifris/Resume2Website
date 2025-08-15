@@ -82,8 +82,15 @@ export default function EmailAuthForm({ mode, onBack, onAuthSuccess, onClose }: 
       
       // Store session
       if (data.session_id) {
+        console.log('📝 Storing session after registration:', data.session_id);
         localStorage.setItem('resume2website_session_id', data.session_id);
         localStorage.setItem('resume2website_user', JSON.stringify(data.user));
+        
+        // Verify it was stored
+        const storedSession = localStorage.getItem('resume2website_session_id');
+        console.log('✅ Session stored and verified:', storedSession);
+      } else {
+        console.error('❌ No session_id in registration response:', data);
       }
       
       showToast(
@@ -91,8 +98,8 @@ export default function EmailAuthForm({ mode, onBack, onAuthSuccess, onClose }: 
         'success'
       );
       
-      // Call success callback
-      onAuthSuccess(data.user);
+      // Call success callback with full data including session_id
+      onAuthSuccess({ ...data.user, session_id: data.session_id });
       
       // Close modal
       setTimeout(() => {
