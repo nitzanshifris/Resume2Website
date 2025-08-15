@@ -946,6 +946,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
         setIsPlaying(false) // No animation needed for restoration
         setShowCVCard(false) // Hide the CV card
+        setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
         
         // Clear restoration state after a short delay
         setTimeout(() => {
@@ -971,6 +972,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               setShowPortfolioInMacBook(true)
               setStage("complete")
               setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
+              setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
               console.log('📦 Restored portfolio from ID:', data.custom_domain_url || data.url)
             }
           }
@@ -1001,6 +1003,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
               setIsPlaying(false) // No animation needed for restoration
               setShowCVCard(false) // Hide the CV card
+              setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
               
               // Clear restoration state after a short delay
               setTimeout(() => {
@@ -1056,6 +1059,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 setShowPortfolioInMacBook(true)
                 setStage("complete")
                 setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
+                setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
                 console.log('📦 Portfolio state set, should display:', restoredUrl)
               }
             }
