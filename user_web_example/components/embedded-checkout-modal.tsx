@@ -24,11 +24,8 @@ export default function EmbeddedCheckoutModal({
   amount = 999, // Default $9.99
   onSuccess 
 }: EmbeddedCheckoutModalProps) {
-  // Log the key to debug (remove in production)
   useEffect(() => {
-    console.log('Stripe Key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.substring(0, 20) + '...');
     if (!stripePromise) {
-      console.error('Stripe not initialized - missing publishable key');
       setError('Payment system not configured. Please check your Stripe configuration.');
     }
   }, []);
@@ -123,7 +120,6 @@ export default function EmbeddedCheckoutModal({
                   stripe={stripePromise} 
                   options={options}
                   onReady={() => {
-                    console.log('Stripe Embedded Checkout is ready');
                     setIsLoading(false);
                   }}
                 >
