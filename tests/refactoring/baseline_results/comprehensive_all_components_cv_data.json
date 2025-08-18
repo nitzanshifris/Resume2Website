@@ -1,0 +1,300 @@
+{
+  "hero": {
+    "fullName": "Alexandra Chen",
+    "professionalTitle": "Senior Product Manager",
+    "summaryTagline": "Digital Innovation Leader",
+    "profilePhotoUrl": null
+  },
+  "contact": {
+    "email": "alexandra.chen@email.com",
+    "phone": "+1 (555) 987-6543",
+    "location": {
+      "city": "Seattle",
+      "state": "Washington",
+      "country": "None"
+    },
+    "professionalLinks": [
+      {
+        "platform": "LinkedIn",
+        "url": "https://www.linkedin.com/in/alexandrachen"
+      },
+      {
+        "platform": "Portfolio",
+        "url": "https://alexchen.dev"
+      }
+    ],
+    "availability": null
+  },
+  "summary": {
+    "summaryText": "Results-driven Senior Product Manager with over 12 years of experience leading cross-functional teams to deliver innovative digital products. Proven track record of driving product strategy, increasing user engagement, and delivering measurable business impact across B2B and B2C platforms. Passionate about leveraging data-driven insights and emerging technologies to create exceptional user experiences. Seeking to lead product innovation at a mission-driven organization.",
+    "yearsOfExperience": 12,
+    "keySpecializations": [
+      "leading cross-functional teams",
+      "digital products",
+      "product strategy",
+      "user engagement",
+      "B2B and B2C platforms",
+      "data-driven insights",
+      "emerging technologies"
+    ],
+    "careerHighlights": [
+      "driving product strategy",
+      "increasing user engagement",
+      "delivering measurable business impact across B2B and B2C platforms"
+    ]
+  },
+  "experience": {
+    "sectionTitle": "PROFESSIONAL EXPERIENCE",
+    "experienceItems": [
+      {
+        "jobTitle": "VP of Product Management",
+        "companyName": "TechVision Corp",
+        "location": {
+          "city": "Seattle",
+          "state": "Washington",
+          "country": "United States"
+        },
+        "dateRange": {
+          "startDate": "March 2020",
+          "endDate": "Present",
+          "isCurrent": true
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Increased platform revenue by 275% ($45M to $168M ARR) through strategic product initiatives",
+          "Led product organization of 25 PMs across 4 product lines",
+          "Reduced customer acquisition cost by 60% through product-led growth strategies",
+          "Achieved 4.8/5.0 customer satisfaction score across 50,000+ enterprise users"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": 25,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Senior Product Manager",
+        "companyName": "InnovateLabs",
+        "location": {
+          "city": "San Francisco",
+          "state": "California",
+          "country": "United States"
+        },
+        "dateRange": {
+          "startDate": "June 2016",
+          "endDate": "February 2020",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Launched AI-powered analytics platform serving 2M+ daily active users",
+          "Increased user retention by 85% through personalization features",
+          "Generated $12M in new revenue streams through premium tier development"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "EDUCATION",
+    "educationItems": [
+      {
+        "degree": "MBA",
+        "fieldOfStudy": "Technology Management",
+        "institution": "Stanford University",
+        "location": null,
+        "dateRange": {
+          "startDate": null,
+          "endDate": "June 2016",
+          "isCurrent": null
+        },
+        "gpa": "3.95/4.0",
+        "honors": [
+          "Dean's List"
+        ],
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "BS",
+        "fieldOfStudy": "Computer Science",
+        "institution": "MIT",
+        "location": null,
+        "dateRange": {
+          "startDate": null,
+          "endDate": "May 2011",
+          "isCurrent": null
+        },
+        "gpa": null,
+        "honors": [
+          "Summa Cum Laude"
+        ],
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "SKILLS",
+    "skillCategories": [
+      {
+        "categoryName": "Product Strategy",
+        "skills": [
+          "Roadmap Development",
+          "Market Analysis",
+          "Competitive Intelligence",
+          "OKR Planning"
+        ]
+      },
+      {
+        "categoryName": "Technical",
+        "skills": [
+          "SQL",
+          "Python",
+          "JavaScript",
+          "REST APIs",
+          "Cloud Architecture",
+          "A/B Testing"
+        ]
+      },
+      {
+        "categoryName": "Leadership",
+        "skills": [
+          "Executive Communication",
+          "Team Building",
+          "Stakeholder Management",
+          "Agile/Scrum"
+        ]
+      }
+    ],
+    "ungroupedSkills": null,
+    "proficiencyIndicators": null
+  },
+  "projects": {
+    "sectionTitle": "KEY PROJECTS",
+    "projectItems": [
+      {
+        "title": "Enterprise Data Platform Transformation",
+        "role": "Manager",
+        "duration": null,
+        "dateRange": {
+          "startDate": "2023",
+          "endDate": null,
+          "isCurrent": null
+        },
+        "description": null,
+        "keyFeatures": [
+          "Led complete redesign reducing query time by 95% (from 20s to <1s average)",
+          "Saved $4.2M annually in infrastructure costs through optimization"
+        ],
+        "technologiesUsed": [
+          "React",
+          "Python",
+          "PostgreSQL",
+          "AWS",
+          "Kubernetes"
+        ],
+        "projectUrl": null,
+        "imageUrl": null,
+        "projectMetrics": null
+      }
+    ]
+  },
+  "achievements": {
+    "sectionTitle": null,
+    "achievements": [
+      {
+        "value": "275%",
+        "label": "Increased platform revenue",
+        "contextOrDetail": "$45M to $168M ARR",
+        "timeframe": null
+      },
+      {
+        "value": "60%",
+        "label": "Reduced customer acquisition cost",
+        "contextOrDetail": "through product-led growth strategies",
+        "timeframe": null
+      },
+      {
+        "value": "4.8/5.0",
+        "label": "customer satisfaction score",
+        "contextOrDetail": "across 50,000+ enterprise users",
+        "timeframe": null
+      },
+      {
+        "value": "85%",
+        "label": "Increased user retention",
+        "contextOrDetail": "through personalization features",
+        "timeframe": null
+      },
+      {
+        "value": "$12M",
+        "label": "Generated new revenue streams",
+        "contextOrDetail": "through premium tier development",
+        "timeframe": null
+      },
+      {
+        "value": "95%",
+        "label": "reducing query time",
+        "contextOrDetail": "from 20s to <1s average",
+        "timeframe": "2023"
+      },
+      {
+        "value": "$4.2M",
+        "label": "Saved annually in infrastructure costs",
+        "contextOrDetail": "through optimization",
+        "timeframe": null
+      }
+    ]
+  },
+  "certifications": {
+    "sectionTitle": "LICENSES & CERTIFICATIONS",
+    "certificationItems": [
+      {
+        "title": "Certified Scrum Product Owner (CSPO)",
+        "issuingOrganization": "Scrum Alliance",
+        "issueDate": "November 2022",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      },
+      {
+        "title": "AWS Certified Solutions Architect Professional",
+        "issuingOrganization": "Amazon",
+        "issueDate": "March 2023",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      },
+      {
+        "title": "Product Management Certificate",
+        "issuingOrganization": "Product School",
+        "issueDate": "2021",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      }
+    ]
+  },
+  "languages": null,
+  "courses": {
+    "sectionTitle": null,
+    "courseItems": null
+  },
+  "volunteer": {
+    "sectionTitle": "VOLUNTEER EXPERIENCE",
+    "volunteerItems": null
+  },
+  "publications": null,
+  "speaking": null,
+  "patents": null,
+  "memberships": null,
+  "hobbies": null,
+  "unclassified_text": null
+}

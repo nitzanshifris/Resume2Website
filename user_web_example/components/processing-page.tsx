@@ -136,7 +136,7 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
         // Step 2: Extract CV data (happens while progress animates)
         try {
           const sessionId = localStorage.getItem('resume2website_session_id')
-          const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${activeJobId}`, {
+          const extractResponse = await fetch(`${API_BASE_URL}/api/v1/extract/${activeJobId}`, {
             method: 'POST',
             headers: {
               'X-Session-ID': sessionId || ''

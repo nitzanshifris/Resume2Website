@@ -19,22 +19,6 @@ RESUME2WEBSITE has a working pipeline that transforms CVs into portfolios using 
 - Three-tier pricing system ($14.90/$19.90/$89.90)
 - Subscription management for hosting
 - Refund system for Get Hired plan
-- Estimated: 1 week
-
-### 2. Vercel Deployment Integration
-**Priority: Critical - User delivery**
-- One-click deployment from dashboard
-- Custom domain connection
-- Environment variable management
-- SSL certificate automation
-- Estimated: 3-4 days
-
-### 3. Resume2Web Branded Template
-**Priority: High - Go Live tier**
-- Complete branded template with watermark
-- Optimized for affordability tier
-- Limited customization options
-- Estimated: 2-3 days
 
 ---
 

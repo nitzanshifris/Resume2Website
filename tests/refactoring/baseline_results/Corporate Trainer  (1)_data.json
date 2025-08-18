@@ -1,0 +1,170 @@
+{
+  "hero": {
+    "fullName": "AIDEN KELLY",
+    "professionalTitle": "Corporate Trainer",
+    "summaryTagline": "Experienced Corporate Trainer with 3+ years of delivering exceptional training programs in the Adult Social Care sector. Skilled in designing engaging training materials using PowerPoint and e-learning platforms. Proficient in Microsoft Office and experienced in managing comprehensive training programs. Possess strong communication skills and adaptability to meet the diverse needs of individuals. Achievements include successfully implementing an e-learning platform and receiving recognition for exceptional training delivery. Passionate about supporting staff in their learning and development journey to deliver first-class service. Bachelor's in Education from the University of Manchester. Fluent in English and Spanish.",
+    "profilePhotoUrl": null
+  },
+  "contact": {
+    "email": "aiden6@hotmail.com",
+    "phone": "1-682-263-5634",
+    "location": {
+      "city": "Wizamouth",
+      "state": "None",
+      "country": "Saint Lucia"
+    },
+    "professionalLinks": [
+      {
+        "platform": "Website",
+        "url": "https://far-flung-scrip.info"
+      }
+    ],
+    "availability": null
+  },
+  "summary": {
+    "summaryText": "Experienced Corporate Trainer with 3+ years of delivering exceptional training programs in the Adult Social Care sector. Skilled in designing engaging training materials using PowerPoint and e-learning platforms. Proficient in Microsoft Office and experienced in managing comprehensive training programs. Possess strong communication skills and adaptability to meet the diverse needs of individuals. Achievements include successfully implementing an e-learning platform and receiving recognition for exceptional training delivery. Passionate about supporting staff in their learning and development journey to deliver first-class service. Bachelor's in Education from the University of Manchester. Fluent in English and Spanish.",
+    "yearsOfExperience": 3,
+    "keySpecializations": [
+      "Adult Social Care sector",
+      "designing engaging training materials",
+      "PowerPoint",
+      "e-learning platforms",
+      "Microsoft Office",
+      "managing comprehensive training programs"
+    ],
+    "careerHighlights": [
+      "successfully implementing an e-learning platform",
+      "receiving recognition for exceptional training delivery"
+    ]
+  },
+  "experience": {
+    "sectionTitle": "EXPERIENCE",
+    "experienceItems": [
+      {
+        "jobTitle": "Corporate Trainer",
+        "companyName": "Eden Futures",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": "United Kingdom"
+        },
+        "dateRange": {
+          "startDate": "2022",
+          "endDate": "Present",
+          "isCurrent": true
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Delivered exceptional training sessions on Active Support, Safeguarding, Medication, First Aid, Moving and Handling, Positive Behaviour Support, Maybo Conflict Management, and Trauma informed care resulting in improved knowledge and skills of staff members",
+          "Researched and designed training materials to update knowledge on new legislation, policies, and practices",
+          "Collaborated with operational teams to develop service-specific training programs to meet the differing needs across our service areas",
+          "Provided individualized learning and development support to staff with visual difficulties, dyslexia, and physical needs"
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": null,
+    "educationItems": [
+      {
+        "degree": "Bachelor's in Education",
+        "fieldOfStudy": "Education",
+        "institution": "University of Manchester",
+        "location": null,
+        "dateRange": null,
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "SKILLS",
+    "skillCategories": [
+      {
+        "categoryName": "Software Tools",
+        "skills": [
+          "Microsoft Office Suite",
+          "PowerPoint",
+          "Learning Management Systems",
+          "E-Learning Platforms"
+        ]
+      },
+      {
+        "categoryName": "Professional Skills",
+        "skills": [
+          "Training and Development",
+          "Instructional Design",
+          "Presentation Skills",
+          "Effective Communication",
+          "Team Collaboration"
+        ]
+      }
+    ],
+    "ungroupedSkills": null,
+    "proficiencyIndicators": null
+  },
+  "projects": null,
+  "achievements": {
+    "sectionTitle": null,
+    "achievements": [
+      {
+        "value": null,
+        "label": "successfully implementing an e-learning platform",
+        "contextOrDetail": null,
+        "timeframe": null
+      },
+      {
+        "value": null,
+        "label": "receiving recognition for exceptional training delivery",
+        "contextOrDetail": null,
+        "timeframe": null
+      }
+    ]
+  },
+  "certifications": null,
+  "languages": {
+    "sectionTitle": null,
+    "languageItems": [
+      {
+        "language": "English",
+        "proficiency": "Fluent",
+        "certification": null
+      },
+      {
+        "language": "Spanish",
+        "proficiency": "Fluent",
+        "certification": null
+      }
+    ]
+  },
+  "courses": null,
+  "volunteer": null,
+  "publications": null,
+  "speaking": {
+    "sectionTitle": null,
+    "speakingEngagements": [
+      {
+        "eventName": "Educational Workshop",
+        "topic": "Active Support, Safeguarding, Medication, First Aid, Moving and Handling, Positive Behaviour Support, Maybo Conflict Management, and Trauma informed care",
+        "date": "2022 - Ongoing",
+        "venue": "Central and North regions, UK",
+        "role": "Corporate Trainer",
+        "eventUrl": null,
+        "presentationUrl": null,
+        "audienceSize": null
+      }
+    ]
+  },
+  "patents": null,
+  "memberships": null,
+  "hobbies": null,
+  "unclassified_text": null
+}

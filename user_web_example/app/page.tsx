@@ -25,6 +25,7 @@ import ProcessingPage from "@/components/processing-page"
 import SimpleDashboard from "@/components/simple-dashboard"
 import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal-new"
+import PricingSelector from "@/components/pricing-selector"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
@@ -1309,7 +1310,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         const timeoutId = setTimeout(() => controller.abort(), 60000)
         
         try {
-          const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
+          const extractResponse = await fetch(`${API_BASE_URL}/api/v1/extract/${jobId}`, {
             method: 'POST',
             headers: {
               'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
@@ -1974,9 +1975,21 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 1.2, ease: "easeInOut" }}
-                      className="flex items-center w-full"
+                      className="flex flex-col items-center w-full"
                       style={{ height: "400px", paddingLeft: "120px" }} // Move progress bar to center above both buttons
                     >
+                      {/* Edit Your Website Button - Shows when portfolio is generated */}
+                      {realProgress >= 60 && portfolioUrl && (
+                        <motion.button
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, ease: "easeOut" }}
+                          onClick={() => setShowPricing(true)}
+                          className="mb-6 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        >
+                          ✏️ Edit Your Website
+                        </motion.button>
+                      )}
                       <VerticalProgressBar 
                         onProgressChange={setProgressBarPercentage}
                         externalProgress={realProgress}
@@ -2187,9 +2200,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.8, delay: 1.6, ease: "easeOut" }}
                         >
-                          
-                          {console.log('🔍 MacBook content state:', { isRestoringPortfolio, showPortfolioInMacBook, portfolioUrl, realProgress, stage })}
-                        {isRestoringPortfolio ? (
+                          {isRestoringPortfolio ? (
                             // Show loading state while restoring portfolio
                             <div className="absolute inset-0 w-full h-full bg-white z-50 flex items-center justify-center">
                               <div className="text-center">
@@ -2200,7 +2211,6 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                           ) : (showPortfolioInMacBook || realProgress >= 60) && portfolioUrl ? (
                             // Show the generated portfolio automatically when ready or when clicked
                             <div className="absolute inset-0 w-full h-full bg-white z-50">
-                              {console.log('🎯 Rendering IframeWithFallback with URL:', portfolioUrl, 'showPortfolioInMacBook:', showPortfolioInMacBook, 'realProgress:', realProgress)}
                               <IframeWithFallback 
                                 src={portfolioUrl}
                                 title="Generated Portfolio"
@@ -2280,7 +2290,6 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         />
                       ) : portfolioUrl ? (
                         <div className="absolute inset-0 w-full h-full bg-white z-50">
-                          {console.log('🎯 Rendering IframeWithFallback with URL:', portfolioUrl, 'showPortfolioInMacBook:', showPortfolioInMacBook, 'realProgress:', realProgress)}
                           <IframeWithFallback 
                             src={portfolioUrl}
                             title="Generated Portfolio"
@@ -2904,6 +2913,7 @@ export default function Home() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [hasTriggeredPhase6Modal, setHasTriggeredPhase6Modal] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const [showPricing, setShowPricing] = useState(false)
   
   // Use the real authentication system
   const { isAuthenticated, user, signIn, signOut } = useAuthContext()
@@ -3418,6 +3428,17 @@ export default function Home() {
         onClose={handleAuthClose}
         onAuthSuccess={handleAuthSuccess}
       />
+
+      {/* Pricing Modal */}
+      {showPricing && (
+        <PricingSelector
+          portfolioId={portfolioId || undefined}
+          onPaymentSuccess={() => {
+            setShowPricing(false)
+            // Handle payment success
+          }}
+        />
+      )}
     </main>
   )
 }

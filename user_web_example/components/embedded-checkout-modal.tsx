@@ -114,17 +114,10 @@ export default function EmbeddedCheckoutModal({
                   <p className="text-gray-900 dark:text-white font-semibold mb-2">Error Loading Checkout</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
                 </div>
-              ) : isLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                </div>
               ) : (
                 <EmbeddedCheckoutProvider 
                   stripe={stripePromise} 
                   options={options}
-                  onReady={() => {
-                    setIsLoading(false);
-                  }}
                 >
                   <EmbeddedCheckout />
                 </EmbeddedCheckoutProvider>

@@ -134,6 +134,10 @@ GET /api/v1/auth/google/status            # Check Google OAuth availability
 
 ## Architecture Essentials
 - **CV Extraction**: 18 sections, cached in SQLite, hash-based deduplication
+  - Modular architecture with specialized components (section_extractor, post_processor, etc.)
+  - Circuit breaker pattern for LLM resilience (5 failures → 60s timeout)
+  - Factory pattern for extractor instances (no singleton conflicts)
+  - Real-time metrics tracking at `/api/v1/metrics/current`
 - **Portfolio Generation**: Two-stage process - Preview first, then optional deployment
 - **Preview Mode**: Instant local preview on ports 4000-5000 (no deployment needed)
 - **Deployment**: Optional Vercel deployment after preview approval (~2-3 min)
@@ -361,12 +365,16 @@ HTTP/2 200
 - **config.py** - Backend configuration, environment variables, AI model settings
 - **main.py** - FastAPI application entry point with routing
 - **src/api/routes/portfolio_generator.py** - Portfolio generation + optional Vercel deployment
-- **src/api/routes/payments.py** - Stripe payment processing endpoints
-- **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
 - **src/api/routes/cv.py** - CV upload, extraction, CRUD operations
+- **src/api/routes/metrics.py** - Real-time extraction metrics endpoint
+- **src/api/routes/payments.py** - Stripe payment processing endpoints
 - **src/api/routes/user_auth.py** - OAuth authentication endpoints (Google, LinkedIn)
 - **src/api/db.py** - SQLite database operations, user management, session handling
-- **src/core/cv_extraction/data_extractor.py** - Claude 4 Opus integration
+- **src/core/cv_extraction/data_extractor.py** - Main extraction orchestrator (uses factory pattern)
+- **src/core/cv_extraction/llm_service.py** - Claude 4 Opus integration with circuit breaker
+- **src/core/cv_extraction/metrics.py** - Performance metrics collection
+- **src/core/cv_extraction/circuit_breaker.py** - Resilience pattern for LLM failures
+- **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
 - **user_web_example/app/page.tsx** - Main frontend entry point with portfolio restoration
 - **user_web_example/components/embedded-checkout-modal.tsx** - Stripe payment modal
 - **user_web_example/app/payment-return/page.tsx** - Payment confirmation page

@@ -18,15 +18,18 @@ from src.services.sse_service import sse_service
 
 # Import existing services
 from src.core.local.text_extractor import text_extractor
-from src.core.cv_extraction.data_extractor import data_extractor
+from src.core.cv_extraction.data_extractor import create_data_extractor
 from src.core.schemas.unified_nullable import CVData
 from src.api.schemas import UploadResponse
 from src.api.routes.auth import get_current_user
 
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-import config
+# Import config from project root
+try:
+    import config
+except ImportError:
+    # If running as a module, try relative import
+    from ... import config
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -126,11 +129,13 @@ async def upload_cv_with_tracking(
         sse_logger.step_complete(f"Extracted {len(text)} characters in {extraction_time:.2f}s")
         
         # Step 2: AI data extraction
-        sse_logger.step("Analyzing CV with AI (Gemini)")
+        sse_logger.step("Analyzing CV with AI (Claude Opus)")
         sse_logger.start_timer("ai_extraction")
         sse_logger.set_gauge("text_length", len(text))
         
-        cv_data = await data_extractor.extract_cv_data(text)
+        # Create new extractor instance for this request
+        extractor = create_data_extractor()
+        cv_data = await extractor.extract_cv_data(text)
         
         ai_time = sse_logger.end_timer("ai_extraction")
         
@@ -147,18 +152,18 @@ async def upload_cv_with_tracking(
         validation_score = 0
         cv_dict = cv_data.model_dump_nullable()
         
-        if cv_dict.get('hero') and cv_dict['hero'].get('name'):
+        if cv_dict.get('hero') and cv_dict['hero'].get('fullName'):
             validation_score += 0.3
-            sse_logger.info(f"✓ Name found: {cv_dict['hero']['name']}")
-        if cv_dict.get('experience') and len(cv_dict['experience']) > 0:
+            sse_logger.info(f"✓ Name found: {cv_dict['hero']['fullName']}")
+        if cv_dict.get('experience') and cv_dict['experience'].get('experienceItems') and len(cv_dict['experience']['experienceItems']) > 0:
             validation_score += 0.3
-            sse_logger.info(f"✓ {len(cv_dict['experience'])} work experiences found")
-        if cv_dict.get('education') and len(cv_dict['education']) > 0:
+            sse_logger.info(f"✓ {len(cv_dict['experience']['experienceItems'])} work experiences found")
+        if cv_dict.get('education') and cv_dict['education'].get('educationItems') and len(cv_dict['education']['educationItems']) > 0:
             validation_score += 0.2
-            sse_logger.info(f"✓ {len(cv_dict['education'])} education entries found")
-        if cv_dict.get('skills') and len(cv_dict['skills']) > 0:
+            sse_logger.info(f"✓ {len(cv_dict['education']['educationItems'])} education entries found")
+        if cv_dict.get('skills') and cv_dict['skills'].get('skillCategories') and len(cv_dict['skills']['skillCategories']) > 0:
             validation_score += 0.2
-            sse_logger.info(f"✓ {len(cv_dict['skills'])} skills found")
+            sse_logger.info(f"✓ {len(cv_dict['skills']['skillCategories'])} skill categories found")
         
         sse_logger.set_gauge("validation_score", validation_score)
         sse_logger.step_complete(f"Data validation score: {validation_score * 100:.0f}%")

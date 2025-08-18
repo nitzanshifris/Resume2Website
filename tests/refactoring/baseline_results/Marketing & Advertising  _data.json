@@ -1,0 +1,196 @@
+{
+  "hero": {
+    "fullName": "John Bergsen",
+    "professionalTitle": "Marketing Specialist",
+    "summaryTagline": "A marketing specialist with six years of professional experience specializing in digital marketing, content development, and lead generation. A proven track record of executing high-impact campaigns to enhance audience engagement and drive brand growth.",
+    "profilePhotoUrl": null
+  },
+  "contact": {
+    "email": "johnbergsen@example.com",
+    "phone": "(123) 456-7890",
+    "location": {
+      "city": "New York",
+      "state": "New York",
+      "country": "None"
+    },
+    "professionalLinks": [
+      {
+        "platform": "LinkedIn",
+        "url": "Not available (extracted from image)"
+      },
+      {
+        "platform": "Portfolio",
+        "url": "Not available (extracted from image)"
+      }
+    ],
+    "availability": null
+  },
+  "summary": {
+    "summaryText": "A marketing specialist with six years of professional experience specializing in digital marketing, content development, and lead generation. A proven track record of executing high-impact campaigns to enhance audience engagement and drive brand growth.",
+    "yearsOfExperience": 6,
+    "keySpecializations": [
+      "digital marketing",
+      "content development",
+      "lead generation"
+    ],
+    "careerHighlights": null
+  },
+  "experience": {
+    "sectionTitle": "Professional Experience",
+    "experienceItems": [
+      {
+        "jobTitle": "Marketing Specialist",
+        "companyName": "Solaris Marketing Inc.",
+        "location": {
+          "city": "New York",
+          "state": "New York",
+          "country": "United States"
+        },
+        "dateRange": {
+          "startDate": "February 2019",
+          "endDate": "Present",
+          "isCurrent": true
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Define and execute a wide range of digital marketing campaigns, evaluate consumer trends, and provide recommendations to enhance digital presence for major client accounts valued at $120,000 to $300,000",
+          "Utilize Google Analytics to analyze web performance and identify opportunities to increase paid search and organic traffic by up to 32%",
+          "Coordinate cross-functionally with digital marketing teams, web developers, and client stakeholders to define effective marketing strategies in alignment with brand goals"
+        ],
+        "technologiesUsed": [
+          "Google Analytics"
+        ],
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Marketing Specialist",
+        "companyName": "Elevate Education",
+        "location": {
+          "city": "New York",
+          "state": "New York",
+          "country": "United States"
+        },
+        "dateRange": {
+          "startDate": "June 2018",
+          "endDate": "February 2019",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Led a variety of digital marketing initiatives to drive traffic and improve lead generation for a premier e-learning company, resulting in a 130% increase in enrollments",
+          "Conducted comprehensive analysis of SEO performance and competitor sites to enhance web copy, resulting in a 14% increase in site traffic",
+          "Executed a large-scale project to launch online advertisements on LinkedIn and Facebook, contributing to a 24% increase in sales conversions"
+        ],
+        "technologiesUsed": [
+          "LinkedIn",
+          "Facebook"
+        ],
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "Education",
+    "educationItems": [
+      {
+        "degree": "Bachelor of Science (B.S.)",
+        "fieldOfStudy": "Marketing",
+        "institution": "Columbia University",
+        "location": {
+          "city": "New York",
+          "state": "New York",
+          "country": "United States"
+        },
+        "dateRange": {
+          "startDate": "September 2014",
+          "endDate": "June 2018",
+          "isCurrent": null
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "Key Skills",
+    "skillCategories": null,
+    "ungroupedSkills": [
+      "Digital marketing",
+      "Competitive analysis",
+      "Data-driven decision-making",
+      "Copywriting",
+      "Brand awareness"
+    ],
+    "proficiencyIndicators": null
+  },
+  "projects": null,
+  "achievements": {
+    "sectionTitle": null,
+    "achievements": [
+      {
+        "value": "32%",
+        "label": "increase in paid search and organic traffic",
+        "contextOrDetail": "Utilize Google Analytics to analyze web performance and identify opportunities",
+        "timeframe": "February 2019 - Present"
+      },
+      {
+        "value": "130%",
+        "label": "increase in enrollments",
+        "contextOrDetail": "Led a variety of digital marketing initiatives to drive traffic and improve lead generation for a premier e-learning company",
+        "timeframe": "June 2018 - February 2019"
+      },
+      {
+        "value": "14%",
+        "label": "increase in site traffic",
+        "contextOrDetail": "Conducted comprehensive analysis of SEO performance and competitor sites to enhance web copy",
+        "timeframe": "June 2018 - February 2019"
+      },
+      {
+        "value": "24%",
+        "label": "increase in sales conversions",
+        "contextOrDetail": "Executed a large-scale project to launch online advertisements on LinkedIn and Facebook",
+        "timeframe": "June 2018 - February 2019"
+      },
+      {
+        "value": "$120,000 to $300,000",
+        "label": "major client accounts valued at",
+        "contextOrDetail": "Define and execute a wide range of digital marketing campaigns, evaluate consumer trends, and provide recommendations to enhance digital presence",
+        "timeframe": "February 2019 - Present"
+      }
+    ]
+  },
+  "certifications": {
+    "sectionTitle": "Certifications",
+    "certificationItems": [
+      {
+        "title": "Professional Certification in Digital Marketing",
+        "issuingOrganization": "AMA",
+        "issueDate": "June 2018",
+        "expirationDate": null,
+        "credentialId": null,
+        "verificationUrl": null
+      }
+    ]
+  },
+  "languages": null,
+  "courses": {
+    "sectionTitle": "Certifications",
+    "courseItems": []
+  },
+  "volunteer": null,
+  "publications": null,
+  "speaking": null,
+  "patents": null,
+  "memberships": null,
+  "hobbies": null,
+  "unclassified_text": null
+}

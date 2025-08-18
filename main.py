@@ -12,7 +12,7 @@ import config
 load_dotenv()
 
 # Import our routes
-from src.api.routes import cv, sse, workflows, cv_enhanced, portfolio_generator, user_auth, payments
+from src.api.routes import cv, sse, workflows, cv_enhanced, portfolio_generator, user_auth, payments, metrics
 from src.api.routes.future_use import portfolio_generator_v2
 # from src.api.routes.archived import portfolio  # Archived - replaced by portfolio_generator
 
@@ -60,6 +60,7 @@ app.include_router(payments.router)  # Stripe payment processing
 app.include_router(sse.router, prefix="/api/v1")
 app.include_router(workflows.router, prefix="/api/v1")
 app.include_router(cv_enhanced.router)  # Enhanced CV with real-time tracking
+app.include_router(metrics.router)  # Performance metrics monitoring
 # app.include_router(demo_preview.router, prefix="/api/v1")  # Demo preview - future use (file not found)
 
 

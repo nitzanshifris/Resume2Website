@@ -22,10 +22,12 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional
 import asyncio
 
-# Import configuration
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-import config
+# Import configuration from project root
+try:
+    import config
+except ImportError:
+    # If running as a module, try relative import
+    from .... import config
 
 # Import authentication dependency
 from src.api.routes.auth import get_current_user, get_current_user_optional

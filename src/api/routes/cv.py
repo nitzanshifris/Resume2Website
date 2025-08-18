@@ -16,9 +16,12 @@ import os  # For environment variables
 import re  # For filename validation
 from dotenv import load_dotenv  # For loading .env file
 from passlib.context import CryptContext  # For secure password hashing
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-import config
+# Import config from project root
+try:
+    import config
+except ImportError:
+    # If running as a module, try relative import
+    from ... import config
 
 # ========== CONFIGURATION ==========
 # Load environment variables from .env file
@@ -58,7 +61,7 @@ init_db()
 
 # ========== Service Imports ==========
 from src.core.local.text_extractor import text_extractor
-from src.core.cv_extraction.data_extractor import data_extractor
+from src.core.cv_extraction.data_extractor import create_data_extractor
 from src.core.schemas.unified_nullable import CVData
 from src.utils.enhanced_sse_logger import EnhancedSSELogger, WorkflowPhase
 from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadResponse, CleanupResponse, UserProfileUpdate
@@ -596,7 +599,9 @@ async def upload_cv(
         # Extract structured data from text using Claude 4 Opus
         logger.info(f"🤖 Extracting structured data using Claude 4 Opus from {len(text)} characters of text")
         try:
-            cv_data = await data_extractor.extract_cv_data(text)
+            # Create new extractor instance for this request
+            extractor = create_data_extractor()
+            cv_data = await extractor.extract_cv_data(text)
             
             if not cv_data:
                 logger.error("❌ CV data extraction returned None")
@@ -612,7 +617,7 @@ async def upload_cv(
             logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
             
             # Calculate confidence score
-            confidence_score = data_extractor.calculate_extraction_confidence(cv_data, text)
+            confidence_score = extractor.calculate_extraction_confidence(cv_data, text)
             logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
             
             # Save CV data to database
@@ -1031,7 +1036,9 @@ async def extract_cv_data_endpoint(
         
         # Extract structured data using Claude 4 Opus
         logger.info(f"🤖 Extracting CV data for job {job_id} using Claude 4 Opus")
-        cv_data = await data_extractor.extract_cv_data(text)
+        # Create new extractor instance for this request
+        extractor = create_data_extractor()
+        cv_data = await extractor.extract_cv_data(text)
         
         if cv_data:
             # Store extraction result
@@ -1152,7 +1159,9 @@ async def upload_cv_anonymous(
         # Extract structured data from text using Claude 4 Opus
         logger.info(f"🤖 Extracting structured data using Claude 4 Opus from {len(text)} characters of text")
         try:
-            cv_data = await data_extractor.extract_cv_data(text)
+            # Create new extractor instance for this request
+            extractor = create_data_extractor()
+            cv_data = await extractor.extract_cv_data(text)
             
             if not cv_data:
                 logger.error("❌ CV data extraction returned None")
@@ -1167,7 +1176,7 @@ async def upload_cv_anonymous(
             logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
             
             # Calculate confidence score
-            confidence_score = data_extractor.calculate_extraction_confidence(cv_data, text)
+            confidence_score = extractor.calculate_extraction_confidence(cv_data, text)
             logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
             
             # Save CV data to database
@@ -1350,7 +1359,9 @@ async def process_multiple_files(job_id: str, file_paths: List[str], user_id: st
         
         # Extract CV data from combined text
         logger.info(f"Extracting CV data from combined text ({len(combined_text)} chars)")
-        cv_data = await data_extractor.extract_cv_data(combined_text)
+        # Create new extractor instance for this request
+        extractor = create_data_extractor()
+        cv_data = await extractor.extract_cv_data(combined_text)
         
         if cv_data:
             # Store extraction result

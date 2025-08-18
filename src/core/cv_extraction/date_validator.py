@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 import re
+from .text_parsing import safe_iter_dicts
 
 logger = logging.getLogger(__name__)
 
@@ -13,40 +14,57 @@ logger = logging.getLogger(__name__)
 class DateValidator:
     """Validates and fixes date-related logical errors in CV data"""
     
+    # Configuration constants
+    MIN_OVERLAP_MONTHS = 2  # Minimum months to consider significant overlap
+    
+    # Class-level precompiled date patterns for performance (compiled once at import)
+    DATE_PATTERNS = [
+        (re.compile(r'(\d{4})-(\d{1,2})'), 'yyyy-mm'),
+        (re.compile(r'(\w+\.?)\s+(\d{4})'), 'month-year'),  # Handles "Sept. 2019"
+        (re.compile(r'(\d{1,2})/(\d{4})'), 'mm-yyyy'),
+        (re.compile(r'(\d{4})'), 'year-only')
+    ]
+    
+    # Class-level precompiled coursework skip patterns
+    COURSEWORK_SKIP_PATTERNS = [
+        re.compile(r'^(advanced|intermediate|beginner|basic)\s*level$', re.IGNORECASE),
+        re.compile(r'^level\s*\d+$', re.IGNORECASE),
+        re.compile(r'^\d+\s*credits?$', re.IGNORECASE),
+        re.compile(r'^(and|or|with)$', re.IGNORECASE)
+    ]
+    
     def __init__(self):
         self.current_year = datetime.now().year
         self.current_month = datetime.now().month
     
     def parse_date(self, date_str: str) -> Optional[Tuple[int, int]]:
         """Parse date string to (year, month) tuple"""
-        if not date_str or date_str.lower() in ['present', 'current', 'now', 'ongoing']:
+        if not date_str:
+            return None
+            
+        # Strip whitespace and punctuation, then check for current date indicators
+        cleaned = date_str.strip().rstrip('.,;:').lower()
+        if cleaned in ['present', 'current', 'now', 'ongoing']:
             return (self.current_year, self.current_month)
         
-        # Try different date formats
-        patterns = [
-            r'(\d{4})-(\d{1,2})',  # 2021-05
-            r'(\w+)\s+(\d{4})',     # May 2021
-            r'(\d{1,2})/(\d{4})',   # 05/2021
-            r'(\d{4})',             # 2021 only
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, date_str)
+        # Try precompiled date patterns (use class-level constants)
+        for pattern, pattern_type in self.DATE_PATTERNS:
+            match = pattern.search(date_str)
             if match:
-                if pattern == r'(\w+)\s+(\d{4})':
+                if pattern_type == 'month-year':
                     # Month name format
                     month_str, year = match.groups()
                     month = self._parse_month(month_str)
                     if month:
                         return (int(year), month)
-                elif pattern == r'(\d{4})':
+                elif pattern_type == 'year-only':
                     # Year only
                     return (int(match.group(1)), 1)  # Default to January
                 else:
                     # Numeric formats
                     groups = match.groups()
                     if len(groups) == 2:
-                        if pattern == r'(\d{4})-(\d{1,2})':
+                        if pattern_type == 'yyyy-mm':
                             return (int(groups[0]), int(groups[1]))
                         else:  # MM/YYYY format
                             return (int(groups[1]), int(groups[0]))
@@ -55,6 +73,9 @@ class DateValidator:
     
     def _parse_month(self, month_str: str) -> Optional[int]:
         """Parse month name to number"""
+        # Remove dots and clean up
+        cleaned_month = month_str.rstrip('.').lower()
+        
         months = {
             'january': 1, 'jan': 1,
             'february': 2, 'feb': 2,
@@ -69,7 +90,7 @@ class DateValidator:
             'november': 11, 'nov': 11,
             'december': 12, 'dec': 12
         }
-        return months.get(month_str.lower())
+        return months.get(cleaned_month)
     
     def check_date_overlap(self, item1: Dict[str, Any], item2: Dict[str, Any]) -> Optional[str]:
         """Check if two date ranges overlap"""
@@ -99,8 +120,8 @@ class DateValidator:
             # Calculate overlap duration in months
             overlap_months = (overlap_end[0] - overlap_start[0]) * 12 + (overlap_end[1] - overlap_start[1])
             
-            if overlap_months > 1:  # More than 1 month overlap
-                return f"Overlap of {overlap_months} months between {start1} and {end2}"
+            if overlap_months >= self.MIN_OVERLAP_MONTHS:
+                return f"Overlap of {overlap_months} months between ({start1} to {end1 or 'Present'}) and ({start2} to {end2 or 'Present'})"
         
         return None
     
@@ -111,7 +132,8 @@ class DateValidator:
         if not cv_data.get('experience') or not cv_data['experience'].get('experienceItems'):
             return issues
         
-        experiences = cv_data['experience']['experienceItems']
+        # Use safe_iter_dicts to handle None/non-dict items
+        experiences = list(safe_iter_dicts(cv_data['experience']['experienceItems']))
         
         for i, exp1 in enumerate(experiences):
             for j, exp2 in enumerate(experiences[i+1:], i+1):
@@ -128,7 +150,7 @@ class DateValidator:
                         'suggestion': 'Verify if these positions were held concurrently (e.g., part-time or consulting)'
                     }
                     issues.append(issue)
-                    logger.warning(f"Date overlap detected: {issue['message']}")
+                    logger.debug(f"Date overlap detected: {issue['message']}")  # Reduced verbosity
         
         return issues
     
@@ -139,17 +161,8 @@ class DateValidator:
         if not cv_data.get('education') or not cv_data['education'].get('educationItems'):
             return issues
         
-        # Filter out None items first
-        education_items = [item for item in cv_data['education']['educationItems'] if item is not None]
-        
-        for edu in education_items:
-            if not edu:  # Skip None items
-                continue
-            
-            # Ensure edu is a dictionary
-            if not isinstance(edu, dict):
-                logger.warning(f"Skipping non-dict education item: {type(edu)}")
-                continue
+        # Use safe_iter_dicts for cleaner iteration
+        for edu in safe_iter_dicts(cv_data['education']['educationItems']):
                 
             # Check for certifications in education
             degree = (edu.get('degree') or '').lower()
@@ -178,10 +191,7 @@ class DateValidator:
                 issues.append(issue)
                 logger.error(f"Misclassification: {issue['message']} - {issue['item']}")
             
-            # Double-check edu is still valid (defensive programming)
-            if not edu or not isinstance(edu, dict):
-                logger.warning("Education item became None or non-dict during processing")
-                continue
+            # No need to check - safe_iter_dicts guarantees valid dicts
                 
             # Check for illogical dates
             date_range = edu.get('dateRange', {}) if edu else {}
@@ -205,7 +215,7 @@ class DateValidator:
                         issues.append(issue)
                     
                     # Check for single-day degrees (likely certifications)
-                    if start_parsed == end_parsed and 'degree' in degree:
+                    if start_parsed == end_parsed:
                         issue = {
                             'type': 'single_day_degree',
                             'severity': 'warning',
@@ -223,12 +233,8 @@ class DateValidator:
         
         # Check for React in fashion designer CV
         if cv_data.get('experience') and cv_data['experience'].get('experienceItems'):
-            # Filter out None items first
-            experience_items = [item for item in cv_data['experience']['experienceItems'] if item is not None]
-            
-            for exp in experience_items:
-                if not isinstance(exp, dict):
-                    continue
+            # Use safe_iter_dicts for cleaner iteration
+            for exp in safe_iter_dicts(cv_data['experience']['experienceItems']):
                     
                 company = (exp.get('companyName') or '').lower()
                 job_title = (exp.get('jobTitle') or '').lower()
@@ -259,26 +265,22 @@ class DateValidator:
     def clean_coursework_list(self, cv_data: Dict[str, Any]) -> Dict[str, Any]:
         """Clean irrelevant items from coursework lists"""
         if cv_data.get('education') and cv_data['education'].get('educationItems'):
-            for edu in cv_data['education']['educationItems']:
-                if not edu or not isinstance(edu, dict):
-                    continue
+            for edu in safe_iter_dicts(cv_data['education']['educationItems']):
                 if edu.get('relevantCoursework'):
                     original = edu['relevantCoursework']
                     # Filter out non-course items
                     cleaned = []
                     
                     for item in original:
-                        # Skip items that are just descriptors
-                        skip_patterns = [
-                            r'^(advanced|intermediate|beginner|basic)\s*level$',
-                            r'^level\s*\d+$',
-                            r'^\d+\s*credits?$',
-                            r'^(and|or|with)$'
-                        ]
-                        
+                        # Type guard for safety
+                        if not isinstance(item, str):
+                            continue
+                            
+                        # Use precompiled patterns for performance
                         should_skip = False
-                        for pattern in skip_patterns:
-                            if re.match(pattern, item.lower().strip()):
+                        item_lower = item.lower().strip()
+                        for pattern in self.COURSEWORK_SKIP_PATTERNS:
+                            if pattern.match(item_lower):
                                 should_skip = True
                                 break
                         
@@ -368,13 +370,11 @@ class DateValidator:
         """Remove suspicious technologies from experience"""
         tech_issues = [i for i in issues if i['type'] == 'suspicious_technology']
         
-        if not tech_issues and cv_data.get('experience') and cv_data['experience'].get('experienceItems'):
+        if tech_issues and cv_data.get('experience') and cv_data['experience'].get('experienceItems'):
             # Filter out None items first
             experience_items = [item for item in cv_data['experience']['experienceItems'] if item is not None]
             
-            for exp in experience_items:
-                if not isinstance(exp, dict):
-                    continue
+            for exp in safe_iter_dicts(experience_items):
                     
                 if exp.get('technologiesUsed'):
                     original_count = len(exp['technologiesUsed'])

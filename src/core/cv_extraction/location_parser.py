@@ -346,45 +346,4 @@ def parse_location_string(location_str: str) -> Location:
     return location
 
 
-def parse_year_range(text: str) -> Tuple[Optional[int], Optional[str]]:
-    """
-    Parse expressions like "more than 9 years" to extract years of experience
-    
-    NOTE: This function should ideally be moved to a separate text parsing module
-    as it's not specifically related to location parsing, but is kept here
-    temporarily for convenience.
-    
-    Returns:
-        Tuple of (years, qualifier) where qualifier can be "exact", "more_than", "approximately", etc.
-    """
-    if not text:
-        return None, None
-    
-    text = text.lower().strip()
-    
-    # Pattern: "more than X years"
-    match = re.search(r'more\s+than\s+(\d+)\s*\+?\s*years?', text)
-    if match:
-        return int(match.group(1)), "more_than"
-    
-    # Pattern: "over X years"
-    match = re.search(r'over\s+(\d+)\s*\+?\s*years?', text)
-    if match:
-        return int(match.group(1)), "more_than"
-    
-    # Pattern: "X+ years"
-    match = re.search(r'(\d+)\s*\+\s*years?', text)
-    if match:
-        return int(match.group(1)), "more_than"
-    
-    # Pattern: "approximately X years"
-    match = re.search(r'(?:approximately|approx\.?|about|around)\s+(\d+)\s*years?', text)
-    if match:
-        return int(match.group(1)), "approximately"
-    
-    # Pattern: "X years"
-    match = re.search(r'(\d+)\s*years?', text)
-    if match:
-        return int(match.group(1)), "exact"
-    
-    return None, None
+# Note: parse_year_range has been moved to text_parsing.py where it belongs

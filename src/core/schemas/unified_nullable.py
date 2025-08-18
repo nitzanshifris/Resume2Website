@@ -34,6 +34,13 @@ class ContactSectionFooter(BaseModel):
     location: Optional[Location] = None
     professionalLinks: Optional[List[ProfessionalLink]] = None
     availability: Optional[str] = None
+    # Demographic fields
+    placeOfBirth: Optional[str] = None
+    nationality: Optional[str] = None
+    drivingLicense: Optional[str] = None
+    dateOfBirth: Optional[str] = None
+    maritalStatus: Optional[str] = None
+    visaStatus: Optional[str] = None
 
 class EducationItem(BaseModel):
     degree: Optional[str] = None
@@ -154,6 +161,7 @@ class VolunteerExperienceItem(BaseModel):
 class VolunteerExperienceSection(BaseModel):
     sectionTitle: Optional[str] = None
     volunteerItems: Optional[List[VolunteerExperienceItem]] = None
+    extracurricularActivities: Optional[List[Dict[str, Any]]] = None  # For activities from demographic extractor
 
 # ===== COMMON ADDITIONAL SECTIONS =====
 # Frequently found but not universal
