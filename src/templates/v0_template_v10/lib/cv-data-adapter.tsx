@@ -476,24 +476,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
             }
           }
           
-          // Add technologies in a contextual way (temporary until tags are implemented)
-          if (item?.technologiesUsed && item.technologiesUsed.length > 0) {
-            const techCount = item.technologiesUsed.length
-            const techs = item.technologiesUsed.join(', ')
-            
-            // Choose natural phrasing based on context
-            if (item?.description?.includes('built') || item?.description?.includes('developed')) {
-              parts.push(`Built with ${techs}`)
-            } else if (item?.description?.includes('led') || item?.description?.includes('managed')) {
-              parts.push(`The tech stack included ${techs}`)
-            } else if (techCount === 1) {
-              parts.push(`Implemented using ${techs}`)
-            } else if (techCount === 2) {
-              parts.push(`Leveraged ${techs}`)
-            } else {
-              parts.push(`Technologies used: ${techs}`)
-            }
-          }
+          // Technologies are now passed as separate tags array
+          // Don't include in description - frontend will display as tags
           
           // Join parts with appropriate punctuation
           return parts.map((part, idx) => {

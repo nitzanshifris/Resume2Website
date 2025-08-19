@@ -24,30 +24,17 @@
 
 ## Section-Specific Implementations
 
-### Projects Section - Smart Card Display
-- **Field Mapping Required:**
-  - Backend `projectTitle` → Frontend `title`
-  - Combine `description` + `outcomes` + `technologiesUsed` into natural `description`
-  - Smart humanized text combination (not robotic)
-- **Description Building Logic:**
-  - Keep original description as primary content
-  - Add outcomes naturally based on context (e.g., "resulting in $2M revenue")
-  - Include technologies with contextual phrasing:
-    - "Built with React, Node.js" (if description mentions "built/developed")
-    - "The tech stack included Python, Django" (if description mentions "led/managed")
-    - "Leveraged AWS, Docker" (for 2 technologies)
-    - "Technologies used: ..." (fallback)
-- **Smart Card Configuration:**
-  - Default: `viewMode: "text"`, `textVariant: "detailed"`
-  - With URL: Change `viewMode` based on URL type (github → "github", video → "video", etc.)
-  - Set `hasLink: true` when any URL exists
-  - If link exists with text: Show link as primary, text in expand view
-- **Future Enhancement:**
-  - Technologies will be displayed as separate tags (like Experience section)
-  - For now, they're included naturally in the description text
+### Projects Section - Add Tags to Smart Cards
+- **Add tags to smart cards in text display mode (detailed variant):**
+  - Display `dateRange` as a tag if present
+  - Display `role` as a tag if present  
+  - Display `technologies` as separate tags (not in description text)
+- **Smart Card Enhancement Required:**
+  - Extend smart card component to support tags in detailed text variant
+  - Tags should appear below description as clickable badges
 - **Files to Update:**
-  - `lib/cv-data-adapter.tsx` - Smart description building ✅ COMPLETED
-  - `components/project-section.tsx` - Handle expand/collapse with links
+  - `components/smart-card.tsx` - Add tags support for text mode detailed variant
+  - `components/project-section.tsx` - Pass tags data to smart cards
 
 ### 3. Experience Section - Timeline Cards
 - **Field Mapping Required:**
