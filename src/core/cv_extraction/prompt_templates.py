@@ -195,19 +195,29 @@ REQUIRED FIELDS (extract only if explicitly stated):
 - employmentType: ONLY if stated (Internship, Externship, Part-time, Contract, etc.)
 
 TECHNOLOGIES EXTRACTION RULES:
-✅ INCLUDE ONLY if explicitly mentioned for THIS specific job:
-- Programming languages (Python, Java, JavaScript, C++, Go, Ruby, etc.)
+✅ INCLUDE if mentioned or clearly implied for THIS specific job:
+- Programming languages (Python, Java, JavaScript, C++, C, Go, Ruby, etc.)
+  * Extract "C/C++" or "C++" if mentioned in job title or responsibilities
 - Frameworks/Libraries (React, Django, Spring, Angular, Vue.js, etc.)
 - Databases (MySQL, PostgreSQL, MongoDB, Oracle, Redis, etc.)
 - Cloud platforms (AWS, Azure, Google Cloud, specific services like EC2, S3, etc.)
+- Operating Systems when used for development (Linux, Windows, Unix, macOS, etc.)
+  * Extract if mentioned as development environment (e.g., "Linux environments")
+- Embedded/System technologies (UEFI, BSP, Kernel Development, Device Drivers, etc.)
+  * Extract "Kernel Development" if "kernel modules" or "kernel-level" mentioned
+  * Extract "BSP" if "BSP layers" mentioned
+  * Extract "UEFI" if "UEFI bootloader" mentioned
 - Specific software tools (Photoshop, AutoCAD, SAP, Salesforce, JIRA, etc.)
-- DevOps tools (Docker, Kubernetes, Jenkins, Git, Terraform, Ansible, etc.)
+- DevOps tools and practices (Docker, Kubernetes, Jenkins, Git, Terraform, Ansible, CI/CD, etc.)
+  * Extract "DevOps" if "DevOps pipelines" mentioned
+  * Extract "CI/CD" if "CI/CD processes" or "CI/CD pipelines" mentioned
 - Data tools (Tableau, PowerBI, Spark, Hadoop, specific Excel features like VBA, etc.)
 - Specific CMS/platforms (WordPress, Shopify, Drupal, etc.)
-- Mobile technologies (iOS, Android, React Native, Flutter, etc.)
+- Mobile technologies (iOS, Android, React Native, Flutter, SwiftUI, etc.)
 - Testing tools (Selenium, Jest, Cypress, JUnit, etc.)
 - Version control (Git, SVN, Perforce, etc.)
 - IDEs and editors ONLY if specialized (IntelliJ, Visual Studio, etc.)
+- Hardware/Embedded tools (JTAG, GDB, Valgrind, Make, CMake, etc.)
 
 ❌ DO NOT INCLUDE:
 - Generic terms: "teams", "team", "office", "computer", "software", "systems", "system", "data", "management", "project", "process", "business"
@@ -220,10 +230,10 @@ TECHNOLOGIES EXTRACTION RULES:
 - Duplicates - each technology should appear only once per job
 
 CRITICAL: 
-- Extract ONLY from the responsibility bullets for THIS specific position
-- Look for concrete tool/technology names, not concepts
-- If unsure whether something is a technology, err on the side of exclusion
-- If no specific technologies are mentioned, return null (not an empty array)
+- Extract from the responsibility bullets AND job title for THIS specific position
+- Look for concrete tool/technology names AND contextual mentions (e.g., "kernel modules" → "Kernel Development")
+- Include technologies clearly implied by the work described (e.g., "DevOps pipelines" → "DevOps")
+- If no technologies are mentioned or implied, return null (not an empty array)
 
 DATE HANDLING:
 - Preserve original date format exactly (e.g., "January 2024" not "01/2024")

@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .font-commissioner {
+    font-family: 'Commissioner', system-ui, sans-serif;
+  }
+  
+  /* Smooth toast animations */
+  [data-sonner-toast] {
+    @apply transition-all duration-300 ease-out;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  [data-sonner-toast][data-removed="true"] {
+    animation: slideOut 0.2s ease-in;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+  
+  /* Gradient-like dashed borders for edit mode */
+  .gradient-border-dashed {
+    border: 1px dashed #22c55e;
+    position: relative;
+  }
+  
+  .gradient-border-dashed-thick {
+    border: 2px dashed #22c55e;
+    position: relative;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 39 56% 95%; /* cream */
+    --foreground: 20 14% 4%; /* near-black */
+
+    --card: 39 56% 95%;
+    --card-foreground: 20 14% 4%;
+
+    --popover: 39 56% 95%;
+    --popover-foreground: 20 14% 4%;
+
+    --primary: 20 14% 4%;
+    --primary-foreground: 39 56% 95%;
+
+    --secondary: 39 10% 90%;
+    --secondary-foreground: 20 14% 4%;
+
+    --muted: 39 10% 90%;
+    --muted-foreground: 20 5% 45%;
+
+    --accent: 45 86% 62%; /* gold */
+    --accent-foreground: 20 14% 4%;
+
+    --accent-glow: hsla(var(--accent), 0.2);
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 39 56% 95%;
+
+    --border: 39 10% 85%;
+    --input: 39 10% 85%;
+    --ring: 45 86% 62%;
+
+    --radius: 0.5rem;
+  }
+
+  html {
+    @apply scroll-smooth;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+  
+  body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    max-width: 100vw; /* Ensure body never exceeds viewport width */
+  }
+}
+
+/* Tweet Card Styles */
+@layer components {
+  /* Ensure tweet cards integrate with the theme */
+  .react-tweet-theme {
+    @apply !bg-background !text-foreground;
+  }
+  
+  /* Tweet card link colors */
+  .react-tweet-theme a {
+    @apply !text-primary hover:!text-primary/80;
+  }
+  
+  /* Tweet card borders */
+  .react-tweet-theme [data-tweet] {
+    @apply !border-border;
+  }
+  
+  /* Dark mode support */
+  .dark .react-tweet-theme {
+    @apply !bg-background !text-foreground;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter);
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    max-width: 100vw; /* Ensure body never exceeds viewport width */
+  }
+  
+  /* Custom scrollbar styles */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-playfair);
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px hsla(var(--accent), 0.4), 0 0 25px hsla(var(--accent), 0.2);
+  }
+  
+  /* Remove any list styling and bullet points */
+  .list-none, 
+  .list-none::before,
+  .list-none::after {
+    list-style: none !important;
+    list-style-type: none !important;
+    content: none !important;
+  }
+  
+  /* Responsive utilities to prevent horizontal overflow */
+  .no-horizontal-overflow {
+    overflow-x: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .responsive-container {
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Enhanced card animations */
+  .card-lift {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:-translate-y-1 hover:shadow-xl;
+  }
+  
+  /* Subtle text animations */
+  .text-transition {
+    @apply transition-colors duration-300;
+  }
+  
+  /* Icon container variations */
+  .icon-container {
+    @apply p-3 rounded-xl transition-all duration-300;
+    @apply bg-gradient-to-br from-slate-100/80 to-slate-200/50;
+  }
+  
+  .icon-container-hover {
+    @apply hover:from-accent/20 hover:to-accent/10;
+    @apply hover:shadow-md;
+  }
+}

@@ -1,0 +1,416 @@
+{
+  "cv_data_structure": {
+    "description": "Complete CV data structure that RESUME2WEBSITE backend can extract and store",
+    "version": "1.0",
+    "last_updated": "2024-08-19",
+    
+    "sections": {
+      "hero": {
+        "description": "Main header information about the person",
+        "fields": {
+          "fullName": "string | null",
+          "professionalTitle": "string | null",
+          "summaryTagline": "string | null",
+          "profilePhotoUrl": "string | null"
+        }
+      },
+      
+      "contact": {
+        "description": "Contact information and demographic details",
+        "fields": {
+          "email": "string | null",
+          "phone": "string | null",
+          "location": {
+            "city": "string | null",
+            "state": "string | null",
+            "country": "string | null"
+          },
+          "professionalLinks": [
+            {
+              "platform": "string | null",
+              "url": "string | null"
+            }
+          ],
+          "availability": "string | null",
+          "placeOfBirth": "string | null",
+          "nationality": "string | null",
+          "drivingLicense": "string | null",
+          "dateOfBirth": "string | null",
+          "maritalStatus": "string | null",
+          "visaStatus": "string | null"
+        }
+      },
+      
+      "summary": {
+        "description": "Professional summary and overview",
+        "fields": {
+          "summaryText": "string | null",
+          "yearsOfExperience": "number | null",
+          "keySpecializations": ["string"] | null,
+          "careerHighlights": ["string"] | null
+        }
+      },
+      
+      "experience": {
+        "description": "Work experience section",
+        "fields": {
+          "sectionTitle": "string | null",
+          "experienceItems": [
+            {
+              "jobTitle": "string | null",
+              "companyName": "string | null",
+              "location": {
+                "city": "string | null",
+                "state": "string | null",
+                "country": "string | null"
+              },
+              "dateRange": {
+                "startDate": "string | null",
+                "endDate": "string | null",
+                "isCurrent": "boolean | null"
+              },
+              "remoteWork": "string | null",
+              "responsibilitiesAndAchievements": ["string"] | null,
+              "technologiesUsed": ["string"] | null,
+              "summary": "string | null",
+              "employmentType": "string | null",
+              "teamSize": "number | null",
+              "reportingTo": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "education": {
+        "description": "Educational background",
+        "fields": {
+          "sectionTitle": "string | null",
+          "educationItems": [
+            {
+              "degree": "string | null",
+              "fieldOfStudy": "string | null",
+              "institution": "string | null",
+              "location": {
+                "city": "string | null",
+                "state": "string | null",
+                "country": "string | null"
+              },
+              "dateRange": {
+                "startDate": "string | null",
+                "endDate": "string | null",
+                "isCurrent": "boolean | null"
+              },
+              "gpa": "string | null",
+              "honors": ["string"] | null,
+              "minors": ["string"] | null,
+              "relevantCoursework": ["string"] | null,
+              "exchangePrograms": ["string"] | null
+            }
+          ]
+        }
+      },
+      
+      "skills": {
+        "description": "Technical and professional skills",
+        "fields": {
+          "sectionTitle": "string | null",
+          "skillCategories": [
+            {
+              "categoryName": "string | null",
+              "skills": ["string"] | null
+            }
+          ],
+          "ungroupedSkills": ["string"] | null,
+          "proficiencyIndicators": {
+            "skill_name": "proficiency_level"
+          }
+        }
+      },
+      
+      "projects": {
+        "description": "Personal or professional projects",
+        "fields": {
+          "sectionTitle": "string | null",
+          "projectItems": [
+            {
+              "title": "string | null",
+              "role": "string | null",
+              "duration": "string | null",
+              "dateRange": {
+                "startDate": "string | null",
+                "endDate": "string | null",
+                "isCurrent": "boolean | null"
+              },
+              "description": "string | null",
+              "keyFeatures": ["string"] | null,
+              "technologiesUsed": ["string"] | null,
+              "projectUrl": "string | null",
+              "imageUrl": "string | null",
+              "projectMetrics": {
+                "metric_name": "metric_value"
+              }
+            }
+          ]
+        }
+      },
+      
+      "achievements": {
+        "description": "Quantifiable achievements and accomplishments",
+        "fields": {
+          "sectionTitle": "string | null",
+          "achievements": [
+            {
+              "value": "string | null",
+              "label": "string | null",
+              "contextOrDetail": "string | null",
+              "timeframe": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "certifications": {
+        "description": "Professional certifications",
+        "fields": {
+          "sectionTitle": "string | null",
+          "certificationItems": [
+            {
+              "title": "string | null",
+              "issuingOrganization": "string | null",
+              "issueDate": "string | null",
+              "expirationDate": "string | null",
+              "credentialId": "string | null",
+              "verificationUrl": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "languages": {
+        "description": "Language proficiencies",
+        "fields": {
+          "sectionTitle": "string | null",
+          "languageItems": [
+            {
+              "language": "string | null",
+              "proficiency": "string | null",
+              "certification": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "courses": {
+        "description": "Training courses and professional development",
+        "fields": {
+          "sectionTitle": "string | null",
+          "courseItems": [
+            {
+              "title": "string | null",
+              "institution": "string | null",
+              "year": "string | null",
+              "dateRange": {
+                "startDate": "string | null",
+                "endDate": "string | null",
+                "isCurrent": "boolean | null"
+              },
+              "certificateNumber": "string | null",
+              "certificateUrl": "string | null",
+              "description": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "volunteer": {
+        "description": "Volunteer work and community involvement",
+        "fields": {
+          "sectionTitle": "string | null",
+          "volunteerItems": [
+            {
+              "role": "string | null",
+              "organization": "string | null",
+              "location": {
+                "city": "string | null",
+                "state": "string | null",
+                "country": "string | null"
+              },
+              "dateRange": {
+                "startDate": "string | null",
+                "endDate": "string | null",
+                "isCurrent": "boolean | null"
+              },
+              "period": "string | null",
+              "description": "string | null",
+              "responsibilities": ["string"] | null,
+              "impactMetrics": {
+                "metric_name": "metric_value"
+              },
+              "commitment": "string | null"
+            }
+          ],
+          "extracurricularActivities": ["object"] | null
+        }
+      },
+      
+      "publications": {
+        "description": "Research publications and papers",
+        "fields": {
+          "sectionTitle": "string | null",
+          "publications": [
+            {
+              "title": "string | null",
+              "authors": ["string"] | null,
+              "publicationType": "string | null",
+              "journalName": "string | null",
+              "conferenceName": "string | null",
+              "publicationDate": "string | null",
+              "doi": "string | null",
+              "publicationUrl": "string | null",
+              "abstract": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "speaking": {
+        "description": "Speaking engagements and presentations",
+        "fields": {
+          "sectionTitle": "string | null",
+          "speakingEngagements": [
+            {
+              "eventName": "string | null",
+              "topic": "string | null",
+              "date": "string | null",
+              "venue": "string | null",
+              "role": "string | null",
+              "eventUrl": "string | null",
+              "presentationUrl": "string | null",
+              "audienceSize": "number | null"
+            }
+          ]
+        }
+      },
+      
+      "patents": {
+        "description": "Patent information",
+        "fields": {
+          "sectionTitle": "string | null",
+          "patents": [
+            {
+              "title": "string | null",
+              "patentNumber": "string | null",
+              "applicationNumber": "string | null",
+              "status": "string | null",
+              "filingDate": "string | null",
+              "grantDate": "string | null",
+              "inventors": ["string"] | null,
+              "issuingAuthority": "string | null",
+              "patentUrl": "string | null",
+              "description": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "memberships": {
+        "description": "Professional memberships and associations",
+        "fields": {
+          "sectionTitle": "string | null",
+          "memberships": [
+            {
+              "organization": "string | null",
+              "role": "string | null",
+              "membershipType": "string | null",
+              "membershipId": "string | null",
+              "dateRange": {
+                "startDate": "string | null",
+                "endDate": "string | null",
+                "isCurrent": "boolean | null"
+              },
+              "period": "string | null",
+              "description": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "hobbies": {
+        "description": "Personal interests and hobbies",
+        "fields": {
+          "sectionTitle": "string | null",
+          "hobbies": ["string"] | null
+        }
+      },
+      
+      "testimonials": {
+        "description": "Recommendations and testimonials (prepared but not fully wired)",
+        "status": "PARTIALLY_IMPLEMENTED",
+        "fields": {
+          "sectionTitle": "string | null",
+          "testimonials": [
+            {
+              "text": "string | null",
+              "name": "string | null",
+              "role": "string | null",
+              "company": "string | null",
+              "date": "string | null",
+              "relationship": "string | null"
+            }
+          ]
+        }
+      },
+      
+      "unclassified_text": {
+        "description": "Catch-all for any text that doesn't fit in other sections",
+        "fields": {
+          "text": "string | null"
+        }
+      }
+    },
+    
+    "metadata": {
+      "extraction_notes": [
+        "All fields are nullable - can be null if not found in CV",
+        "Empty strings are converted to null during processing",
+        "Empty arrays remain as empty arrays",
+        "Preserve original language and Unicode characters",
+        "No translation or normalization of text",
+        "Exact text preservation for responsibilities and achievements",
+        "Claude 4 Opus used with temperature 0.0 for deterministic extraction"
+      ],
+      
+      "supported_date_formats": [
+        "yyyy-mm",
+        "mm/yyyy",
+        "month year",
+        "year only",
+        "Present/Current",
+        "Range formats (e.g., '2020 - 2023')"
+      ],
+      
+      "skills_exclusions": [
+        "Languages (go to languages section)",
+        "Soft skills like 'Team Player', 'Communication'",
+        "Hobbies (go to hobbies section)",
+        "Certifications (go to certifications section)",
+        "Generic terms like 'Computer Skills'"
+      ],
+      
+      "professional_link_platforms": [
+        "LinkedIn",
+        "GitHub",
+        "Portfolio",
+        "Twitter/X",
+        "Personal Website",
+        "Behance",
+        "Dribbble",
+        "Stack Overflow",
+        "Medium",
+        "YouTube",
+        "Instagram",
+        "Facebook"
+      ]
+    }
+  }
+}
