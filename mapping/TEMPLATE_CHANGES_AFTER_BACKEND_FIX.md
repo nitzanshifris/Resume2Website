@@ -35,6 +35,7 @@
   - Show duration calculation from dateRange
   - Display "Active" badge if isCurrent=true
   - Show technology badges at bottom when expanded
+  - **Conditional Display**: Hide "Technologies & Tools" section title if no technologies exist for that experience item
 - **Additional Badges/Tags to Add (if data exists):**
   - `experience.experienceItems[].location` - Location badge: 📍 City, State
   - `experience.experienceItems[].remoteWork` - Remote/Hybrid/Onsite badge: 🏠
