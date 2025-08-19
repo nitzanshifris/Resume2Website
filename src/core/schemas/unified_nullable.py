@@ -53,6 +53,15 @@ class EducationItem(BaseModel):
     minors: Optional[List[str]] = None
     relevantCoursework: Optional[List[str]] = None
     exchangePrograms: Optional[List[str]] = None
+    # Smart card display fields (timeline mode by default)
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None  # Default to 'timeline'
+    textVariant: Optional[str] = None
 
 class EducationSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -70,6 +79,15 @@ class ExperienceItem(BaseModel):
     employmentType: Optional[str] = None
     teamSize: Optional[int] = None
     reportingTo: Optional[str] = None
+    # Smart card display fields (timeline mode by default)
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None  # Default to 'timeline'
+    textVariant: Optional[str] = None
 
 class ExperienceSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -86,6 +104,15 @@ class AchievementItem(BaseModel):
     label: Optional[str] = None
     contextOrDetail: Optional[str] = None
     timeframe: Optional[str] = None
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None
 
 class AchievementsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -108,6 +135,15 @@ class CertificationItem(BaseModel):
     expirationDate: Optional[str] = None
     credentialId: Optional[str] = None
     verificationUrl: Optional[str] = None
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None  # Can be same as verificationUrl
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None
 
 class CertificationsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -130,6 +166,14 @@ class ProjectItem(BaseModel):
     projectUrl: Optional[str] = None
     imageUrl: Optional[str] = None
     projectMetrics: Optional[Dict[str, str]] = None
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    linkUrl: Optional[str] = None  # General website URL for 'uri' mode
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None  # 'website', 'video', 'github', 'image'
+    viewMode: Optional[str] = None  # Display mode suggestion
+    textVariant: Optional[str] = None  # 'detailed' or 'simple'
 
 class ProjectsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -156,6 +200,15 @@ class VolunteerExperienceItem(BaseModel):
     commitment: Optional[str] = None
     # For simpler format
     period: Optional[str] = None  # Alternative to dateRange
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None
 
 class VolunteerExperienceSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -173,6 +226,15 @@ class CourseItem(BaseModel):
     certificateNumber: Optional[str] = None
     certificateUrl: Optional[str] = None
     description: Optional[str] = None
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None  # Can be same as certificateUrl
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None
 
 class CoursesSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -191,6 +253,15 @@ class PublicationItem(BaseModel):
     doi: Optional[str] = None
     publicationUrl: Optional[str] = None
     abstract: Optional[str] = None
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None  # Can be same as publicationUrl
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None
 
 class PublicationsResearchSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -205,6 +276,15 @@ class SpeakingEngagementItem(BaseModel):
     eventUrl: Optional[str] = None
     presentationUrl: Optional[str] = None
     audienceSize: Optional[int] = None
+    # Smart card display fields
+    videoUrl: Optional[str] = None  # Recording of the talk
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None  # Can be presentationUrl or eventUrl
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None
 
 class SpeakingEngagementsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -234,14 +314,38 @@ class ProfessionalMembership(BaseModel):
     dateRange: Optional[DateRange] = None
     description: Optional[str] = None
     period: Optional[str] = None  # Alternative to dateRange
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None
 
 class ProfessionalMembershipsSection(BaseModel):
     sectionTitle: Optional[str] = None
     memberships: Optional[List[ProfessionalMembership]] = None
 
+class HobbyItem(BaseModel):
+    """Individual hobby item with smart card support."""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    # Smart card display fields
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None
+    hasLink: Optional[bool] = None
+    linkType: Optional[str] = None
+    viewMode: Optional[str] = None
+    textVariant: Optional[str] = None  # Default to 'simple' for hobbies
+
 class HobbiesSection(BaseModel):
     sectionTitle: Optional[str] = None
-    hobbies: Optional[List[str]] = None
+    hobbies: Optional[List[str]] = None  # Simple string list (legacy)
+    hobbyItems: Optional[List[HobbyItem]] = None  # Smart card items
 
 # ===== MAIN CV SCHEMA =====
 class CVData(BaseModel):

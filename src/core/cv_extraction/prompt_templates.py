@@ -161,6 +161,12 @@ PRESERVATION RULES:
 - Preserve date format exactly
 - Include verification URLs if present
 
+URL EXTRACTION:
+- verificationUrl: Direct verification/credential link
+- linkUrl: Any other relevant certification links
+- imageUrl: Certificate badge/logo images
+- Extract ALL URLs related to certifications
+
 EXTRACTION HINTS:
 - Look for keywords: "Certified", "Certification", "Licensed", "Accredited"
 - Look for issuing organizations: PMI, Microsoft, AWS, Google, Oracle, etc.
@@ -257,6 +263,12 @@ EXTRACTION RULES:
 - Preserve original figures exactly (e.g., "47%" not "nearly 50%")
 - If unclear or ambiguous, leave null
 
+URL EXTRACTION:
+- linkUrl: Links to awards, recognition pages, or achievement details
+- imageUrl: Award badges, certificates, or achievement visuals
+- videoUrl: Videos showcasing the achievement
+- Extract ALL URLs related to achievements
+
 INCLUDE:
 - Results with exact percentages (increased X by 47%)
 - Financial impact with exact amounts ($2.3M revenue, €50K savings)
@@ -287,7 +299,13 @@ Include:
 - Date published
 - DOI/URL if available
 - Brief description of research
-- Citations if mentioned"""
+- Citations if mentioned
+
+URL EXTRACTION:
+- publicationUrl: Direct link to publication
+- linkUrl: Alternative links (journal site, preprint, etc.)
+- videoUrl: Video presentations of the research
+- Extract ALL URLs mentioned in publication descriptions"""
 
 
 class SpeakingPromptTemplate(BasePromptTemplate):
@@ -310,7 +328,14 @@ For each entry include:
 - Topic/title of presentation
 - Date and location
 - Audience size/type if mentioned (extract numbers like "180+ meetings", "130+ employees")
-- Role (Educator, Trainer, Presenter, etc.)"""
+- Role (Educator, Trainer, Presenter, etc.)
+
+URL EXTRACTION:
+- presentationUrl: Link to slides or presentation materials
+- videoUrl: Recording of the talk/presentation
+- eventUrl: Event website
+- linkUrl: Any other relevant links
+- Extract ALL URLs related to speaking engagements"""
 
 
 class PatentsPromptTemplate(BasePromptTemplate):
@@ -336,7 +361,12 @@ Include:
 - Membership level/type
 - Date joined
 - Role/position if any
-- Active status"""
+- Active status
+
+URL EXTRACTION:
+- linkUrl: Organization website or member profile page
+- imageUrl: Organization logos or membership badges
+- Extract ALL URLs related to memberships"""
 
 
 class ContactPromptTemplate(BasePromptTemplate):
@@ -380,7 +410,14 @@ class HobbiesPromptTemplate(BasePromptTemplate):
         return """Extract ALL hobbies and interests.
 This is important for understanding the person's full profile.
 Include all activities, interests, and pastimes mentioned.
-DO NOT skip this section"""
+DO NOT skip this section
+
+URL EXTRACTION:
+- linkUrl: Links to hobby-related websites, clubs, or projects
+- imageUrl: Photos of hobby activities or achievements
+- videoUrl: Videos of hobby performances or activities
+- githubUrl: Hobby-related coding projects
+- Extract ALL URLs mentioned with hobbies"""
 
 
 class EducationPromptTemplate(BasePromptTemplate):
@@ -435,9 +472,19 @@ REQUIRED FIELDS (extract only if explicitly stated):
 - role: Role in project (if stated)
 - description: Project description exactly as written
 - outcomes/metrics: Quantified results, impact, or achievements
-- projectUrl: URLs to project, GitHub, demo, etc.
 - technologies: Technologies used (ONLY if explicitly mentioned)
 - dateRange: Keep original date format
+
+URL EXTRACTION (CRITICAL):
+- projectUrl: Main project website or demo link
+- githubUrl: GitHub repository links (must be github.com/user/repo format)
+- videoUrl: YouTube, Vimeo, or video file links
+- imageUrl: Screenshots or project images
+- linkUrl: Any other general website URLs
+
+IMPORTANT: Extract ALL URLs mentioned, even if embedded in description text.
+Example: "Built a portfolio site (https://example.com) using React"
+Should extract: projectUrl = "https://example.com"
 
 🚨 CRITICAL EXCLUSIONS:
 - Job responsibilities that belong in Experience section
@@ -467,6 +514,12 @@ REQUIRED FIELDS:
 - dateRange: Preserve original date format
 - description: Activities and responsibilities
 - impact metrics: Quantified impact or achievements
+
+URL EXTRACTION:
+- linkUrl: Organization website or project links
+- videoUrl: Videos of volunteer activities/events
+- imageUrl: Photos from volunteer work
+- Extract ALL URLs related to volunteer activities
 
 INCLUDE:
 - Volunteer positions
@@ -498,6 +551,13 @@ REQUIRED FIELDS:
 - year/date: When completed (preserve format)
 - certificateNumber: ONLY if explicitly provided
 - certificateUrl: ONLY if URL is provided
+
+URL EXTRACTION:
+- certificateUrl: Direct link to course certificate
+- linkUrl: Course platform or enrollment page
+- videoUrl: Course preview or demo videos
+- imageUrl: Course badge or certificate images
+- Extract ALL URLs related to courses
 
 INCLUDE:
 - Online courses (Udemy, Coursera, etc.)

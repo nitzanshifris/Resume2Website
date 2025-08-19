@@ -12,6 +12,18 @@ from .demographic_extractor import demographic_extractor
 
 logger = logging.getLogger(__name__)
 
+# URL pattern definitions for categorization
+URL_PATTERNS = {
+    'github': r'^https?://github\.com/[\w-]+/[\w-]+/?$',
+    'youtube': r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)',
+    'vimeo': r'vimeo\.com/(?:channels/(?:\w+/)?|groups/(?:[^/]*/)?|video/)?(\d+)',
+    'image': r'\.(jpg|jpeg|png|gif|webp|svg|bmp)(?:\?.*)?$',
+    'tweet': r'(?:twitter\.com|x\.com)/\w+/status/\d+',
+    'linkedin': r'linkedin\.com/in/[\w-]+',
+    'pdf': r'\.pdf(?:\?.*)?$',
+    'video': r'\.(mp4|webm|ogg|mov|avi)(?:\?.*)?$'
+}
+
 
 class EnhancementProcessor:
     """Processes and enhances extracted CV data with additional intelligence."""
@@ -338,6 +350,185 @@ class EnhancementProcessor:
         return enhanced
     
     @staticmethod
+    def classify_url(url: str) -> str:
+        """
+        Classify a URL by its type.
+        Returns: 'github', 'youtube', 'vimeo', 'image', 'tweet', 'pdf', 'video', or 'website'
+        """
+        if not url:
+            return 'website'
+            
+        url_lower = url.lower()
+        
+        # Check each pattern
+        for url_type, pattern in URL_PATTERNS.items():
+            if re.search(pattern, url_lower, re.IGNORECASE):
+                return url_type
+                
+        # Default to website
+        return 'website'
+    
+    @staticmethod
+    def extract_urls_from_text(text: str) -> List[str]:
+        """Extract all URLs from a text string."""
+        if not text:
+            return []
+            
+        # Comprehensive URL regex pattern
+        url_pattern = r'https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&/=]*)'
+        urls = re.findall(url_pattern, text)
+        
+        # Clean and deduplicate
+        return list(set(url.strip() for url in urls))
+    
+    @staticmethod
+    def determine_view_mode(item: Dict[str, Any], section_name: str) -> str:
+        """
+        Determine the best view mode for a smart card item.
+        Special cases:
+        - Education/Experience: Always 'timeline'
+        - Hobbies: Default textVariant='simple'
+        - Others: Based on URL type
+        """
+        # Special case for Education and Experience
+        if section_name in ['education', 'experience']:
+            return 'timeline'
+        
+        # Check for video URLs first (highest priority)
+        if item.get('videoUrl'):
+            return 'video'
+        
+        # Check for GitHub
+        if item.get('githubUrl'):
+            return 'github'
+        
+        # Check for images
+        if item.get('imageUrl'):
+            return 'images'
+        
+        # Check for general links
+        for url_field in ['linkUrl', 'projectUrl', 'verificationUrl', 'publicationUrl', 
+                         'eventUrl', 'presentationUrl', 'certificateUrl']:
+            url = item.get(url_field)
+            if url:
+                url_type = EnhancementProcessor.classify_url(url)
+                if url_type == 'tweet':
+                    return 'tweet'
+                elif url_type in ['youtube', 'vimeo', 'video']:
+                    return 'video'
+                elif url_type == 'github':
+                    return 'github'
+                elif url_type == 'image':
+                    return 'images'
+                else:
+                    return 'uri'
+        
+        # Default to text
+        return 'text'
+    
+    @staticmethod
+    def set_text_variant(section_name: str) -> str:
+        """
+        Set appropriate text variant for each section.
+        Hobbies uses 'simple', all others use 'detailed'.
+        """
+        return 'simple' if section_name == 'hobbies' else 'detailed'
+    
+    @staticmethod
+    def process_smart_card_urls(item: Dict[str, Any], section_name: str) -> Dict[str, Any]:
+        """
+        Process URLs for a smart card item.
+        Sets hasLink, linkType, viewMode, and textVariant.
+        """
+        if not isinstance(item, dict):
+            return item
+            
+        # Check all URL fields
+        url_fields = ['projectUrl', 'linkUrl', 'videoUrl', 'githubUrl', 'imageUrl',
+                     'verificationUrl', 'publicationUrl', 'eventUrl', 'presentationUrl',
+                     'certificateUrl', 'url']
+        
+        has_any_url = False
+        primary_url = None
+        primary_url_type = None
+        
+        # Find the primary URL and its type
+        for field in url_fields:
+            url = item.get(field)
+            if url:
+                has_any_url = True
+                if not primary_url:  # First URL found becomes primary
+                    primary_url = url
+                    primary_url_type = EnhancementProcessor.classify_url(url)
+                
+                # Special handling for specific URL types
+                if field == 'videoUrl':
+                    primary_url_type = 'video'
+                    primary_url = url
+                    break
+                elif field == 'githubUrl':
+                    primary_url_type = 'github'
+                    primary_url = url
+                    break
+        
+        # Extract URLs from description if no explicit URLs found
+        if not has_any_url and item.get('description'):
+            urls = EnhancementProcessor.extract_urls_from_text(item['description'])
+            if urls:
+                has_any_url = True
+                primary_url = urls[0]
+                primary_url_type = EnhancementProcessor.classify_url(primary_url)
+                
+                # Set appropriate URL field based on type
+                if primary_url_type == 'video':
+                    item['videoUrl'] = primary_url
+                elif primary_url_type == 'github':
+                    item['githubUrl'] = primary_url
+                elif primary_url_type == 'image':
+                    item['imageUrl'] = primary_url
+                else:
+                    item['linkUrl'] = primary_url
+        
+        # Set smart card fields
+        item['hasLink'] = has_any_url
+        item['linkType'] = primary_url_type if has_any_url else None
+        item['viewMode'] = EnhancementProcessor.determine_view_mode(item, section_name)
+        item['textVariant'] = EnhancementProcessor.set_text_variant(section_name)
+        
+        return item
+    
+    @staticmethod
+    def enhance_all_smart_card_sections(enhanced: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Process all sections that use smart cards to add URL metadata.
+        """
+        # Define sections and their item field names
+        smart_card_sections = {
+            'experience': 'experienceItems',
+            'education': 'educationItems',
+            'projects': 'projectItems',
+            'achievements': 'achievements',
+            'certifications': 'certificationItems',
+            'volunteer': 'volunteerItems',
+            'courses': 'courseItems',
+            'publications': 'publications',
+            'speaking': 'speakingEngagements',
+            'memberships': 'memberships',
+            'hobbies': 'hobbyItems'
+        }
+        
+        for section_name, items_field in smart_card_sections.items():
+            section = enhanced.get(section_name)
+            if section and isinstance(section, dict):
+                items = section.get(items_field)
+                if items and isinstance(items, list):
+                    # Process each item
+                    for i, item in enumerate(items):
+                        items[i] = EnhancementProcessor.process_smart_card_urls(item, section_name)
+        
+        return enhanced
+    
+    @staticmethod
     def enhance_all(data: Dict[str, Any], raw_text: str) -> Dict[str, Any]:
         """
         Apply all enhancement processors to the extracted data.
@@ -364,6 +555,7 @@ class EnhancementProcessor:
         enhanced = EnhancementProcessor.ensure_achievements_structure(enhanced)
         enhanced = EnhancementProcessor.create_hero_if_missing(enhanced, raw_text)
         enhanced = EnhancementProcessor.filter_technologies_in_experience(enhanced)
+        enhanced = EnhancementProcessor.enhance_all_smart_card_sections(enhanced)
         
         # Apply demographic enhancements
         if enhanced.get('contact'):
