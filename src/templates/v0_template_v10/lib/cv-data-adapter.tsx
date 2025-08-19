@@ -454,29 +454,86 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     projects: {
       sectionTitle: cv2webData.projects?.sectionTitle || "Projects",
       projectItems: (cv2webData.projects?.projectItems || []).map((item, index) => {
+        // Build a natural, humanized description
+        const buildProjectDescription = () => {
+          let parts = []
+          
+          // Start with the main description
+          if (item?.description) {
+            parts.push(item.description)
+          }
+          
+          // Add outcomes in a natural way
+          if (item?.outcomes) {
+            // If outcomes starts with a verb or contains metrics, add it naturally
+            if (item.outcomes.match(/^(resulting|achieving|leading|generating|improving)/i)) {
+              parts.push(item.outcomes)
+            } else if (item.outcomes.includes('$') || item.outcomes.match(/\d+%/)) {
+              // For metrics, add with context
+              parts.push(`This project achieved ${item.outcomes}`)
+            } else {
+              parts.push(item.outcomes)
+            }
+          }
+          
+          // Add technologies in a contextual way (temporary until tags are implemented)
+          if (item?.technologiesUsed && item.technologiesUsed.length > 0) {
+            const techCount = item.technologiesUsed.length
+            const techs = item.technologiesUsed.join(', ')
+            
+            // Choose natural phrasing based on context
+            if (item?.description?.includes('built') || item?.description?.includes('developed')) {
+              parts.push(`Built with ${techs}`)
+            } else if (item?.description?.includes('led') || item?.description?.includes('managed')) {
+              parts.push(`The tech stack included ${techs}`)
+            } else if (techCount === 1) {
+              parts.push(`Implemented using ${techs}`)
+            } else if (techCount === 2) {
+              parts.push(`Leveraged ${techs}`)
+            } else {
+              parts.push(`Technologies used: ${techs}`)
+            }
+          }
+          
+          // Join parts with appropriate punctuation
+          return parts.map((part, idx) => {
+            // Ensure each part ends with proper punctuation
+            let cleanPart = part.trim()
+            if (!cleanPart.match(/[.!?]$/)) {
+              cleanPart += '.'
+            }
+            return cleanPart
+          }).join(' ')
+        }
+        
         // Determine the best view mode based on available URLs
         const viewModeData = determineViewMode({
           projectUrl: item?.projectUrl,
           imageUrl: item?.imageUrl,
           videoUrl: item?.videoUrl,
           githubUrl: item?.githubUrl,
-          demoUrl: item?.demoUrl
+          demoUrl: item?.demoUrl,
+          linkUrl: item?.linkUrl
         } as any)
         
         return {
-          title: item?.title || "Project",
-          description: item?.description || "Project description.",
-          link: item?.projectUrl || "#",
+          title: item?.projectTitle || item?.title || "Project",  // Fixed: use projectTitle
+          description: buildProjectDescription(),
+          link: item?.projectUrl || item?.linkUrl || "#",
           icon: getRandomIcon(),
           viewMode: viewModeData.viewMode as any,
           textVariant: "detailed" as const,
+          hasLink: Boolean(item?.projectUrl || item?.githubUrl || item?.videoUrl || item?.linkUrl),
           // Add specific data based on view mode
           ...(viewModeData.videoUrl && { videoUrl: viewModeData.videoUrl }),
           ...(viewModeData.githubUrl && { githubUrl: viewModeData.githubUrl }),
           ...(viewModeData.images && { images: viewModeData.images }),
           ...(viewModeData.tweetId && { tweetId: viewModeData.tweetId }),
           ...(viewModeData.primaryUrl && { linkUrl: viewModeData.primaryUrl }),
-          // Include technologies if available
+          // Role and date if available
+          ...(item?.role && { role: item.role }),
+          ...(item?.dateRange && { dateRange: formatDateRange(item.dateRange) }),
+          // Keep technologies array for future tags implementation
           ...(item?.technologiesUsed && { technologies: item.technologiesUsed })
         }
       })
