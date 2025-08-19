@@ -137,6 +137,7 @@ class DataExtractor:
     async def _extract_all_sections_with_metrics(self, raw_text: str, metrics: ExtractionMetrics) -> Dict[str, Any]:
         """
         Extract all CV sections in parallel with metrics tracking.
+        Now with concurrency limiting to prevent API overload.
         
         Args:
             raw_text: The raw CV text
@@ -147,23 +148,32 @@ class DataExtractor:
         """
         metrics.sections_requested = len(self.SECTION_SCHEMAS)
         
-        # Create extraction tasks for all sections with timing
+        # Limit concurrent API calls to prevent overload
+        MAX_CONCURRENT_CALLS = 4  # Process 4 sections at a time
+        semaphore = asyncio.Semaphore(MAX_CONCURRENT_CALLS)
+        
+        # Create extraction tasks for all sections with timing and concurrency control
         async def extract_with_timing(section_name: str):
-            with SectionTimer(metrics, section_name):
-                result = await self.section_extractor.extract(
-                    section_name=section_name,
-                    raw_text=raw_text,
-                    llm_caller=self.llm_service.call_llm
-                )
-                if result and result.get(section_name) is not None:
-                    metrics.sections_extracted += 1
-                else:
-                    metrics.sections_failed += 1
-                return result
+            async with semaphore:  # Acquire semaphore before making API call
+                with SectionTimer(metrics, section_name):
+                    logger.debug(f"Starting extraction for section: {section_name}")
+                    result = await self.section_extractor.extract(
+                        section_name=section_name,
+                        raw_text=raw_text,
+                        llm_caller=self.llm_service.call_llm
+                    )
+                    if result and result.get(section_name) is not None:
+                        metrics.sections_extracted += 1
+                        logger.debug(f"Successfully extracted section: {section_name}")
+                    else:
+                        metrics.sections_failed += 1
+                        logger.debug(f"Failed to extract section: {section_name}")
+                    return result
         
         tasks = [extract_with_timing(section_name) for section_name in self.SECTION_SCHEMAS.keys()]
         
-        # Execute all tasks in parallel
+        # Execute all tasks with controlled concurrency
+        logger.info(f"Starting extraction of {len(tasks)} sections with max {MAX_CONCURRENT_CALLS} concurrent calls")
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Combine results
@@ -180,7 +190,7 @@ class DataExtractor:
     
     async def _extract_all_sections(self, raw_text: str) -> Dict[str, Any]:
         """
-        Extract all CV sections in parallel.
+        Extract all CV sections in parallel with concurrency limiting.
         
         Args:
             raw_text: The raw CV text
@@ -188,17 +198,22 @@ class DataExtractor:
         Returns:
             Dictionary of extracted sections
         """
-        # Create extraction tasks for all sections
-        tasks = [
-            self.section_extractor.extract(
-                section_name=section_name,
-                raw_text=raw_text,
-                llm_caller=self.llm_service.call_llm
-            )
-            for section_name in self.SECTION_SCHEMAS.keys()
-        ]
+        # Limit concurrent API calls
+        MAX_CONCURRENT_CALLS = 4
+        semaphore = asyncio.Semaphore(MAX_CONCURRENT_CALLS)
         
-        # Execute in parallel
+        async def extract_with_limit(section_name: str):
+            async with semaphore:
+                return await self.section_extractor.extract(
+                    section_name=section_name,
+                    raw_text=raw_text,
+                    llm_caller=self.llm_service.call_llm
+                )
+        
+        # Create extraction tasks for all sections
+        tasks = [extract_with_limit(section_name) for section_name in self.SECTION_SCHEMAS.keys()]
+        
+        # Execute with controlled concurrency
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Process results
