@@ -140,6 +140,26 @@ class CertificationsPromptTemplate(BasePromptTemplate):
     def get_section_specific_instructions(self) -> str:
         exclusions = "\n".join([f"- {ex}" for ex in extraction_config.CERTIFICATIONS_EXCLUSIONS])
         return f"""Extract ONLY formal certifications, licenses, and professional credentials.
+
+OUTPUT FORMAT (CRITICAL):
+For each certification:
+- title: The certification name (e.g., "AWS Certified Solutions Architect")
+- description: Natural, humanized text combining ALL details into one flowing paragraph
+- issuingOrganization: Keep separate for reference (but also include in description)
+- Other fields: Extract as usual but ALSO include in description
+
+DESCRIPTION BUILDING:
+Combine these elements naturally into complete sentences:
+- Issuing organization ("Issued by Amazon Web Services")
+- Issue date and expiry date ("in March 2023, valid until March 2026")
+- What the certification demonstrates ("demonstrates expertise in...")
+- Credential ID if present ("Credential ID: AWS-PSA-123456")
+- Any additional context about the certification
+
+EXAMPLE:
+title="AWS Certified Solutions Architect - Professional"
+description="Issued by Amazon Web Services in March 2023, valid until March 2026. This advanced certification demonstrates expertise in designing distributed systems on AWS cloud platform and validates skills in architecting complex solutions. Credential ID: AWS-PSA-123456."
+
 🚨 CRITICAL EXCLUSIONS - DO NOT INCLUDE:
 {exclusions}
 
@@ -262,41 +282,88 @@ PRESERVATION RULES:
 
 
 class AchievementsPromptTemplate(BasePromptTemplate):
-    """Template for achievements section extraction."""
+    """Template for achievements section extraction - includes patents and memberships."""
     
     def get_section_specific_instructions(self) -> str:
-        return """Extract ONLY quantifiable achievements with impact metrics.
+        return """Extract ALL achievements, patents, professional memberships, awards, and quantifiable accomplishments.
+
+OUTPUT FORMAT:
+For each achievement, patent, or membership, create a simple structure:
+- value: The main identifier (achievement name, patent title, organization name, award)
+- label: Short descriptive label
+- contextOrDetail: Natural, humanized text combining ALL details into one flowing paragraph
+- timeframe: When it occurred or duration
+
+PATENTS (CRITICAL - MUST EXTRACT):
+Look for sections labeled "Patents", "Intellectual Property", "IP", "Inventions"
+- Patent titles and numbers (US Patent #1234567, Patent Pending, etc.)
+- Patent status (granted, pending, provisional, published)
+- Filing/grant dates
+- Co-inventors if mentioned
+- Brief description of the invention
+FORMAT AS: 
+  value="Patent Title or Number"
+  label="Patent" or "Patent Pending"
+  contextOrDetail="Granted in 2023 for innovative system that [description]. Filed with co-inventors..."
+  timeframe="2023" or date range
+
+PROFESSIONAL MEMBERSHIPS (CRITICAL - MUST EXTRACT):
+Look for sections labeled "Memberships", "Professional Organizations", "Affiliations", "Associations"
+- Organization names (IEEE, ACM, PMI, AMA, etc.)
+- Membership levels (Fellow, Senior Member, Member, Student Member)
+- Leadership roles (Board Member, Committee Chair, Chapter President)
+- Active dates or duration
+FORMAT AS:
+  value="IEEE"
+  label="Senior Member"
+  contextOrDetail="Active senior member of the Institute of Electrical and Electronics Engineers since 2018, serving on the local chapter's advisory board and contributing to technical standards committees"
+  timeframe="2018 - Present"
+
+AWARDS & RECOGNITIONS:
+- Employee of the Month/Year awards
+- Industry awards and honors
+- Academic honors (Dean's List, Honors, etc.)
+- Competition wins and rankings
+FORMAT AS:
+  value="Employee of the Year"
+  label="Company Award"
+  contextOrDetail="Recognized for exceptional performance, leading three major projects to successful completion ahead of schedule"
+  timeframe="2023"
+
+QUANTIFIABLE ACHIEVEMENTS:
+- Results with exact metrics (increased sales by 47%)
+- Financial impact ($2.3M revenue, €50K cost savings)
+- Scale metrics (managed 12 people, led 5 projects)
+- Performance improvements (reduced processing time by 3 hours)
+FORMAT AS:
+  value="$2.3M Revenue Growth"
+  label="Sales Achievement"
+  contextOrDetail="Increased quarterly revenue by $2.3M through strategic account management and new client acquisition"
+  timeframe="Q3 2023"
 
 EXTRACTION RULES:
-- Use exact metrics and units as written (%, $, €, team size, numbers)
-- Do NOT rephrase or paraphrase - copy exact wording
-- Preserve original figures exactly (e.g., "47%" not "nearly 50%")
-- If unclear or ambiguous, leave null
+1. Look for SEPARATE sections labeled "Patents" or "Memberships" and extract them here
+2. Combine all related details into natural, flowing contextOrDetail text
+3. Don't use robotic comma-separated lists in contextOrDetail
+4. Write contextOrDetail as if telling someone about the achievement
+5. Include context, dates, and impact in the contextOrDetail naturally
+6. Preserve exact numbers and metrics
+7. Extract ALL patents even if in separate "Patents" section
+8. Extract ALL memberships even if in separate "Memberships" section
 
 URL EXTRACTION:
-- linkUrl: Links to awards, recognition pages, or achievement details
-- imageUrl: Award badges, certificates, or achievement visuals
-- videoUrl: Videos showcasing the achievement
-- Extract ALL URLs related to achievements
+- linkUrl: Patent databases, membership portals, award pages
+- verificationUrl: Patent office links, membership verification
+- imageUrl: Award certificates, patent diagrams
+- Extract ALL URLs related to achievements, patents, or memberships
 
-INCLUDE:
-- Results with exact percentages (increased X by 47%)
-- Financial impact with exact amounts ($2.3M revenue, €50K savings)
-- Scale metrics with exact numbers (managed 12 people, 5 projects)
-- Awards and recognitions with exact titles
-- Quantified improvements (reduced time by 3 hours, improved accuracy to 99.5%)
-
-🚨 CRITICAL EXCLUSIONS:
-- Generic responsibilities without measurable impact
-- Duplicates from summary section
-- Vague statements without specific metrics
-- Items without quantifiable outcomes (unless explicitly labeled as award/recognition)
-
-PRESERVATION:
-- Keep exact figures and wording
-- Preserve currency symbols and units
-- Maintain original phrasing - do not "improve" the language
-- Extract contextOrDetail and timeframe exactly as written"""
+🚨 CRITICAL:
+- MUST scan entire CV for "Patents" section and extract all patents here
+- MUST scan entire CV for "Memberships" or "Professional Organizations" section and extract all here
+- Combine everything into value + label + contextOrDetail format
+- Make contextOrDetail human-readable full sentences, not technical lists
+- If you find a dedicated Patents section, extract EVERY patent from it
+- If you find a dedicated Memberships section, extract EVERY membership from it"""
 
 
 class PublicationsPromptTemplate(BasePromptTemplate):
@@ -304,6 +371,24 @@ class PublicationsPromptTemplate(BasePromptTemplate):
     
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL publications, research papers, and articles.
+
+OUTPUT FORMAT (CRITICAL):
+For each publication:
+- title: The publication title (keep as is)
+- description: Natural, humanized text combining ALL details into one flowing paragraph
+- Other fields: Extract as usual but ALSO include in description
+
+DESCRIPTION BUILDING:
+Combine these elements naturally:
+- Authors list ("Co-authored with..." or "Lead author with...")
+- Publication venue and type ("Published in IEEE Journal..." or "Presented at...")
+- Publication date
+- Brief summary of the work or its impact
+- DOI or other identifiers if present
+
+EXAMPLE:
+title="Machine Learning Approaches for Network Security"
+description="Published in IEEE Transactions on Network Security, March 2023, co-authored with Dr. Smith and Prof. Johnson. This peer-reviewed paper presents novel algorithms for detecting network intrusions using deep learning, achieving 99.5% accuracy in real-world deployments. DOI: 10.1109/TNS.2023.123456."
 Include:
 - Title, authors, publication name
 - Date published
@@ -323,6 +408,26 @@ class SpeakingPromptTemplate(BasePromptTemplate):
     
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL speaking engagements, presentations, talks, and training activities.
+
+OUTPUT FORMAT (CRITICAL):
+For each speaking engagement:
+- title: The topic or presentation title (primary field)
+- description: Natural, humanized text combining ALL details into one flowing paragraph
+- eventName: Keep separate for reference
+- Other fields: Extract as usual but ALSO include in description
+
+DESCRIPTION BUILDING:
+Combine these elements naturally:
+- Event name and type
+- Venue and date
+- Audience size and type if known
+- Key topics covered
+- Any special recognition or invitation details
+
+EXAMPLE:
+title="Future of Cloud Computing"
+description="Keynote presentation at TechConf 2023 in San Francisco, delivered to an audience of 500+ technology professionals. Discussed emerging trends in serverless architecture and edge computing, with live demonstrations of cutting-edge deployment strategies. Invited as industry expert based on 10+ years of cloud architecture experience."
+
 IMPORTANT: Include any mentions of:
 - Training or educating employees/staff  
 - Presenting concepts or reports to teams
@@ -418,6 +523,24 @@ class HobbiesPromptTemplate(BasePromptTemplate):
     
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL hobbies and interests.
+
+OUTPUT FORMAT (CRITICAL):
+For each hobby:
+- title: The hobby or interest name
+- description: Brief, natural text about this interest (1-2 sentences)
+
+DESCRIPTION BUILDING (SIMPLE):
+- Keep descriptions short and conversational
+- Mention any achievements or special aspects
+- Don't over-explain, keep it light
+
+EXAMPLE:
+title="Photography"
+description="Passionate landscape photographer with work featured in local galleries. Enjoy capturing natural beauty during weekend hiking trips."
+
+title="Chess"
+description="Competitive chess player rated 1800+ on chess.com. Regular participant in local tournaments."
+
 This is important for understanding the person's full profile.
 Include all activities, interests, and pastimes mentioned.
 DO NOT skip this section
@@ -518,12 +641,32 @@ class VolunteerPromptTemplate(BasePromptTemplate):
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL volunteer work, community service, and extra-curricular activities.
 
+OUTPUT FORMAT (CRITICAL):
+For each volunteer activity:
+- role: Position or role (keep separate)
+- organization: Organization name (keep separate)  
+- description: Natural, humanized text combining ALL details into one flowing paragraph
+- dateRange: Keep separate for dates
+
+DESCRIPTION BUILDING:
+Combine these elements naturally into complete sentences:
+- What you did and your responsibilities
+- Impact metrics or achievements
+- Duration and time commitment
+- Any leadership roles or special recognition
+- Skills developed or community impact
+
+EXAMPLE:
+role="Youth Soccer Coach"
+organization="Community Sports League"
+description="Volunteered as head coach for under-12 soccer team from 2021 to 2023, dedicating 10 hours weekly during the season. Led team to regional championships while mentoring 15 young athletes in sportsmanship and teamwork. Organized fundraising events that raised $5,000 for new equipment and created an inclusive environment where every child could develop their skills."
+
 REQUIRED FIELDS:
 - role: Position or role in organization
 - organization: Name of organization/group
 - dateRange: Preserve original date format
-- description: Activities and responsibilities
-- impact metrics: Quantified impact or achievements
+- description: Natural paragraph combining activities, responsibilities, and impact
+- impact metrics: Include in description naturally
 
 URL EXTRACTION:
 - linkUrl: Organization website or project links
@@ -554,6 +697,27 @@ class CoursesPromptTemplate(BasePromptTemplate):
     
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL courses, training programs, and workshops.
+
+OUTPUT FORMAT (CRITICAL):
+For each course:
+- title: The course name (keep as is)
+- description: Natural, humanized text combining ALL details into one flowing paragraph
+- institution: Keep separate for reference
+- Other fields: Extract as usual but ALSO include in description
+
+DESCRIPTION BUILDING:
+Combine these elements naturally:
+- Institution or platform
+- Completion date
+- Key topics covered
+- Skills gained
+- Certificate number if applicable
+- Duration or hours if mentioned
+
+EXAMPLE:
+title="Advanced Machine Learning Specialization"
+description="Completed through Coursera in partnership with Stanford University, finished in December 2023. This 6-month specialization covered deep learning, natural language processing, and computer vision, with hands-on projects in TensorFlow and PyTorch. Earned certificate with distinction, Certificate ID: COURSERA-ML-2023-45678."
+
 
 REQUIRED FIELDS:
 - title: Exact course name

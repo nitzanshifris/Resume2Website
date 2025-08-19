@@ -1,5 +1,31 @@
 # Template Changes Required (Frontend Only)
 
+## BACKEND CHANGES COMPLETED ✅
+1. **Patents and Memberships merged into Achievements section**
+   - Backend now extracts patents and memberships as part of achievements
+   - No separate patents or memberships sections in backend output
+   - All items output as: `value`, `label`, `contextOrDetail`, `timeframe`
+
+2. **Achievements section enhanced**
+   - Now includes patents, memberships, awards, and quantifiable achievements
+   - Natural, humanized descriptions in `contextOrDetail` field
+   - Example patent: value="US Patent #123", label="Patent", contextOrDetail="Granted in 2023 for innovative..."
+   - Example membership: value="IEEE", label="Senior Member", contextOrDetail="Active senior member since 2018..."
+
+3. **Section extraction optimized**
+   - Removed Patents and Memberships from SECTION_SCHEMAS
+   - Performance improved with concurrency limiting (4 max concurrent API calls)
+   - Extraction time reduced from 90+ seconds to ~74 seconds
+
+4. **All sections now output title + description format**
+   - **Certifications**: title + humanized description combining issuer, dates, credential ID
+   - **Volunteer**: role/org kept separate, description combines all activities and impact
+   - **Publications**: title + description with authors, venue, date, impact
+   - **Speaking**: title (topic) + description with event details, audience, recognition
+   - **Courses**: title + description with institution, completion, skills gained
+   - **Hobbies**: title + brief description (simple variant, 1-2 sentences)
+   - All descriptions are natural paragraphs, not robotic lists
+
 ## Core Data Structure Changes
 
 ### 1. Remove `hero.summaryTagline` Field
@@ -23,6 +49,26 @@
   - `lib/cv-data-adapter.tsx` - Add helper function to intelligently combine fields
 
 ## Section-Specific Implementations
+
+### Achievements Section - Unified Structure (Patents, Memberships, Awards)
+- **Backend now provides ALL achievements, patents, and memberships in one section:**
+  - No separate `patents` or `memberships` sections anymore
+  - All items have unified structure:
+    - `value`: Main identifier (e.g., "US Patent #12345", "IEEE", "$2.3M Revenue Growth")
+    - `label`: Type/category (e.g., "Patent", "Senior Member", "Sales Achievement")
+    - `contextOrDetail`: Full humanized description as flowing paragraph
+    - `timeframe`: When it occurred or duration (e.g., "2023", "2018 - Present")
+- **Frontend Display:**
+  - Use smart cards with text mode (detailed variant)
+  - Display `value` as the card title
+  - Display `contextOrDetail` as the description
+  - Show `label` as a category badge
+  - Show `timeframe` as a date badge
+  - Group by type if needed (Patents together, Memberships together, etc.)
+- **No need to:**
+  - Look for separate patents section
+  - Look for separate memberships section
+  - Combine fields manually - backend provides complete descriptions
 
 ### Projects Section - Add Tags to Smart Cards
 - **Add tags to smart cards in text display mode (detailed variant):**
@@ -89,7 +135,7 @@
   - Memberships: Users/Group
   - Hobbies: Star
   - Patents: Lightbulb
-  - Achievements: Trophy
+  - Achievements: Trophy (Now includes Patents: Lightbulb, Memberships: Users/Group)
 
 ### 6. Smart Card Text Display
 - **Present text title + description for each smart card showing non-text display**

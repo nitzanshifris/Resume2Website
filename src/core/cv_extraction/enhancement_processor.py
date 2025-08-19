@@ -553,6 +553,7 @@ class EnhancementProcessor:
         enhanced = EnhancementProcessor.apply_smart_deduplication(enhanced)
         enhanced = EnhancementProcessor.extract_years_of_experience_from_summary(enhanced)
         enhanced = EnhancementProcessor.ensure_achievements_structure(enhanced)
+        # Patents and memberships now extracted directly in achievements section
         enhanced = EnhancementProcessor.create_hero_if_missing(enhanced, raw_text)
         enhanced = EnhancementProcessor.filter_technologies_in_experience(enhanced)
         enhanced = EnhancementProcessor.enhance_all_smart_card_sections(enhanced)

@@ -130,6 +130,7 @@ class LanguagesSection(BaseModel):
 
 class CertificationItem(BaseModel):
     title: Optional[str] = None
+    description: Optional[str] = None  # Humanized description combining all details
     issuingOrganization: Optional[str] = None
     issueDate: Optional[str] = None
     expirationDate: Optional[str] = None
@@ -245,6 +246,7 @@ class CoursesSection(BaseModel):
 
 class PublicationItem(BaseModel):
     title: Optional[str] = None
+    description: Optional[str] = None  # Humanized description combining all details
     authors: Optional[List[str]] = None
     publicationType: Optional[str] = None
     journalName: Optional[str] = None
@@ -268,6 +270,8 @@ class PublicationsResearchSection(BaseModel):
     publications: Optional[List[PublicationItem]] = None
 
 class SpeakingEngagementItem(BaseModel):
+    title: Optional[str] = None  # Topic or presentation title
+    description: Optional[str] = None  # Humanized description combining all details
     eventName: Optional[str] = None
     topic: Optional[str] = None
     date: Optional[str] = None

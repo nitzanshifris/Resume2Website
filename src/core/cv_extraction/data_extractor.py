@@ -45,16 +45,15 @@ class DataExtractor:
         "skills": SkillsSection,
         "projects": ProjectsSection,
         "certifications": CertificationsSection,
-        "achievements": AchievementsSection,
+        "achievements": AchievementsSection,  # Now includes patents and memberships
         "volunteer": VolunteerExperienceSection,
         "languages": LanguagesSection,
         "contact": ContactSectionFooter,
         "courses": CoursesSection,
         "hobbies": HobbiesSection,
         "publications": PublicationsResearchSection,
-        "speaking": SpeakingEngagementsSection,
-        "patents": PatentsSection,
-        "memberships": ProfessionalMembershipsSection
+        "speaking": SpeakingEngagementsSection
+        # Removed: patents and memberships (now part of achievements)
     }
     
     def __init__(self, api_key: Optional[str] = None):
