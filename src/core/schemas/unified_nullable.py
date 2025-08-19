@@ -4,8 +4,32 @@ Unified CV data schemas with all fields nullable for RESUME2WEBSITE.
 This module defines comprehensive Pydantic models for representing CV/resume data
 in a structured format where ALL fields are nullable (can be null in JSON).
 """
-from typing import List, Optional, Dict, Union, Any
-from pydantic import BaseModel, Field, HttpUrl, EmailStr
+from typing import List, Optional, Dict, Union, Any, Literal
+from pydantic import BaseModel, Field, HttpUrl, EmailStr, ConfigDict
+
+
+# Base Schema with Pydantic v2 configuration
+class BaseSchema(BaseModel):
+    """Base schema with proper Pydantic v2 configuration."""
+    model_config = ConfigDict(
+        validate_assignment=True,
+        use_enum_values=True,
+        # Note: json_encoders is deprecated in v2, handled differently
+        arbitrary_types_allowed=True
+    )
+
+
+# Smart Card Fields Mixin
+class SmartCardFields(BaseModel):
+    """Mixin for smart card display fields used across multiple sections."""
+    videoUrl: Optional[str] = None
+    githubUrl: Optional[str] = None
+    imageUrl: Optional[str] = None
+    linkUrl: Optional[str] = None
+    hasLink: Optional[bool] = None
+    linkType: Optional[Literal['website', 'video', 'github', 'image', 'pdf', 'tweet']] = None
+    viewMode: Optional[Literal['text', 'timeline', 'video', 'github', 'images', 'tweet', 'uri']] = None
+    textVariant: Optional[Literal['detailed', 'simple']] = None
 
 
 # Base Schemas
@@ -42,10 +66,11 @@ class ContactSectionFooter(BaseModel):
     maritalStatus: Optional[str] = None
     visaStatus: Optional[str] = None
 
-class EducationItem(BaseModel):
+class EducationItem(SmartCardFields):
     degree: Optional[str] = None
     fieldOfStudy: Optional[str] = None
     institution: Optional[str] = None
+    description: Optional[str] = None  # Humanized description combining all details
     location: Optional[Location] = None
     dateRange: Optional[DateRange] = None
     gpa: Optional[str] = None
@@ -53,21 +78,13 @@ class EducationItem(BaseModel):
     minors: Optional[List[str]] = None
     relevantCoursework: Optional[List[str]] = None
     exchangePrograms: Optional[List[str]] = None
-    # Smart card display fields (timeline mode by default)
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None  # Default to 'timeline'
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
 
 class EducationSection(BaseModel):
     sectionTitle: Optional[str] = None
     educationItems: Optional[List[EducationItem]] = None
 
-class ExperienceItem(BaseModel):
+class ExperienceItem(SmartCardFields):
     jobTitle: Optional[str] = None
     companyName: Optional[str] = None
     location: Optional[Location] = None
@@ -79,15 +96,7 @@ class ExperienceItem(BaseModel):
     employmentType: Optional[str] = None
     teamSize: Optional[int] = None
     reportingTo: Optional[str] = None
-    # Smart card display fields (timeline mode by default)
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None  # Default to 'timeline'
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
 
 class ExperienceSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -98,21 +107,13 @@ class HeroSection(BaseModel):
     professionalTitle: Optional[str] = None
     profilePhotoUrl: Optional[str] = None
 
-class AchievementItem(BaseModel):
+class AchievementItem(SmartCardFields):
     """Represents a quantifiable achievement or accomplishment."""
     value: Optional[str] = None
     label: Optional[str] = None
     contextOrDetail: Optional[str] = None
     timeframe: Optional[str] = None
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
 
 class AchievementsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -128,7 +129,7 @@ class LanguagesSection(BaseModel):
     sectionTitle: Optional[str] = None
     languageItems: Optional[List[LanguageItem]] = None
 
-class CertificationItem(BaseModel):
+class CertificationItem(SmartCardFields):
     title: Optional[str] = None
     description: Optional[str] = None  # Humanized description combining all details
     issuingOrganization: Optional[str] = None
@@ -136,15 +137,7 @@ class CertificationItem(BaseModel):
     expirationDate: Optional[str] = None
     credentialId: Optional[str] = None
     verificationUrl: Optional[str] = None
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None  # Can be same as verificationUrl
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
 
 class CertificationsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -156,7 +149,7 @@ class ProfessionalSummaryOverview(BaseModel):
     keySpecializations: Optional[List[str]] = None
     careerHighlights: Optional[List[str]] = None
 
-class ProjectItem(BaseModel):
+class ProjectItem(SmartCardFields):
     title: Optional[str] = None
     role: Optional[str] = None
     duration: Optional[str] = None
@@ -165,16 +158,9 @@ class ProjectItem(BaseModel):
     keyFeatures: Optional[List[str]] = None
     technologiesUsed: Optional[List[str]] = None
     projectUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
     projectMetrics: Optional[Dict[str, str]] = None
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    linkUrl: Optional[str] = None  # General website URL for 'uri' mode
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None  # 'website', 'video', 'github', 'image'
-    viewMode: Optional[str] = None  # Display mode suggestion
-    textVariant: Optional[str] = None  # 'detailed' or 'simple'
+    # Smart card fields inherited from SmartCardFields mixin
+    # Note: imageUrl is already defined in SmartCardFields
 
 class ProjectsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -183,14 +169,16 @@ class ProjectsSection(BaseModel):
 class SkillCategory(BaseModel):
     categoryName: Optional[str] = None
     skills: Optional[List[str]] = None
+    description: Optional[str] = None  # Humanized description of skills in this category
 
 class SkillsSection(BaseModel):
     sectionTitle: Optional[str] = None
+    description: Optional[str] = None  # Overall skills summary description
     skillCategories: Optional[List[SkillCategory]] = None
     ungroupedSkills: Optional[List[str]] = None
     proficiencyIndicators: Optional[Dict[str, str]] = None
 
-class VolunteerExperienceItem(BaseModel):
+class VolunteerExperienceItem(SmartCardFields):
     role: Optional[str] = None
     organization: Optional[str] = None
     location: Optional[Location] = None
@@ -201,15 +189,7 @@ class VolunteerExperienceItem(BaseModel):
     commitment: Optional[str] = None
     # For simpler format
     period: Optional[str] = None  # Alternative to dateRange
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
 
 class VolunteerExperienceSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -219,7 +199,7 @@ class VolunteerExperienceSection(BaseModel):
 # ===== COMMON ADDITIONAL SECTIONS =====
 # Frequently found but not universal
 
-class CourseItem(BaseModel):
+class CourseItem(SmartCardFields):
     title: Optional[str] = None
     institution: Optional[str] = None  # Changed from issuingOrganization
     year: Optional[str] = None  # Simplified date field
@@ -227,15 +207,7 @@ class CourseItem(BaseModel):
     certificateNumber: Optional[str] = None
     certificateUrl: Optional[str] = None
     description: Optional[str] = None
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None  # Can be same as certificateUrl
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
 
 class CoursesSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -244,7 +216,7 @@ class CoursesSection(BaseModel):
 # ===== SPECIALIZED SECTIONS =====
 # Less common, typically for specific professions
 
-class PublicationItem(BaseModel):
+class PublicationItem(SmartCardFields):
     title: Optional[str] = None
     description: Optional[str] = None  # Humanized description combining all details
     authors: Optional[List[str]] = None
@@ -255,21 +227,13 @@ class PublicationItem(BaseModel):
     doi: Optional[str] = None
     publicationUrl: Optional[str] = None
     abstract: Optional[str] = None
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None  # Can be same as publicationUrl
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
 
 class PublicationsResearchSection(BaseModel):
     sectionTitle: Optional[str] = None
     publications: Optional[List[PublicationItem]] = None
 
-class SpeakingEngagementItem(BaseModel):
+class SpeakingEngagementItem(SmartCardFields):
     title: Optional[str] = None  # Topic or presentation title
     description: Optional[str] = None  # Humanized description combining all details
     eventName: Optional[str] = None
@@ -280,71 +244,20 @@ class SpeakingEngagementItem(BaseModel):
     eventUrl: Optional[str] = None
     presentationUrl: Optional[str] = None
     audienceSize: Optional[int] = None
-    # Smart card display fields
-    videoUrl: Optional[str] = None  # Recording of the talk
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None  # Can be presentationUrl or eventUrl
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None
+    # Smart card fields inherited from SmartCardFields mixin
+    # Note: videoUrl can be recording of the talk
 
 class SpeakingEngagementsSection(BaseModel):
     sectionTitle: Optional[str] = None
     speakingEngagements: Optional[List[SpeakingEngagementItem]] = None
 
-class PatentItem(BaseModel):
-    title: Optional[str] = None
-    patentNumber: Optional[str] = None
-    applicationNumber: Optional[str] = None
-    status: Optional[str] = None
-    filingDate: Optional[str] = None
-    grantDate: Optional[str] = None
-    inventors: Optional[List[str]] = None
-    issuingAuthority: Optional[str] = None
-    patentUrl: Optional[str] = None
-    description: Optional[str] = None
 
-class PatentsSection(BaseModel):
-    sectionTitle: Optional[str] = None
-    patents: Optional[List[PatentItem]] = None
-
-class ProfessionalMembership(BaseModel):
-    organization: Optional[str] = None
-    role: Optional[str] = None
-    membershipType: Optional[str] = None
-    membershipId: Optional[str] = None
-    dateRange: Optional[DateRange] = None
-    description: Optional[str] = None
-    period: Optional[str] = None  # Alternative to dateRange
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None
-
-class ProfessionalMembershipsSection(BaseModel):
-    sectionTitle: Optional[str] = None
-    memberships: Optional[List[ProfessionalMembership]] = None
-
-class HobbyItem(BaseModel):
+class HobbyItem(SmartCardFields):
     """Individual hobby item with smart card support."""
     title: Optional[str] = None
     description: Optional[str] = None
-    # Smart card display fields
-    videoUrl: Optional[str] = None
-    githubUrl: Optional[str] = None
-    imageUrl: Optional[str] = None
-    linkUrl: Optional[str] = None
-    hasLink: Optional[bool] = None
-    linkType: Optional[str] = None
-    viewMode: Optional[str] = None
-    textVariant: Optional[str] = None  # Default to 'simple' for hobbies
+    # Smart card fields inherited from SmartCardFields mixin
+    # Note: textVariant defaults to 'simple' for hobbies
 
 class HobbiesSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -352,7 +265,7 @@ class HobbiesSection(BaseModel):
     hobbyItems: Optional[List[HobbyItem]] = None  # Smart card items
 
 # ===== MAIN CV SCHEMA =====
-class CVData(BaseModel):
+class CVData(BaseSchema):
     # Core sections (most common)
     hero: Optional[HeroSection] = None
     contact: Optional[ContactSectionFooter] = None
@@ -372,20 +285,10 @@ class CVData(BaseModel):
     # Specialized sections (less common)
     publications: Optional[PublicationsResearchSection] = None
     speaking: Optional[SpeakingEngagementsSection] = None
-    patents: Optional[PatentsSection] = None
-    memberships: Optional[ProfessionalMembershipsSection] = None
     hobbies: Optional[HobbiesSection] = None
     
     # Catch-all for unstructured content
     unclassified_text: Optional[str] = None
-    
-    class Config:
-        """Pydantic configuration."""
-        json_encoders = {
-            HttpUrl: str  # Convert HttpUrl to string for JSON serialization
-        }
-        validate_assignment = True
-        use_enum_values = True
     
     def model_dump_nullable(self, exclude_none: bool = False) -> Dict[str, Any]:
         """

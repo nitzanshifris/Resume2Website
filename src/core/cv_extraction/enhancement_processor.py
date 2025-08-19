@@ -262,12 +262,13 @@ class EnhancementProcessor:
     @staticmethod
     def create_hero_if_missing(enhanced: Dict[str, Any], raw_text: str) -> Dict[str, Any]:
         """Create hero section from contact info if missing"""
-        if enhanced.get("contact") and not enhanced.get("hero"):
-            contact = enhanced["contact"]
-            enhanced["hero"] = {
-                "fullName": EnhancementProcessor.extract_name_from_text(raw_text) or "Professional",
-                "professionalTitle": EnhancementProcessor.extract_title_from_text(raw_text) or "Professional"
-            }
+        # DISABLED: No default values or inference allowed
+        # if enhanced.get("contact") and not enhanced.get("hero"):
+        #     contact = enhanced["contact"]
+        #     enhanced["hero"] = {
+        #         "fullName": EnhancementProcessor.extract_name_from_text(raw_text) or "Professional",
+        #         "professionalTitle": EnhancementProcessor.extract_title_from_text(raw_text) or "Professional"
+        #     }
         return enhanced
     
     @staticmethod

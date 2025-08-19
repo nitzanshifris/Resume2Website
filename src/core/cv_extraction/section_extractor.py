@@ -11,7 +11,8 @@ from pydantic import BaseModel, ValidationError
 from .prompt_templates import prompt_registry
 from .url_normalizer import normalize_section_data
 from .location_processor import location_processor
-from .role_inferencer import infer_project_role, infer_speaking_event_name, infer_field_of_study
+# DISABLED: No inference allowed for deterministic extraction
+# from .role_inferencer import infer_project_role, infer_speaking_event_name, infer_field_of_study
 from .extraction_config import extraction_config
 from .text_parsing import safe_iter_dicts
 
@@ -179,7 +180,8 @@ class SectionExtractor:
         data = self._process_additional_fields(section_name, data)
         
         # 4. Process roles and infer missing fields
-        data = self._process_roles(section_name, data)
+        # DISABLED: No inference allowed for deterministic extraction
+        # data = self._process_roles(section_name, data)
         
         return data
     

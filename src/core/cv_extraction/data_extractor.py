@@ -24,7 +24,7 @@ from src.core.schemas.unified_nullable import (
     CertificationsSection, AchievementsSection,
     VolunteerExperienceSection, LanguagesSection, ContactSectionFooter, 
     CoursesSection, HobbiesSection, PublicationsResearchSection,
-    SpeakingEngagementsSection, PatentsSection, ProfessionalMembershipsSection
+    SpeakingEngagementsSection
 )
 
 logger = logging.getLogger(__name__)
