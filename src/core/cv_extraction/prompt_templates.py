@@ -185,8 +185,39 @@ REQUIRED FIELDS (extract only if explicitly stated):
 - companyName: Exact company name
 - dateRange: Preserve original date format (don't normalize)
 - responsibilitiesAndAchievements: Keep exact bullet phrasing and order; preserve metrics with units
-- technologiesUsed: ONLY if explicitly mentioned in the role
+- technologiesUsed: Extract ONLY specific technologies mentioned IN THIS ROLE (see rules below)
 - employmentType: ONLY if stated (Internship, Externship, Part-time, Contract, etc.)
+
+TECHNOLOGIES EXTRACTION RULES:
+✅ INCLUDE ONLY if explicitly mentioned for THIS specific job:
+- Programming languages (Python, Java, JavaScript, C++, Go, Ruby, etc.)
+- Frameworks/Libraries (React, Django, Spring, Angular, Vue.js, etc.)
+- Databases (MySQL, PostgreSQL, MongoDB, Oracle, Redis, etc.)
+- Cloud platforms (AWS, Azure, Google Cloud, specific services like EC2, S3, etc.)
+- Specific software tools (Photoshop, AutoCAD, SAP, Salesforce, JIRA, etc.)
+- DevOps tools (Docker, Kubernetes, Jenkins, Git, Terraform, Ansible, etc.)
+- Data tools (Tableau, PowerBI, Spark, Hadoop, specific Excel features like VBA, etc.)
+- Specific CMS/platforms (WordPress, Shopify, Drupal, etc.)
+- Mobile technologies (iOS, Android, React Native, Flutter, etc.)
+- Testing tools (Selenium, Jest, Cypress, JUnit, etc.)
+- Version control (Git, SVN, Perforce, etc.)
+- IDEs and editors ONLY if specialized (IntelliJ, Visual Studio, etc.)
+
+❌ DO NOT INCLUDE:
+- Generic terms: "teams", "team", "office", "computer", "software", "systems", "system", "data", "management", "project", "process", "business"
+- Soft skills or methodologies: Agile, Scrum, communication, leadership, collaboration
+- Basic office tools unless specifically advanced: just "Excel" no, but "Excel VBA" or "Excel Macros" yes
+- Generic business terms: stakeholders, cross-functional, strategic, optimization
+- Job-related nouns that aren't technologies: requirements, documentation, analysis, implementation
+- Technologies mentioned in other jobs but not explicitly in THIS job's bullets
+- Technologies from skills section unless explicitly stated as used in THIS role
+- Duplicates - each technology should appear only once per job
+
+CRITICAL: 
+- Extract ONLY from the responsibility bullets for THIS specific position
+- Look for concrete tool/technology names, not concepts
+- If unsure whether something is a technology, err on the side of exclusion
+- If no specific technologies are mentioned, return null (not an empty array)
 
 DATE HANDLING:
 - Preserve original date format exactly (e.g., "January 2024" not "01/2024")

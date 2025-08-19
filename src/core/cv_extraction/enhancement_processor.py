@@ -254,10 +254,87 @@ class EnhancementProcessor:
             contact = enhanced["contact"]
             enhanced["hero"] = {
                 "fullName": EnhancementProcessor.extract_name_from_text(raw_text) or "Professional",
-                "professionalTitle": EnhancementProcessor.extract_title_from_text(raw_text) or "Professional",
-                "summaryTagline": enhanced.get("summary", {}).get("summaryText", "")[:100] + "..."
-                    if enhanced.get("summary") else "Experienced Professional"
+                "professionalTitle": EnhancementProcessor.extract_title_from_text(raw_text) or "Professional"
             }
+        return enhanced
+    
+    @staticmethod
+    def filter_technologies_in_experience(enhanced: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Filter and validate technologies in experience items.
+        Remove generic terms and ensure only valid tech is included.
+        """
+        # List of generic terms to exclude
+        EXCLUDED_TERMS = {
+            'teams', 'team', 'office', 'computer', 'software', 'systems', 
+            'system', 'data', 'management', 'project', 'process', 'business',
+            'communication', 'collaboration', 'leadership', 'analysis',
+            'documentation', 'requirements', 'testing', 'development',
+            'implementation', 'design', 'architecture', 'infrastructure'
+        }
+        
+        # Common tech terms that should be preserved even if they contain excluded words
+        TECH_WHITELIST = {
+            'microsoft teams', 'ms teams', 'team foundation server', 'tfs',
+            'systems manager', 'aws systems manager', 'office 365', 'ms office',
+            'data science', 'data engineering', 'database', 'data warehouse',
+            'project server', 'software engineering', 'system design',
+            'test automation', 'infrastructure as code'
+        }
+        
+        if not enhanced.get('experience') or not isinstance(enhanced['experience'], dict):
+            return enhanced
+            
+        experience_items = enhanced['experience'].get('experienceItems', [])
+        if not isinstance(experience_items, list):
+            return enhanced
+            
+        for item in experience_items:
+            if not isinstance(item, dict) or not item.get('technologiesUsed'):
+                continue
+                
+            if not isinstance(item['technologiesUsed'], list):
+                continue
+                
+            # Filter technologies
+            filtered_techs = []
+            for tech in item['technologiesUsed']:
+                if not tech or not isinstance(tech, str):
+                    continue
+                    
+                tech_lower = tech.lower().strip()
+                
+                # Skip if it's a single excluded word
+                if tech_lower in EXCLUDED_TERMS:
+                    logger.debug(f"Filtering out generic term: {tech}")
+                    continue
+                    
+                # Check if it's in whitelist (preserve even if contains excluded words)
+                if any(whitelist_term in tech_lower for whitelist_term in TECH_WHITELIST):
+                    filtered_techs.append(tech)
+                    continue
+                    
+                # Check if all words in the tech are excluded terms
+                words = tech_lower.split()
+                if all(word in EXCLUDED_TERMS for word in words):
+                    logger.debug(f"Filtering out phrase with all generic terms: {tech}")
+                    continue
+                    
+                # Keep the technology
+                filtered_techs.append(tech)
+            
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_techs = []
+            for tech in filtered_techs:
+                tech_normalized = tech.lower().strip()
+                if tech_normalized not in seen:
+                    seen.add(tech_normalized)
+                    unique_techs.append(tech)
+            
+            # Update the technologies list
+            item['technologiesUsed'] = unique_techs if unique_techs else None
+            
         return enhanced
     
     @staticmethod
@@ -286,6 +363,7 @@ class EnhancementProcessor:
         enhanced = EnhancementProcessor.extract_years_of_experience_from_summary(enhanced)
         enhanced = EnhancementProcessor.ensure_achievements_structure(enhanced)
         enhanced = EnhancementProcessor.create_hero_if_missing(enhanced, raw_text)
+        enhanced = EnhancementProcessor.filter_technologies_in_experience(enhanced)
         
         # Apply demographic enhancements
         if enhanced.get('contact'):

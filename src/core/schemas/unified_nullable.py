@@ -78,7 +78,6 @@ class ExperienceSection(BaseModel):
 class HeroSection(BaseModel):
     fullName: Optional[str] = None
     professionalTitle: Optional[str] = None
-    summaryTagline: Optional[str] = None
     profilePhotoUrl: Optional[str] = None
 
 class AchievementItem(BaseModel):
