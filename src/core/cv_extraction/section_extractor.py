@@ -365,7 +365,3 @@ class SectionExtractor:
                 return None
         
         return data
-
-
-# Create singleton instance
-section_extractor = SectionExtractor({})

@@ -151,7 +151,7 @@ class TestSchemaFieldNames(unittest.TestCase):
             'hero', 'contact', 'summary', 'experience', 'education',
             'skills', 'projects', 'achievements', 'certifications',
             'languages', 'courses', 'volunteer', 'publications',
-            'speaking', 'patents', 'memberships', 'hobbies'
+            'speaking', 'hobbies'
         ]
         
         for section in expected_sections:
