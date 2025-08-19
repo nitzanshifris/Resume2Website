@@ -108,6 +108,10 @@ class EnhancementProcessor:
         Returns:
             Enhanced data with availability added to contact
         """
+        # Only extract if inference is allowed
+        if not extraction_config.ALLOW_INFERENCE:
+            return enhanced
+            
         if not enhanced.get('contact') or enhanced.get('contact', {}).get('availability'):
             return enhanced
         
@@ -190,6 +194,10 @@ class EnhancementProcessor:
         Returns:
             Enhanced data with years of experience extracted
         """
+        # Only extract if inference is allowed
+        if not extraction_config.ALLOW_INFERENCE:
+            return enhanced
+            
         if not enhanced.get('summary'):
             return enhanced
         
@@ -514,7 +522,6 @@ class EnhancementProcessor:
             'courses': 'courseItems',
             'publications': 'publications',
             'speaking': 'speakingEngagements',
-            'memberships': 'memberships',
             'hobbies': 'hobbyItems'
         }
         

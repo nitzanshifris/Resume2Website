@@ -58,10 +58,9 @@ OUTPUT REQUIREMENTS:
 - Adhere exactly to field names from schema; omit unknown fields
 - If no relevant information is found, return an empty JSON object {{}}
 
-JSON Schema:
-```json
+BEGIN_SCHEMA
 {schema_json}
-```
+END_SCHEMA
 
 CV Text:
 ---
