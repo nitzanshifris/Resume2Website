@@ -856,6 +856,93 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   isRetrying: boolean;
   setIsRetrying: (value: boolean) => void;
 }) {
+  // Helper function to parse error response and get standardized messages
+  const getStandardizedError = (error: any) => {
+    const errorMessage = error.message || 'File validation failed'
+    const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
+    
+    // Check for specific error patterns in the message
+    if (statusCode === 400 && (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate'))) {
+      return {
+        title: 'Not a resume',
+        message: "This file doesn't look like a resume (CV).",
+        suggestion: 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
+    if (statusCode === 400 && (errorMessage.includes('corrupted') || errorMessage.includes('unreadable'))) {
+      return {
+        title: 'Unsupported or corrupted file',
+        message: "The file type doesn't match its contents or can't be read.",
+        suggestion: 'Upload a PDF, DOC/DOCX, TXT, PNG, JPG, or WEBP exported directly from your editor.'
+      }
+    }
+    
+    if (statusCode === 401 || statusCode === 403 || errorMessage.includes('Authentication required')) {
+      return {
+        title: 'Sign in to continue',
+        message: 'Creating a portfolio requires an account.',
+        suggestion: 'Sign in to link this upload to your workspace.',
+        showAuth: true
+      }
+    }
+    
+    if (statusCode === 408 || errorMessage.includes('timed out')) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    if (statusCode === 413 || errorMessage.includes('too large')) {
+      return {
+        title: 'File is too large',
+        message: 'Maximum file size is 10 MB.',
+        suggestion: 'Reduce the file size (export to PDF, compress images) and try again.'
+      }
+    }
+    
+    if (statusCode === 415 || errorMessage.includes('Unsupported')) {
+      return {
+        title: 'File type not supported',
+        message: 'Supported types: PDF, DOC/DOCX, TXT, PNG, JPG, WEBP, RTF.',
+        suggestion: 'Export your resume to one of the supported formats and re-upload.'
+      }
+    }
+    
+    if (statusCode === 429 || errorMessage.includes('rate limit')) {
+      return {
+        title: 'Too many uploads',
+        message: "You've reached the upload limit for now.",
+        suggestion: 'Please wait and try again later. Sign in for higher limits.'
+      }
+    }
+    
+    if (statusCode === 422 || errorMessage.includes('extract text')) {
+      return {
+        title: "Couldn't read the file",
+        message: "We couldn't extract text from this file.",
+        suggestion: 'Try a higher-quality scan or export a text-based PDF.'
+      }
+    }
+    
+    if (statusCode === 404) {
+      return {
+        title: 'Item not found',
+        message: "We couldn't find that upload (it may have expired).",
+        suggestion: 'Upload the file again to continue.'
+      }
+    }
+    
+    // Default 500 error
+    return {
+      title: 'Something went wrong',
+      message: "We couldn't process the file due to a server error.",
+      suggestion: 'Try again in a few minutes. If this keeps happening, export to PDF or contact support.'
+    }
+  }
+  
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
   >("typewriter")
@@ -1477,12 +1564,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       console.error('❌ Processing error:', error)
       setProcessingError(error instanceof Error ? error.message : 'An error occurred')
       setIsProcessing(false)
-      // Show error in UI using ErrorToast
+      // Show error in UI using standardized ErrorToast
+      const errorInfo = getStandardizedError(error)
       setErrorToast({
         isOpen: true,
-        title: 'Processing failed',
-        message: error instanceof Error ? error.message : 'An error occurred during processing',
-        suggestion: 'Please try uploading a different file or check your internet connection'
+        title: errorInfo.title,
+        message: errorInfo.message,  
+        suggestion: errorInfo.suggestion
       })
     }
   }
@@ -1529,28 +1617,22 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         // Parse error message
         const errorMessage = error.message || 'Please upload a valid resume/CV file'
         
-        // Check if this is a Resume Gate rejection (400 error)
-        if (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate')) {
-          // Resume Gate specific error - use standard message
-          setErrorToast({
-            isOpen: true,
-            title: 'Not a resume',
-            message: "This file doesn't look like a resume (CV).",
-            suggestion: "Use a resume with contact info and sections like Experience, Education, and Skills."
-          })
-        } else {
-          // Other errors - parse normally
-          const lines = errorMessage.split('\n').filter((line: string) => line.trim())
-          let mainMessage = lines[0] || 'Please upload a valid file'
-          const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
-          
-          setErrorToast({
-            isOpen: true,
-            title: 'Invalid File',
-            message: mainMessage,
-            suggestion: suggestion || 'Please upload a PDF or Word document'
-          })
+        // Use standardized error messages
+        const errorInfo = getStandardizedError(error)
+        
+        // Show auth modal if needed
+        if (errorInfo.showAuth) {
+          setShowSignupModal(true)
+          return
         }
+        
+        // Show error toast with standardized message
+        setErrorToast({
+          isOpen: true,
+          title: errorInfo.title,
+          message: errorInfo.message,
+          suggestion: errorInfo.suggestion
+        })
       }
     } else {
       // No file, just start animation (shouldn't happen)
@@ -1648,28 +1730,22 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       // Parse error message
       const errorMessage = error.message || 'Please upload a valid resume/CV file'
       
-      // Check if this is a Resume Gate rejection (400 error)
-      if (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate')) {
-        // Resume Gate specific error - use standard message
-        setErrorToast({
-          isOpen: true,
-          title: 'Not a resume',
-          message: "This file doesn't look like a resume (CV).",
-          suggestion: "Use a resume with contact info and sections like Experience, Education, and Skills."
-        })
-      } else {
-        // Other errors - parse normally
-        const lines = errorMessage.split('\n').filter((line: string) => line.trim())
-        let mainMessage = lines[0] || 'Please upload a valid file'
-        const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
-        
-        setErrorToast({
-          isOpen: true,
-          title: 'Invalid File',
-          message: mainMessage,
-          suggestion: suggestion || 'Please upload a PDF or Word document'
-        })
+      // Use standardized error messages
+      const errorInfo = getStandardizedError(error)
+      
+      // Show auth modal if needed
+      if (errorInfo.showAuth) {
+        setShowSignupModal(true)
+        return
       }
+      
+      // Show error toast with standardized message
+      setErrorToast({
+        isOpen: true,
+        title: errorInfo.title,
+        message: errorInfo.message,
+        suggestion: errorInfo.suggestion
+      })
     })
   }
 
@@ -3141,6 +3217,93 @@ export default function Home() {
     setShowAuthModal(false)
   }
 
+  // Helper function to parse error response and get standardized messages
+  const getStandardizedError = (error: any) => {
+    const errorMessage = error.message || 'File validation failed'
+    const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
+    
+    // Check for specific error patterns in the message
+    if (statusCode === 400 && (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate'))) {
+      return {
+        title: 'Not a resume',
+        message: "This file doesn't look like a resume (CV).",
+        suggestion: 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
+    if (statusCode === 400 && (errorMessage.includes('corrupted') || errorMessage.includes('unreadable'))) {
+      return {
+        title: 'Unsupported or corrupted file',
+        message: "The file type doesn't match its contents or can't be read.",
+        suggestion: 'Upload a PDF, DOC/DOCX, TXT, PNG, JPG, or WEBP exported directly from your editor.'
+      }
+    }
+    
+    if (statusCode === 401 || statusCode === 403 || errorMessage.includes('Authentication required')) {
+      return {
+        title: 'Sign in to continue',
+        message: 'Creating a portfolio requires an account.',
+        suggestion: 'Sign in to link this upload to your workspace.',
+        showAuth: true
+      }
+    }
+    
+    if (statusCode === 408 || errorMessage.includes('timed out')) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    if (statusCode === 413 || errorMessage.includes('too large')) {
+      return {
+        title: 'File is too large',
+        message: 'Maximum file size is 10 MB.',
+        suggestion: 'Reduce the file size (export to PDF, compress images) and try again.'
+      }
+    }
+    
+    if (statusCode === 415 || errorMessage.includes('Unsupported')) {
+      return {
+        title: 'File type not supported',
+        message: 'Supported types: PDF, DOC/DOCX, TXT, PNG, JPG, WEBP, RTF.',
+        suggestion: 'Export your resume to one of the supported formats and re-upload.'
+      }
+    }
+    
+    if (statusCode === 429 || errorMessage.includes('rate limit')) {
+      return {
+        title: 'Too many uploads',
+        message: "You've reached the upload limit for now.",
+        suggestion: 'Please wait and try again later. Sign in for higher limits.'
+      }
+    }
+    
+    if (statusCode === 422 || errorMessage.includes('extract text')) {
+      return {
+        title: "Couldn't read the file",
+        message: "We couldn't extract text from this file.",
+        suggestion: 'Try a higher-quality scan or export a text-based PDF.'
+      }
+    }
+    
+    if (statusCode === 404) {
+      return {
+        title: 'Item not found',
+        message: "We couldn't find that upload (it may have expired).",
+        suggestion: 'Upload the file again to continue.'
+      }
+    }
+    
+    // Default 500 error
+    return {
+      title: 'Something went wrong',
+      message: "We couldn't process the file due to a server error.",
+      suggestion: 'Try again in a few minutes. If this keeps happening, export to PDF or contact support.'
+    }
+  }
+  
   const handleFileSelect = async (file: File) => {
     // Single orchestrator for all file uploads - validation first, then animation
     console.log('📁 File selected, starting unified upload flow:', file.name)
@@ -3174,33 +3337,21 @@ export default function Home() {
       }).catch(error => {
         console.error('❌ File validation failed:', error)
         
-        // Show error toast with specific message
-        const errorMessage = error.message || 'File validation failed'
+        // Get standardized error message
+        const errorInfo = getStandardizedError(error)
         
-        // Parse error for better UX
-        let title = 'Not a resume'
-        let message = errorMessage
-        let suggestion = undefined
-        
-        if (errorMessage.includes('Authentication required')) {
-          // Show auth modal instead
+        // Show auth modal if needed
+        if (errorInfo.showAuth) {
           setShowAuthModal(true)
           return
         }
         
-        if (errorMessage.includes('Please upload a valid resume')) {
-          const parts = errorMessage.split('\n\n')
-          message = parts[0]
-          if (parts[1]) {
-            suggestion = parts[1].replace('💡 ', '')
-          }
-        }
-        
+        // Show error toast with standardized message
         setErrorToast({
           isOpen: true,
-          title,
-          message,
-          suggestion
+          title: errorInfo.title,
+          message: errorInfo.message,
+          suggestion: errorInfo.suggestion
         })
         
         // Clear the invalid file
