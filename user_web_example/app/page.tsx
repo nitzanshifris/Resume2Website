@@ -30,7 +30,7 @@ import ErrorToast from "@/components/ui/error-toast"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
-import { uploadFile, extractCVData, API_BASE_URL } from "@/lib/api"
+import { uploadFile, extractCVData, claimAnonymousCV, API_BASE_URL } from "@/lib/api"
 
 // Linear progress milestones - evenly distributed for predictable progress
 const PROGRESS_MILESTONES = {
@@ -1889,27 +1889,122 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setTimeout(async () => {
       // Check if we already have a job_id from anonymous upload
       if (currentJobId) {
-        console.log('📊 Using existing job_id, extracting CV data...', currentJobId)
+        console.log('📊 Using existing job_id, claiming and extracting CV data...', currentJobId)
         
         try {
-          // Start showing progress immediately
-          setIsPlaying(true)
-          animateProgress(0, 20, 1000) // Quick progress to show extraction started
+          // IMPORTANT: Keep the UI exactly as it was (video carousel visible)
+          // Don't change showNewTypewriter, showCVCard, or stage
+          // The user was already seeing the video carousel, keep it that way!
           
-          // Extract CV data using the existing job_id
+          // Just continue or restart the smooth progress animation
+          if (!animateSmoothProgress.current.isRunning) {
+            startSmoothProgress()
+          }
+          
+          // STEP 1: Claim ownership of the anonymous CV
+          console.log('🔄 Claiming anonymous CV...')
+          const claimResult = await claimAnonymousCV(currentJobId)
+          console.log('✅ CV claimed successfully:', claimResult)
+          
+          // STEP 2: Extract CV data using the existing job_id (now owned by user)
+          console.log('📊 Extracting CV data...')
           const extractResult = await extractCVData(currentJobId)
           console.log('✅ CV extraction completed:', extractResult)
           
           // Continue with portfolio generation using the extracted data
-          if (extractResult.status === 'completed' && pendingFile) {
-            // Now continue with portfolio generation
-            processPortfolioGeneration(pendingFile, true) // Skip validation since we already have job_id
+          if (extractResult.status === 'completed') {
+            // Generate portfolio directly with the already uploaded and extracted CV
+            console.log('🚀 Generating portfolio for job_id:', currentJobId)
+            
+            // Call portfolio generation endpoint directly (no new upload!)
+            const portfolioResponse = await fetch(`${API_BASE_URL}/api/v1/portfolio/generate/${currentJobId}`, {
+              method: 'POST',
+              headers: {
+                'X-Session-ID': localStorage.getItem('resume2website_session_id') || '',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                template_id: 'v0_template_v2.1'
+              })
+            })
+            
+            if (portfolioResponse.ok) {
+              const portfolioData = await portfolioResponse.json()
+              console.log('✅ Portfolio generation started:', portfolioData)
+              
+              // Store portfolio data
+              if (portfolioData.portfolio_url) {
+                setPortfolioUrl(portfolioData.portfolio_url)
+                setRealProgress(60) // Trigger portfolio display
+                setShowPortfolioInMacBook(true) // Show the portfolio
+                localStorage.setItem('lastPortfolio', JSON.stringify({
+                  url: portfolioData.portfolio_url,
+                  timestamp: Date.now()
+                }))
+                
+                // Complete the progress animation
+                completeSmoothProgress()
+              }
+            }
           }
-        } catch (error) {
-          console.error('❌ Failed to extract CV data:', error)
-          setProcessingError('Failed to process CV data. Please try again.')
-          setIsPlaying(false)
-          setProgress(0)
+          
+          // Clear currentJobId after successful claim+extract
+          setCurrentJobId(null)
+        } catch (error: any) {
+          console.error('❌ Failed to claim/extract CV data:', error)
+          
+          // Handle specific error cases
+          if (error.message?.includes('already owned')) {
+            // CV already owned by user, just extract
+            try {
+              const extractResult = await extractCVData(currentJobId)
+              console.log('✅ CV extraction completed (already owned):', extractResult)
+              
+              if (extractResult.status === 'completed') {
+                // Generate portfolio directly (no new upload!)
+                console.log('🚀 Generating portfolio for job_id:', currentJobId)
+                
+                const portfolioResponse = await fetch(`${API_BASE_URL}/api/v1/portfolio/generate/${currentJobId}`, {
+                  method: 'POST',
+                  headers: {
+                    'X-Session-ID': localStorage.getItem('resume2website_session_id') || '',
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    template_id: 'v0_template_v2.1'
+                  })
+                })
+                
+                if (portfolioResponse.ok) {
+                  const portfolioData = await portfolioResponse.json()
+                  console.log('✅ Portfolio generation started:', portfolioData)
+                  
+                  if (portfolioData.portfolio_url) {
+                    setPortfolioUrl(portfolioData.portfolio_url)
+                    setRealProgress(60) // Trigger portfolio display
+                    setShowPortfolioInMacBook(true) // Show the portfolio
+                    localStorage.setItem('lastPortfolio', JSON.stringify({
+                      url: portfolioData.portfolio_url,
+                      timestamp: Date.now()
+                    }))
+                    
+                    // Complete the progress animation
+                    completeSmoothProgress()
+                  }
+                }
+              }
+              setCurrentJobId(null)
+            } catch (extractError) {
+              console.error('❌ Failed to extract CV:', extractError)
+              setProcessingError('Failed to process CV data. Please try again.')
+              setIsPlaying(false)
+              setProgress(0)
+            }
+          } else {
+            setProcessingError('Failed to process CV data. Please try again.')
+            setIsPlaying(false)
+            setProgress(0)
+          }
         }
       } else if (pendingFile) {
         // No existing job_id, upload and process normally
@@ -1949,6 +2044,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       return
     }
     
+    // CRITICAL: Skip if we already have a job_id (anonymous user just signed up)
+    if (currentJobId) {
+      console.log('⏭️ Skipping auto-start, already have job_id:', currentJobId)
+      return
+    }
+    
     if (uploadedFile && uploadedFile !== prevUploadedFile) {
       console.log('📁 New file detected from parent:', uploadedFile.name)
       setPrevUploadedFile(uploadedFile)
@@ -1966,7 +2067,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         }, 1500) // Wait for CV to appear first
       }
     }
-  }, [uploadedFile, prevUploadedFile, isAuthenticated])
+  }, [uploadedFile, prevUploadedFile, isAuthenticated, currentJobId])
   
   // Wrapper for handleFileSelect that also sets showCVCard
   const handleLocalFileSelect = (file: File) => {

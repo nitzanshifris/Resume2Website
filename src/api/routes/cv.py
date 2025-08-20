@@ -50,6 +50,7 @@ from src.api.db import (
     create_cv_upload,
     get_user_cv_uploads,
     update_cv_upload_status,
+    transfer_cv_ownership,  # Add the new function
     # Caching functions
     get_cached_extraction,
     cache_extraction_result,
@@ -1028,16 +1029,26 @@ async def extract_cv_data_endpoint(
             
             cv_upload = dict(result)
             
-            # Only verify ownership for authenticated users if they're trying to access someone else's CV
-            if current_user_id and not current_user_id.startswith("anonymous_"):
-                upload_user_id = cv_upload.get('user_id')
-                # Allow access if: user owns it, or CV has no owner, or it's the same session
-                if upload_user_id and upload_user_id != current_user_id:
-                    # Check if this is the same session that uploaded it
-                    # (frontend might have different session ID than what was stored)
-                    logger.warning(f"User {current_user_id} trying to access CV from user {upload_user_id}")
-                    # For now, allow it since the frontend has the job_id
-                    pass
+            # STRICT OWNERSHIP ENFORCEMENT
+            upload_user_id = cv_upload.get('user_id')
+            
+            # If the CV belongs to an anonymous user and current user is authenticated
+            if upload_user_id and upload_user_id.startswith("anonymous_"):
+                if current_user_id and not current_user_id.startswith("anonymous_"):
+                    # Authenticated user trying to extract anonymous CV - MUST claim first
+                    logger.error(f"❌ User {current_user_id} trying to extract anonymous CV {job_id} without claiming it first")
+                    raise HTTPException(
+                        status_code=403, 
+                        detail="Anonymous CV must be claimed before extraction. Call /api/v1/cv/claim first."
+                    )
+            
+            # If CV belongs to a specific user, only that user can extract
+            elif upload_user_id and upload_user_id != current_user_id:
+                logger.error(f"❌ User {current_user_id} trying to access CV owned by {upload_user_id}")
+                raise HTTPException(
+                    status_code=403,
+                    detail="You don't have permission to access this CV"
+                )
         finally:
             conn.close()
         
@@ -1801,3 +1812,64 @@ async def update_profile(
         "message": "Profile updated successfully",
         "profile": updated_profile
     }
+
+
+# ========== CV OWNERSHIP TRANSFER ==========
+
+class ClaimRequest(BaseModel):
+    """Request body for claiming an anonymous CV"""
+    job_id: str
+
+
+@router.post("/claim")
+async def claim_anonymous_cv(
+    request: ClaimRequest,
+    current_user_id: str = Depends(get_current_user)
+):
+    """
+    Transfer ownership of an anonymous CV to the authenticated user.
+    This is used when an anonymous user signs up and needs to claim their uploaded CV.
+    
+    Args:
+        request: Contains the job_id of the CV to claim
+        current_user_id: Authenticated user's ID (injected by dependency)
+        
+    Returns:
+        Success status and transfer details
+    """
+    logger.info(f"🔄 User {current_user_id} attempting to claim CV with job_id: {request.job_id}")
+    
+    # Transfer ownership in the database
+    result = transfer_cv_ownership(request.job_id, current_user_id)
+    
+    if result["success"]:
+        if result.get("already_owned"):
+            logger.info(f"✅ CV {request.job_id} already owned by user {current_user_id}")
+            return {
+                "status": "success",
+                "message": "CV already owned by user",
+                "job_id": request.job_id,
+                "already_owned": True
+            }
+        else:
+            logger.info(f"✅ Successfully transferred CV {request.job_id} from {result['previous_owner']} to {current_user_id}")
+            return {
+                "status": "success", 
+                "message": "CV ownership transferred successfully",
+                "job_id": request.job_id,
+                "previous_owner": result["previous_owner"],
+                "new_owner": current_user_id
+            }
+    else:
+        error_code = result.get("code", "UNKNOWN")
+        error_message = result.get("error", "Failed to transfer CV ownership")
+        
+        if error_code == "NOT_FOUND":
+            logger.warning(f"❌ CV not found for job_id: {request.job_id}")
+            raise HTTPException(status_code=404, detail="CV not found")
+        elif error_code == "FORBIDDEN":
+            logger.warning(f"❌ CV {request.job_id} owned by another user, cannot transfer to {current_user_id}")
+            raise HTTPException(status_code=403, detail="CV is owned by another user")
+        else:
+            logger.error(f"❌ Failed to transfer CV {request.job_id}: {error_message}")
+            raise HTTPException(status_code=500, detail=error_message)

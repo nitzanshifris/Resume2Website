@@ -152,6 +152,49 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
 }
 
 // Extract CV data from an already uploaded file
+// Claim ownership of an anonymous CV after signup
+export async function claimAnonymousCV(jobId: string): Promise<any> {
+  const sessionId = getSessionId()
+  if (!sessionId) {
+    throw new Error('Authentication required to claim CV')
+  }
+  
+  const claimUrl = `${API_BASE_URL}/api/v1/claim`
+  console.log('🔄 Claiming anonymous CV with job_id:', jobId)
+  
+  try {
+    const response = await fetch(claimUrl, {
+      method: 'POST',
+      headers: {
+        'X-Session-ID': sessionId,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ job_id: jobId })
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('Claim error response:', response.status, errorData)
+      
+      if (response.status === 404) {
+        throw new Error('CV not found')
+      }
+      if (response.status === 403) {
+        throw new Error('CV is owned by another user')
+      }
+      
+      throw new Error(errorData.detail || errorData.message || `Claim failed with status ${response.status}`)
+    }
+    
+    const result = await response.json()
+    console.log('✅ Successfully claimed CV:', result)
+    return result
+  } catch (error) {
+    console.error('Failed to claim CV:', error)
+    throw error
+  }
+}
+
 export async function extractCVData(jobId: string): Promise<any> {
   const sessionId = getSessionId()
   if (!sessionId) {

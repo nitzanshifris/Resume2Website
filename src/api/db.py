@@ -380,6 +380,65 @@ def update_cv_upload_status(job_id: str, status: str, cv_data: str = None) -> bo
         conn.close()
 
 
+def transfer_cv_ownership(job_id: str, new_user_id: str) -> Dict[str, Any]:
+    """
+    Transfer ownership of a CV from anonymous user to authenticated user.
+    
+    Args:
+        job_id: The job_id of the CV to transfer
+        new_user_id: The authenticated user's ID to transfer ownership to
+        
+    Returns:
+        Dict with success status and details
+    """
+    conn = get_db_connection()
+    try:
+        # First, get the current CV upload record
+        cursor = conn.execute(
+            "SELECT user_id, filename, status FROM cv_uploads WHERE job_id = ?",
+            (job_id,)
+        )
+        row = cursor.fetchone()
+        
+        if not row:
+            return {"success": False, "error": "CV not found", "code": "NOT_FOUND"}
+        
+        current_owner = row['user_id']
+        
+        # Check if it's an anonymous user (starts with 'anonymous_')
+        if not current_owner.startswith('anonymous_'):
+            # Check if already owned by the requesting user
+            if current_owner == new_user_id:
+                return {"success": True, "message": "CV already owned by user", "already_owned": True}
+            else:
+                return {"success": False, "error": "CV owned by another user", "code": "FORBIDDEN"}
+        
+        # Transfer ownership using atomic UPDATE
+        result = conn.execute(
+            "UPDATE cv_uploads SET user_id = ? WHERE job_id = ? AND user_id LIKE 'anonymous_%'",
+            (new_user_id, job_id)
+        )
+        conn.commit()
+        
+        if result.rowcount > 0:
+            logger.info(f"Successfully transferred CV {job_id} from {current_owner} to {new_user_id}")
+            return {
+                "success": True, 
+                "message": "CV ownership transferred successfully",
+                "job_id": job_id,
+                "previous_owner": current_owner,
+                "new_owner": new_user_id
+            }
+        else:
+            return {"success": False, "error": "Failed to transfer ownership", "code": "UPDATE_FAILED"}
+            
+    except Exception as e:
+        logger.error(f"Error transferring CV ownership: {e}")
+        return {"success": False, "error": str(e), "code": "INTERNAL_ERROR"}
+    finally:
+        conn.close()
+
+
 # ========== EXTRACTION CACHING FUNCTIONS ==========
 
 def get_cached_extraction(file_hash: str) -> Optional[dict]:
