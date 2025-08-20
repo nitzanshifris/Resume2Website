@@ -838,6 +838,17 @@ const VerticalProgressBar = ({
   )
 }
 
+// Type definition for standardized errors
+interface StandardizedError {
+  title: string
+  message: string
+  suggestion?: string
+  isAuthError?: boolean
+}
+
+// Constant for custom event name to avoid typos
+const RESUME_AUTO_START_EVENT = 'resume2web:autoStart'
+
 // Resume2Website Demo Component - Mobile-First WOW Experience
 function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn, setErrorToast, isRetrying, setIsRetrying }: { 
   onOpenModal: () => void; 
@@ -857,7 +868,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   setIsRetrying: (value: boolean) => void;
 }) {
   // Helper function to parse error response and get standardized messages
-  const getStandardizedError = (error: any) => {
+  const getStandardizedError = (error: any): StandardizedError => {
     // Handle network errors, CORS, and fetch failures
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
@@ -1655,7 +1666,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         const errorInfo = getStandardizedError(error)
         
         // Show auth modal if needed
-        if ((errorInfo as any).isAuthError) {
+        if (errorInfo.isAuthError) {
           setShowSignupModal(true)
           return
         }
@@ -1775,7 +1786,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const errorInfo = getStandardizedError(error)
       
       // Show auth modal if needed
-      if ((errorInfo as any).isAuthError) {
+      if (errorInfo.isAuthError) {
         setShowSignupModal(true)
         return
       }
@@ -1906,10 +1917,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       (window as any).__autoStartListeners = existingListeners + 1
     }
     
-    window.addEventListener('resume2web:autoStart', handleAutoStart as EventListener)
+    window.addEventListener(RESUME_AUTO_START_EVENT, handleAutoStart as EventListener)
     return () => {
       console.log('🧹 Cleaning up autoStartAnimation listener')
-      window.removeEventListener('resume2web:autoStart', handleAutoStart as EventListener)
+      window.removeEventListener(RESUME_AUTO_START_EVENT, handleAutoStart as EventListener)
       
       // Decrement listener count in dev mode
       if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
@@ -3278,7 +3289,7 @@ export default function Home() {
   }
 
   // Helper function to parse error response and get standardized messages
-  const getStandardizedError = (error: any) => {
+  const getStandardizedError = (error: any): StandardizedError => {
     // Handle network errors, CORS, and fetch failures
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
@@ -3421,7 +3432,7 @@ export default function Home() {
         // Trigger animation by dispatching a custom event that Resume2WebsiteDemo can listen to
         // Guard for SSR safety
         if (typeof window !== 'undefined') {
-          const event = new CustomEvent('resume2web:autoStart', { detail: file })
+          const event = new CustomEvent(RESUME_AUTO_START_EVENT, { detail: file })
           window.dispatchEvent(event)
         }
       }).catch(error => {
@@ -3431,7 +3442,7 @@ export default function Home() {
         const errorInfo = getStandardizedError(error)
         
         // Show auth modal if needed
-        if ((errorInfo as any).isAuthError) {
+        if (errorInfo.isAuthError) {
           setShowAuthModal(true)
           return
         }

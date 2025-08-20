@@ -222,7 +222,7 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,image/*"
+        accept=".pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp"
         onChange={handleFileInput}
         className="hidden"
         multiple
