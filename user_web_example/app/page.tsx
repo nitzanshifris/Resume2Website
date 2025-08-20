@@ -1231,14 +1231,16 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   }
 
   // Process portfolio generation in the background
-  const processPortfolioGeneration = async (file: File) => {
+  const processPortfolioGeneration = async (file: File, skipValidation: boolean = false) => {
     try {
       setIsProcessing(true)
       setProcessingError(null)
       
       // Step 1: Upload file (0-20%)
       console.log('📤 Uploading file...', file.name, file.size, 'bytes')
-      animateProgress(0, PROGRESS_MILESTONES.UPLOAD_START, 500) // Quick start
+      if (!skipValidation) {
+        animateProgress(0, PROGRESS_MILESTONES.UPLOAD_START, 500) // Quick start only if not validating
+      }
       
       const uploadResponse = await uploadFile(file)
       const jobId = uploadResponse.job_id
@@ -1489,12 +1491,29 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setProcessingError(null)
     setRealProgress(0)
     
-    // Start the animation
-    setIsPlaying(true)
-    
-    // Start backend processing in parallel
+    // Validate file first before starting animation
     if (uploadedFile) {
-      processPortfolioGeneration(uploadedFile)
+      console.log('🔍 Validating file before starting demo...')
+      try {
+        // Upload and validate first
+        const uploadResponse = await uploadFile(uploadedFile)
+        setCurrentJobId(uploadResponse.job_id)
+        console.log('✅ File validated, starting animation and processing')
+        
+        // Now start the animation
+        setIsPlaying(true)
+        
+        // Start full backend processing
+        processPortfolioGeneration(uploadedFile, true) // Skip validation since we just did it
+      } catch (error: any) {
+        console.error('❌ File validation failed:', error)
+        setShowCVCard(false)
+        setProcessingError(error.message || 'Please upload a valid resume/CV file')
+        alert(error.message || 'Please upload a valid resume/CV file')
+      }
+    } else {
+      // No file, just start animation (shouldn't happen)
+      setIsPlaying(true)
     }
   }
 
@@ -1532,19 +1551,22 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // 5. Show progress bar for 3 seconds
     // 6. Then show signup modal
     
-    // Step 1: Wait for CV to appear (~1.5 seconds for upload/display)
-    console.log('⏳ Waiting for CV to appear in card...')
+    // Step 1: Validate the file first before starting any animation
+    console.log('🔍 Validating file before animation...')
+    setShowCVCard(true) // Show CV card but don't start animation yet
     
-    setTimeout(() => {
-      // Step 2: CV is now visible, start MacBook animation immediately
-      console.log('✅ CV visible in card, starting MacBook animation immediately...')
+    // Upload and validate the file first
+    uploadFile(pendingFile).then(uploadResponse => {
+      // File is valid! Now start the animation
+      console.log('✅ File validated successfully, starting animation...')
+      setCurrentJobId(uploadResponse.job_id)
+      
+      // Step 2: CV is now visible and validated, start MacBook animation
       console.log('🎬 Starting MacBook animation...')
       setIsPlaying(true)
       
       // Keep progress at 0% - it should NOT animate until user signs up
       setRealProgress(0)
-      
-      // DO NOT animate progress bar - keep it at 0% while waiting for auth
       
       // The animation sequence takes about 6 seconds to reach "materializing" stage
       // where the MacBook appears and opens
@@ -1560,7 +1582,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           setShowSignupModal(true)
         }, 3000)
       }, 6000) // Time for animation to reach MacBook stage
-    }, 1500) // 1.5 seconds for CV to appear
+    }).catch(error => {
+      // File validation failed - show error and don't start animation
+      console.error('❌ File validation failed:', error)
+      setShowCVCard(false) // Hide the CV card
+      setProcessingError(error.message || 'Please upload a valid resume/CV file')
+      alert(error.message || 'Please upload a valid resume/CV file')
+    })
   }
 
   const handleAuthSuccess = async (data: any) => {
@@ -1617,11 +1645,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       
       // Trigger animation based on auth status
       if (isAuthenticated) {
-        console.log('✅ User authenticated, will start full process after CV appears')
-        setTimeout(() => {
-          console.log('🚀 Starting full process for authenticated user')
-          handleStartDemo()
-        }, 1500) // Wait for CV to appear first
+        console.log('✅ User authenticated, will validate and start full process')
+        // Validate first, then start demo
+        handleStartDemo() // This now includes validation
       } else {
         console.log('⚠️ User not authenticated, starting preview sequence')
         setTimeout(() => {
