@@ -1,9 +1,11 @@
 """
 Circuit Breaker pattern implementation for LLM service resilience
 Prevents cascade failures when the LLM service is experiencing issues
+Now with exponential backoff and full jitter for smoother recovery
 """
 import time
 import logging
+import random
 from typing import Optional, Callable, Any, Dict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -23,12 +25,18 @@ class CircuitState(Enum):
 
 @dataclass
 class CircuitBreakerConfig:
-    """Configuration for circuit breaker behavior"""
+    """Configuration for circuit breaker behavior with exponential backoff"""
     failure_threshold: int = 5           # Failures before opening circuit
     success_threshold: int = 2           # Successes in half-open before closing
-    timeout_seconds: float = 60.0        # Time before attempting recovery
-    failure_window_seconds: float = 60.0  # Time window for counting failures
+    base_timeout_seconds: float = 30.0   # Base timeout for exponential backoff
+    max_timeout_seconds: float = 300.0   # Maximum timeout (5 minutes)
+    timeout_multiplier: float = 2.0      # Exponential multiplier
+    jitter_range: float = 0.5            # Jitter range (0.5 = ±50% of calculated timeout)
+    failure_window_seconds: float = 60.0 # Time window for counting failures
     half_open_max_attempts: int = 3      # Max attempts in half-open state
+    
+    # Legacy support - will be calculated dynamically
+    timeout_seconds: float = field(init=False, default=60.0)
 
 
 @dataclass
@@ -71,8 +79,10 @@ class CircuitBreaker:
         self._recent_failures: list = []
         self._half_open_attempts = 0
         self._lock = asyncio.Lock()
+        self._failure_count = 0  # Track failures for exponential backoff
+        self._current_timeout = self.config.base_timeout_seconds
         
-        logger.info(f"Circuit breaker '{name}' initialized with config: {self.config}")
+        logger.info(f"Circuit breaker '{name}' initialized with exponential backoff config: base={self.config.base_timeout_seconds}s, max={self.config.max_timeout_seconds}s")
     
     async def __aenter__(self):
         """Async context manager entry"""
@@ -153,10 +163,34 @@ class CircuitBreaker:
         recent_failure_count = len(self._recent_failures)
         return recent_failure_count >= self.config.failure_threshold
     
+    def _calculate_timeout_with_jitter(self) -> float:
+        """
+        Calculate timeout with exponential backoff and full jitter
+        
+        Full jitter formula: timeout = random(0, min(cap, base * 2^attempt))
+        This provides the best performance under high contention
+        """
+        # Calculate exponential backoff
+        exponential_timeout = self.config.base_timeout_seconds * (self.config.timeout_multiplier ** self._failure_count)
+        
+        # Cap at maximum timeout
+        capped_timeout = min(exponential_timeout, self.config.max_timeout_seconds)
+        
+        # Apply full jitter (random between 0 and capped timeout)
+        # Full jitter is better than fixed or proportional jitter for avoiding thundering herd
+        jittered_timeout = random.uniform(0, capped_timeout)
+        
+        # Ensure minimum timeout (at least 1 second)
+        final_timeout = max(1.0, jittered_timeout)
+        
+        logger.debug(f"Circuit breaker '{self.name}': Calculated timeout={final_timeout:.2f}s (failures={self._failure_count}, exp={exponential_timeout:.2f}s, capped={capped_timeout:.2f}s)")
+        
+        return final_timeout
+    
     def _should_attempt_reset(self) -> bool:
         """Check if enough time has passed to attempt recovery"""
         time_since_change = datetime.now() - self._state_changed_at
-        return time_since_change.total_seconds() >= self.config.timeout_seconds
+        return time_since_change.total_seconds() >= self._current_timeout
     
     def _cleanup_old_failures(self):
         """Remove failures outside the time window"""
@@ -164,19 +198,25 @@ class CircuitBreaker:
         self._recent_failures = [f for f in self._recent_failures if f > cutoff]
     
     async def _transition_to_open(self):
-        """Transition to OPEN state"""
+        """Transition to OPEN state with exponential backoff calculation"""
         self.state = CircuitState.OPEN
         self._state_changed_at = datetime.now()
         self._half_open_attempts = 0
+        self._failure_count += 1  # Increment failure count for exponential backoff
+        
+        # Calculate next timeout with exponential backoff and jitter
+        self._current_timeout = self._calculate_timeout_with_jitter()
         
         self.stats.state_changes.append({
             "from": self.state.value,
             "to": CircuitState.OPEN.value,
             "at": self._state_changed_at.isoformat(),
-            "reason": f"Failures exceeded threshold ({self.stats.consecutive_failures})"
+            "reason": f"Failures exceeded threshold ({self.stats.consecutive_failures})",
+            "timeout": f"{self._current_timeout:.2f}s",
+            "failure_count": self._failure_count
         })
         
-        logger.error(f"Circuit breaker '{self.name}' opened due to failures")
+        logger.error(f"Circuit breaker '{self.name}' opened due to failures. Will retry in {self._current_timeout:.2f}s (failure #{self._failure_count})")
     
     async def _transition_to_half_open(self):
         """Transition to HALF_OPEN state"""
@@ -196,7 +236,7 @@ class CircuitBreaker:
         logger.info(f"Circuit breaker '{self.name}' half-open, testing recovery")
     
     async def _transition_to_closed(self):
-        """Transition to CLOSED state"""
+        """Transition to CLOSED state and reset exponential backoff"""
         previous_state = self.state
         self.state = CircuitState.CLOSED
         self._state_changed_at = datetime.now()
@@ -204,14 +244,19 @@ class CircuitBreaker:
         self._recent_failures.clear()
         self.stats.reset_consecutive_counters()
         
+        # Reset exponential backoff counters
+        self._failure_count = 0
+        self._current_timeout = self.config.base_timeout_seconds
+        
         self.stats.state_changes.append({
             "from": previous_state.value,
             "to": CircuitState.CLOSED.value,
             "at": self._state_changed_at.isoformat(),
-            "reason": "Service recovered"
+            "reason": "Service recovered",
+            "backoff_reset": True
         })
         
-        logger.info(f"Circuit breaker '{self.name}' closed, service recovered")
+        logger.info(f"Circuit breaker '{self.name}' closed - service recovered, backoff reset to {self.config.base_timeout_seconds}s")
     
     def get_status(self) -> Dict[str, Any]:
         """Get current circuit breaker status"""
@@ -232,9 +277,17 @@ class CircuitBreaker:
                 "last_failure": self.stats.last_failure_time.isoformat() if self.stats.last_failure_time else None,
                 "last_success": self.stats.last_success_time.isoformat() if self.stats.last_success_time else None,
             },
+            "backoff": {
+                "failure_count": self._failure_count,
+                "current_timeout": f"{self._current_timeout:.2f}s",
+                "next_retry": (self._state_changed_at + timedelta(seconds=self._current_timeout)).isoformat() if self.state == CircuitState.OPEN else None
+            },
             "config": {
                 "failure_threshold": self.config.failure_threshold,
-                "timeout_seconds": self.config.timeout_seconds,
+                "base_timeout_seconds": self.config.base_timeout_seconds,
+                "max_timeout_seconds": self.config.max_timeout_seconds,
+                "timeout_multiplier": self.config.timeout_multiplier,
+                "jitter_range": self.config.jitter_range,
                 "failure_window_seconds": self.config.failure_window_seconds
             }
         }
@@ -278,10 +331,12 @@ def with_circuit_breaker(breaker: CircuitBreaker):
 llm_circuit_breaker = CircuitBreaker(
     "llm_service",
     CircuitBreakerConfig(
-        failure_threshold=5,          # Open after 5 failures
-        success_threshold=2,          # Close after 2 successes
-        timeout_seconds=60,           # Try recovery after 1 minute
-        failure_window_seconds=60,    # Count failures in 1 minute window
-        half_open_max_attempts=3      # Allow 3 test calls in half-open
+        failure_threshold=5,              # Open after 5 failures
+        success_threshold=2,              # Close after 2 successes
+        base_timeout_seconds=30.0,       # Start with 30s timeout
+        max_timeout_seconds=300.0,       # Cap at 5 minutes
+        timeout_multiplier=2.0,          # Double timeout each failure
+        failure_window_seconds=60.0,     # Count failures in 1 minute window
+        half_open_max_attempts=3         # Allow 3 test calls in half-open
     )
 )
