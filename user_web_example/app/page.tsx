@@ -839,7 +839,7 @@ const VerticalProgressBar = ({
 }
 
 // Resume2Website Demo Component - Mobile-First WOW Experience
-function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn, setErrorToast }: { 
+function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn, setErrorToast, isRetrying, setIsRetrying }: { 
   onOpenModal: () => void; 
   setShowPricing: (value: boolean) => void;
   uploadedFile: File | null;
@@ -853,6 +853,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     message: string;
     suggestion?: string;
   }) => void;
+  isRetrying: boolean;
+  setIsRetrying: (value: boolean) => void;
 }) {
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
@@ -1182,6 +1184,23 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }, [isPlaying])
 
+  // Handle retry after error
+  useEffect(() => {
+    if (isRetrying && uploadedFile && !isPlaying) {
+      console.log('🔄 Retry detected, starting validation and animation')
+      setIsRetrying(false) // Reset flag
+      
+      // Check if user is authenticated
+      if (isAuthenticated) {
+        console.log('✅ User authenticated, starting full demo')
+        handleStartDemo()
+      } else {
+        console.log('⚠️ User not authenticated, starting preview')
+        startPreviewAnimation(uploadedFile)
+      }
+    }
+  }, [isRetrying, uploadedFile, isPlaying])
+  
   // Trigger new typewriter is now handled in the animation sequence
   // This useEffect is disabled to prevent duplicate triggers
   /*
@@ -2995,6 +3014,7 @@ export default function Home() {
   const [hasTriggeredPhase6Modal, setHasTriggeredPhase6Modal] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const [showPricing, setShowPricing] = useState(false)
+  const [isRetrying, setIsRetrying] = useState(false)
   
   // Error toast state
   const [errorToast, setErrorToast] = useState<{
@@ -3148,23 +3168,19 @@ export default function Home() {
       console.log('📤 Setting new file for validation:', file.name)
       setUploadedFile(file)
       
-      // For unauthenticated users, also set dropped file and start preview
+      // For unauthenticated users, also set dropped file
       if (!isAuthenticated) {
         setDroppedFile(file)
         console.log('📦 File stored for processing after authentication')
-        
-        // Start the preview animation after file is set
-        setTimeout(() => {
-          console.log('🎬 Starting preview animation after retry')
-          startPreviewAnimation(file) // Pass the file directly
-        }, 200) // Slightly longer delay to ensure CV appears in pile first
-      } else {
-        // For authenticated users, start the full demo
-        setTimeout(() => {
-          console.log('🚀 Starting full demo after retry')
-          handleStartDemo()
-        }, 100) // Small delay to ensure file is visible in CV pile first
       }
+      
+      // Trigger the demo to start - the Resume2WebsiteDemo component will handle it
+      // when it detects the uploadedFile change
+      setTimeout(() => {
+        console.log('🎯 Triggering demo start after retry...')
+        // Set a flag to indicate retry is happening
+        setIsRetrying(true)
+      }, 200) // Delay to ensure file is visible in CV pile first
     }, 100) // Increased delay to ensure proper state reset
   }
 
@@ -3408,6 +3424,8 @@ export default function Home() {
           handleFileSelect={handleFileSelect}
           signIn={signIn}
           setErrorToast={setErrorToast}
+          isRetrying={isRetrying}
+          setIsRetrying={setIsRetrying}
         />
       </section>
       <section id="demo" className="min-h-screen">
