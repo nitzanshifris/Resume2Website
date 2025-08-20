@@ -16,8 +16,14 @@
 
 2. **cv.py** ✅
    - **Prefix**: `/api/v1`
-   - **Used for**: CV upload and processing (`/api/v1/upload`, `/api/v1/upload-multiple`)
-   - **Status**: Active and needed
+   - **Used for**: 
+     - `POST /api/v1/upload` - Authenticated upload (validates + extracts)
+     - `POST /api/v1/upload-anonymous` - Anonymous upload (validates only)
+     - `POST /api/v1/extract/{job_id}` - Extract CV data after signup
+     - `POST /api/v1/upload-multiple` - Multiple file upload
+     - `GET /api/v1/cv/{job_id}` - Get CV data
+     - `PUT /api/v1/cv/{job_id}` - Update CV data
+   - **Status**: Active and critical for anonymous flow
 
 3. **sse.py** ✅
    - **Prefix**: `/api/v1`
