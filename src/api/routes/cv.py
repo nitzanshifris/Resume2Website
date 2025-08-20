@@ -539,20 +539,26 @@ async def upload_cv(
                 if os.path.exists(tmp_file_path):
                     os.unlink(tmp_file_path)
             
+            # Check if this is an image file
+            is_image_file = mime_type and mime_type.startswith('image/')
+            
             # Check if content is likely a resume
             is_resume, score, signals = is_likely_resume(
                 gate_text, 
                 threshold=settings.cv_min_resume_score,
-                max_chars=settings.cv_gate_max_chars
+                max_chars=settings.cv_gate_max_chars,
+                is_image=is_image_file
             )
             
             if not is_resume:
                 reason = get_rejection_reason(signals)
+                from src.utils.cv_resume_gate import get_suggestion_for_rejection
+                suggestion = get_suggestion_for_rejection(signals)
                 error_response = {
                     "error": "Please upload a valid resume/CV file",
                     "score": score,
                     "reason": reason,
-                    "suggestion": "Make sure your file contains standard resume sections like Experience, Education, Skills, and contact information."
+                    "suggestion": suggestion
                 }
                 
                 # Include signals in debug mode
@@ -1007,7 +1013,7 @@ async def extract_cv_data_endpoint(
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT job_id, filename, file_type, status, cv_data, user_id FROM cv_uploads WHERE job_id = ?",
+                "SELECT job_id, filename, file_type, status, cv_data, user_id, file_hash FROM cv_uploads WHERE job_id = ?",
                 (job_id,)
             )
             result = cursor.fetchone()
@@ -1106,24 +1112,54 @@ async def extract_cv_data_endpoint(
             raise HTTPException(status_code=400, detail="No text content found in file")
         
         # Extract structured data using Claude 4 Opus
-        logger.info(f"🤖 Extracting CV data for job {job_id} using Claude 4 Opus")
+        logger.info(f"🤖 Extracting CV data for job {job_id} using Claude 4 Opus from {len(text)} characters of text")
         # Create new extractor instance for this request
         extractor = create_data_extractor()
         cv_data = await extractor.extract_cv_data(text)
         
-        if cv_data:
-            # Store extraction result
-            import json
-            cv_data_json = json.dumps(cv_data.model_dump_nullable())
-            update_cv_upload_status(job_id, 'completed', cv_data_json)
-            
-            return {
-                "status": "completed",
-                "cv_data": cv_data.model_dump_nullable()
-            }
-        else:
+        if not cv_data:
+            logger.error("❌ CV data extraction returned None")
             update_cv_upload_status(job_id, 'failed')
             raise HTTPException(status_code=500, detail="Failed to extract CV data")
+        
+        sections_count = len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])
+        logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
+        
+        # Calculate confidence score
+        confidence_score = extractor.calculate_extraction_confidence(cv_data, text)
+        logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
+        
+        # Save CV data to database
+        import json
+        cv_data_json = json.dumps(cv_data.model_dump_nullable())
+        update_cv_upload_status(job_id, 'completed', cv_data_json)
+        
+        # Get file hash for caching (if available)
+        if cv_upload.get('file_hash'):
+            file_hash = cv_upload['file_hash']
+            # Cache extraction result if confidence is high enough
+            if confidence_score >= 0.75:  # Only cache high-confidence extractions
+                cache_success = cache_extraction_result(
+                    file_hash=file_hash,
+                    cv_data=cv_data_json,
+                    extraction_model=config.PRIMARY_MODEL,  # claude-4-opus
+                    temperature=config.EXTRACTION_TEMPERATURE,  # 0.0
+                    confidence_score=confidence_score
+                )
+                if cache_success:
+                    logger.info(f"💾 High-confidence extraction cached for future use (score: {confidence_score:.2f})")
+                else:
+                    logger.warning("❌ Failed to cache extraction result")
+            else:
+                logger.info(f"⚠️ Low confidence score ({confidence_score:.2f}) - not caching result")
+        
+        logger.info(f"✅ CV extraction completed for job {job_id}")
+        
+        return {
+            "status": "completed",
+            "cv_data": cv_data.model_dump_nullable(),
+            "confidence_score": confidence_score
+        }
             
     except HTTPException:
         raise
@@ -1234,20 +1270,26 @@ async def upload_cv_anonymous(
                 if os.path.exists(tmp_file_path):
                     os.unlink(tmp_file_path)
             
+            # Check if this is an image file
+            is_image_file = mime_type and mime_type.startswith('image/')
+            
             # Check if content is likely a resume
             is_resume, score, signals = is_likely_resume(
                 gate_text, 
                 threshold=settings.cv_min_resume_score,
-                max_chars=settings.cv_gate_max_chars
+                max_chars=settings.cv_gate_max_chars,
+                is_image=is_image_file
             )
             
             if not is_resume:
                 reason = get_rejection_reason(signals)
+                from src.utils.cv_resume_gate import get_suggestion_for_rejection
+                suggestion = get_suggestion_for_rejection(signals)
                 error_response = {
                     "error": "Please upload a valid resume/CV file",
                     "score": score,
                     "reason": reason,
-                    "suggestion": "Make sure your file contains standard resume sections like Experience, Education, Skills, and contact information."
+                    "suggestion": suggestion
                 }
                 
                 # Include signals in debug mode
@@ -1334,79 +1376,13 @@ async def upload_cv_anonymous(
         file_hash=file_hash
     )
     
-    # === CV PROCESSING (SAME AS REGULAR UPLOAD) ===
-    try:
-        # Extract text from file
-        text = text_extractor.extract_text(file_path)
-        
-        if not text or len(text.strip()) < 10:
-            # Update status to failed
-            update_cv_upload_status(job_id, 'failed')
-            raise HTTPException(status_code=400, detail="File appears to be empty or unreadable")
-        
-        # Extract structured data from text using Claude 4 Opus
-        logger.info(f"🤖 Extracting structured data using Claude 4 Opus from {len(text)} characters of text")
-        try:
-            # Create new extractor instance for this request
-            extractor = create_data_extractor()
-            cv_data = await extractor.extract_cv_data(text)
-            
-            if not cv_data:
-                logger.error("❌ CV data extraction returned None")
-                update_cv_upload_status(job_id, 'failed')
-                # Return success with job_id even if extraction failed
-                return UploadResponse(
-                    message="File uploaded but CV extraction failed. Please try again.",
-                    job_id=job_id
-                )
-            
-            sections_count = len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])
-            logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
-            
-            # Calculate confidence score
-            confidence_score = extractor.calculate_extraction_confidence(cv_data, text)
-            logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
-            
-            # Save CV data to database
-            import json
-            cv_data_json = json.dumps(cv_data.model_dump_nullable())
-            update_cv_upload_status(job_id, 'completed', cv_data_json)
-            
-            # Cache extraction result if confidence is high enough
-            if confidence_score >= 0.75:  # Only cache high-confidence extractions
-                cache_success = cache_extraction_result(
-                    file_hash=file_hash,
-                    cv_data=cv_data_json,
-                    extraction_model=config.PRIMARY_MODEL,  # claude-4-opus
-                    temperature=config.EXTRACTION_TEMPERATURE,  # 0.0
-                    confidence_score=confidence_score
-                )
-                if cache_success:
-                    logger.info(f"💾 High-confidence extraction cached for future use (score: {confidence_score:.2f})")
-                else:
-                    logger.warning("❌ Failed to cache extraction result")
-            else:
-                logger.info(f"⚠️ Low confidence score ({confidence_score:.2f}) - not caching result")
-            
-            logger.info(f"✅ Anonymous CV upload and extraction completed for job {job_id}")
-            
-        except Exception as e:
-            logger.error(f"Failed to extract CV data: {e}")
-            import traceback
-            logger.error(f"Full traceback:\n{traceback.format_exc()}")
-            # Mark as failed but still return job_id
-            update_cv_upload_status(job_id, 'failed')
-            return UploadResponse(
-                message="File uploaded but CV extraction failed. Please try again.",
-                job_id=job_id
-            )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"CV processing failed for job {job_id}: {e}")
-        update_cv_upload_status(job_id, 'failed')
-        raise HTTPException(status_code=500, detail=f"CV processing failed: {str(e)}")
+    # === ANONYMOUS UPLOAD COMPLETE - NO EXTRACTION ===
+    # The extraction will happen later via /extract/{job_id} after user signs up
+    logger.info(f"✅ Anonymous file uploaded and validated successfully for job {job_id}")
+    logger.info(f"📁 File saved, awaiting user signup for extraction")
+    
+    # Set status to 'uploaded' instead of 'completed' since no extraction happened yet
+    update_cv_upload_status(job_id, 'uploaded')
     
     # === RECORD SUCCESSFUL UPLOAD FOR RATE LIMITING ===
     # Only record for anonymous users

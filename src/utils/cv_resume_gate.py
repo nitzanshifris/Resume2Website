@@ -322,7 +322,7 @@ def score_resume_likelihood(text: str, max_chars: int = 5000) -> Tuple[int, Dict
     return total_score, signals_dict
 
 
-def is_likely_resume(text: str, threshold: int = 60, max_chars: int = 5000) -> Tuple[bool, int, Dict[str, int]]:
+def is_likely_resume(text: str, threshold: int = 60, max_chars: int = 5000, is_image: bool = False) -> Tuple[bool, int, Dict[str, int]]:
     """
     Determine if the text is likely a resume based on scoring threshold.
     
@@ -330,11 +330,49 @@ def is_likely_resume(text: str, threshold: int = 60, max_chars: int = 5000) -> T
         text: The text content to analyze
         threshold: Minimum score to be considered a resume (default 60)
         max_chars: Maximum characters to analyze (default 5000)
+        is_image: Whether the source is an image file (requires stricter validation)
     
     Returns:
         Tuple of (is_resume, score, signals_dict)
     """
     score, signals = score_resume_likelihood(text, max_chars)
+    
+    # For image files, apply stricter validation
+    if is_image:
+        # Require minimum text length for images (screenshots often have less text)
+        if len(text) < 500:
+            score = max(0, score - 20)  # Penalize short text from images
+            signals['image_short_text_penalty'] = -20
+        
+        # Check signal diversity - require at least 3 different types of signals
+        signal_types = set()
+        for key in signals.keys():
+            if signals[key] > 0:
+                if key.startswith('section_'):
+                    signal_types.add('section')
+                elif key in ['email', 'phone', 'professional_url']:
+                    signal_types.add('contact')
+                elif key in ['date_ranges', 'month_year_dates', 'year_mentions']:
+                    signal_types.add('dates')
+                elif key == 'job_titles':
+                    signal_types.add('job_titles')
+                elif key == 'bullet_structure':
+                    signal_types.add('structure')
+        
+        # Require at least 3 different signal types for images
+        if len(signal_types) < 3:
+            diversity_penalty = (3 - len(signal_types)) * 10
+            score = max(0, score - diversity_penalty)
+            signals['image_diversity_penalty'] = -diversity_penalty
+        
+        # For images, require both contact info AND experience section
+        has_contact = any(signals.get(k, 0) > 0 for k in ['email', 'phone'])
+        has_experience = signals.get('section_experience', 0) > 0
+        
+        if not (has_contact and has_experience):
+            score = max(0, score - 15)  # Additional penalty
+            signals['image_missing_core_penalty'] = -15
+    
     is_resume = score >= threshold
     
     # Log decision and top signals
@@ -343,7 +381,7 @@ def is_likely_resume(text: str, threshold: int = 60, max_chars: int = 5000) -> T
         sorted_signals = sorted(signals.items(), key=lambda x: abs(x[1]), reverse=True)[:3]
         top_signals_str = ', '.join(f"{k}={v}" for k, v in sorted_signals)
         logger.info(f"Resume Gate: score={score}, threshold={threshold}, "
-                   f"decision={'PASS' if is_resume else 'FAIL'}, "
+                   f"is_image={is_image}, decision={'PASS' if is_resume else 'FAIL'}, "
                    f"top_signals=[{top_signals_str}]")
     
     return is_resume, score, signals
@@ -372,6 +410,17 @@ def get_rejection_reason(signals: Dict[str, int]) -> str:
     # Check for contact info
     has_contact = 'email' in signals or 'phone' in signals
     
+    # Check for image-specific penalties
+    is_image_rejection = any(k in signals for k in ['image_short_text_penalty', 'image_diversity_penalty', 'image_missing_core_penalty'])
+    
+    if is_image_rejection:
+        if 'image_short_text_penalty' in signals:
+            return "The image doesn't contain enough readable text for a resume"
+        elif 'image_diversity_penalty' in signals:
+            return "The image lacks the variety of content expected in a resume"
+        elif 'image_missing_core_penalty' in signals:
+            return "The image is missing core resume elements (contact info and experience)"
+    
     if missing and not has_contact:
         return f"Your file is missing: contact information and resume sections ({', '.join(missing)})"
     elif missing:
@@ -392,6 +441,17 @@ def get_suggestion_for_rejection(signals: Dict[str, int]) -> str:
     Returns:
         A suggestion for the user
     """
+    # Check for image-specific penalties
+    is_image_rejection = any(k in signals for k in ['image_short_text_penalty', 'image_diversity_penalty', 'image_missing_core_penalty'])
+    
+    if is_image_rejection:
+        if 'image_short_text_penalty' in signals:
+            return "Please upload a complete resume document or a high-quality scan with all resume sections visible."
+        elif 'image_diversity_penalty' in signals:
+            return "Upload a full resume with multiple sections (Experience, Education, Skills, Contact info)."
+        elif 'image_missing_core_penalty' in signals:
+            return "Make sure your resume image includes both contact information and work experience."
+    
     has_sections = any(k.startswith('section_') for k in signals)
     has_contact = 'email' in signals or 'phone' in signals
     

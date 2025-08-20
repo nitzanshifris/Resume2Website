@@ -126,19 +126,14 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
         // Handle Resume Gate detailed error
         if (typeof errorData.detail === 'object') {
           const { error, score, reason, suggestion } = errorData.detail
-          let message = error || 'Please upload a valid resume/CV file'
-          
-          if (reason) {
-            message += `\n\n${reason}`
-          }
-          
-          if (suggestion) {
-            message += `\n\n💡 ${suggestion}`
-          }
-          
-          // Don't show debug score in the error message
-          
-          throw new Error(message)
+          // Create a structured error that preserves the details
+          const err = new Error(error || 'Please upload a valid resume/CV file')
+          // Add custom properties to preserve the backend details
+          ;(err as any).statusCode = 400
+          ;(err as any).resumeGateReason = reason
+          ;(err as any).resumeGateSuggestion = suggestion
+          ;(err as any).isResumeGateError = true
+          throw err
         }
         throw new Error(errorData.detail)
       }
@@ -152,6 +147,45 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new Error('Network error: Unable to connect to server. Please check if the backend is running.')
     }
+    throw error
+  }
+}
+
+// Extract CV data from an already uploaded file
+export async function extractCVData(jobId: string): Promise<any> {
+  const sessionId = getSessionId()
+  if (!sessionId) {
+    throw new Error('Authentication required: Please sign in to extract CV data')
+  }
+  
+  const extractUrl = `${API_BASE_URL}/api/v1/extract/${jobId}`
+  console.log('📊 Extracting CV data for job:', jobId)
+  
+  try {
+    const response = await fetch(extractUrl, {
+      method: 'POST',
+      headers: {
+        'X-Session-ID': sessionId,
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('Extract error response:', response.status, errorData)
+      
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`Authentication required: ${errorData.message || 'Please sign in to continue'}`)
+      }
+      
+      throw new Error(errorData.detail || errorData.message || `Extraction failed with status ${response.status}`)
+    }
+    
+    const result = await response.json()
+    console.log('✅ CV extraction completed:', result.status)
+    return result
+  } catch (error: any) {
+    console.error('Extract error:', error)
     throw error
   }
 }
@@ -198,19 +232,14 @@ export async function uploadMultipleFiles(files: File[]): Promise<UploadResponse
         // Handle Resume Gate detailed error
         if (typeof errorData.detail === 'object') {
           const { error, score, reason, suggestion } = errorData.detail
-          let message = error || 'Please upload valid resume/CV files'
-          
-          if (reason) {
-            message += `\n\n${reason}`
-          }
-          
-          if (suggestion) {
-            message += `\n\n💡 ${suggestion}`
-          }
-          
-          // Don't show debug score in the error message
-          
-          throw new Error(message)
+          // Create a structured error that preserves the details
+          const err = new Error(error || 'Please upload valid resume/CV files')
+          // Add custom properties to preserve the backend details
+          ;(err as any).statusCode = 400
+          ;(err as any).resumeGateReason = reason
+          ;(err as any).resumeGateSuggestion = suggestion
+          ;(err as any).isResumeGateError = true
+          throw err
         }
         throw new Error(errorData.detail)
       }

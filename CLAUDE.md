@@ -104,7 +104,9 @@ CV extraction creates structured data with these sections:
 ## Key API Endpoints
 ```python
 # CV Management
-POST /api/v1/upload-cv                    # Upload CV file
+POST /api/v1/upload                       # Upload CV (authenticated users - validates + extracts)
+POST /api/v1/upload-anonymous             # Upload CV (anonymous - validates only, NO extraction)
+POST /api/v1/extract/{job_id}             # Extract CV data (called after signup for anonymous)
 GET /api/v1/cv/{job_id}                   # Get CV data
 PUT /api/v1/cv/{job_id}                   # Update CV data
 GET /api/v1/my-cvs                        # List user's CVs
@@ -133,10 +135,14 @@ GET /api/v1/auth/google/status            # Check Google OAuth availability
 ```
 
 ## Architecture Essentials
+- **Resume Gate Validation**: Stricter for images (requires 500+ chars, 3+ signal types, both contact AND experience)
+  - Smart rejection reasons with helpful suggestions
+  - Image-specific validation rules to prevent screenshot abuse
 - **CV Extraction**: 18 sections, cached in SQLite, hash-based deduplication
   - Modular architecture with specialized components (section_extractor, post_processor, etc.)
   - Circuit breaker pattern for LLM resilience (5 failures → 60s timeout)
   - Factory pattern for extractor instances (no singleton conflicts)
+  - Confidence scoring for extraction quality (caches only >0.75 confidence)
   - Real-time metrics tracking at `/api/v1/metrics/current`
 - **Portfolio Generation**: Two-stage process - Preview first, then optional deployment
 - **Preview Mode**: Instant local preview on ports 4000-5000 (no deployment needed)
@@ -150,8 +156,18 @@ GET /api/v1/auth/google/status            # Check Google OAuth availability
 
 ## Development Workflow Patterns
 ### CV Processing Flow
+
+#### Anonymous Users (NEW FLOW):
 ```
-1. User uploads CV → Text extraction → Claude 4 Opus analysis → SQLite storage
+1. Upload file → /upload-anonymous → Resume Gate validation → Save file → Return job_id (NO extraction)
+2. Frontend shows MacBook animation → Shows signup modal after 6 seconds
+3. User signs up → handleAuthSuccess → Calls /extract/{job_id} → Claude 4 Opus extraction
+4. Portfolio generation continues with extracted data
+```
+
+#### Authenticated Users:
+```
+1. Upload CV → /upload → Resume Gate validation → Text extraction → Claude 4 Opus analysis → SQLite storage
 2. CV Editor → User edits extracted data → CRUD operations
 3. Portfolio generation → Isolated sandbox → Template injection → Vercel deployment
 4. Resource management → Health monitoring → Auto-cleanup → Metrics tracking
@@ -199,6 +215,10 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 - **Live Logging**: Use structured prefixes (🚀 ⏳ ✅ ⚠️ ❌) for transparency
 - **Resource Management**: Auto-cleanup portfolios >24h, max 20 active, 512MB memory limit
 - **Caching Strategy**: File hash deduplication, SQLite CV data cache, API response optimization
+- **Validation Guards**: File fingerprinting (name-size-lastModified) to prevent double uploads
+- **Error Handling**: Structured errors with Resume Gate reasons and suggestions
+- **Retry Flow**: Seamless retry with skipValidation flag for already-validated files
+- **State Management**: currentJobId tracks anonymous uploads across signup flow
 
 ## Critical Reminders
 1. **Claude 4 Opus ONLY** - No other AI models (temperature 0.0)
@@ -218,8 +238,11 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 - **Vercel deployment hangs**: Check `ps aux | grep vercel`, may be building
 - **Infinite npm install loop**: Remove `"install": "npm install"` from scripts
 - **"Cannot find module"**: Run `pnpm install` in project root
-- **TypeScript errors**: Run `pnpm run typecheck` to see all errors
+- **TypeScript errors**: Run `npx tsc --noEmit` in user_web_example folder
 - **Python venv issues**: Check `which python` shows venv path
+- **Resume Gate too strict/lenient**: Adjust threshold in settings.py (default=60)
+- **Double upload on retry**: Check validation guards in handleFileSelect
+- **Animation not starting**: Verify skipValidation flag and event dispatching
 
 ### Debug Commands
 ```bash
@@ -250,7 +273,8 @@ pnpm run dev --verbose                         # Frontend verbose logs
 ## Portfolio Generation Flow
 ### Two-Stage Process
 1. **Preview Stage** (Default):
-   - User uploads CV → Extract → Generate → **Local Preview**
+   - Authenticated: Upload → Extract → Generate → **Local Preview**
+   - Anonymous: Upload (validation only) → Animation → Signup → Extract → Generate → **Local Preview**
    - Instant preview on `http://localhost:4000`
    - No deployment, runs locally for testing
    - Portfolio persists across page refreshes
@@ -259,6 +283,7 @@ pnpm run dev --verbose                         # Frontend verbose logs
    - User approves preview → Payment → **Deploy to Vercel**
    - Real-time progress monitoring (~2-3 min)
    - Returns live URL: `https://portfolio-xxxxx.vercel.app`
+   - Automatic custom domain: `https://john-doe.portfolios.resume2website.com`
 
 ### Key Implementation Details
 - **CLI Integration**: Uses `vercel` CLI to bypass 10MB API limit
@@ -365,7 +390,7 @@ HTTP/2 200
 - **config.py** - Backend configuration, environment variables, AI model settings
 - **main.py** - FastAPI application entry point with routing
 - **src/api/routes/portfolio_generator.py** - Portfolio generation + optional Vercel deployment
-- **src/api/routes/cv.py** - CV upload, extraction, CRUD operations
+- **src/api/routes/cv.py** - CV upload, extraction, CRUD operations (separate flows for anonymous/authenticated)
 - **src/api/routes/metrics.py** - Real-time extraction metrics endpoint
 - **src/api/routes/payments.py** - Stripe payment processing endpoints
 - **src/api/routes/user_auth.py** - OAuth authentication endpoints (Google, LinkedIn)
@@ -374,8 +399,12 @@ HTTP/2 200
 - **src/core/cv_extraction/llm_service.py** - Claude 4 Opus integration with circuit breaker
 - **src/core/cv_extraction/metrics.py** - Performance metrics collection
 - **src/core/cv_extraction/circuit_breaker.py** - Resilience pattern for LLM failures
+- **src/utils/cv_resume_gate.py** - Resume validation logic with image-specific rules
 - **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
-- **user_web_example/app/page.tsx** - Main frontend entry point with portfolio restoration
+- **user_web_example/app/page.tsx** - Main frontend with anonymous/auth flows, retry handling
+- **user_web_example/lib/api.ts** - API client with uploadFile, extractCVData functions
+- **user_web_example/components/interactive-cv-pile.tsx** - CV upload UI with drag-drop
+- **user_web_example/components/ui/error-toast.tsx** - Resume Gate error display with retry
 - **user_web_example/components/embedded-checkout-modal.tsx** - Stripe payment modal
 - **user_web_example/app/payment-return/page.tsx** - Payment confirmation page
 - **package.json** - Frontend dependencies, scripts, workspace config

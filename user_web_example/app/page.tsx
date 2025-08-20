@@ -30,7 +30,7 @@ import ErrorToast from "@/components/ui/error-toast"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
-import { uploadFile, API_BASE_URL } from "@/lib/api"
+import { uploadFile, extractCVData, API_BASE_URL } from "@/lib/api"
 
 // Linear progress milestones - evenly distributed for predictable progress
 const PROGRESS_MILESTONES = {
@@ -849,6 +849,14 @@ interface StandardizedError {
 // Constant for custom event name to avoid typos
 const RESUME_AUTO_START_EVENT = 'resume2web:autoStart'
 
+// TypeScript declaration for window flags
+declare global {
+  interface Window {
+    __isHandlingFileSelect?: boolean
+    __autoStartListeners?: number
+  }
+}
+
 // Resume2Website Demo Component - Mobile-First WOW Experience
 function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn, setErrorToast, isRetrying, setIsRetrying }: { 
   onOpenModal: () => void; 
@@ -896,11 +904,43 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       }
     }
     
+    // Handle Resume Gate errors with custom properties
+    if (error.isResumeGateError) {
+      return {
+        title: 'Not a resume',
+        message: error.resumeGateReason || "This file doesn't look like a resume (CV).",
+        suggestion: error.resumeGateSuggestion || 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
     const errorMessage = error.message || 'File validation failed'
     const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
     
     // Check for specific error patterns in the message
     if (statusCode === 400 && (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate'))) {
+      // Check if we have more specific error details from backend
+      if (errorMessage.includes("doesn't contain enough readable text")) {
+        return {
+          title: 'Not a resume',
+          message: "The image doesn't contain enough readable text for a resume.",
+          suggestion: 'Please upload a complete resume document or a high-quality scan with all resume sections visible.'
+        }
+      }
+      if (errorMessage.includes("lacks the variety of content")) {
+        return {
+          title: 'Not a resume',
+          message: "The image lacks the variety of content expected in a resume.",
+          suggestion: 'Upload a full resume with multiple sections (Experience, Education, Skills, Contact info).'
+        }
+      }
+      if (errorMessage.includes("missing core resume elements")) {
+        return {
+          title: 'Not a resume',
+          message: "The image is missing core resume elements.",
+          suggestion: 'Make sure your resume image includes both contact information and work experience.'
+        }
+      }
+      // Default resume error
       return {
         title: 'Not a resume',
         message: "This file doesn't look like a resume (CV).",
@@ -1685,7 +1725,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }
 
-  const startPreviewAnimation = (fileToProcess?: File) => {
+  const startPreviewAnimation = (fileToProcess?: File, skipValidation: boolean = false) => {
     console.log('🎬 Starting preview animation (no backend processing)')
     
     // Use provided file or fall back to uploadedFile
@@ -1734,17 +1774,19 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // 5. Show progress bar for 3 seconds
     // 6. Then show signup modal
     
-    // Step 1: Validate the file first before starting any animation
-    console.log('🔍 Validating file before animation...', file.name)
-    setShowCVCard(true) // Show CV card but don't start animation yet
-    
-    // Upload and validate the file first (use the correct file reference)
-    uploadFile(file).then(uploadResponse => {
-      // File is valid! Now start the animation
-      console.log('✅ File validated successfully, starting animation...')
-      setCurrentJobId(uploadResponse.job_id)
+    // Step 1: Check if we need to validate
+    if (skipValidation) {
+      // File already validated - just start the animation
+      console.log('✅ Skipping validation (already done), starting animation...')
+      setShowCVCard(true)
       
-      // Step 2: CV is now visible and validated, start MacBook animation
+      // Get job ID from localStorage if available
+      const jobId = localStorage.getItem('pending_job_id')
+      if (jobId) {
+        setCurrentJobId(jobId)
+      }
+      
+      // Start MacBook animation
       console.log('🎬 Starting MacBook animation...')
       setIsPlaying(true)
       
@@ -1752,53 +1794,72 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       setRealProgress(0)
       
       // The animation sequence takes about 6 seconds to reach "materializing" stage
-      // where the MacBook appears and opens
       setTimeout(() => {
-        // Step 3: MacBook should be fully open now
         console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
-        setShowPortfolioInMacBook(true) // Ensure MacBook content is visible
+        setShowPortfolioInMacBook(true)
         
-        // Step 4: Wait 3 seconds with progress bar visible
         setTimeout(() => {
-          // Step 5: Now show the signup modal
           console.log('⏰ Showing signup modal after full preview')
           setShowSignupModal(true)
         }, 3000)
-      }, 6000) // Time for animation to reach MacBook stage
-    }).catch(error => {
-      // File validation failed - show error and don't start animation
-      // Don't log to console - we'll show the nice error toast
-      // Hide the CV card since the file is invalid
-      setShowCVCard(false)
-      setProcessingError(error.message || 'Please upload a valid resume/CV file')
+      }, 6000)
+    } else {
+      // Need to validate first
+      console.log('🔍 Validating file before animation...', file.name)
+      setShowCVCard(true)
       
-      // Reset all animation and progress states
-      setIsPlaying(false)
-      setProgress(0)
-      setRealProgress(0)
-      setStage("typewriter")
-      setShowPortfolioInMacBook(false)
-      
-      // Parse error message
-      const errorMessage = error.message || 'Please upload a valid resume/CV file'
-      
-      // Use standardized error messages
-      const errorInfo = getStandardizedError(error)
-      
-      // Show auth modal if needed
-      if (errorInfo.isAuthError) {
-        setShowSignupModal(true)
-        return
-      }
-      
-      // Show error toast with standardized message
-      setErrorToast({
-        isOpen: true,
-        title: errorInfo.title,
-        message: errorInfo.message,
-        suggestion: errorInfo.suggestion
+      uploadFile(file).then(uploadResponse => {
+        console.log('✅ File validated successfully, starting animation...')
+        setCurrentJobId(uploadResponse.job_id)
+        
+        console.log('🎬 Starting MacBook animation...')
+        setIsPlaying(true)
+        setRealProgress(0)
+        
+        setTimeout(() => {
+          console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
+          setShowPortfolioInMacBook(true)
+          
+          setTimeout(() => {
+            console.log('⏰ Showing signup modal after full preview')
+            setShowSignupModal(true)
+          }, 3000)
+        }, 6000)
+      }).catch(error => {
+        // File validation failed - show error and don't start animation
+        // Don't log to console - we'll show the nice error toast
+        // Hide the CV card since the file is invalid
+        setShowCVCard(false)
+        setProcessingError(error.message || 'Please upload a valid resume/CV file')
+        
+        // Reset all animation and progress states
+        setIsPlaying(false)
+        setProgress(0)
+        setRealProgress(0)
+        setStage("typewriter")
+        setShowPortfolioInMacBook(false)
+        
+        // Parse error message
+        const errorMessage = error.message || 'Please upload a valid resume/CV file'
+        
+        // Use standardized error messages
+        const errorInfo = getStandardizedError(error)
+        
+        // Show auth modal if needed
+        if (errorInfo.isAuthError) {
+          setShowSignupModal(true)
+          return
+        }
+        
+        // Show error toast with standardized message
+        setErrorToast({
+          isOpen: true,
+          title: errorInfo.title,
+          message: errorInfo.message,
+          suggestion: errorInfo.suggestion
+        })
       })
-    })
+    }
   }
 
   const handleAuthSuccess = async (data: any) => {
@@ -1813,13 +1874,35 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setIsWaitingForAuth(false)
     
     // Wait a moment for auth context to update
-    setTimeout(() => {
-      // Now start the real backend processing with the pending file
-      if (pendingFile) {
-        // Start the actual portfolio generation - this will update realProgress from backend
+    setTimeout(async () => {
+      // Check if we already have a job_id from anonymous upload
+      if (currentJobId) {
+        console.log('📊 Using existing job_id, extracting CV data...', currentJobId)
+        
+        try {
+          // Start showing progress immediately
+          setIsPlaying(true)
+          animateProgress(0, 20, 1000) // Quick progress to show extraction started
+          
+          // Extract CV data using the existing job_id
+          const extractResult = await extractCVData(currentJobId)
+          console.log('✅ CV extraction completed:', extractResult)
+          
+          // Continue with portfolio generation using the extracted data
+          if (extractResult.status === 'completed' && pendingFile) {
+            // Now continue with portfolio generation
+            processPortfolioGeneration(pendingFile, true) // Skip validation since we already have job_id
+          }
+        } catch (error) {
+          console.error('❌ Failed to extract CV data:', error)
+          setProcessingError('Failed to process CV data. Please try again.')
+          setIsPlaying(false)
+          setProgress(0)
+        }
+      } else if (pendingFile) {
+        // No existing job_id, upload and process normally
+        console.log('📤 No existing job_id, uploading file...')
         processPortfolioGeneration(pendingFile)
-        // The progress bar will now animate based on real backend progress
-        // No need to manually set progress values - backend handles it
         setIsPlaying(true)
       }
     }, 100)
@@ -1848,6 +1931,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   
   // Watch for uploadedFile changes from ANY source (dropbox, navbar, button)
   useEffect(() => {
+    // Skip if we're handling file through handleFileSelect (prevents double upload)
+    if (typeof window !== 'undefined' && window.__isHandlingFileSelect) {
+      console.log('⏭️ Skipping auto-start in effect, file is being handled by handleFileSelect')
+      return
+    }
+    
     if (uploadedFile && uploadedFile !== prevUploadedFile) {
       console.log('📁 New file detected from parent:', uploadedFile.name)
       setPrevUploadedFile(uploadedFile)
@@ -1901,9 +1990,18 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const handleAutoStart = useCallback((event: CustomEvent) => {
     if (uploadedFile && !isPlaying) {
       console.log('🎬 Auto-starting animation from retry')
-      handleFileClick(uploadedFile)
+      
+      // Check if user is authenticated
+      if (isAuthenticated) {
+        console.log('✅ User authenticated, starting full process')
+        handleStartDemo()
+      } else {
+        console.log('⚠️ User not authenticated, starting preview with skip validation')
+        // For anonymous users, skip validation since it was already done
+        startPreviewAnimation(uploadedFile, true)
+      }
     }
-  }, [uploadedFile, isPlaying, handleFileClick])
+  }, [uploadedFile, isPlaying, isAuthenticated])
   
   useEffect(() => {
     // Log listener registration in dev mode to catch leaks
@@ -3189,8 +3287,40 @@ export default function Home() {
     suggestion: undefined
   })
   
+  // Validation guard to prevent concurrent uploads
+  const isValidatingRef = useRef(false)
+  const currentFileFingerprint = useRef<string | null>(null)
+  
+  // Helper to get file fingerprint
+  const getFileFingerprint = (file: File): string => {
+    return `${file.name}-${file.size}-${file.lastModified}`
+  }
+  
+  // Cleanup window flags on unmount to prevent leaks
+  useEffect(() => {
+    return () => {
+      // Clean up global flags on unmount
+      if (typeof window !== 'undefined') {
+        window.__isHandlingFileSelect = false
+      }
+      // Also clean up refs
+      isValidatingRef.current = false
+      currentFileFingerprint.current = null
+    }
+  }, [])
+  
   // Use the real authentication system
   const { isAuthenticated, user, signIn, signOut } = useAuthContext()
+  
+  // Clear validation state when auth changes to prevent leaks
+  useEffect(() => {
+    // Reset validation state on auth change
+    isValidatingRef.current = false
+    currentFileFingerprint.current = null
+    if (typeof window !== 'undefined') {
+      window.__isHandlingFileSelect = false
+    }
+  }, [isAuthenticated])
   
   const sections = ['hero', 'demo', 'research', 'ugc-reels', 'faq']
   
@@ -3317,11 +3447,43 @@ export default function Home() {
       }
     }
     
+    // Handle Resume Gate errors with custom properties
+    if (error.isResumeGateError) {
+      return {
+        title: 'Not a resume',
+        message: error.resumeGateReason || "This file doesn't look like a resume (CV).",
+        suggestion: error.resumeGateSuggestion || 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
     const errorMessage = error.message || 'File validation failed'
     const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
     
     // Check for specific error patterns in the message
     if (statusCode === 400 && (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate'))) {
+      // Check if we have more specific error details from backend
+      if (errorMessage.includes("doesn't contain enough readable text")) {
+        return {
+          title: 'Not a resume',
+          message: "The image doesn't contain enough readable text for a resume.",
+          suggestion: 'Please upload a complete resume document or a high-quality scan with all resume sections visible.'
+        }
+      }
+      if (errorMessage.includes("lacks the variety of content")) {
+        return {
+          title: 'Not a resume',
+          message: "The image lacks the variety of content expected in a resume.",
+          suggestion: 'Upload a full resume with multiple sections (Experience, Education, Skills, Contact info).'
+        }
+      }
+      if (errorMessage.includes("missing core resume elements")) {
+        return {
+          title: 'Not a resume',
+          message: "The image is missing core resume elements.",
+          suggestion: 'Make sure your resume image includes both contact information and work experience.'
+        }
+      }
+      // Default resume error
       return {
         title: 'Not a resume',
         message: "This file doesn't look like a resume (CV).",
@@ -3406,12 +3568,33 @@ export default function Home() {
     // Single orchestrator for all file uploads - validation first, then animation
     console.log('📁 File selected, starting unified upload flow:', file.name)
     
+    // Check if we're already validating
+    if (isValidatingRef.current) {
+      console.log('⚠️ Already validating a file, ignoring duplicate request')
+      return
+    }
+    
+    // Check if it's the same file we're currently processing
+    const fingerprint = getFileFingerprint(file)
+    if (currentFileFingerprint.current === fingerprint && isValidatingRef.current) {
+      console.log('⚠️ Same file already being processed, ignoring duplicate')
+      return
+    }
+    
+    // Set validation guard
+    isValidatingRef.current = true
+    currentFileFingerprint.current = fingerprint
+    
     // Close any error toast
     setErrorToast(prev => ({ ...prev, isOpen: false }))
     
     // Clear old files first
     setUploadedFile(null)
     setDroppedFile(null)
+    
+    // Mark that we're handling file selection to prevent double processing
+    // This flag will be read by Resume2WebsiteDemo to skip its auto-start effect
+    window.__isHandlingFileSelect = true
     
     // Use requestAnimationFrame to ensure clean render boundary
     requestAnimationFrame(() => {
@@ -3426,15 +3609,18 @@ export default function Home() {
       // Now validate the file first
       console.log('🔍 Validating file before animation...')
       uploadFile(file).then(uploadResponse => {
-        // File is valid! Now trigger animation by simulating click
+        // File is valid! Now trigger animation
         console.log('✅ File validated successfully, auto-starting animation...')
         
-        // Trigger animation by dispatching a custom event that Resume2WebsiteDemo can listen to
-        // Guard for SSR safety
-        if (typeof window !== 'undefined') {
-          const event = new CustomEvent(RESUME_AUTO_START_EVENT, { detail: file })
-          window.dispatchEvent(event)
+        // Store the job ID for later use
+        if (uploadResponse.job_id) {
+          localStorage.setItem('pending_job_id', uploadResponse.job_id)
         }
+        
+        // Dispatch event immediately - no timeout needed
+        const event = new CustomEvent(RESUME_AUTO_START_EVENT, { detail: file })
+        window.dispatchEvent(event)
+        console.log('🚀 Auto-start event dispatched for:', file.name)
       }).catch(error => {
         console.error('❌ File validation failed:', error)
         
@@ -3458,6 +3644,11 @@ export default function Home() {
         // Clear the invalid file and reset all animation states
         setUploadedFile(null)
         setDroppedFile(null)
+      }).finally(() => {
+        // Clear all guards on both success and error
+        window.__isHandlingFileSelect = false
+        isValidatingRef.current = false
+        // Keep the fingerprint until next file to detect true duplicates
       })
     })
   }
