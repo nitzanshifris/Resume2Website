@@ -536,9 +536,10 @@ async def upload_cv(
             if not is_resume:
                 reason = get_rejection_reason(signals)
                 error_response = {
-                    "error": "The uploaded file does not appear to be an English resume.",
+                    "error": "Please upload a valid resume/CV file",
                     "score": score,
-                    "reason": reason
+                    "reason": reason,
+                    "suggestion": "Make sure your file contains standard resume sections like Experience, Education, Skills, and contact information."
                 }
                 
                 # Include signals in debug mode
@@ -1192,9 +1193,10 @@ async def upload_cv_anonymous(
             if not is_resume:
                 reason = get_rejection_reason(signals)
                 error_response = {
-                    "error": "The uploaded file does not appear to be an English resume.",
+                    "error": "Please upload a valid resume/CV file",
                     "score": score,
-                    "reason": reason
+                    "reason": reason,
+                    "suggestion": "Make sure your file contains standard resume sections like Experience, Education, Skills, and contact information."
                 }
                 
                 # Include signals in debug mode

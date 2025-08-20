@@ -111,8 +111,23 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
       if (response.status === 400 && errorData.detail) {
         // Handle Resume Gate detailed error
         if (typeof errorData.detail === 'object') {
-          const { error, score, reason } = errorData.detail
-          throw new Error(`${error || 'Upload failed'}\n\nScore: ${score}/100\nReason: ${reason || 'File validation failed'}`)
+          const { error, score, reason, suggestion } = errorData.detail
+          let message = error || 'Please upload a valid resume/CV file'
+          
+          if (reason) {
+            message += `\n\n${reason}`
+          }
+          
+          if (suggestion) {
+            message += `\n\n💡 ${suggestion}`
+          }
+          
+          // Only show score in development/debug mode
+          if (window.location.hostname === 'localhost') {
+            message += `\n\n(Debug: Score ${score}/100)`
+          }
+          
+          throw new Error(message)
         }
         throw new Error(errorData.detail)
       }
@@ -161,7 +176,33 @@ export async function uploadMultipleFiles(files: File[]): Promise<UploadResponse
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       console.error('Multiple upload error response:', response.status, errorData)
-      throw new Error(`Upload failed: ${errorData.message || response.statusText}`)
+      
+      // Check if this is a Resume Gate rejection
+      if (response.status === 400 && errorData.detail) {
+        // Handle Resume Gate detailed error
+        if (typeof errorData.detail === 'object') {
+          const { error, score, reason, suggestion } = errorData.detail
+          let message = error || 'Please upload valid resume/CV files'
+          
+          if (reason) {
+            message += `\n\n${reason}`
+          }
+          
+          if (suggestion) {
+            message += `\n\n💡 ${suggestion}`
+          }
+          
+          // Only show score in development/debug mode
+          if (window.location.hostname === 'localhost') {
+            message += `\n\n(Debug: Score ${score}/100)`
+          }
+          
+          throw new Error(message)
+        }
+        throw new Error(errorData.detail)
+      }
+      
+      throw new Error(`Upload failed: ${errorData.message || errorData.detail || response.statusText}`)
     }
     
     return await response.json()

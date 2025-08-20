@@ -253,15 +253,15 @@ def get_rejection_reason(signals: Dict[str, int]) -> str:
     has_structure = 'bullet_structure' in signals or 'job_titles' in signals
     
     if not has_contact:
-        missing.append("contact information")
+        missing.append("contact information (email, phone)")
     if not has_sections:
-        missing.append("standard resume sections (Experience, Education, Skills)")
+        missing.append("resume sections (Experience, Education, Skills)")
     if not has_dates:
-        missing.append("employment dates or time periods")
+        missing.append("dates or time periods")
     if not has_structure:
-        missing.append("professional structure or job titles")
+        missing.append("professional content")
     
     if missing:
-        return f"Missing key resume components: {', '.join(missing)}"
+        return f"Your file is missing: {', '.join(missing)}"
     else:
-        return "Content does not match typical resume patterns"
+        return "The content doesn't appear to be a professional resume"

@@ -191,7 +191,8 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
             alert(errorMessage)
             
             // Stop further uploads if Resume Gate rejection
-            if (error instanceof Error && error.message.includes('does not appear to be an English resume')) {
+            if (error instanceof Error && error.message.includes('Please upload a valid resume/CV')) {
+              setIsUploading(false)  // Stop the animation immediately
               break
             }
           }
