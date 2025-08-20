@@ -101,8 +101,14 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
     if (validFiles.length === 0) return
 
     setSelectedFiles(validFiles)
-    setIsUploading(true)
+    
+    // Don't start animation immediately - wait a moment for backend validation
+    // This gives the backend time to reject invalid files quickly
     setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
+    
+    // Small delay before showing upload animation to allow quick rejections
+    await new Promise(resolve => setTimeout(resolve, 100))
+    setIsUploading(true)
 
     // Check if multiple image files are being uploaded
     const imageExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.heif', '.tiff', '.tif', '.bmp']
@@ -179,6 +185,15 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
                 p.file === file.name ? { ...p, status: 'error' as const } : p
               )
             )
+            
+            // Show detailed error message
+            const errorMessage = error instanceof Error ? error.message : `Failed to upload ${file.name}`
+            alert(errorMessage)
+            
+            // Stop further uploads if Resume Gate rejection
+            if (error instanceof Error && error.message.includes('does not appear to be an English resume')) {
+              break
+            }
           }
         }
 
@@ -200,7 +215,10 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
       setIsUploading(false)
       // Update all files as error
       setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'error' as const })))
-      alert('Failed to upload files. Please try again.')
+      
+      // Show detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload files. Please try again.'
+      alert(errorMessage)
     }
   }
 

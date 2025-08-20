@@ -106,7 +106,18 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       console.error('Upload error response:', response.status, errorData)
-      throw new Error(`Upload failed: ${errorData.message || response.statusText}`)
+      
+      // Check if this is a Resume Gate rejection
+      if (response.status === 400 && errorData.detail) {
+        // Handle Resume Gate detailed error
+        if (typeof errorData.detail === 'object') {
+          const { error, score, reason } = errorData.detail
+          throw new Error(`${error || 'Upload failed'}\n\nScore: ${score}/100\nReason: ${reason || 'File validation failed'}`)
+        }
+        throw new Error(errorData.detail)
+      }
+      
+      throw new Error(`Upload failed: ${errorData.message || errorData.detail || response.statusText}`)
     }
     
     return await response.json()
