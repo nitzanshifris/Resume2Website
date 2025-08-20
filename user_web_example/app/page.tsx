@@ -2197,7 +2197,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                                 // For consistency, use the same file upload flow as the dropbox
                                 const fileInput = document.createElement('input')
                                 fileInput.type = 'file'
-                                fileInput.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg'
+                                fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
                                 fileInput.onchange = (e) => {
                                   const target = e.target as HTMLInputElement
                                   if (target.files && target.files[0]) {
@@ -2633,7 +2633,7 @@ const AppleNavbar = ({
       // This will create a consistent experience across all upload methods
       const fileInput = document.createElement('input')
       fileInput.type = 'file'
-      fileInput.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg'
+      fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
       fileInput.onchange = (e) => {
         const target = e.target as HTMLInputElement
         if (target.files && target.files[0]) {
