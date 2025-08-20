@@ -3130,12 +3130,12 @@ export default function Home() {
 
   const handleFileSelect = async (file: File) => {
     // Set the uploaded file - this will trigger CV to appear in the card
-    console.log('📁 File selected for retry, showing CV in card:', file.name)
+    console.log('📁 File selected for retry, clearing old file and showing new CV in card:', file.name)
     
     // Clear any existing error state
     setErrorToast(prev => ({ ...prev, isOpen: false }))
     
-    // Reset the uploaded file first to ensure fresh state and clear any cached validation
+    // IMPORTANT: Clear the uploaded file first to force CV pile to update
     setUploadedFile(null)
     setDroppedFile(null)
     
@@ -3163,22 +3163,25 @@ export default function Home() {
       }
     }
     
-    // Set the new file immediately for faster response
-    console.log('📤 Setting new file for validation:', file.name)
-    setUploadedFile(file)
-    
-    // For unauthenticated users, also set dropped file
-    if (!isAuthenticated) {
-      setDroppedFile(file)
-      console.log('📦 File stored for processing after authentication')
-    }
-    
-    // Trigger the demo to start with minimal delay
-    setTimeout(() => {
-      console.log('🎯 Triggering demo start after retry...')
-      // Set a flag to indicate retry is happening
-      setIsRetrying(true)
-    }, 50) // Minimal delay just to ensure React has rendered the file in CV pile
+    // Use requestAnimationFrame to ensure the clear has been rendered
+    requestAnimationFrame(() => {
+      // Now set the new file after the old one has been cleared from the UI
+      console.log('📤 Setting new file for validation:', file.name)
+      setUploadedFile(file)
+      
+      // For unauthenticated users, also set dropped file
+      if (!isAuthenticated) {
+        setDroppedFile(file)
+        console.log('📦 File stored for processing after authentication')
+      }
+      
+      // Trigger the demo to start after another frame
+      requestAnimationFrame(() => {
+        console.log('🎯 Triggering demo start after retry...')
+        // Set a flag to indicate retry is happening
+        setIsRetrying(true)
+      })
+    })
   }
 
   const handleCVCardClick = (file: File) => {
