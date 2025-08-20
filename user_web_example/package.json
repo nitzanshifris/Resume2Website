@@ -7,10 +7,7 @@
     "build": "next build",
     "start": "next start -p 3019",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -76,7 +73,6 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
