@@ -533,15 +533,53 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     certifications: {
       sectionTitle: cv2webData.certifications?.sectionTitle || "Certifications",
-      certificationItems: (cv2webData.certifications?.certificationItems || []).map((item, index) => ({
-        title: item?.title || "Certification",
-        issuingBody: item?.issuingOrganization || "Issuing Body",
-        year: item?.issueDate || "",
-        icon: getRandomIcon(),
-        viewMode: item?.verificationUrl ? "uri" as const : "text" as const,
-        textVariant: "detailed" as const,
-        ...(item?.verificationUrl && { linkUrl: item.verificationUrl, link: item.verificationUrl })
-      }))
+      certificationItems: (cv2webData.certifications?.certificationItems || []).map((item, index) => {
+        // Build natural description combining all certification details
+        const buildCertificationDescription = () => {
+          let parts = []
+          
+          // Add issuing organization
+          if (item?.issuingOrganization) {
+            parts.push(`Issued by ${item.issuingOrganization}`)
+          }
+          
+          // Add date information
+          if (item?.issueDate) {
+            parts.push(`Obtained in ${item.issueDate}`)
+          }
+          
+          // Add expiry if present
+          if (item?.expiryDate) {
+            if (item.expiryDate === "Never" || item.expiryDate.toLowerCase().includes("no expir")) {
+              parts.push("No expiration")
+            } else {
+              parts.push(`Valid until ${item.expiryDate}`)
+            }
+          }
+          
+          // Add credential ID if present
+          if (item?.credentialId) {
+            parts.push(`Credential ID: ${item.credentialId}`)
+          }
+          
+          // Add description if present
+          if (item?.description) {
+            parts.unshift(item.description) // Put description first
+          }
+          
+          return parts.join('. ').trim() || "Professional certification"
+        }
+        
+        return {
+          title: item?.title || "Certification",
+          description: buildCertificationDescription(),
+          icon: getRandomIcon(),
+          viewMode: item?.verificationUrl ? "uri" as const : "text" as const,
+          textVariant: "detailed" as const,
+          hasLink: Boolean(item?.verificationUrl),
+          ...(item?.verificationUrl && { linkUrl: item.verificationUrl, link: item.verificationUrl })
+        }
+      })
     },
 
     achievements: {

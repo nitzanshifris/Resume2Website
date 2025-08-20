@@ -12,7 +12,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from src.utils.cv_resume_gate import (
     score_resume_likelihood,
     is_likely_resume,
-    get_rejection_reason
+    get_rejection_reason,
+    normalize_text_for_gate,
+    detect_ocr_like_text
 )
 
 
@@ -187,6 +189,57 @@ class TestResumeGate:
         assert score < 60
         assert 'short_text_penalty' in signals
         assert signals['short_text_penalty'] == -10
+    
+    def test_ocr_like_resume(self):
+        """Test OCR-extracted resume with irregular formatting"""
+        ocr_text = """
+        Lanford Jaden Software Engineer 
+        CONTACT 725-320-2987 lanfordjaden@email.com www.linkedin.com/lanfordj
+        EDUCATION Master of Science in Computer Science Emerald University United States (2028-2030)
+        Bachelor of Science in Computer Science Emerald University United States (2024-2028)
+        SKILLS Proficient in programming languages Java C++ Python Web development frameworks Spring Hibernate
+        Database management SQL MySQL Front-end technologies HTML CSS JavaScript
+        SUMMARY Results-driven software engineer with a Master's degree in Computer Science and a strong passion for developing
+        innovative software solutions Experienced in collaborating with cross-functional teams and delivering high-quality code on time
+        WORK EXPERIENCE Software Engineer Tech Solutions Inc (2030-PRESENT) Collaborated with a team of software engineers to
+        develop and maintain a scalable web application using Java and Spring framework
+        Senior Graphic Designer TechNova Solutions (2028-2030) Designed and implemented new features based on
+        client requirements following Agile development methodologies And assisted in the deployment and
+        maintenance of software releases including troubleshooting and optimizing performance
+        LANGUAGE English Romanian (Native) Spanish (Intermediate)
+        """
+        
+        is_resume, score, signals = is_likely_resume(ocr_text, threshold=60)
+        
+        assert is_resume is True, f"OCR resume should pass, got score={score}, signals={signals}"
+        assert score >= 60
+        assert 'email' in signals
+        assert any(k.startswith('section_education') for k in signals)
+        assert any(k.startswith('section_experience') for k in signals)
+        assert any(k.startswith('section_skills') for k in signals)
+    
+    def test_text_normalization(self):
+        """Test text normalization for OCR artifacts"""
+        text_with_artifacts = "develop-\nment of soft\u00A0ware applications"
+        normalized = normalize_text_for_gate(text_with_artifacts)
+        
+        assert "development" in normalized
+        assert "\u00A0" not in normalized
+        assert "soft ware" in normalized
+    
+    def test_ocr_detection(self):
+        """Test OCR-like text detection"""
+        # Text with non-breaking spaces
+        text_with_nbsp = "Hello\u00A0World\u00A0Test"
+        assert detect_ocr_like_text(text_with_nbsp) is True
+        
+        # Normal text
+        normal_text = """
+        This is a normal text document with proper formatting.
+        It has multiple lines and normal spacing.
+        Each sentence is properly structured.
+        """ * 10  # Make it long enough
+        assert detect_ocr_like_text(normal_text) is False
     
     def test_short_but_valid_cv(self):
         """Test that a short but complete CV passes validation"""

@@ -1514,35 +1514,34 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         processPortfolioGeneration(uploadedFile, true) // Skip validation since we just did it
       } catch (error: any) {
         // Don't log to console - we'll show the nice error toast
-        setShowCVCard(false)
+        // Keep CV card visible so user can see what file failed
         setProcessingError(error.message || 'Please upload a valid resume/CV file')
         
-        // Parse error message for Resume Gate details
+        // Parse error message
         const errorMessage = error.message || 'Please upload a valid resume/CV file'
-        const lines = errorMessage.split('\n').filter(line => line.trim())
         
-        // Get the main message (first line)
-        let mainMessage = lines[0] || 'Please upload a valid resume/CV file'
-        
-        // Find the reason (second paragraph, if exists)
-        const reasonLine = lines.find(line => 
-          line.includes('missing') || 
-          line.includes('does not appear') ||
-          line.includes('Your file')
-        )
-        if (reasonLine && !mainMessage.includes(reasonLine)) {
-          mainMessage = reasonLine
+        // Check if this is a Resume Gate rejection (400 error)
+        if (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate')) {
+          // Resume Gate specific error - use standard message
+          setErrorToast({
+            isOpen: true,
+            title: 'Not a resume',
+            message: "This file doesn't look like a resume (CV).",
+            suggestion: "Use a resume with contact info and sections like Experience, Education, and Skills."
+          })
+        } else {
+          // Other errors - parse normally
+          const lines = errorMessage.split('\n').filter(line => line.trim())
+          let mainMessage = lines[0] || 'Please upload a valid file'
+          const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
+          
+          setErrorToast({
+            isOpen: true,
+            title: 'Invalid File',
+            message: mainMessage,
+            suggestion: suggestion || 'Please upload a PDF or Word document'
+          })
         }
-        
-        // Extract suggestion (line with 💡)
-        const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
-        
-        setErrorToast({
-          isOpen: true,
-          title: 'Invalid Resume File',
-          message: mainMessage,
-          suggestion: suggestion || 'Please upload a PDF or Word document containing your resume'
-        })
       }
     } else {
       // No file, just start animation (shouldn't happen)
@@ -1625,35 +1624,34 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }).catch(error => {
       // File validation failed - show error and don't start animation
       // Don't log to console - we'll show the nice error toast
-      setShowCVCard(false) // Hide the CV card
+      // Keep the CV card visible so user can see what file failed
       setProcessingError(error.message || 'Please upload a valid resume/CV file')
       
-      // Parse error message for Resume Gate details
+      // Parse error message
       const errorMessage = error.message || 'Please upload a valid resume/CV file'
-      const lines = errorMessage.split('\n').filter(line => line.trim())
       
-      // Get the main message (first line)
-      let mainMessage = lines[0] || 'Please upload a valid resume/CV file'
-      
-      // Find the reason (second paragraph, if exists)
-      const reasonLine = lines.find(line => 
-        line.includes('missing') || 
-        line.includes('does not appear') ||
-        line.includes('Your file')
-      )
-      if (reasonLine && !mainMessage.includes(reasonLine)) {
-        mainMessage = reasonLine
+      // Check if this is a Resume Gate rejection (400 error)
+      if (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate')) {
+        // Resume Gate specific error - use standard message
+        setErrorToast({
+          isOpen: true,
+          title: 'Not a resume',
+          message: "This file doesn't look like a resume (CV).",
+          suggestion: "Use a resume with contact info and sections like Experience, Education, and Skills."
+        })
+      } else {
+        // Other errors - parse normally
+        const lines = errorMessage.split('\n').filter(line => line.trim())
+        let mainMessage = lines[0] || 'Please upload a valid file'
+        const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
+        
+        setErrorToast({
+          isOpen: true,
+          title: 'Invalid File',
+          message: mainMessage,
+          suggestion: suggestion || 'Please upload a PDF or Word document'
+        })
       }
-      
-      // Extract suggestion (line with 💡)
-      const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
-      
-      setErrorToast({
-        isOpen: true,
-        title: 'Invalid Resume File',
-        message: mainMessage,
-        suggestion: suggestion || 'Please upload a PDF or Word document containing your resume'
-      })
     })
   }
 
@@ -2068,7 +2066,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 1.2, ease: "easeInOut" }}
                       className="flex flex-col items-center w-full"
-                      style={{ height: "400px", paddingLeft: "120px" }} // Move progress bar to center above both buttons
+                      style={{ height: "400px" }}
                     >
                       {/* Edit Your Website Button - Shows when portfolio is generated */}
                       {realProgress >= 60 && portfolioUrl && (
@@ -3121,7 +3119,14 @@ export default function Home() {
 
   const handleFileSelect = async (file: File) => {
     // Set the uploaded file - this will trigger CV to appear in the card
-    console.log('📁 File selected, showing CV in card:', file.name)
+    console.log('📁 File selected for retry, showing CV in card:', file.name)
+    
+    // Clear any existing error state
+    setErrorToast(prev => ({ ...prev, isOpen: false }))
+    
+    // Reset the uploaded file first to ensure fresh state and clear any cached validation
+    setUploadedFile(null)
+    setDroppedFile(null)
     
     // If user is authenticated and has an existing portfolio, clear it
     if (isAuthenticated) {
@@ -3145,24 +3150,24 @@ export default function Home() {
         console.log('⚠️ Could not delete existing portfolios:', error)
         // Continue anyway - user might not have any portfolios
       }
+    }
+    
+    // Set the new file after a brief delay to ensure state reset and trigger fresh validation
+    setTimeout(() => {
+      console.log('📤 Setting new file for validation:', file.name)
+      setUploadedFile(file)
       
-      // The Resume2WebsiteDemo component will reset its own state when
-      // it detects a new file upload
-    }
-    
-    setUploadedFile(file)
-    
-    // Don't open auth modal here - just store the file
-    // The auth modal will open when user clicks "Transform into portfolio"
-    if (!isAuthenticated) {
-      // Store the file for later use after authentication
-      setDroppedFile(file)
-    }
+      // For unauthenticated users, also set dropped file
+      if (!isAuthenticated) {
+        setDroppedFile(file)
+        console.log('📦 File stored for processing after authentication')
+      }
+    }, 100) // Increased delay to ensure proper state reset
   }
 
   const handleCVCardClick = (file: File) => {
-    // The Resume2WebsiteDemo component will handle everything internally
-    // This is just a placeholder for the prop
+    // This function is not used since Resume2WebsiteDemo handles clicks internally
+    // We can't directly trigger the animation from here
   }
 
   const handleLogout = async () => {
@@ -3569,6 +3574,7 @@ export default function Home() {
         title={errorToast.title}
         message={errorToast.message}
         suggestion={errorToast.suggestion}
+        onRetryUpload={handleFileSelect}
       />
     </main>
   )

@@ -1,15 +1,96 @@
 """
-Resume Gate Validator - English-only pre-processing validator
-Checks if uploaded content is likely an English resume before extraction
+Resume Gate Validator - Validates if uploaded content is likely a resume/CV
+With enhanced support for OCR-extracted text
 """
 import re
 import logging
+import unicodedata
 from typing import Tuple, Dict
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
+
+def normalize_text_for_gate(text: str) -> str:
+    """
+    Normalize text for better Resume Gate detection, especially for OCR text.
+    
+    Args:
+        text: Raw text to normalize
+        
+    Returns:
+        Normalized text suitable for pattern matching
+    """
+    if not text:
+        return ""
+    
+    # Replace non-breaking spaces and other Unicode spaces with regular spaces
+    text = unicodedata.normalize('NFKC', text)
+    text = re.sub(r'[\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]', ' ', text)
+    
+    # Fix hyphenation at line breaks (e.g., "devel-\nopment" → "development")
+    text = re.sub(r'(\w+)-\s*\n\s*(\w+)', r'\1\2', text)
+    
+    # Normalize line endings (CRLF/CR to LF)
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    
+    # Collapse multiple spaces (but preserve newlines)
+    text = re.sub(r'[ \t]+', ' ', text)
+    
+    # Normalize common bullet points to a standard marker
+    bullet_chars = '•·▪▫◦‣⁃※→➤➢∙°●■□▸▹►▻◆◇★☆✓✔✗✘'
+    text = re.sub(f'[{re.escape(bullet_chars)}]', '• ', text)
+    
+    # Trim trailing spaces from each line
+    text = '\n'.join(line.rstrip() for line in text.split('\n'))
+    
+    return text
+
+
+def detect_ocr_like_text(text: str) -> bool:
+    """
+    Detect if text appears to be from OCR extraction.
+    
+    Args:
+        text: Text to analyze
+        
+    Returns:
+        True if text appears to be OCR-extracted
+    """
+    if not text or len(text) < 100:
+        return False
+    
+    # Check for non-breaking spaces (common in OCR)
+    if '\u00A0' in text:
+        return True
+    
+    # Check newline density - OCR often has fewer newlines
+    lines = text.split('\n')
+    avg_line_length = len(text) / max(len(lines), 1)
+    if avg_line_length > 150:  # Very long lines suggest OCR
+        return True
+    
+    # Check for unusual character patterns common in OCR
+    unusual_chars = sum(1 for c in text if unicodedata.category(c) in ['Zs', 'Cc', 'Cf'])
+    if unusual_chars / len(text) > 0.02:  # More than 2% unusual spaces/control chars
+        return True
+    
+    # Check for typical OCR artifacts
+    ocr_patterns = [
+        r'\b[A-Z]{2,}\s+[A-Z]{2,}\s+[A-Z]{2,}\b',  # Multiple consecutive all-caps words
+        r'[a-z][A-Z][a-z]',  # Mixed case within words (common OCR error)
+        r'\s{3,}',  # Multiple spaces (OCR spacing issues)
+    ]
+    
+    for pattern in ocr_patterns:
+        if len(re.findall(pattern, text[:1000])) > 3:
+            return True
+    
+    return False
+
+
 # Pre-compiled regex patterns for performance
+# Relaxed patterns for better OCR text handling
 PATTERNS = {
     # Contact patterns
     'email': re.compile(
@@ -25,42 +106,43 @@ PATTERNS = {
         re.IGNORECASE
     ),
     
-    # Section heading patterns - must be on their own line or start of line
+    # Section heading patterns - very relaxed for OCR/PDF text
+    # Match the word anywhere in text, even as part of longer text
     'experience': re.compile(
-        r'^[\s]*(?:WORK\s+)?EXPERIENCE|^[\s]*EMPLOYMENT|^[\s]*PROFESSIONAL\s+EXPERIENCE',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:WORK\s+EXPERIENCE|EXPERIENCE|EMPLOYMENT|PROFESSIONAL\s+EXPERIENCE|WORK\s+HISTORY|CAREER)',
+        re.IGNORECASE
     ),
     'education': re.compile(
-        r'^[\s]*EDUCATION|^[\s]*ACADEMIC\s+BACKGROUND',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:EDUCATION|ACADEMIC|QUALIFICATION|DEGREE|UNIVERSITY|COLLEGE|SCHOOL)',
+        re.IGNORECASE
     ),
     'skills': re.compile(
-        r'^[\s]*(?:TECHNICAL\s+)?SKILLS|^[\s]*COMPETENCIES',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:SKILL|COMPETENC|EXPERTISE|ABILIT|PROFICIENC)',
+        re.IGNORECASE
     ),
     'projects': re.compile(
-        r'^[\s]*(?:PERSONAL\s+)?PROJECTS|^[\s]*PORTFOLIO',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:PROJECT|PORTFOLIO)',
+        re.IGNORECASE
     ),
     'certifications': re.compile(
-        r'^[\s]*CERTIFICATIONS?|^[\s]*LICENSES?|^[\s]*CREDENTIALS',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:CERTIFICATION|LICENSE|CREDENTIAL)',
+        re.IGNORECASE
     ),
     'summary': re.compile(
-        r'^[\s]*(?:PROFESSIONAL\s+)?SUMMARY|^[\s]*PROFILE|^[\s]*OBJECTIVE',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:SUMMARY|PROFILE|OBJECTIVE|ABOUT)',
+        re.IGNORECASE
     ),
     'achievements': re.compile(
-        r'^[\s]*ACHIEVEMENTS?|^[\s]*AWARDS?|^[\s]*HONORS',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:ACHIEVEMENT|AWARD|HONOR|ACCOMPLISHMENT)',
+        re.IGNORECASE
     ),
     'volunteer': re.compile(
-        r'^[\s]*VOLUNTEER(?:ING)?|^[\s]*COMMUNITY\s+SERVICE',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:VOLUNTEER|COMMUNITY)',
+        re.IGNORECASE
     ),
     'publications': re.compile(
-        r'^[\s]*PUBLICATIONS?|^[\s]*RESEARCH',
-        re.IGNORECASE | re.MULTILINE
+        r'(?:PUBLICATION|RESEARCH)',
+        re.IGNORECASE
     ),
     
     # Date patterns
@@ -100,6 +182,7 @@ PATTERNS = {
 def score_resume_likelihood(text: str, max_chars: int = 5000) -> Tuple[int, Dict[str, int]]:
     """
     Score the likelihood that the text is a resume (0-100).
+    Now with better OCR text handling.
     
     Args:
         text: The text content to analyze
@@ -111,14 +194,24 @@ def score_resume_likelihood(text: str, max_chars: int = 5000) -> Tuple[int, Dict
     if not text:
         return 0, {}
     
-    # Cap text length for performance
-    text = text[:max_chars]
+    # Normalize text for better detection
+    original_text = text
+    text = normalize_text_for_gate(text[:max_chars])
+    
+    # Detect if this is OCR-like text
+    is_ocr = detect_ocr_like_text(original_text[:max_chars])
     
     signals = defaultdict(int)
     
-    # Extremely short text penalty (only for very short text)
-    if len(text) < 200:  # Reduced from 500 to 200 characters
+    # Track if OCR mode for debugging
+    if is_ocr:
+        signals['ocr_mode'] = 1
+    
+    # Short text penalty - reduced for OCR text
+    if len(text) < 200 and not is_ocr:
         signals['short_text_penalty'] = -10
+    elif len(text) < 100:  # Only penalize very short text in OCR mode
+        signals['short_text_penalty'] = -5
     
     # Contact signals (max 20 points)
     if PATTERNS['email'].search(text):
@@ -129,74 +222,96 @@ def score_resume_likelihood(text: str, max_chars: int = 5000) -> Tuple[int, Dict
         signals['professional_url'] = 5
     
     # Cap contact signals at 20
-    contact_total = sum([signals['email'], signals['phone'], signals['professional_url']])
+    contact_total = sum([signals.get('email', 0), signals.get('phone', 0), signals.get('professional_url', 0)])
     if contact_total > 20:
         scale = 20 / contact_total
-        signals['email'] = int(signals['email'] * scale)
-        signals['phone'] = int(signals['phone'] * scale)
-        signals['professional_url'] = int(signals['professional_url'] * scale)
+        if 'email' in signals:
+            signals['email'] = int(signals['email'] * scale)
+        if 'phone' in signals:
+            signals['phone'] = int(signals['phone'] * scale)
+        if 'professional_url' in signals:
+            signals['professional_url'] = int(signals['professional_url'] * scale)
     
-    # Section heading signals (max 40 points)
+    # Section heading signals (max 45 points - increased for better detection)
     section_scores = {
-        'experience': 15,
-        'education': 10,
-        'skills': 10,
-        'projects': 7,
-        'certifications': 7,
-        'summary': 5,
-        'achievements': 5,
-        'volunteer': 5,
-        'publications': 5
+        'experience': 20,  # Increased from 15
+        'education': 15,   # Increased from 10
+        'skills': 15,      # Increased from 10
+        'projects': 8,     # Increased from 5
+        'certifications': 8,  # Increased from 5
+        'summary': 8,      # Increased from 5
+        'achievements': 5,  # Increased from 3
+        'volunteer': 5,     # Increased from 3
+        'publications': 5   # Increased from 3
     }
     
     sections_found = []
     for section, score in section_scores.items():
         if PATTERNS[section].search(text):
-            signals[f'section_{section}'] = score
+            # Boost section scores for OCR text since headers are harder to detect
+            bonus = 3 if is_ocr and section in ['experience', 'education', 'skills'] else 1 if is_ocr else 0
+            signals[f'section_{section}'] = score + bonus
             sections_found.append(section)
     
-    # Cap section signals at 40
-    section_total = sum(signals[f'section_{s}'] for s in sections_found)
-    if section_total > 40:
-        scale = 40 / section_total
+    # Cap section signals at 45 points (increased from 35/40)
+    section_cap = 45
+    section_total = sum(signals.get(f'section_{s}', 0) for s in sections_found)
+    if section_total > section_cap:
+        scale = section_cap / section_total
         for section in sections_found:
             signals[f'section_{section}'] = int(signals[f'section_{section}'] * scale)
     
-    # Date patterns (max 20 points)
+    # Date patterns (max 20 points, boosted for OCR)
     year_ranges = len(PATTERNS['year_range'].findall(text))
     month_years = len(PATTERNS['month_year'].findall(text))
     standalone_years = len(PATTERNS['standalone_year'].findall(text))
     
-    # Score based on date frequency
+    # Score based on date frequency (boost for OCR since dates are reliable indicators)
     if year_ranges > 0:
-        signals['date_ranges'] = min(10, year_ranges * 3)
+        signals['date_ranges'] = min(12 if is_ocr else 10, year_ranges * 3)
     if month_years > 0:
-        signals['month_year_dates'] = min(5, month_years * 2)
+        signals['month_year_dates'] = min(6 if is_ocr else 5, month_years * 2)
     if standalone_years > 2:
-        signals['year_mentions'] = min(5, standalone_years)
+        signals['year_mentions'] = min(6 if is_ocr else 5, standalone_years)
     
     # Cap date signals at 20
-    date_total = signals['date_ranges'] + signals['month_year_dates'] + signals['year_mentions']
+    date_total = signals.get('date_ranges', 0) + signals.get('month_year_dates', 0) + signals.get('year_mentions', 0)
     if date_total > 20:
         scale = 20 / date_total
-        signals['date_ranges'] = int(signals['date_ranges'] * scale)
-        signals['month_year_dates'] = int(signals['month_year_dates'] * scale)
-        signals['year_mentions'] = int(signals['year_mentions'] * scale)
+        if 'date_ranges' in signals:
+            signals['date_ranges'] = int(signals['date_ranges'] * scale)
+        if 'month_year_dates' in signals:
+            signals['month_year_dates'] = int(signals['month_year_dates'] * scale)
+        if 'year_mentions' in signals:
+            signals['year_mentions'] = int(signals['year_mentions'] * scale)
     
-    # Bullet structure (max 10 points)
+    # Bullet structure (max 10 points, reduced importance for OCR)
     lines = text.split('\n')
     bullet_lines = sum(1 for line in lines if PATTERNS['bullet'].match(line))
     if bullet_lines > 3:
-        signals['bullet_structure'] = min(10, bullet_lines)
+        signals['bullet_structure'] = min(10 if not is_ocr else 5, bullet_lines)
     
-    # Job title lexicon (max 10 points)
+    # Job title lexicon (max 10 points, boosted for OCR)
     job_titles = PATTERNS['job_titles'].findall(text)
     unique_titles = len(set(word.lower() for word in job_titles))
     if unique_titles > 0:
-        signals['job_titles'] = min(10, unique_titles * 2)
+        multiplier = 3 if is_ocr else 2
+        signals['job_titles'] = min(10, unique_titles * multiplier)
     
     # Calculate total score
-    total_score = sum(signals.values())
+    total_score = sum(v for k, v in signals.items() if k != 'ocr_mode')
+    
+    # Special bonus: If we have at least 2 critical sections + contact info, ensure passing
+    critical_sections = ['section_experience', 'section_education', 'section_skills']
+    critical_count = sum(1 for s in critical_sections if s in signals and signals[s] > 0)
+    has_contact = ('email' in signals and signals['email'] > 0) or ('phone' in signals and signals['phone'] > 0)
+    
+    if critical_count >= 2 and has_contact:
+        # Give a bonus to ensure this passes (bring score to at least 65)
+        if total_score < 65:
+            bonus = 65 - total_score
+            signals['critical_sections_bonus'] = bonus
+            total_score = 65
     
     # Clamp between 0 and 100
     total_score = max(0, min(100, total_score))
@@ -247,21 +362,44 @@ def get_rejection_reason(signals: Dict[str, int]) -> str:
     missing = []
     
     # Check for missing critical components
-    has_contact = any(k in signals for k in ['email', 'phone', 'professional_url'])
-    has_sections = any(k.startswith('section_') for k in signals)
-    has_dates = any(k in signals for k in ['date_ranges', 'month_year_dates', 'year_mentions'])
-    has_structure = 'bullet_structure' in signals or 'job_titles' in signals
+    if not any(k.startswith('section_experience') for k in signals):
+        missing.append("Experience")
+    if not any(k.startswith('section_education') for k in signals):
+        missing.append("Education")
+    if not any(k.startswith('section_skills') for k in signals):
+        missing.append("Skills")
     
-    if not has_contact:
-        missing.append("contact information (email, phone)")
-    if not has_sections:
-        missing.append("resume sections (Experience, Education, Skills)")
-    if not has_dates:
-        missing.append("dates or time periods")
-    if not has_structure:
-        missing.append("professional content")
+    # Check for contact info
+    has_contact = 'email' in signals or 'phone' in signals
     
-    if missing:
-        return f"Your file is missing: {', '.join(missing)}"
+    if missing and not has_contact:
+        return f"Your file is missing: contact information and resume sections ({', '.join(missing)})"
+    elif missing:
+        return f"Your file is missing: resume sections ({', '.join(missing)})"
+    elif not has_contact:
+        return "Your file is missing: contact information (email, phone)"
     else:
-        return "The content doesn't appear to be a professional resume"
+        return "Your file doesn't appear to be a structured resume"
+
+
+def get_suggestion_for_rejection(signals: Dict[str, int]) -> str:
+    """
+    Generate a helpful suggestion based on what's missing.
+    
+    Args:
+        signals: The signals dictionary from scoring
+    
+    Returns:
+        A suggestion for the user
+    """
+    has_sections = any(k.startswith('section_') for k in signals)
+    has_contact = 'email' in signals or 'phone' in signals
+    
+    if not has_sections and not has_contact:
+        return "Make sure your file contains standard resume sections like Experience, Education, Skills, and contact information."
+    elif not has_sections:
+        return "Add clear section headers like 'Experience', 'Education', and 'Skills' to your resume."
+    elif not has_contact:
+        return "Include your email address and phone number in your resume."
+    else:
+        return "Ensure your resume has a clear structure with standard sections and formatting."

@@ -1,0 +1,407 @@
+{
+  "job_id": "c5223a08-1011-4888-9746-4dd0964012d7",
+  "cv_data": {
+    "hero": {
+      "fullName": "Gal Levinsky",
+      "professionalTitle": "Engineering Leader | Embedded Systems Expert | Cybersecurity Strategist",
+      "profilePhotoUrl": null
+    },
+    "contact": {
+      "email": "xgalsagi@gmail.com",
+      "phone": "+972 -53-2741041",
+      "location": {
+        "city": null,
+        "state": null,
+        "country": null
+      },
+      "professionalLinks": null,
+      "availability": null,
+      "placeOfBirth": null,
+      "nationality": null,
+      "drivingLicense": null,
+      "dateOfBirth": null,
+      "maritalStatus": null,
+      "visaStatus": null
+    },
+    "summary": {
+      "summaryText": "Engineering leader with 8+ years of experience in embedded systems and cybersecurity. Skilled at scaling and guiding cross -functional teams, with deep technical roots in C/C++ and a strong track record of delivering secure, mission -critical technologies.",
+      "yearsOfExperience": 8,
+      "keySpecializations": [
+        "embedded systems",
+        "cybersecurity"
+      ],
+      "careerHighlights": null
+    },
+    "experience": {
+      "sectionTitle": "Professional Experience",
+      "experienceItems": [
+        {
+          "jobTitle": "Director of Engineering",
+          "companyName": null,
+          "location": {
+            "city": null,
+            "state": null,
+            "country": null
+          },
+          "dateRange": {
+            "startDate": "2022",
+            "endDate": "Present",
+            "isCurrent": true
+          },
+          "remoteWork": null,
+          "responsibilitiesAndAchievements": [
+            "Led six embedded development teams comprising 55 engineers, driving national cybersecurity initiatives in the communications and defense sector.",
+            "Directed product development from architecture to delivery, focused on secure, low -level embedded systems.",
+            "Oversa w the design and implementation of kernel modules, BSP layers, and embedded applications for custom hardware platforms",
+            "Defined technical vision, set engineering standards, and led code and architecture reviews across teams",
+            "Introduced DevOps pipelines and improved CI/CD processes to accelerate delivery and ensure quality",
+            "Mentored engineering leads, managed cross -functional collaboration, and aligned technical execution with strategic goals"
+          ],
+          "technologiesUsed": [
+            "Kernel Development",
+            "BSP",
+            "DevOps",
+            "CI/CD"
+          ],
+          "summary": null,
+          "employmentType": null,
+          "teamSize": 55,
+          "reportingTo": null,
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed"
+        },
+        {
+          "jobTitle": "Head of Embedded Development Team & Product Manager",
+          "companyName": null,
+          "location": {
+            "city": null,
+            "state": null,
+            "country": null
+          },
+          "dateRange": {
+            "startDate": "2018",
+            "endDate": "2019",
+            "isCurrent": false
+          },
+          "remoteWork": null,
+          "responsibilitiesAndAchievements": [
+            "Leader of a n embedded development team responsible for three cybersecurity projects in the communications sector .",
+            "Collaborated closely with various clients, including defense organizations, to define requirements, plan workflows, manage development, and liaise with operations departments for seamless execution."
+          ],
+          "technologiesUsed": null,
+          "summary": null,
+          "employmentType": null,
+          "teamSize": null,
+          "reportingTo": null,
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed"
+        },
+        {
+          "jobTitle": "Professional Recruitment Manager for Development & Research Clusters",
+          "companyName": null,
+          "location": {
+            "city": null,
+            "state": null,
+            "country": null
+          },
+          "dateRange": {
+            "startDate": "2017",
+            "endDate": "2018",
+            "isCurrent": false
+          },
+          "remoteWork": null,
+          "responsibilitiesAndAchievements": [
+            "Leader of the recruitment process for the unit within the GAMMA Cybersecurity recruitment framework.",
+            "Designed technical assessments, conducted interviews, and oversaw the unit's recruitment cycles and talent acquisition strategies."
+          ],
+          "technologiesUsed": null,
+          "summary": null,
+          "employmentType": null,
+          "teamSize": null,
+          "reportingTo": null,
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed"
+        },
+        {
+          "jobTitle": "Embedded Software Developer (C/C ++)",
+          "companyName": null,
+          "location": {
+            "city": null,
+            "state": null,
+            "country": null
+          },
+          "dateRange": {
+            "startDate": "2014",
+            "endDate": "2017",
+            "isCurrent": false
+          },
+          "remoteWork": null,
+          "responsibilitiesAndAchievements": [
+            "Designed and developed cybersecurity systems in embedded environments, focusing on performance, reliability, and secure execution under tight operational constraints.",
+            "Developed a custom UEFI bootloader and application , ensuring secure and controlled boot processes for specialized hardware.",
+            "Implemented kernel -level and user -space drivers in Linux and Windows environments for low -level device communication and control.",
+            "Contributed to full software lifecycle: from requirements gathering and architecture design to hands -on coding and debugging under real -time conditions."
+          ],
+          "technologiesUsed": [
+            "C",
+            "C++",
+            "UEFI",
+            "Kernel Development",
+            "Device Drivers",
+            "Linux",
+            "Windows"
+          ],
+          "summary": null,
+          "employmentType": null,
+          "teamSize": null,
+          "reportingTo": null,
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed"
+        }
+      ]
+    },
+    "education": {
+      "sectionTitle": "Education",
+      "educationItems": [
+        {
+          "degree": "Bachelor of Science in Computer Science",
+          "fieldOfStudy": "Computer Science",
+          "institution": "Hebrew University of Jerusalem",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": null
+          },
+          "dateRange": {
+            "startDate": "2019",
+            "endDate": "2022",
+            "isCurrent": false
+          },
+          "gpa": null,
+          "honors": [
+            "Dean's Honor List (2022)"
+          ],
+          "minors": null,
+          "relevantCoursework": null,
+          "exchangePrograms": null,
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed"
+        },
+        {
+          "degree": "Master of Business Administration (MBA)",
+          "fieldOfStudy": "Business Administration",
+          "institution": "Coller School of Management, Tel Aviv University",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": null
+          },
+          "dateRange": {
+            "startDate": "2023",
+            "endDate": "2024",
+            "isCurrent": false
+          },
+          "gpa": null,
+          "honors": null,
+          "minors": null,
+          "relevantCoursework": null,
+          "exchangePrograms": null,
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed"
+        },
+        {
+          "degree": "CIO Leadership Development Program (equivalent to half an M.Sc. degree)",
+          "fieldOfStudy": null,
+          "institution": "National Defense University",
+          "location": {
+            "city": "Washington",
+            "state": "District of Columbia",
+            "country": "D.C."
+          },
+          "dateRange": {
+            "startDate": "2025",
+            "endDate": null,
+            "isCurrent": null
+          },
+          "gpa": null,
+          "honors": null,
+          "minors": null,
+          "relevantCoursework": null,
+          "exchangePrograms": null,
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed"
+        }
+      ]
+    },
+    "skills": {
+      "sectionTitle": "Technologies & Tools",
+      "skillCategories": [
+        {
+          "categoryName": "Technical Foundation",
+          "skills": [
+            "C",
+            "C++",
+            "Embedded Systems",
+            "Kernel Development",
+            "UEFI",
+            "BSP",
+            "Secure Boot",
+            "Device Drivers (Linux & Windows)",
+            "Cybersecurity Architecture"
+          ]
+        },
+        {
+          "categoryName": "Tools & Platforms",
+          "skills": [
+            "GDB",
+            "Valgrind",
+            "JTAG",
+            "Git",
+            "Make",
+            "CMake",
+            "Python",
+            "SwiftUI"
+          ]
+        },
+        {
+          "categoryName": "Engineering Leadership & Execution",
+          "skills": [
+            "Agile Project Management",
+            "DevOps Strategy",
+            "CI/CD Implementation",
+            "Technical Hiring",
+            "Team Scaling",
+            "Architecture Reviews",
+            "Cross-functional Coordination"
+          ]
+        }
+      ],
+      "ungroupedSkills": null,
+      "proficiencyIndicators": null
+    },
+    "projects": null,
+    "achievements": {
+      "sectionTitle": null,
+      "achievements": [
+        {
+          "value": "55",
+          "label": "engineers",
+          "contextOrDetail": "Led six embedded development teams comprising 55 engineers, driving national cybersecurity initiatives in the communications and defense sector",
+          "timeframe": "2022 - Present",
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "text",
+          "textVariant": "detailed"
+        },
+        {
+          "value": "Dean's Honor List",
+          "label": null,
+          "contextOrDetail": "Bachelor of Science in Computer Science , Hebrew University of Jerusalem",
+          "timeframe": "2022",
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "text",
+          "textVariant": "detailed"
+        }
+      ]
+    },
+    "certifications": null,
+    "languages": {
+      "sectionTitle": "Languages",
+      "languageItems": [
+        {
+          "language": "Hebrew",
+          "proficiency": "Native",
+          "certification": null
+        },
+        {
+          "language": "English",
+          "proficiency": "Highly Proficient",
+          "certification": null
+        }
+      ]
+    },
+    "courses": {
+      "sectionTitle": null,
+      "courseItems": [
+        {
+          "title": "CIO Leadership Development Program",
+          "institution": "National Defense University, Washington, D.C.",
+          "year": "2025",
+          "dateRange": null,
+          "certificateNumber": null,
+          "certificateUrl": null,
+          "description": "(equivalent to half an M.Sc. degree)",
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "text",
+          "textVariant": "detailed"
+        }
+      ]
+    },
+    "volunteer": null,
+    "publications": null,
+    "speaking": null,
+    "patents": null,
+    "memberships": null,
+    "hobbies": null,
+    "unclassified_text": null
+  },
+  "status": "completed",
+  "filename": "Gal_Levinsky_CV.pdf",
+  "upload_date": "2025-08-19T21:11:38.249867"
+}
