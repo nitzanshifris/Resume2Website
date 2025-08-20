@@ -81,7 +81,8 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
   const formData = new FormData()
   formData.append('file', file)
   
-  // Use anonymous upload endpoint if no session
+  // IMPORTANT: Use anonymous upload endpoint if no session
+  // This allows users to upload and validate files before signing up
   const uploadUrl = sessionId 
     ? `${API_BASE_URL}/api/v1/upload`
     : `${API_BASE_URL}/api/v1/upload-anonymous`
@@ -106,6 +107,11 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       console.error('Upload error response:', response.status, errorData)
+      
+      // Check if this is an authentication error
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`Authentication required (${response.status}): ${errorData.message || 'Please sign in to continue'}`)
+      }
       
       // Check if this is a Resume Gate rejection
       if (response.status === 400 && errorData.detail) {
@@ -149,7 +155,7 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
 export async function uploadMultipleFiles(files: File[]): Promise<UploadResponse> {
   const sessionId = getSessionId()
   if (!sessionId) {
-    throw new Error('Not authenticated. Please sign in.')
+    throw new Error('Authentication required: Please sign in to upload multiple files')
   }
   
   const formData = new FormData()
@@ -176,6 +182,11 @@ export async function uploadMultipleFiles(files: File[]): Promise<UploadResponse
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       console.error('Multiple upload error response:', response.status, errorData)
+      
+      // Check if this is an authentication error
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`Authentication required (${response.status}): ${errorData.message || 'Please sign in to continue'}`)
+      }
       
       // Check if this is a Resume Gate rejection
       if (response.status === 400 && errorData.detail) {
@@ -323,6 +334,9 @@ export function setSessionId(sessionId: string): void {
 export function clearSession(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('resume2website_session_id')
+    localStorage.removeItem('resume2website_user')
+    // CRITICAL: Clear portfolio data to prevent showing to next user
+    localStorage.removeItem('lastPortfolio')
   }
 }
 

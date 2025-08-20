@@ -3395,6 +3395,7 @@ export default function Home() {
         onBack={handleUploadBack}
         onSuccess={handleUploadSuccess}
         initialFile={droppedFile}
+        onAuthRequired={() => setShowSignupModal(true)}
       />
 
       {/* Resume Builder Modal */}
@@ -3432,7 +3433,7 @@ export default function Home() {
       {/* Pricing Modal */}
       {showPricing && (
         <PricingSelector
-          portfolioId={portfolioId || undefined}
+          portfolioId={portfolioId ?? undefined}
           onPaymentSuccess={() => {
             setShowPricing(false)
             // Handle payment success

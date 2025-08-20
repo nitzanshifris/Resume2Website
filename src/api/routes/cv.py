@@ -2,7 +2,7 @@
 CV processing endpoints - MVP version
 """
 # ========== IMPORTS ==========
-from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Form, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Form, Depends, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, HttpUrl, EmailStr
 from typing import Dict, Any, Optional, List
@@ -1136,6 +1136,7 @@ async def extract_cv_data_endpoint(
 
 @router.post("/upload-anonymous", response_model=UploadResponse)
 async def upload_cv_anonymous(
+    request: Request,
     file: UploadFile = File(...),
     current_user_id: Optional[str] = Depends(get_current_user_optional)
 ) -> UploadResponse:
@@ -1143,18 +1144,42 @@ async def upload_cv_anonymous(
     Upload and process a CV file anonymously (for demo purposes).
     
     Authentication is optional - allows anonymous users to try the service.
+    Rate limited for anonymous users by IP address.
     
     Args:
+        request: FastAPI request object for IP extraction
         file: The CV file (PDF, DOCX, TXT, images, etc.)
         current_user_id: Optional user ID if authenticated
         
     Returns:
         Job details including job_id
     """
-    # Generate anonymous user ID if not authenticated
+    # Rate limiting for anonymous users
     if not current_user_id:
+        # Get client IP address
+        client_ip = request.client.host
+        if request.headers.get("X-Forwarded-For"):
+            # Handle proxy/load balancer
+            client_ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+        
+        # Import rate limiter
+        from src.utils.upload_rate_limiter import upload_rate_limiter
+        
+        # Check rate limit
+        allowed, reason = upload_rate_limiter.check_upload_allowed(client_ip)
+        if not allowed:
+            logger.warning(f"Rate limit exceeded for IP {client_ip}: {reason}")
+            raise HTTPException(
+                status_code=429,
+                detail=reason,
+                headers={"Retry-After": "3600"}  # Suggest retry after 1 hour
+            )
+        
+        # Generate anonymous user ID
         current_user_id = f"anonymous_{uuid.uuid4().hex[:12]}"
-        logger.info(f"Anonymous user uploading file: {file.filename}")
+        logger.info(f"Anonymous user from IP {client_ip} uploading file: {file.filename}")
+        
+        # Record the upload for rate limiting (will be done after successful validation)
     else:
         logger.info(f"Authenticated user {current_user_id} uploading file: {file.filename}")
     
@@ -1273,6 +1298,12 @@ async def upload_cv_anonymous(
             f.write(file_content)
         logger.info(f"File saved for display: {file_path}")
         
+        # Record successful upload for rate limiting (even cache hits count)
+        if current_user_id.startswith("anonymous_") and 'client_ip' in locals():
+            from src.utils.upload_rate_limiter import upload_rate_limiter
+            upload_rate_limiter.record_upload(client_ip)
+            logger.info(f"Recorded cached upload for IP {client_ip}")
+        
         return UploadResponse(
             message=f"CV processed instantly (cached result)",
             job_id=job_id
@@ -1376,6 +1407,13 @@ async def upload_cv_anonymous(
         logger.error(f"CV processing failed for job {job_id}: {e}")
         update_cv_upload_status(job_id, 'failed')
         raise HTTPException(status_code=500, detail=f"CV processing failed: {str(e)}")
+    
+    # === RECORD SUCCESSFUL UPLOAD FOR RATE LIMITING ===
+    # Only record for anonymous users
+    if current_user_id.startswith("anonymous_") and 'client_ip' in locals():
+        from src.utils.upload_rate_limiter import upload_rate_limiter
+        upload_rate_limiter.record_upload(client_ip)
+        logger.info(f"Recorded successful upload for IP {client_ip}")
     
     # === RETURN SUCCESS ===
     return UploadResponse(
