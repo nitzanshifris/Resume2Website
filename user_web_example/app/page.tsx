@@ -749,7 +749,7 @@ const VerticalProgressBar = ({
           <motion.div
             className="absolute bottom-0 left-0 right-0 rounded-full overflow-hidden"
             initial={{ height: 0 }}
-            animate={{ height: `${percentage}%` }} // Direct percentage - 60% means 60% of bar height
+            animate={{ height: `${(percentage / 60) * 80}%` }} // Scale: 60 progress = 80% height
             transition={{ 
               type: "spring",
               stiffness: 40,
