@@ -1948,8 +1948,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
             }
           }
           
-          // Clear currentJobId after successful claim+extract
-          setCurrentJobId(null)
+          // Keep currentJobId to prevent duplicate uploads
+          // We'll clear it later after everything settles
+          // setCurrentJobId(null)
         } catch (error: any) {
           console.error('❌ Failed to claim/extract CV data:', error)
           
@@ -1993,7 +1994,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   }
                 }
               }
-              setCurrentJobId(null)
+              // Keep currentJobId to prevent duplicate uploads
+              // setCurrentJobId(null)
             } catch (extractError) {
               console.error('❌ Failed to extract CV:', extractError)
               setProcessingError('Failed to process CV data. Please try again.')
