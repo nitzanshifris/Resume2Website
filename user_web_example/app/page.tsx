@@ -26,6 +26,7 @@ import SimpleDashboard from "@/components/simple-dashboard"
 import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal-new"
 import PricingSelector from "@/components/pricing-selector"
+import ErrorToast from "@/components/ui/error-toast"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
@@ -838,7 +839,7 @@ const VerticalProgressBar = ({
 }
 
 // Resume2Website Demo Component - Mobile-First WOW Experience
-function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn }: { 
+function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn, setErrorToast }: { 
   onOpenModal: () => void; 
   setShowPricing: (value: boolean) => void;
   uploadedFile: File | null;
@@ -846,6 +847,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   onFileClick: (file: File) => void;
   handleFileSelect: (file: File) => void;
   signIn?: (sessionId: string, userData: any) => Promise<void>;
+  setErrorToast: (toast: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    suggestion?: string;
+  }) => void;
 }) {
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
@@ -879,6 +886,19 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  
+  // Error toast state
+  const [errorToast, setErrorToast] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    suggestion?: string
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    suggestion: undefined
+  })
   
   // Loading sequence states for mobile
   const [loadingStep, setLoadingStep] = useState(0) // 0: backgrounds, 1: headline, 2: subheadline, 3: cv image
@@ -1509,7 +1529,19 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         console.error('❌ File validation failed:', error)
         setShowCVCard(false)
         setProcessingError(error.message || 'Please upload a valid resume/CV file')
-        alert(error.message || 'Please upload a valid resume/CV file')
+        
+        // Parse error message for Resume Gate details
+        const errorMessage = error.message || 'Please upload a valid resume/CV file'
+        const lines = errorMessage.split('\n')
+        const mainMessage = lines[0]
+        const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '')
+        
+        setErrorToast({
+          isOpen: true,
+          title: 'Invalid Resume File',
+          message: mainMessage,
+          suggestion: suggestion || 'Please upload a PDF or Word document containing your resume'
+        })
       }
     } else {
       // No file, just start animation (shouldn't happen)
@@ -1594,7 +1626,19 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       console.error('❌ File validation failed:', error)
       setShowCVCard(false) // Hide the CV card
       setProcessingError(error.message || 'Please upload a valid resume/CV file')
-      alert(error.message || 'Please upload a valid resume/CV file')
+      
+      // Parse error message for Resume Gate details
+      const errorMessage = error.message || 'Please upload a valid resume/CV file'
+      const lines = errorMessage.split('\n')
+      const mainMessage = lines[0]
+      const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '')
+      
+      setErrorToast({
+        isOpen: true,
+        title: 'Invalid Resume File',
+        message: mainMessage,
+        suggestion: suggestion || 'Please upload a PDF or Word document containing your resume'
+      })
     })
   }
 
@@ -2958,6 +3002,21 @@ export default function Home() {
     setIsHydrated(true)
   }, [])
   
+  // Handle retry file upload from error toast
+  useEffect(() => {
+    const handleRetryUpload = (event: CustomEvent) => {
+      const file = event.detail as File
+      if (file) {
+        handleFileSelect(file)
+      }
+    }
+    
+    window.addEventListener('retryFileUpload', handleRetryUpload as EventListener)
+    return () => {
+      window.removeEventListener('retryFileUpload', handleRetryUpload as EventListener)
+    }
+  }, [])
+  
   // Reset Phase 6 modal trigger when authentication state changes
   useEffect(() => {
     if (isAuthenticated) {
@@ -3312,6 +3371,7 @@ export default function Home() {
           onFileClick={handleCVCardClick}
           handleFileSelect={handleFileSelect}
           signIn={signIn}
+          setErrorToast={setErrorToast}
         />
       </section>
       <section id="demo" className="min-h-screen">
@@ -3473,6 +3533,15 @@ export default function Home() {
           }}
         />
       )}
+      
+      {/* Error Toast - Global for all components */}
+      <ErrorToast
+        isOpen={errorToast.isOpen}
+        onClose={() => setErrorToast(prev => ({ ...prev, isOpen: false }))}
+        title={errorToast.title}
+        message={errorToast.message}
+        suggestion={errorToast.suggestion}
+      />
     </main>
   )
 }
