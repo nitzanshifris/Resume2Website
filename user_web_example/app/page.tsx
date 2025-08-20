@@ -62,10 +62,14 @@ const PROGRESS_CONFIG = {
 
 // Helper function to map semantic progress to visual
 const mapSemanticToVisual = (semantic: number): number => {
-  if (semantic >= PROGRESS_CONFIG.SEMANTIC_READY) {
+  // If we're at or above the ready point, show 80%
+  if (semantic >= PROGRESS_CONFIG.SEMANTIC_READY - PROGRESS_CONFIG.ROUND_EPSILON) {
     return PROGRESS_CONFIG.VISUAL_READY
   }
-  return Math.floor((semantic / PROGRESS_CONFIG.SEMANTIC_READY) * PROGRESS_CONFIG.VISUAL_READY)
+  // Otherwise scale proportionally
+  const scaled = (semantic / PROGRESS_CONFIG.SEMANTIC_READY) * PROGRESS_CONFIG.VISUAL_READY
+  // Round up if we're close to the next integer to avoid getting stuck
+  return Math.round(scaled)
 }
 
 // Client-only RoughNotation to prevent hydration issues
@@ -1496,6 +1500,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // Centralized function to finalize portfolio display
   const finalizePortfolioReady = (portfolioUrl: string, portfolioId?: string) => {
     console.log('🎆 Finalizing portfolio ready state:', portfolioUrl)
+    console.log('Current state before finalization:', {
+      realProgress,
+      showPortfolioInMacBook,
+      stage,
+      portfolioUrl: portfolioUrl
+    })
     
     // Stop any ongoing animations
     if (animateSmoothProgress.current) {
@@ -1514,8 +1524,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setStage("complete")
     
     // CRITICAL: Set progress to exactly 60 (semantic) which should display as 80% (visual)
-    setRealProgress(60)
-    setProgress(60) // Also set the animation progress
+    setRealProgress(PROGRESS_CONFIG.SEMANTIC_READY)
+    setProgress(PROGRESS_CONFIG.SEMANTIC_READY) // Also set the animation progress
     
     // Save to localStorage
     const sessionId = localStorage.getItem('resume2website_session_id')
@@ -1526,7 +1536,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       timestamp: Date.now()
     }))
     
-    console.log('✅ Portfolio finalized - should show at 80%')
+    const visualProgress = mapSemanticToVisual(PROGRESS_CONFIG.SEMANTIC_READY)
+    console.log(`✅ Portfolio finalized - semantic: ${PROGRESS_CONFIG.SEMANTIC_READY}, visual: ${visualProgress}%`)
   }
 
   // Keep the old function for backward compatibility but simplified
@@ -2001,10 +2012,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               console.log('✅ Portfolio generation started:', portfolioData)
               
               // Store portfolio data
-              if (portfolioData.portfolio_url) {
-                console.log('🎉 Portfolio ready at:', portfolioData.portfolio_url)
+              const portfolioUrl = portfolioData.custom_domain_url || portfolioData.url || portfolioData.portfolio_url || portfolioData.local_url
+              if (portfolioUrl) {
+                console.log('🎉 Portfolio ready at:', portfolioUrl)
                 // Use centralized finalization
-                finalizePortfolioReady(portfolioData.portfolio_url, portfolioData.portfolio_id)
+                finalizePortfolioReady(portfolioUrl, portfolioData.portfolio_id)
               }
             }
           }
@@ -2041,10 +2053,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   const portfolioData = await portfolioResponse.json()
                   console.log('✅ Portfolio generation started:', portfolioData)
                   
-                  if (portfolioData.portfolio_url) {
-                    console.log('🎉 Portfolio ready at:', portfolioData.portfolio_url)
+                  const portfolioUrl = portfolioData.custom_domain_url || portfolioData.url || portfolioData.portfolio_url || portfolioData.local_url
+                  if (portfolioUrl) {
+                    console.log('🎉 Portfolio ready at:', portfolioUrl)
                     // Use centralized finalization
-                    finalizePortfolioReady(portfolioData.portfolio_url, portfolioData.portfolio_id)
+                    finalizePortfolioReady(portfolioUrl, portfolioData.portfolio_id)
                   }
                 }
               }
