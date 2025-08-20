@@ -1549,8 +1549,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }
 
-  const startPreviewAnimation = () => {
+  const startPreviewAnimation = (fileToProcess?: File) => {
     console.log('🎬 Starting preview animation (no backend processing)')
+    
+    // Use provided file or fall back to uploadedFile
+    const file = fileToProcess || uploadedFile
     
     // Reset states for preview
     setStage("initial") // Start from initial stage to show CV immediately
@@ -1573,10 +1576,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     
     // Don't start animation immediately - wait for CV to appear in card
     setIsWaitingForAuth(true)
-    setPendingFile(uploadedFile)
+    setPendingFile(file)
     
     // Check if we have a file to upload
-    if (!uploadedFile) {
+    if (!file) {
       console.error('❌ No file to upload')
       alert('Please select a file first')
       return
@@ -1591,11 +1594,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // 6. Then show signup modal
     
     // Step 1: Validate the file first before starting any animation
-    console.log('🔍 Validating file before animation...', uploadedFile.name)
+    console.log('🔍 Validating file before animation...', file.name)
     setShowCVCard(true) // Show CV card but don't start animation yet
     
-    // Upload and validate the file first (use uploadedFile, not pendingFile)
-    uploadFile(uploadedFile).then(uploadResponse => {
+    // Upload and validate the file first (use the correct file reference)
+    uploadFile(file).then(uploadResponse => {
       // File is valid! Now start the animation
       console.log('✅ File validated successfully, starting animation...')
       setCurrentJobId(uploadResponse.job_id)
@@ -3145,10 +3148,22 @@ export default function Home() {
       console.log('📤 Setting new file for validation:', file.name)
       setUploadedFile(file)
       
-      // For unauthenticated users, also set dropped file
+      // For unauthenticated users, also set dropped file and start preview
       if (!isAuthenticated) {
         setDroppedFile(file)
         console.log('📦 File stored for processing after authentication')
+        
+        // Start the preview animation after file is set
+        setTimeout(() => {
+          console.log('🎬 Starting preview animation after retry')
+          startPreviewAnimation(file) // Pass the file directly
+        }, 200) // Slightly longer delay to ensure CV appears in pile first
+      } else {
+        // For authenticated users, start the full demo
+        setTimeout(() => {
+          console.log('🚀 Starting full demo after retry')
+          handleStartDemo()
+        }, 100) // Small delay to ensure file is visible in CV pile first
       }
     }, 100) // Increased delay to ensure proper state reset
   }
