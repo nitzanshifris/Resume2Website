@@ -910,7 +910,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         title: 'Sign in to continue',
         message: 'Creating a portfolio requires an account.',
         suggestion: 'Sign in to link this upload to your workspace.',
-        showAuth: true
+        isAuthError: true  // Special flag for auth errors, but still returns standard object
       }
     }
     
@@ -1641,6 +1641,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         // Keep CV card visible so user can see what file failed
         setProcessingError(error.message || 'Please upload a valid resume/CV file')
         
+        // Reset all animation and progress states
+        setIsPlaying(false)
+        setProgress(0)
+        setRealProgress(0)
+        setStage("typewriter")
+        setShowPortfolioInMacBook(false)
+        
         // Parse error message
         const errorMessage = error.message || 'Please upload a valid resume/CV file'
         
@@ -1648,7 +1655,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         const errorInfo = getStandardizedError(error)
         
         // Show auth modal if needed
-        if (errorInfo.showAuth) {
+        if ((errorInfo as any).isAuthError) {
           setShowSignupModal(true)
           return
         }
@@ -1754,6 +1761,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       setShowCVCard(false)
       setProcessingError(error.message || 'Please upload a valid resume/CV file')
       
+      // Reset all animation and progress states
+      setIsPlaying(false)
+      setProgress(0)
+      setRealProgress(0)
+      setStage("typewriter")
+      setShowPortfolioInMacBook(false)
+      
       // Parse error message
       const errorMessage = error.message || 'Please upload a valid resume/CV file'
       
@@ -1761,7 +1775,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const errorInfo = getStandardizedError(error)
       
       // Show auth modal if needed
-      if (errorInfo.showAuth) {
+      if ((errorInfo as any).isAuthError) {
         setShowSignupModal(true)
         return
       }
@@ -1892,10 +1906,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       (window as any).__autoStartListeners = existingListeners + 1
     }
     
-    window.addEventListener('autoStartAnimation', handleAutoStart as EventListener)
+    window.addEventListener('resume2web:autoStart', handleAutoStart as EventListener)
     return () => {
       console.log('🧹 Cleaning up autoStartAnimation listener')
-      window.removeEventListener('autoStartAnimation', handleAutoStart as EventListener)
+      window.removeEventListener('resume2web:autoStart', handleAutoStart as EventListener)
       
       // Decrement listener count in dev mode
       if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
@@ -2015,6 +2029,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className="relative w-full max-w-[340px] h-[485px]"
               >
                 <InteractiveCVPile 
+                  key={uploadedFile ? `${uploadedFile.name}-${uploadedFile.size}-${uploadedFile.lastModified}` : 'empty'}
                   className="w-full h-full" 
                   onFileSelect={handleLocalFileSelect}
                   onFileClick={handleFileClick}
@@ -2347,6 +2362,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 >
                   {/* Interactive CV Pile - Upload area */}
                   <InteractiveCVPile 
+                    key={uploadedFile ? `${uploadedFile.name}-${uploadedFile.size}-${uploadedFile.lastModified}` : 'empty'}
                     className="relative z-5 w-[268px] xs:w-[308px] sm:w-[344px] md:w-[384px] lg:w-[424px] xl:w-[460px] 2xl:w-[500px] h-[344px] xs:h-[384px] sm:h-[460px] md:h-[500px] lg:h-[540px] xl:h-[576px]" 
                     onFileSelect={handleLocalFileSelect}
                     onFileClick={handleFileClick}
@@ -3315,7 +3331,7 @@ export default function Home() {
         title: 'Sign in to continue',
         message: 'Creating a portfolio requires an account.',
         suggestion: 'Sign in to link this upload to your workspace.',
-        showAuth: true
+        isAuthError: true  // Special flag for auth errors, but still returns standard object
       }
     }
     
@@ -3405,7 +3421,7 @@ export default function Home() {
         // Trigger animation by dispatching a custom event that Resume2WebsiteDemo can listen to
         // Guard for SSR safety
         if (typeof window !== 'undefined') {
-          const event = new CustomEvent('autoStartAnimation', { detail: file })
+          const event = new CustomEvent('resume2web:autoStart', { detail: file })
           window.dispatchEvent(event)
         }
       }).catch(error => {
@@ -3415,7 +3431,7 @@ export default function Home() {
         const errorInfo = getStandardizedError(error)
         
         // Show auth modal if needed
-        if (errorInfo.showAuth) {
+        if ((errorInfo as any).isAuthError) {
           setShowAuthModal(true)
           return
         }
@@ -3428,7 +3444,7 @@ export default function Home() {
           suggestion: errorInfo.suggestion
         })
         
-        // Clear the invalid file
+        // Clear the invalid file and reset all animation states
         setUploadedFile(null)
         setDroppedFile(null)
       })
