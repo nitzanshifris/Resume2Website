@@ -9,7 +9,7 @@ import { test, expect, Page } from '@playwright/test'
 import path from 'path'
 
 // Test configuration
-const TEST_URL = process.env.TEST_URL || 'http://localhost:3000'
+const TEST_URL = process.env.TEST_URL || 'http://localhost:3019'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'
 
 // Test file paths
