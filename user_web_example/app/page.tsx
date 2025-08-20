@@ -53,6 +53,21 @@ const TIMINGS = {
   IFRAME_TIMEOUT_REMOTE: 5000,
 } as const
 
+// Progress Constants
+const PROGRESS_CONFIG = {
+  SEMANTIC_READY: 60,           // Semantic completion point
+  VISUAL_READY: 80,             // Visual display percentage
+  ROUND_EPSILON: 0.5,           // Rounding threshold
+} as const
+
+// Helper function to map semantic progress to visual
+const mapSemanticToVisual = (semantic: number): number => {
+  if (semantic >= PROGRESS_CONFIG.SEMANTIC_READY) {
+    return PROGRESS_CONFIG.VISUAL_READY
+  }
+  return Math.floor((semantic / PROGRESS_CONFIG.SEMANTIC_READY) * PROGRESS_CONFIG.VISUAL_READY)
+}
+
 // Client-only RoughNotation to prevent hydration issues
 const ClientRoughNotation = dynamic(
   () => import('react-rough-notation').then(mod => mod.RoughNotation),
@@ -694,9 +709,13 @@ const VerticalProgressBar = ({
   useEffect(() => {
     // Always use external progress when provided - no time-based animation
     if (externalProgress !== undefined) {
-      // Round to integer, but ensure 60 stays as 60 (not 59)
-      const integerProgress = externalProgress >= 59.5 ? 60 : Math.floor(externalProgress)
-      console.log(`📊 VerticalProgressBar: externalProgress=${externalProgress}, integerProgress=${integerProgress}`)
+      // Round to integer, but ensure semantic ready point is reached
+      const integerProgress = externalProgress >= (PROGRESS_CONFIG.SEMANTIC_READY - PROGRESS_CONFIG.ROUND_EPSILON) 
+        ? PROGRESS_CONFIG.SEMANTIC_READY 
+        : Math.floor(externalProgress)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`📊 VerticalProgressBar: externalProgress=${externalProgress}, integerProgress=${integerProgress}`)
+      }
       setPercentage(integerProgress)
       onProgressChange?.(integerProgress)
       return
@@ -751,7 +770,7 @@ const VerticalProgressBar = ({
           <motion.div
             className="absolute bottom-0 left-0 right-0 rounded-full overflow-hidden"
             initial={{ height: 0 }}
-            animate={{ height: `${percentage >= 59 ? 80 : (percentage / 60) * 80}%` }} // Scale: 60 progress = 80% height
+            animate={{ height: `${mapSemanticToVisual(percentage)}%` }} // Use centralized mapping
             transition={{ 
               type: "spring",
               stiffness: 40,
@@ -788,8 +807,10 @@ const VerticalProgressBar = ({
         {/* Traveling Percentage Button - centered on same axis as bar */}
         <motion.div
           className="absolute left-1/2 -translate-x-1/2 w-20 h-20 z-30"
-          initial={{ bottom: "-40px" }} // Start with center at bottom
-          animate={{ bottom: `${(percentage * 384) / 100 - 40}px` }} // Direct percentage of bar height (384px)
+          initial={{ bottom: "calc(0% - 40px)" }} // Start with center at bottom
+          animate={{ 
+            bottom: `calc(${mapSemanticToVisual(percentage)}% - 40px)` 
+          }} // Use centralized visual mapping
           transition={{
             type: "spring",
             stiffness: 40,
@@ -813,9 +834,9 @@ const VerticalProgressBar = ({
             {/* Inner glass layer */}
             <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/30 to-white/10" />
             
-            {/* Percentage text - scale to 80% visually when at 60% semantically */}
+            {/* Percentage text - use centralized visual mapping */}
             <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
-              {percentage >= 59 ? 80 : Math.min(79, Math.floor((percentage / 60) * 80))}%
+              {mapSemanticToVisual(percentage)}%
             </span>
             
             {/* Click indicator when ready */}
@@ -2701,7 +2722,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
 
                         {/* Phase 3C/5: Video Carousel OR Gate-kept Website Preview */}
                         <motion.div
-                          className="w-full max-w-4xl -mt-8"
+                          className="w-full max-w-4xl -mt-8 relative" 
+                          style={{ minHeight: '400px' }}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.8, delay: 1.6, ease: "easeOut" }}
@@ -2716,11 +2738,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             </div>
                           ) : showPortfolioInMacBook && portfolioUrl ? (
                             // Show the generated portfolio automatically when ready or when clicked
-                            <div className="absolute inset-0 w-full h-full bg-white z-50">
+                            <div className="w-full" style={{ height: '500px' }}>
                               <IframeWithFallback 
                                 src={portfolioUrl}
                                 title="Generated Portfolio"
-                                className="w-full h-full border-0"
+                                className="w-full h-full border-0 rounded-lg shadow-lg"
                               />
                             </div>
                           ) : (portfolioUrl && realProgress >= 60) ? (
