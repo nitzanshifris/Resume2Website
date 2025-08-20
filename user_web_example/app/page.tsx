@@ -1184,22 +1184,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }, [isPlaying])
 
-  // Handle retry after error
-  useEffect(() => {
-    if (isRetrying && uploadedFile && !isPlaying) {
-      console.log('🔄 Retry detected, starting validation and animation')
-      setIsRetrying(false) // Reset flag
-      
-      // Check if user is authenticated
-      if (isAuthenticated) {
-        console.log('✅ User authenticated, starting full demo')
-        handleStartDemo()
-      } else {
-        console.log('⚠️ User not authenticated, starting preview')
-        startPreviewAnimation(uploadedFile)
-      }
-    }
-  }, [isRetrying, uploadedFile, isPlaying])
+  // Auto-start animation listener will be added after handleFileClick is defined
   
   // Trigger new typewriter is now handled in the animation sequence
   // This useEffect is disabled to prevent duplicate triggers
@@ -1492,8 +1477,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       console.error('❌ Processing error:', error)
       setProcessingError(error instanceof Error ? error.message : 'An error occurred')
       setIsProcessing(false)
-      // Show error in UI
-      alert(`Error: ${error instanceof Error ? error.message : 'Processing failed'}`)
+      // Show error in UI using ErrorToast
+      setErrorToast({
+        isOpen: true,
+        title: 'Processing failed',
+        message: error instanceof Error ? error.message : 'An error occurred during processing',
+        suggestion: 'Please try uploading a different file or check your internet connection'
+      })
     }
   }
   
@@ -1550,7 +1540,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           })
         } else {
           // Other errors - parse normally
-          const lines = errorMessage.split('\n').filter(line => line.trim())
+          const lines = errorMessage.split('\n').filter((line: string) => line.trim())
           let mainMessage = lines[0] || 'Please upload a valid file'
           const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
           
@@ -1600,7 +1590,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // Check if we have a file to upload
     if (!file) {
       console.error('❌ No file to upload')
-      alert('Please select a file first')
+      setErrorToast({
+        isOpen: true,
+        title: 'No file selected',
+        message: 'Please select a file first',
+        suggestion: 'Drag and drop a file or click to browse'
+      })
       return
     }
     
@@ -1646,7 +1641,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }).catch(error => {
       // File validation failed - show error and don't start animation
       // Don't log to console - we'll show the nice error toast
-      // Keep the CV card visible so user can see what file failed
+      // Hide the CV card since the file is invalid
+      setShowCVCard(false)
       setProcessingError(error.message || 'Please upload a valid resume/CV file')
       
       // Parse error message
@@ -1663,7 +1659,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         })
       } else {
         // Other errors - parse normally
-        const lines = errorMessage.split('\n').filter(line => line.trim())
+        const lines = errorMessage.split('\n').filter((line: string) => line.trim())
         let mainMessage = lines[0] || 'Please upload a valid file'
         const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
         
@@ -1771,6 +1767,23 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       startPreviewAnimation()
     }
   }
+
+  // Listen for auto-start animation event (from retry flow)
+  // Using useCallback to ensure stable reference for event handler
+  const handleAutoStart = useCallback((event: CustomEvent) => {
+    if (uploadedFile && !isPlaying) {
+      console.log('🎬 Auto-starting animation from retry')
+      handleFileClick(uploadedFile)
+    }
+  }, [uploadedFile, isPlaying, handleFileClick])
+  
+  useEffect(() => {
+    window.addEventListener('autoStartAnimation', handleAutoStart as EventListener)
+    return () => {
+      console.log('🧹 Cleaning up autoStartAnimation listener')
+      window.removeEventListener('autoStartAnimation', handleAutoStart as EventListener)
+    }
+  }, [handleAutoStart])
 
   // Mobile-First Layout
   if (isMobile) {
@@ -3129,57 +3142,70 @@ export default function Home() {
   }
 
   const handleFileSelect = async (file: File) => {
-    // Set the uploaded file - this will trigger CV to appear in the card
-    console.log('📁 File selected for retry, clearing old file and showing new CV in card:', file.name)
+    // Single orchestrator for all file uploads - validation first, then animation
+    console.log('📁 File selected, starting unified upload flow:', file.name)
     
-    // Clear any existing error state
+    // Close any error toast
     setErrorToast(prev => ({ ...prev, isOpen: false }))
     
-    // IMPORTANT: Clear the uploaded file first to force CV pile to update
+    // Clear old files first
     setUploadedFile(null)
     setDroppedFile(null)
     
-    // If user is authenticated and has an existing portfolio, clear it
-    if (isAuthenticated) {
-      console.log('🗑️ Clearing any existing portfolio data for new upload...')
-      
-      // Clear saved portfolio data
-      localStorage.removeItem('lastPortfolio')
-      
-      // Clear URL params
-      const url = new URL(window.location.href)
-      url.searchParams.delete('url')
-      url.searchParams.delete('portfolio_id')
-      window.history.replaceState({}, '', url.toString())
-      
-      // Delete all existing portfolios from backend and Vercel
-      console.log('🗑️ Deleting existing portfolios from backend...')
-      try {
-        const { deleteAllUserPortfolios } = await import('@/lib/api')
-        await deleteAllUserPortfolios()
-      } catch (error) {
-        console.log('⚠️ Could not delete existing portfolios:', error)
-        // Continue anyway - user might not have any portfolios
-      }
-    }
-    
-    // Use requestAnimationFrame to ensure the clear has been rendered
+    // Use requestAnimationFrame to ensure clean render boundary
     requestAnimationFrame(() => {
-      // Now set the new file after the old one has been cleared from the UI
-      console.log('📤 Setting new file for validation:', file.name)
+      // Set the new file after paint
       setUploadedFile(file)
       
       // For unauthenticated users, also set dropped file
       if (!isAuthenticated) {
         setDroppedFile(file)
-        console.log('📦 File stored for processing after authentication')
       }
       
-      // Trigger the demo to start after another frame
-      requestAnimationFrame(() => {
-        console.log('🎯 Triggering demo start after retry...')
-        // Set a flag to indicate retry is happening
-        setIsRetrying(true)
+      // Now validate the file first
+      console.log('🔍 Validating file before animation...')
+      uploadFile(file).then(uploadResponse => {
+        // File is valid! Now trigger animation by simulating click
+        console.log('✅ File validated successfully, auto-starting animation...')
+        
+        // Trigger animation by dispatching a custom event that Resume2WebsiteDemo can listen to
+        const event = new CustomEvent('autoStartAnimation', { detail: file })
+        window.dispatchEvent(event)
+      }).catch(error => {
+        console.error('❌ File validation failed:', error)
+        
+        // Show error toast with specific message
+        const errorMessage = error.message || 'File validation failed'
+        
+        // Parse error for better UX
+        let title = 'Not a resume'
+        let message = errorMessage
+        let suggestion = undefined
+        
+        if (errorMessage.includes('Authentication required')) {
+          // Show auth modal instead
+          setShowAuthModal(true)
+          return
+        }
+        
+        if (errorMessage.includes('Please upload a valid resume')) {
+          const parts = errorMessage.split('\n\n')
+          message = parts[0]
+          if (parts[1]) {
+            suggestion = parts[1].replace('💡 ', '')
+          }
+        }
+        
+        setErrorToast({
+          isOpen: true,
+          title,
+          message,
+          suggestion
+        })
+        
+        // Clear the invalid file
+        setUploadedFile(null)
+        setDroppedFile(null)
       })
     })
   }
@@ -3542,7 +3568,7 @@ export default function Home() {
         onBack={handleUploadBack}
         onSuccess={handleUploadSuccess}
         initialFile={droppedFile}
-        onAuthRequired={() => setShowSignupModal(true)}
+        onAuthRequired={() => setShowAuthModal(true)}
       />
 
       {/* Resume Builder Modal */}
@@ -3580,7 +3606,7 @@ export default function Home() {
       {/* Pricing Modal */}
       {showPricing && (
         <PricingSelector
-          portfolioId={portfolioId ?? undefined}
+          portfolioId={undefined}
           onPaymentSuccess={() => {
             setShowPricing(false)
             // Handle payment success

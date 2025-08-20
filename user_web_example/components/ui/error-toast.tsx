@@ -45,7 +45,7 @@ export default function ErrorToast({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[99]"
-          onClick={onClose}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Modal */}
           <motion.div
@@ -102,7 +102,7 @@ export default function ErrorToast({
                     // Trigger file picker again
                     const fileInput = document.createElement('input')
                     fileInput.type = 'file'
-                    fileInput.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
+                    fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
                     fileInput.onchange = (e) => {
                       const target = e.target as HTMLInputElement
                       if (target.files && target.files[0]) {
