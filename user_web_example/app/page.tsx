@@ -1956,9 +1956,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               
               // Store portfolio data
               if (portfolioData.portfolio_url) {
+                console.log('🎉 Portfolio ready at:', portfolioData.portfolio_url)
                 setPortfolioUrl(portfolioData.portfolio_url)
                 setRealProgress(60) // Trigger portfolio display
                 setShowPortfolioInMacBook(true) // Show the portfolio
+                setStage("complete") // CRITICAL: Set stage to complete to show portfolio
                 localStorage.setItem('lastPortfolio', JSON.stringify({
                   url: portfolioData.portfolio_url,
                   timestamp: Date.now()
@@ -1966,6 +1968,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 
                 // Complete the progress animation
                 completeSmoothProgress()
+                setProgress(60) // Also set the visual progress
               }
             }
           }
@@ -2003,9 +2006,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   console.log('✅ Portfolio generation started:', portfolioData)
                   
                   if (portfolioData.portfolio_url) {
+                    console.log('🎉 Portfolio ready at:', portfolioData.portfolio_url)
                     setPortfolioUrl(portfolioData.portfolio_url)
                     setRealProgress(60) // Trigger portfolio display
                     setShowPortfolioInMacBook(true) // Show the portfolio
+                    setStage("complete") // CRITICAL: Set stage to complete to show portfolio
                     localStorage.setItem('lastPortfolio', JSON.stringify({
                       url: portfolioData.portfolio_url,
                       timestamp: Date.now()
@@ -2013,6 +2018,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     
                     // Complete the progress animation
                     completeSmoothProgress()
+                    setProgress(60) // Also set the visual progress
                   }
                 }
               }
