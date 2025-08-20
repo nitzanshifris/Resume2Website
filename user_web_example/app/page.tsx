@@ -2065,21 +2065,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 1.2, ease: "easeInOut" }}
-                      className="flex flex-col items-center w-full"
-                      style={{ height: "400px" }}
+                      className="flex items-center w-full"
+                      style={{ height: "400px", paddingLeft: "120px" }}
                     >
-                      {/* Edit Your Website Button - Shows when portfolio is generated */}
-                      {realProgress >= 60 && portfolioUrl && (
-                        <motion.button
-                          initial={{ opacity: 0, y: -20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                          onClick={() => setShowPricing(true)}
-                          className="mb-6 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                        >
-                          ✏️ Edit Your Website
-                        </motion.button>
-                      )}
                       <VerticalProgressBar 
                         onProgressChange={setProgressBarPercentage}
                         externalProgress={realProgress}
@@ -2189,7 +2177,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
 
 
             <AnimatePresence mode="wait">
-              {(stage === "initial" || stage === "intro" || stage === "typewriter") && !showNewTypewriter && (
+              {(stage === "initial" || stage === "intro" || stage === "typewriter") && (
                 <motion.div
                   key="initial"
                   initial={{ opacity: 0, scale: 0.95, y: 30 }}
@@ -2200,7 +2188,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     transition: { duration: 0.6, ease: "easeInOut" },
                   }}
                   transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 1.0 }}
-                  className="relative flex justify-start pl-8"
+                  className="relative flex justify-center"
                 >
                   {/* Interactive CV Pile - Upload area */}
                   <InteractiveCVPile 
@@ -2213,7 +2201,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 </motion.div>
               )}
 
-              {(stage === "morphing" || stage === "dissolving") && !showNewTypewriter && (
+              {(stage === "morphing" || stage === "dissolving") && (
                 <motion.div
                   key="transforming"
                   initial={{ opacity: 0 }}
@@ -2224,7 +2212,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     scale: 0.95
                   }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                className="w-[290px] xs:w-[335px] sm:w-[385px] md:w-[430px] lg:w-[480px] xl:w-[530px] h-[385px] xs:w-[430px] sm:h-[525px] md:h-[575px] lg:h-[625px] xl:h-[675px] relative"
+                  className="w-[290px] xs:w-[335px] sm:w-[385px] md:w-[430px] lg:w-[480px] xl:w-[530px] h-[385px] xs:h-[430px] sm:h-[525px] md:h-[575px] lg:h-[625px] xl:h-[675px] relative"
                 >
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 via-sky-400/30 to-blue-600/30 rounded-xl"
