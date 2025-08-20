@@ -19,6 +19,7 @@ interface UploadResumeProps {
 export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initialFile }: UploadResumeProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isValidating, setIsValidating] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState<{file: string, status: 'uploading' | 'success' | 'error'}[]>([])
@@ -101,9 +102,7 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
     if (validFiles.length === 0) return
 
     setSelectedFiles(validFiles)
-    
-    // Don't show upload progress immediately - wait for actual upload to start
-    // This prevents animation from showing when files are rejected by Resume Gate
+    setIsValidating(true) // Show validating state
 
     // Check if multiple image files are being uploaded
     const imageExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.heif', '.tiff', '.tif', '.bmp']
@@ -121,6 +120,7 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
         const response = await uploadMultipleFiles(validFiles)
         
         // Only show progress after successful upload start
+        setIsValidating(false)
         setIsUploading(true)
         setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
         
@@ -157,6 +157,7 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
             
             // Only show upload progress after successful response
             if (i === 0) {
+              setIsValidating(false)
               setIsUploading(true)
               setUploadProgress(validFiles.map(f => ({ file: f.name, status: 'uploading' as const })))
             }
@@ -215,6 +216,7 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
       }
     } catch (error) {
       console.error('Upload error:', error)
+      setIsValidating(false)
       setIsUploading(false)
       // Update all files as error
       setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'error' as const })))
@@ -323,7 +325,13 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
                   />
 
                   <div className="text-center">
-                    {isUploading ? (
+                    {isValidating ? (
+                      <>
+                        <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mx-auto mb-4" />
+                        <p className="text-lg font-medium text-gray-700">Validating file...</p>
+                        <p className="text-sm text-gray-500 mt-2">Checking if your file is a valid resume</p>
+                      </>
+                    ) : isUploading ? (
                       <>
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
                         <p className="text-lg font-medium text-gray-700">Processing your files...</p>

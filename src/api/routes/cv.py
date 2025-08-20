@@ -1241,25 +1241,58 @@ async def upload_cv_anonymous(
             # Don't block on Resume Gate errors - continue processing
             logger.warning("Resume Gate check failed, continuing with upload")
     
-    # === CREATE JOB ID & SAVE FILE ===
+    # === CALCULATE FILE HASH FOR CACHING ===
+    import hashlib
+    file_hash = hashlib.sha256(file_content).hexdigest()
+    logger.info(f"File hash calculated: {file_hash[:8]}...")
+    
+    # Check if we have cached extraction result
+    cached_result = get_cached_extraction(file_hash)
+    if cached_result:
+        logger.info(f"🎯 CACHE HIT! Using cached extraction for anonymous upload (hash {file_hash[:8]})")
+        
+        # Create new job_id but use cached CV data
+        job_id = str(uuid.uuid4())
+        upload_id = create_cv_upload(
+            user_id=current_user_id,
+            job_id=job_id,
+            filename=file.filename,
+            file_type=file_extension,
+            file_hash=file_hash
+        )
+        
+        # Update status with cached data
+        update_cv_upload_status(job_id, 'completed', cached_result['cv_data'])
+        
+        # Still save the file for display purposes
+        user_dir = os.path.join(config.UPLOAD_DIR, current_user_id)
+        os.makedirs(user_dir, exist_ok=True)
+        file_path = os.path.join(user_dir, f"{job_id}{file_extension}")
+        
+        with open(file_path, "wb") as f:
+            f.write(file_content)
+        logger.info(f"File saved for display: {file_path}")
+        
+        return UploadResponse(
+            message=f"CV processed instantly (cached result)",
+            job_id=job_id
+        )
+    
+    # === CREATE JOB ID & SAVE FILE (NO CACHE HIT) ===
     job_id = str(uuid.uuid4())
     
-    # Ensure user directory exists
+    # Ensure user directory exists  
     user_dir = os.path.join(config.UPLOAD_DIR, current_user_id)
     os.makedirs(user_dir, exist_ok=True)
     
-    # Build file path
-    file_path = os.path.join(user_dir, f"{job_id}_{file.filename}")
+    # Build file path - use consistent naming scheme
+    file_path = os.path.join(user_dir, f"{job_id}{file_extension}")
     
     # Save file
     with open(file_path, "wb") as f:
         f.write(file_content)
     
     logger.info(f"File saved for job {job_id}: {file_path}")
-    
-    # Calculate file hash for caching
-    import hashlib
-    file_hash = hashlib.sha256(file_content).hexdigest()
     
     # === CREATE CV UPLOAD RECORD ===
     create_cv_upload(
