@@ -111,7 +111,10 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      console.error('Upload error response:', response.status, errorData)
+      // Only log in development, not in production
+      if (window.location.hostname === 'localhost' && process.env.NODE_ENV === 'development') {
+        console.log('Upload validation failed:', response.status)
+      }
       
       // Check if this is an authentication error
       if (response.status === 401 || response.status === 403) {
@@ -133,10 +136,7 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
             message += `\n\n💡 ${suggestion}`
           }
           
-          // Only show score in development/debug mode
-          if (window.location.hostname === 'localhost') {
-            message += `\n\n(Debug: Score ${score}/100)`
-          }
+          // Don't show debug score in the error message
           
           throw new Error(message)
         }
@@ -208,10 +208,7 @@ export async function uploadMultipleFiles(files: File[]): Promise<UploadResponse
             message += `\n\n💡 ${suggestion}`
           }
           
-          // Only show score in development/debug mode
-          if (window.location.hostname === 'localhost') {
-            message += `\n\n(Debug: Score ${score}/100)`
-          }
+          // Don't show debug score in the error message
           
           throw new Error(message)
         }

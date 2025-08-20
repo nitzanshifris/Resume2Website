@@ -1513,15 +1513,29 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         // Start full backend processing
         processPortfolioGeneration(uploadedFile, true) // Skip validation since we just did it
       } catch (error: any) {
-        console.error('❌ File validation failed:', error)
+        // Don't log to console - we'll show the nice error toast
         setShowCVCard(false)
         setProcessingError(error.message || 'Please upload a valid resume/CV file')
         
         // Parse error message for Resume Gate details
         const errorMessage = error.message || 'Please upload a valid resume/CV file'
-        const lines = errorMessage.split('\n')
-        const mainMessage = lines[0]
-        const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '')
+        const lines = errorMessage.split('\n').filter(line => line.trim())
+        
+        // Get the main message (first line)
+        let mainMessage = lines[0] || 'Please upload a valid resume/CV file'
+        
+        // Find the reason (second paragraph, if exists)
+        const reasonLine = lines.find(line => 
+          line.includes('missing') || 
+          line.includes('does not appear') ||
+          line.includes('Your file')
+        )
+        if (reasonLine && !mainMessage.includes(reasonLine)) {
+          mainMessage = reasonLine
+        }
+        
+        // Extract suggestion (line with 💡)
+        const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
         
         setErrorToast({
           isOpen: true,
@@ -1610,15 +1624,29 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       }, 6000) // Time for animation to reach MacBook stage
     }).catch(error => {
       // File validation failed - show error and don't start animation
-      console.error('❌ File validation failed:', error)
+      // Don't log to console - we'll show the nice error toast
       setShowCVCard(false) // Hide the CV card
       setProcessingError(error.message || 'Please upload a valid resume/CV file')
       
       // Parse error message for Resume Gate details
       const errorMessage = error.message || 'Please upload a valid resume/CV file'
-      const lines = errorMessage.split('\n')
-      const mainMessage = lines[0]
-      const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '')
+      const lines = errorMessage.split('\n').filter(line => line.trim())
+      
+      // Get the main message (first line)
+      let mainMessage = lines[0] || 'Please upload a valid resume/CV file'
+      
+      // Find the reason (second paragraph, if exists)
+      const reasonLine = lines.find(line => 
+        line.includes('missing') || 
+        line.includes('does not appear') ||
+        line.includes('Your file')
+      )
+      if (reasonLine && !mainMessage.includes(reasonLine)) {
+        mainMessage = reasonLine
+      }
+      
+      // Extract suggestion (line with 💡)
+      const suggestion = lines.find((line: string) => line.includes('💡'))?.replace('💡 ', '').trim()
       
       setErrorToast({
         isOpen: true,
