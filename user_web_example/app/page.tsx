@@ -1054,6 +1054,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   
+  // Dedupe ref to prevent duplicate processing
+  const startedForJobIdRef = useRef<Set<string>>(new Set())
+  
   // Loading sequence states for mobile
   const [loadingStep, setLoadingStep] = useState(0) // 0: backgrounds, 1: headline, 2: subheadline, 3: cv image
 
@@ -1666,6 +1669,18 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   }
   
   const handleStartDemo = async () => {
+    // HARD GUARD: If we already have a job_id, don't upload again
+    if (currentJobId) {
+      console.log('⚠️ handleStartDemo called but currentJobId exists:', currentJobId)
+      // Check if we've already started processing this job
+      if (startedForJobIdRef.current.has(currentJobId)) {
+        console.log('✋ Already processing job:', currentJobId)
+        return
+      }
+      // Mark this job as started
+      startedForJobIdRef.current.add(currentJobId)
+      return // Don't upload or process again
+    }
     
     // Reset everything to initial state before starting
     setStage("typewriter")
@@ -1691,7 +1706,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       try {
         // Upload and validate first
         const uploadResponse = await uploadFile(uploadedFile)
-        setCurrentJobId(uploadResponse.job_id)
+        const jobId = uploadResponse.job_id
+        setCurrentJobId(jobId)
+        
+        // Add to dedupe set to prevent re-processing
+        startedForJobIdRef.current.add(jobId)
         console.log('✅ File validated, starting animation and processing')
         
         // Now start the animation
@@ -1890,6 +1909,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       // Check if we already have a job_id from anonymous upload
       if (currentJobId) {
         console.log('📊 Using existing job_id, claiming and extracting CV data...', currentJobId)
+        
+        // Add to dedupe set to prevent duplicate processing
+        startedForJobIdRef.current.add(currentJobId)
         
         try {
           // IMPORTANT: Keep the UI exactly as it was (video carousel visible)
