@@ -858,6 +858,33 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
 }) {
   // Helper function to parse error response and get standardized messages
   const getStandardizedError = (error: any) => {
+    // Handle network errors, CORS, and fetch failures
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        title: 'Connection problem',
+        message: 'Unable to connect to the server.',
+        suggestion: 'Check your internet connection and try again.'
+      }
+    }
+    
+    // Handle AbortError (client-side timeout)
+    if (error.name === 'AbortError' || (error instanceof Error && error.message.includes('AbortError'))) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    // Handle CORS errors
+    if (error instanceof TypeError && (error.message.includes('CORS') || error.message.includes('cross-origin'))) {
+      return {
+        title: 'Connection blocked',
+        message: 'The server blocked the connection for security reasons.',
+        suggestion: 'Try refreshing the page or contact support if this persists.'
+      }
+    }
+    
     const errorMessage = error.message || 'File validation failed'
     const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
     
@@ -1854,10 +1881,27 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   }, [uploadedFile, isPlaying, handleFileClick])
   
   useEffect(() => {
+    // Log listener registration in dev mode to catch leaks
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📌 Registering autoStartAnimation listener')
+      // Check for existing listeners (dev only)
+      const existingListeners = (window as any).__autoStartListeners || 0
+      if (existingListeners > 0) {
+        console.warn(`⚠️ Potential listener leak: ${existingListeners} existing listeners found`)
+      }
+      (window as any).__autoStartListeners = existingListeners + 1
+    }
+    
     window.addEventListener('autoStartAnimation', handleAutoStart as EventListener)
     return () => {
       console.log('🧹 Cleaning up autoStartAnimation listener')
       window.removeEventListener('autoStartAnimation', handleAutoStart as EventListener)
+      
+      // Decrement listener count in dev mode
+      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+        (window as any).__autoStartListeners = ((window as any).__autoStartListeners || 1) - 1
+        console.log(`📉 Listeners remaining: ${(window as any).__autoStartListeners}`)
+      }
     }
   }, [handleAutoStart])
 
@@ -3219,6 +3263,33 @@ export default function Home() {
 
   // Helper function to parse error response and get standardized messages
   const getStandardizedError = (error: any) => {
+    // Handle network errors, CORS, and fetch failures
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        title: 'Connection problem',
+        message: 'Unable to connect to the server.',
+        suggestion: 'Check your internet connection and try again.'
+      }
+    }
+    
+    // Handle AbortError (client-side timeout)
+    if (error.name === 'AbortError' || (error instanceof Error && error.message.includes('AbortError'))) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    // Handle CORS errors
+    if (error instanceof TypeError && (error.message.includes('CORS') || error.message.includes('cross-origin'))) {
+      return {
+        title: 'Connection blocked',
+        message: 'The server blocked the connection for security reasons.',
+        suggestion: 'Try refreshing the page or contact support if this persists.'
+      }
+    }
+    
     const errorMessage = error.message || 'File validation failed'
     const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
     
@@ -3332,8 +3403,11 @@ export default function Home() {
         console.log('✅ File validated successfully, auto-starting animation...')
         
         // Trigger animation by dispatching a custom event that Resume2WebsiteDemo can listen to
-        const event = new CustomEvent('autoStartAnimation', { detail: file })
-        window.dispatchEvent(event)
+        // Guard for SSR safety
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('autoStartAnimation', { detail: file })
+          window.dispatchEvent(event)
+        }
       }).catch(error => {
         console.error('❌ File validation failed:', error)
         

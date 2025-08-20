@@ -102,7 +102,7 @@ export default function ErrorToast({
                     // Trigger file picker again
                     const fileInput = document.createElement('input')
                     fileInput.type = 'file'
-                    fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp'
+                    fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
                     fileInput.onchange = (e) => {
                       const target = e.target as HTMLInputElement
                       if (target.files && target.files[0]) {
