@@ -69,6 +69,11 @@ export async function apiRequest<T>(
 
 // File upload function
 export async function uploadFile(file: File): Promise<UploadResponse> {
+  // Safety check for null/undefined file
+  if (!file) {
+    throw new Error('No file provided for upload')
+  }
+  
   const sessionId = getSessionId()
   console.log('🔑 Session ID retrieved for upload:', sessionId)
   console.log('📦 localStorage content:', {

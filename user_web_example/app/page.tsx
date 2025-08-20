@@ -1543,6 +1543,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setIsWaitingForAuth(true)
     setPendingFile(uploadedFile)
     
+    // Check if we have a file to upload
+    if (!uploadedFile) {
+      console.error('❌ No file to upload')
+      alert('Please select a file first')
+      return
+    }
+    
     // Timeline:
     // 1. Wait for CV to fully appear in card (estimated 4 seconds)
     // 2. Wait 3 more seconds with CV visible
@@ -1552,11 +1559,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // 6. Then show signup modal
     
     // Step 1: Validate the file first before starting any animation
-    console.log('🔍 Validating file before animation...')
+    console.log('🔍 Validating file before animation...', uploadedFile.name)
     setShowCVCard(true) // Show CV card but don't start animation yet
     
-    // Upload and validate the file first
-    uploadFile(pendingFile).then(uploadResponse => {
+    // Upload and validate the file first (use uploadedFile, not pendingFile)
+    uploadFile(uploadedFile).then(uploadResponse => {
       // File is valid! Now start the animation
       console.log('✅ File validated successfully, starting animation...')
       setCurrentJobId(uploadResponse.job_id)
