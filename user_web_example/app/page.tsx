@@ -1370,40 +1370,107 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }, [stage])
 
-  // Linear progress animation helper - more predictable and backend-synchronized
-  const animateProgress = (from: number, to: number, duration: number = 1000) => {
-    const startTime = Date.now()
-    const diff = to - from
-    let lastIntegerProgress = Math.floor(from)
+  // Smooth continuous progress animation with asymptotic approach
+  const animateSmoothProgress = useRef<{
+    isRunning: boolean;
+    startTime: number;
+    expectedDuration: number;
+    animationId: number | null;
+    processComplete: boolean;
+  }>({
+    isRunning: false,
+    startTime: 0,
+    expectedDuration: 40000, // 40 seconds to reach near 60
+    animationId: null,
+    processComplete: false
+  })
+
+  const startSmoothProgress = () => {
+    // Reset progress to 0 and start the smooth animation
+    setRealProgress(0)
     
-    const updateProgress = () => {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      
-      // Use linear interpolation for more predictable progress
-      // This ensures progress moves steadily without jumps
-      const currentProgress = from + (diff * progress)
-      
-      // Update every integer change for smooth visual progression
-      const currentInteger = Math.floor(currentProgress)
-      if (currentInteger !== lastIntegerProgress && currentInteger <= to) {
-        setRealProgress(currentInteger)
-        lastIntegerProgress = currentInteger
-        console.log(`📊 Progress: ${currentInteger}% (${from}% → ${to}%)`)
-      }
-      
-      // Continue animation until we reach the target
-      if (progress < 1) {
-        requestAnimationFrame(updateProgress)
-      } else {
-        // Ensure we set the final value
-        const finalValue = Math.floor(to)
-        setRealProgress(finalValue)
-        console.log(`✅ Progress complete: ${finalValue}%`)
-      }
+    animateSmoothProgress.current = {
+      isRunning: true,
+      startTime: Date.now(),
+      expectedDuration: 40000, // 40 seconds expected
+      animationId: null,
+      processComplete: false
     }
     
-    requestAnimationFrame(updateProgress)
+    const updateProgress = () => {
+      if (!animateSmoothProgress.current.isRunning) return
+      
+      const elapsed = Date.now() - animateSmoothProgress.current.startTime
+      const expectedDuration = animateSmoothProgress.current.expectedDuration
+      
+      // If process completed, quickly go to 60
+      if (animateSmoothProgress.current.processComplete) {
+        setRealProgress(prev => {
+          if (prev < 60) {
+            // Animate quickly to 60
+            const step = Math.min(3, 60 - prev) // Jump by 3 or remaining
+            const newProgress = Math.min(60, prev + step)
+            if (newProgress < 60) {
+              setTimeout(() => updateProgress(), 100) // Fast updates
+            }
+            return newProgress
+          }
+          return 60
+        })
+        return
+      }
+      
+      // Calculate smooth progress
+      let targetProgress: number
+      
+      if (elapsed < expectedDuration) {
+        // Linear progression from 0 to 55
+        targetProgress = (elapsed / expectedDuration) * 55
+      } else {
+        // Asymptotic approach from 55 to 60
+        // Using exponential decay: 60 - 5 * e^(-t)
+        const overtime = (elapsed - expectedDuration) / 5000 // Scale overtime
+        targetProgress = 60 - 5 * Math.exp(-overtime)
+      }
+      
+      // Always show integers only
+      const intProgress = Math.floor(targetProgress)
+      
+      // Never exceed 59 until process is complete
+      const cappedProgress = Math.min(59, intProgress)
+      
+      // Only update if it's a new integer value
+      setRealProgress(prev => {
+        if (prev !== cappedProgress && cappedProgress > prev) {
+          console.log(`📊 Progress: ${cappedProgress}%`)
+          return cappedProgress
+        }
+        return prev
+      })
+      
+      // Continue animation
+      animateSmoothProgress.current.animationId = requestAnimationFrame(updateProgress)
+    }
+    
+    // Start the animation
+    updateProgress()
+  }
+
+  const completeSmoothProgress = () => {
+    animateSmoothProgress.current.processComplete = true
+  }
+
+  const stopSmoothProgress = () => {
+    animateSmoothProgress.current.isRunning = false
+    if (animateSmoothProgress.current.animationId) {
+      cancelAnimationFrame(animateSmoothProgress.current.animationId)
+    }
+  }
+
+  // Keep the old function for backward compatibility but simplified
+  const animateProgress = (from: number, to: number, duration: number = 1000) => {
+    // This is now just used for specific jumps when needed
+    setRealProgress(to)
   }
 
   // Process portfolio generation in the background
@@ -1412,45 +1479,16 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       setIsProcessing(true)
       setProcessingError(null)
       
-      // Step 1: Upload file (0-20%)
+      // Start the smooth continuous progress animation
+      startSmoothProgress()
+      
+      // Step 1: Upload file
       console.log('📤 Uploading file...', file.name, file.size, 'bytes')
-      if (!skipValidation) {
-        animateProgress(0, PROGRESS_MILESTONES.UPLOAD_START, 500) // Quick start only if not validating
-      }
       
       const uploadResponse = await uploadFile(file)
       const jobId = uploadResponse.job_id
       setCurrentJobId(jobId)
       console.log('✅ Upload complete, job_id:', jobId)
-      
-      // Step 2: Check if extraction is needed (might already be done during upload)
-      // For cached uploads, extraction happens during upload, so we can skip this step
-      console.log('🔍 Checking if CV extraction is needed...')
-      
-      // Start smooth linear progress from 5 to 20 (like we do for 20-60)
-      // This will increment smoothly: 5, 6, 7, 8... up to 20
-      let currentProgress = PROGRESS_MILESTONES.UPLOAD_START // Start from 5
-      const progressTo20Interval = setInterval(() => {
-        currentProgress++
-        setRealProgress(currentProgress)
-        if (currentProgress >= PROGRESS_MILESTONES.EXTRACTION_START) {
-          clearInterval(progressTo20Interval)
-        }
-      }, 200) // Update every 200ms for smooth progression from 5 to 20 (15 steps * 200ms = 3 seconds)
-      
-      // Continue with extraction progress from 20 to 45
-      let progressInterval: NodeJS.Timeout | null = null
-      setTimeout(() => {
-        progressInterval = setInterval(() => {
-          setRealProgress(prev => {
-            if (prev >= PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5) {
-              if (progressInterval) clearInterval(progressInterval)
-              return prev
-            }
-            return Math.min(prev + 1, PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5)
-          })
-        }, 800) // Update every 800ms
-      }, 3000) // Start after the 5-20 animation completes
       
       // Start extraction with proper timeout handling
       const extractStartTime = Date.now()
@@ -1471,10 +1509,6 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           if (cvData && cvData.cv_data && cvData.status === 'completed') {
             console.log('✅ CV already extracted during upload (cached), skipping extraction')
             extractionNeeded = false
-            // Jump progress to extraction complete
-            clearInterval(progressTo20Interval)
-            if (progressInterval) clearInterval(progressInterval)
-            setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
           }
         }
       } catch (e) {
@@ -1505,16 +1539,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           // Wait for response to ensure extraction completed
           const extractData = await extractResponse.json()
           console.log('✅ CV extraction response received:', extractData)
-          
-          // Clear the progress intervals and complete extraction
-          clearInterval(progressTo20Interval) // Clear first interval if still running
-          if (progressInterval) clearInterval(progressInterval) // Clear second interval
-          setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
           console.log('✅ CV extraction complete')
         } catch (error) {
           clearTimeout(timeoutId)
-          clearInterval(progressTo20Interval)
-          if (progressInterval) clearInterval(progressInterval)
           if (error instanceof Error && error.name === 'AbortError') {
             throw new Error('CV extraction timed out after 60 seconds')
           }
@@ -1522,25 +1549,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         }
       }
       
-      // Step 3: Generate portfolio (45-60%) - final step
+      // Step 3: Generate portfolio - final step
       console.log('🎨 Generating portfolio...')
       const templates = ['v0_template_v1.5', 'v0_template_v2.1']
       const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
       console.log('🎯 Selected template:', randomTemplate)
-      
-      // Jump directly to generation phase since extraction is complete
-      setRealProgress(PROGRESS_MILESTONES.GENERATION_START)
-      
-      // Simulate progress during generation
-      const generateProgressInterval = setInterval(() => {
-        setRealProgress(prev => {
-          if (prev >= PROGRESS_MILESTONES.GENERATION_COMPLETE - 2) {
-            clearInterval(generateProgressInterval)
-            return prev
-          }
-          return Math.min(prev + 1, PROGRESS_MILESTONES.GENERATION_COMPLETE - 2)
-        })
-      }, 2000) // Update every 2 seconds to avoid decimals
       
       const generateStartTime = Date.now()
       const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate/${jobId}`
@@ -1599,9 +1612,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         }
         window.history.pushState({}, '', newUrl)
         
-        // Clear progress interval and jump to completion
-        clearInterval(generateProgressInterval)
-        setRealProgress(PROGRESS_MILESTONES.GENERATION_COMPLETE)
+        // Complete the smooth progress animation
+        completeSmoothProgress()
         console.log('✅ Portfolio generated successfully:', portfolioUrl)
         
         // Show portfolio immediately with a small delay for UX
@@ -1617,7 +1629,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           // Construct URL from available data - use the actual generated URL if available
           const baseUrl = generateData.url || generateData.portfolio_url || 'http://localhost:4000'
           setPortfolioUrl(baseUrl)
-          animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, remainingGenerationTime)
+          completeSmoothProgress()
           console.log('✅ Portfolio generated successfully (constructed URL):', baseUrl)
           
           setTimeout(() => {
@@ -1631,7 +1643,6 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       }
       } catch (error) {
         clearTimeout(generateTimeoutId)
-        clearInterval(generateProgressInterval)
         if (error instanceof Error && error.name === 'AbortError') {
           throw new Error('Portfolio generation timed out after 5 minutes')
         }
@@ -1640,6 +1651,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       
     } catch (error) {
       console.error('❌ Processing error:', error)
+      stopSmoothProgress()
       setProcessingError(error instanceof Error ? error.message : 'An error occurred')
       setIsProcessing(false)
       // Show error in UI using standardized ErrorToast
