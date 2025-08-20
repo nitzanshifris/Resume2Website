@@ -813,7 +813,7 @@ const VerticalProgressBar = ({
             
             {/* Percentage text - scale to 80% visually when at 60% semantically */}
             <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
-              {Math.round((percentage / 60) * 80)}%
+              {percentage >= 60 ? 80 : Math.min(80, Math.ceil((percentage / 60) * 80))}%
             </span>
             
             {/* Click indicator when ready */}
@@ -1596,8 +1596,18 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         const portfolioUrl = generateData.custom_domain_url || generateData.url || generateData.portfolio_url
         const portfolioIdValue = generateData.portfolio_id || generateData.id
         
+        // CRITICAL: Immediately show portfolio when API returns success
+        console.log('🎉 Portfolio generation successful! URL:', portfolioUrl)
         setPortfolioUrl(portfolioUrl)
         setPortfolioId(portfolioIdValue)
+        setShowPortfolioInMacBook(true) // Show portfolio immediately
+        setStage("complete") // Set to complete stage
+        setRealProgress(60) // Force to semantic completion (60 = ready)
+        
+        // Stop the smooth progress animation since we're done
+        if (animateSmoothProgress.current) {
+          animateSmoothProgress.current.isRunning = false
+        }
         
         // Save to localStorage with user association
         localStorage.setItem('lastPortfolio', JSON.stringify({
@@ -1615,15 +1625,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         }
         window.history.pushState({}, '', newUrl)
         
-        // Complete the smooth progress animation
-        completeSmoothProgress()
+        // Portfolio is already shown immediately above, no delay needed
         console.log('✅ Portfolio generated successfully:', portfolioUrl)
-        
-        // Show portfolio immediately with a small delay for UX
-        setTimeout(() => {
-          setShowPortfolioInMacBook(true)
-          console.log('🖥️ Auto-showing portfolio in MacBook frame')
-        }, TIMINGS.PORTFOLIO_DISPLAY_DELAY)
+        console.log('🖥️ Portfolio should already be showing in MacBook frame')
         
       } else {
         console.error('❌ No portfolio URL in response:', generateData)
@@ -1966,8 +1970,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   timestamp: Date.now()
                 }))
                 
-                // Complete the progress animation
-                completeSmoothProgress()
+                // Stop progress animation since we're done
+                if (animateSmoothProgress.current) {
+                  animateSmoothProgress.current.isRunning = false
+                }
                 setProgress(60) // Also set the visual progress
               }
             }
@@ -2007,18 +2013,22 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   
                   if (portfolioData.portfolio_url) {
                     console.log('🎉 Portfolio ready at:', portfolioData.portfolio_url)
+                    // CRITICAL: Immediately show portfolio when ready
                     setPortfolioUrl(portfolioData.portfolio_url)
-                    setRealProgress(60) // Trigger portfolio display
-                    setShowPortfolioInMacBook(true) // Show the portfolio
-                    setStage("complete") // CRITICAL: Set stage to complete to show portfolio
+                    setShowPortfolioInMacBook(true) // Show the portfolio FIRST
+                    setStage("complete") // Set stage to complete
+                    setRealProgress(60) // Set semantic completion
+                    setProgress(60) // Also set the visual progress
+                    
+                    // Stop progress animation since we're done
+                    if (animateSmoothProgress.current) {
+                      animateSmoothProgress.current.isRunning = false
+                    }
+                    
                     localStorage.setItem('lastPortfolio', JSON.stringify({
                       url: portfolioData.portfolio_url,
                       timestamp: Date.now()
                     }))
-                    
-                    // Complete the progress animation
-                    completeSmoothProgress()
-                    setProgress(60) // Also set the visual progress
                   }
                 }
               }
@@ -2709,7 +2719,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                                 <p className="text-gray-600">Restoring your last portfolio...</p>
                               </div>
                             </div>
-                          ) : (showPortfolioInMacBook || realProgress >= 60) && portfolioUrl ? (
+                          ) : showPortfolioInMacBook && portfolioUrl ? (
                             // Show the generated portfolio automatically when ready or when clicked
                             <div className="absolute inset-0 w-full h-full bg-white z-50">
                               <IframeWithFallback 
