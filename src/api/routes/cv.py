@@ -521,10 +521,23 @@ async def upload_cv(
     # === 2.6 RESUME GATE VALIDATION ===
     if settings.cv_strict_cv_validation:
         # Extract text for Resume Gate validation
+        import tempfile
+        import os
         try:
-            extracted_text = text_extractor.extract_text(file_content, file_extension)
-            # Limit text for performance
-            gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            # Save to temporary file for text extraction
+            with tempfile.NamedTemporaryFile(suffix=file_extension, delete=False) as tmp_file:
+                tmp_file.write(file_content)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                # Extract text from the temporary file
+                extracted_text = text_extractor.extract_text(tmp_file_path)
+                # Limit text for performance
+                gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            finally:
+                # Clean up temporary file
+                if os.path.exists(tmp_file_path):
+                    os.unlink(tmp_file_path)
             
             # Check if content is likely a resume
             is_resume, score, signals = is_likely_resume(
@@ -1178,10 +1191,23 @@ async def upload_cv_anonymous(
     # === RESUME GATE VALIDATION ===
     if settings.cv_strict_cv_validation:
         # Extract text for Resume Gate validation
+        import tempfile
+        import os
         try:
-            extracted_text = text_extractor.extract_text(file_content, file_extension)
-            # Limit text for performance
-            gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            # Save to temporary file for text extraction
+            with tempfile.NamedTemporaryFile(suffix=file_extension, delete=False) as tmp_file:
+                tmp_file.write(file_content)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                # Extract text from the temporary file
+                extracted_text = text_extractor.extract_text(tmp_file_path)
+                # Limit text for performance
+                gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            finally:
+                # Clean up temporary file
+                if os.path.exists(tmp_file_path):
+                    os.unlink(tmp_file_path)
             
             # Check if content is likely a resume
             is_resume, score, signals = is_likely_resume(

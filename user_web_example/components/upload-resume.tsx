@@ -102,13 +102,8 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
 
     setSelectedFiles(validFiles)
     
-    // Don't start animation immediately - wait a moment for backend validation
-    // This gives the backend time to reject invalid files quickly
-    setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
-    
-    // Small delay before showing upload animation to allow quick rejections
-    await new Promise(resolve => setTimeout(resolve, 100))
-    setIsUploading(true)
+    // Don't show upload progress immediately - wait for actual upload to start
+    // This prevents animation from showing when files are rejected by Resume Gate
 
     // Check if multiple image files are being uploaded
     const imageExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.heif', '.tiff', '.tif', '.bmp']
@@ -122,11 +117,12 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
         // Use the multiple upload endpoint for multiple image files
         console.log('Uploading multiple image files as single CV')
         
-        // Show all files as uploading
-        setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
-        
-        // Upload all files together
+        // Start upload first, then show progress if successful
         const response = await uploadMultipleFiles(validFiles)
+        
+        // Only show progress after successful upload start
+        setIsUploading(true)
+        setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
         
         if (response.job_id) {
           // Store session ID if provided
@@ -158,6 +154,12 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
           try {
             // Upload file to backend
             const response = await uploadFile(file)
+            
+            // Only show upload progress after successful response
+            if (i === 0) {
+              setIsUploading(true)
+              setUploadProgress(validFiles.map(f => ({ file: f.name, status: 'uploading' as const })))
+            }
             
             if (response.job_id) {
               // Store session ID if provided (only from first file)
