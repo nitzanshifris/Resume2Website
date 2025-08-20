@@ -69,6 +69,9 @@ from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadRespon
 # Import authentication dependency
 from src.api.routes.auth import get_current_user, get_current_user_optional
 
+# Import file validation
+from src.utils.file_validator import validate_uploaded_file, sanitize_filename, generate_safe_filename
+
 # ========== PASSWORD HASHING ==========
 # Initialize password context with bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -490,12 +493,21 @@ async def upload_cv(
     if not file_content:
         raise HTTPException(status_code=400, detail="File is empty")
 
-    # Check file size
-    if len(file_content) > config.MAX_UPLOAD_SIZE:
-        raise HTTPException(
-            status_code=413, 
-            detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024}MB"
-        )
+    # Validate file content with magic bytes checking
+    is_valid, error_msg, mime_type = validate_uploaded_file(
+        file_content,
+        file.filename,
+        max_size=config.MAX_UPLOAD_SIZE
+    )
+    
+    if not is_valid:
+        logger.warning(f"File validation failed for user {current_user_id}: {error_msg}")
+        raise HTTPException(status_code=400, detail=error_msg)
+    
+    logger.info(f"File validated successfully: {mime_type}")
+    
+    # Sanitize filename for security
+    safe_filename = sanitize_filename(file.filename)
     
     # === 2.5 GET FILE EXTENSION ===
     file_extension = get_file_extension(file.filename)
@@ -1098,24 +1110,24 @@ async def upload_cv_anonymous(
     if not file_content:
         raise HTTPException(status_code=400, detail="File is empty")
     
-    # Check file size
-    if len(file_content) > config.MAX_UPLOAD_SIZE:
-        raise HTTPException(
-            status_code=413, 
-            detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024:.0f}MB"
-        )
+    # Validate file content with magic bytes checking
+    is_valid, error_msg, mime_type = validate_uploaded_file(
+        file_content,
+        file.filename,
+        max_size=config.MAX_UPLOAD_SIZE
+    )
     
-    # Validate filename first
-    if not validate_filename(file.filename):
-        raise HTTPException(status_code=400, detail="Invalid filename")
+    if not is_valid:
+        logger.warning(f"File validation failed for anonymous user: {error_msg}")
+        raise HTTPException(status_code=400, detail=error_msg)
     
-    # Check file type
-    file_extension = get_file_extension(file.filename)
-    if file_extension not in config.ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"File type {file_extension} not supported. Allowed types: {', '.join(config.ALLOWED_EXTENSIONS)}"
-        )
+    logger.info(f"File validated successfully: {mime_type}")
+    
+    # Sanitize filename for security
+    safe_filename = sanitize_filename(file.filename)
+    
+    # Get file extension
+    file_extension = get_file_extension(safe_filename)
     
     # === CREATE JOB ID & SAVE FILE ===
     job_id = str(uuid.uuid4())
@@ -1253,12 +1265,6 @@ async def upload_multiple_files(
         if not file.filename:
             continue
             
-        # Get file extension
-        file_extension = get_file_extension(file.filename)
-        if file_extension not in config.ALLOWED_EXTENSIONS:
-            logger.warning(f"Skipping file {file.filename} - invalid type {file_extension}")
-            continue
-            
         # Read file content
         file_content = await file.read()
         file_size = len(file_content)
@@ -1271,11 +1277,27 @@ async def upload_multiple_files(
                 detail=f"Total file size exceeds limit of {config.MAX_UPLOAD_SIZE * 3 / 1024 / 1024:.1f}MB"
             )
         
+        # Validate file content with magic bytes checking
+        is_valid, error_msg, mime_type = validate_uploaded_file(
+            file_content,
+            file.filename,
+            max_size=config.MAX_UPLOAD_SIZE * 3  # Per-file limit within total
+        )
+        
+        if not is_valid:
+            logger.warning(f"Skipping file {file.filename} - validation failed: {error_msg}")
+            continue
+        
+        # Sanitize filename
+        safe_filename = sanitize_filename(file.filename)
+        file_extension = get_file_extension(safe_filename)
+        
         allowed_files.append({
-            'filename': file.filename,
+            'filename': safe_filename,
             'extension': file_extension,
             'content': file_content,
-            'size': file_size
+            'size': file_size,
+            'mime_type': mime_type
         })
         
         # Reset file position
