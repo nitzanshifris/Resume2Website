@@ -811,9 +811,9 @@ const VerticalProgressBar = ({
             {/* Inner glass layer */}
             <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/30 to-white/10" />
             
-            {/* Percentage text */}
+            {/* Percentage text - scale to 80% visually when at 60% semantically */}
             <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
-              {percentage}%
+              {Math.round((percentage / 60) * 80)}%
             </span>
             
             {/* Click indicator when ready */}
