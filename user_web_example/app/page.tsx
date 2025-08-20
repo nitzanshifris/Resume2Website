@@ -694,7 +694,9 @@ const VerticalProgressBar = ({
   useEffect(() => {
     // Always use external progress when provided - no time-based animation
     if (externalProgress !== undefined) {
-      const integerProgress = Math.floor(externalProgress)
+      // Round to integer, but ensure 60 stays as 60 (not 59)
+      const integerProgress = externalProgress >= 59.5 ? 60 : Math.floor(externalProgress)
+      console.log(`📊 VerticalProgressBar: externalProgress=${externalProgress}, integerProgress=${integerProgress}`)
       setPercentage(integerProgress)
       onProgressChange?.(integerProgress)
       return
@@ -749,7 +751,7 @@ const VerticalProgressBar = ({
           <motion.div
             className="absolute bottom-0 left-0 right-0 rounded-full overflow-hidden"
             initial={{ height: 0 }}
-            animate={{ height: `${(percentage / 60) * 80}%` }} // Scale: 60 progress = 80% height
+            animate={{ height: `${percentage >= 59 ? 80 : (percentage / 60) * 80}%` }} // Scale: 60 progress = 80% height
             transition={{ 
               type: "spring",
               stiffness: 40,
@@ -813,7 +815,7 @@ const VerticalProgressBar = ({
             
             {/* Percentage text - scale to 80% visually when at 60% semantically */}
             <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
-              {percentage >= 60 ? 80 : Math.min(80, Math.ceil((percentage / 60) * 80))}%
+              {percentage >= 59 ? 80 : Math.min(79, Math.floor((percentage / 60) * 80))}%
             </span>
             
             {/* Click indicator when ready */}
@@ -1470,6 +1472,42 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }
 
+  // Centralized function to finalize portfolio display
+  const finalizePortfolioReady = (portfolioUrl: string, portfolioId?: string) => {
+    console.log('🎆 Finalizing portfolio ready state:', portfolioUrl)
+    
+    // Stop any ongoing animations
+    if (animateSmoothProgress.current) {
+      animateSmoothProgress.current.isRunning = false
+      if (animateSmoothProgress.current.animationId) {
+        cancelAnimationFrame(animateSmoothProgress.current.animationId)
+      }
+    }
+    
+    // Set all states for portfolio display
+    setPortfolioUrl(portfolioUrl)
+    if (portfolioId) {
+      setPortfolioId(portfolioId)
+    }
+    setShowPortfolioInMacBook(true)
+    setStage("complete")
+    
+    // CRITICAL: Set progress to exactly 60 (semantic) which should display as 80% (visual)
+    setRealProgress(60)
+    setProgress(60) // Also set the animation progress
+    
+    // Save to localStorage
+    const sessionId = localStorage.getItem('resume2website_session_id')
+    localStorage.setItem('lastPortfolio', JSON.stringify({
+      url: portfolioUrl,
+      id: portfolioId,
+      userId: sessionId,
+      timestamp: Date.now()
+    }))
+    
+    console.log('✅ Portfolio finalized - should show at 80%')
+  }
+
   // Keep the old function for backward compatibility but simplified
   const animateProgress = (from: number, to: number, duration: number = 1000) => {
     // This is now just used for specific jumps when needed
@@ -1596,26 +1634,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         const portfolioUrl = generateData.custom_domain_url || generateData.url || generateData.portfolio_url
         const portfolioIdValue = generateData.portfolio_id || generateData.id
         
-        // CRITICAL: Immediately show portfolio when API returns success
+        // Use centralized finalization
         console.log('🎉 Portfolio generation successful! URL:', portfolioUrl)
-        setPortfolioUrl(portfolioUrl)
-        setPortfolioId(portfolioIdValue)
-        setShowPortfolioInMacBook(true) // Show portfolio immediately
-        setStage("complete") // Set to complete stage
-        setRealProgress(60) // Force to semantic completion (60 = ready)
-        
-        // Stop the smooth progress animation since we're done
-        if (animateSmoothProgress.current) {
-          animateSmoothProgress.current.isRunning = false
-        }
-        
-        // Save to localStorage with user association
-        localStorage.setItem('lastPortfolio', JSON.stringify({
-          url: portfolioUrl,
-          id: portfolioIdValue,
-          userId: sessionId, // Associate with current user
-          timestamp: Date.now()
-        }))
+        finalizePortfolioReady(portfolioUrl, portfolioIdValue)
         
         // Update URL without reload
         const newUrl = new URL(window.location.href)
@@ -1961,20 +1982,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               // Store portfolio data
               if (portfolioData.portfolio_url) {
                 console.log('🎉 Portfolio ready at:', portfolioData.portfolio_url)
-                setPortfolioUrl(portfolioData.portfolio_url)
-                setRealProgress(60) // Trigger portfolio display
-                setShowPortfolioInMacBook(true) // Show the portfolio
-                setStage("complete") // CRITICAL: Set stage to complete to show portfolio
-                localStorage.setItem('lastPortfolio', JSON.stringify({
-                  url: portfolioData.portfolio_url,
-                  timestamp: Date.now()
-                }))
-                
-                // Stop progress animation since we're done
-                if (animateSmoothProgress.current) {
-                  animateSmoothProgress.current.isRunning = false
-                }
-                setProgress(60) // Also set the visual progress
+                // Use centralized finalization
+                finalizePortfolioReady(portfolioData.portfolio_url, portfolioData.portfolio_id)
               }
             }
           }
@@ -2013,22 +2022,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   
                   if (portfolioData.portfolio_url) {
                     console.log('🎉 Portfolio ready at:', portfolioData.portfolio_url)
-                    // CRITICAL: Immediately show portfolio when ready
-                    setPortfolioUrl(portfolioData.portfolio_url)
-                    setShowPortfolioInMacBook(true) // Show the portfolio FIRST
-                    setStage("complete") // Set stage to complete
-                    setRealProgress(60) // Set semantic completion
-                    setProgress(60) // Also set the visual progress
-                    
-                    // Stop progress animation since we're done
-                    if (animateSmoothProgress.current) {
-                      animateSmoothProgress.current.isRunning = false
-                    }
-                    
-                    localStorage.setItem('lastPortfolio', JSON.stringify({
-                      url: portfolioData.portfolio_url,
-                      timestamp: Date.now()
-                    }))
+                    // Use centralized finalization
+                    finalizePortfolioReady(portfolioData.portfolio_url, portfolioData.portfolio_id)
                   }
                 }
               }
