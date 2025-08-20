@@ -3163,25 +3163,22 @@ export default function Home() {
       }
     }
     
-    // Set the new file after a brief delay to ensure state reset and trigger fresh validation
+    // Set the new file immediately for faster response
+    console.log('📤 Setting new file for validation:', file.name)
+    setUploadedFile(file)
+    
+    // For unauthenticated users, also set dropped file
+    if (!isAuthenticated) {
+      setDroppedFile(file)
+      console.log('📦 File stored for processing after authentication')
+    }
+    
+    // Trigger the demo to start with minimal delay
     setTimeout(() => {
-      console.log('📤 Setting new file for validation:', file.name)
-      setUploadedFile(file)
-      
-      // For unauthenticated users, also set dropped file
-      if (!isAuthenticated) {
-        setDroppedFile(file)
-        console.log('📦 File stored for processing after authentication')
-      }
-      
-      // Trigger the demo to start - the Resume2WebsiteDemo component will handle it
-      // when it detects the uploadedFile change
-      setTimeout(() => {
-        console.log('🎯 Triggering demo start after retry...')
-        // Set a flag to indicate retry is happening
-        setIsRetrying(true)
-      }, 200) // Delay to ensure file is visible in CV pile first
-    }, 100) // Increased delay to ensure proper state reset
+      console.log('🎯 Triggering demo start after retry...')
+      // Set a flag to indicate retry is happening
+      setIsRetrying(true)
+    }, 50) // Minimal delay just to ensure React has rendered the file in CV pile
   }
 
   const handleCVCardClick = (file: File) => {

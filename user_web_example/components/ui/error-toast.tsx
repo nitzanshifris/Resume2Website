@@ -21,15 +21,8 @@ export default function ErrorToast({
   suggestion,
   onRetryUpload
 }: ErrorToastProps) {
-  // Auto-close after 8 seconds
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => {
-        onClose()
-      }, 8000)
-      return () => clearTimeout(timer)
-    }
-  }, [isOpen, onClose])
+  // Don't auto-close - user must close manually or retry
+  // Removed auto-dismiss timer per user requirement
 
   // Handle escape key
   useEffect(() => {
