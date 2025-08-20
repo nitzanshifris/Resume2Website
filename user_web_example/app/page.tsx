@@ -887,19 +887,6 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   
-  // Error toast state
-  const [errorToast, setErrorToast] = useState<{
-    isOpen: boolean
-    title: string
-    message: string
-    suggestion?: string
-  }>({
-    isOpen: false,
-    title: '',
-    message: '',
-    suggestion: undefined
-  })
-  
   // Loading sequence states for mobile
   const [loadingStep, setLoadingStep] = useState(0) // 0: backgrounds, 1: headline, 2: subheadline, 3: cv image
 
@@ -2991,6 +2978,19 @@ export default function Home() {
   const [hasTriggeredPhase6Modal, setHasTriggeredPhase6Modal] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const [showPricing, setShowPricing] = useState(false)
+  
+  // Error toast state
+  const [errorToast, setErrorToast] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    suggestion?: string
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    suggestion: undefined
+  })
   
   // Use the real authentication system
   const { isAuthenticated, user, signIn, signOut } = useAuthContext()
