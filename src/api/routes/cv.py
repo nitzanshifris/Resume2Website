@@ -72,6 +72,12 @@ from src.api.routes.auth import get_current_user, get_current_user_optional
 # Import file validation
 from src.utils.file_validator import validate_uploaded_file, sanitize_filename, generate_safe_filename
 
+# Import Resume Gate validator
+from src.utils.cv_resume_gate import is_likely_resume, get_rejection_reason
+
+# Import settings for Resume Gate configuration
+from src.core.settings import settings
+
 # ========== PASSWORD HASHING ==========
 # Initialize password context with bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -511,6 +517,45 @@ async def upload_cv(
     
     # === 2.5 GET FILE EXTENSION ===
     file_extension = get_file_extension(file.filename)
+    
+    # === 2.6 RESUME GATE VALIDATION ===
+    if settings.cv_strict_cv_validation:
+        # Extract text for Resume Gate validation
+        try:
+            extracted_text = text_extractor.extract_text(file_content, file_extension)
+            # Limit text for performance
+            gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            
+            # Check if content is likely a resume
+            is_resume, score, signals = is_likely_resume(
+                gate_text, 
+                threshold=settings.cv_min_resume_score,
+                max_chars=settings.cv_gate_max_chars
+            )
+            
+            if not is_resume:
+                reason = get_rejection_reason(signals)
+                error_response = {
+                    "error": "The uploaded file does not appear to be an English resume.",
+                    "score": score,
+                    "reason": reason
+                }
+                
+                # Include signals in debug mode
+                if settings.debug:
+                    error_response["signals"] = signals
+                
+                logger.warning(f"Resume Gate rejected file from user {current_user_id}: score={score}, reason={reason}")
+                raise HTTPException(status_code=400, detail=error_response)
+            
+            logger.info(f"Resume Gate passed: score={score}")
+            
+        except HTTPException:
+            raise  # Re-raise validation failures
+        except Exception as e:
+            logger.error(f"Resume Gate validation error: {e}")
+            # Don't block on Resume Gate errors - continue processing
+            logger.warning("Resume Gate check failed, continuing with upload")
     
     # === 2.6 CALCULATE FILE HASH FOR CACHING ===
     file_hash = hashlib.sha256(file_content).hexdigest()
@@ -1128,6 +1173,45 @@ async def upload_cv_anonymous(
     
     # Get file extension
     file_extension = get_file_extension(safe_filename)
+    
+    # === RESUME GATE VALIDATION ===
+    if settings.cv_strict_cv_validation:
+        # Extract text for Resume Gate validation
+        try:
+            extracted_text = text_extractor.extract_text(file_content, file_extension)
+            # Limit text for performance
+            gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            
+            # Check if content is likely a resume
+            is_resume, score, signals = is_likely_resume(
+                gate_text, 
+                threshold=settings.cv_min_resume_score,
+                max_chars=settings.cv_gate_max_chars
+            )
+            
+            if not is_resume:
+                reason = get_rejection_reason(signals)
+                error_response = {
+                    "error": "The uploaded file does not appear to be an English resume.",
+                    "score": score,
+                    "reason": reason
+                }
+                
+                # Include signals in debug mode
+                if settings.debug:
+                    error_response["signals"] = signals
+                
+                logger.warning(f"Resume Gate rejected anonymous upload: score={score}, reason={reason}")
+                raise HTTPException(status_code=400, detail=error_response)
+            
+            logger.info(f"Resume Gate passed for anonymous: score={score}")
+            
+        except HTTPException:
+            raise  # Re-raise validation failures
+        except Exception as e:
+            logger.error(f"Resume Gate validation error: {e}")
+            # Don't block on Resume Gate errors - continue processing
+            logger.warning("Resume Gate check failed, continuing with upload")
     
     # === CREATE JOB ID & SAVE FILE ===
     job_id = str(uuid.uuid4())

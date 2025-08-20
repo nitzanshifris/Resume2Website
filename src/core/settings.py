@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     allowed_file_types: list[str] = ["application/pdf", "application/msword", "text/plain"]
     upload_directory: str = "data/uploads"
     
+    # Resume Gate Configuration
+    cv_strict_cv_validation: bool = True  # Enable Resume Gate validator
+    cv_min_resume_score: int = 60  # Minimum score to pass validation
+    cv_gate_max_chars: int = 5000  # Max characters to analyze for performance
+    
     # Database Configuration
     database_url: str = "sqlite:///./data/app.db"
     
