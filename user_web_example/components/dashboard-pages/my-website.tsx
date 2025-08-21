@@ -69,6 +69,7 @@ interface CVDataStructure {
 
 interface MyWebsiteProps {
   userName?: string
+  portfolioUrl?: string | null
 }
 
 const colorThemes = [

@@ -1081,7 +1081,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const [processingError, setProcessingError] = useState<string | null>(null)
   const [currentJobId, setCurrentJobId] = useState<string | null>(null)
   // Get progress from JobFlow context instead of local state
-  const { context: jobFlowContext } = useJobFlow()
+  const { 
+    context: jobFlowContext,
+    startPreviewFlow,
+    startAuthenticatedFlow,
+    startPostSignupFlow
+  } = useJobFlow()
   const realProgress = getSemanticProgressForState(jobFlowContext.state)
   const [showPortfolioInMacBook, setShowPortfolioInMacBook] = useState(false)
   const [isRestoringPortfolio, setIsRestoringPortfolio] = useState(false)
@@ -1387,13 +1392,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     sequence()
   }, [isPlaying, isWaitingForAuth])
 
-  // Progress tracking
-  useEffect(() => {
-    if (isPlaying) {
-      // Progress animation now handled by JobFlow
-      return () => clearInterval(interval)
-    }
-  }, [isPlaying])
+  // Progress tracking is now handled entirely by JobFlow
 
   // Auto-start animation listener will be added after handleFileClick is defined
   
@@ -1917,38 +1916,6 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           setShowSignupModal(true)
         }, 3000)
       }, 6000)
-        // File validation failed - show error and don't start animation
-        // Don't log to console - we'll show the nice error toast
-        // Hide the CV card since the file is invalid
-        setShowCVCard(false)
-        setProcessingError(error.message || 'Please upload a valid resume/CV file')
-        
-        // Reset all animation and progress states
-        setIsPlaying(false)
-        // Progress reset handled by JobFlow
-        setStage("typewriter")
-        setShowPortfolioInMacBook(false)
-        
-        // Parse error message
-        const errorMessage = error.message || 'Please upload a valid resume/CV file'
-        
-        // Use standardized error messages
-        const errorInfo = getStandardizedError(error)
-        
-        // Show auth modal if needed
-        if (errorInfo.isAuthError) {
-          setShowSignupModal(true)
-          return
-        }
-        
-        // Show error toast with standardized message
-        setErrorToast({
-          isOpen: true,
-          title: errorInfo.title,
-          message: errorInfo.message,
-          suggestion: errorInfo.suggestion
-        })
-      })
     }
   }
 
@@ -1982,6 +1949,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         startAuthenticatedFlow(pendingFile)
       } else {
         startPreviewFlow(pendingFile)
+      }
     }
   }
 
@@ -3844,23 +3812,19 @@ function HomeWithJobFlow() {
         setDroppedFile(file)
       }
       
-      // Now validate the file first
-      console.log('🔍 Validating file before animation...')
-      uploadFile(file).then(uploadResponse => {
-        // File is valid! Now trigger animation
-        console.log('✅ File validated successfully, auto-starting animation...')
+      // Use JobFlow orchestrators instead of direct uploadFile
+      console.log('🔍 Using JobFlow to handle file upload...')
+      
+      // JobFlow will handle validation, upload, and state management
+      const flowPromise = isAuthenticated 
+        ? startAuthenticatedFlow(file)
+        : startPreviewFlow(file)
         
-        // Store the job ID for later use
-        if (uploadResponse.job_id) {
-          localStorage.setItem('pending_job_id', uploadResponse.job_id)
-        }
-        
-        // Dispatch event immediately - no timeout needed
-        const event = new CustomEvent(RESUME_AUTO_START_EVENT, { detail: file })
-        window.dispatchEvent(event)
-        console.log('🚀 Auto-start event dispatched for:', file.name)
+      flowPromise.then(() => {
+        console.log('✅ JobFlow flow started successfully')
+        // JobFlow handles all state management and event dispatching
       }).catch(error => {
-        console.error('❌ File validation failed:', error)
+        console.error('❌ JobFlow error:', error)
         
         // Get standardized error message
         const errorInfo = getStandardizedError(error)
