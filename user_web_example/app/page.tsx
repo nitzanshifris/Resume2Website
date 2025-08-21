@@ -2062,7 +2062,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       {/* Keep the existing desktop layout but simplified */}
       <div className="w-full h-screen flex flex-row items-center justify-center gap-0">
         {/* Left Side - Text Content - Dynamic width based on stage and completion */}
-        <div className={`${hasCompletedGeneration ? "w-[25%]" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
+        <div className={`${hasCompletedGeneration ? "w-[20%]" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
           <div className="w-full h-full flex flex-col justify-center gap-12">
             <motion.div
               initial={{ opacity: 0 }}
@@ -2215,7 +2215,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               {/* Button section - Show different buttons based on completion state */}
               <AnimatePresence mode="wait">
                 {showNewTypewriter && hasCompletedGeneration ? (
-                  // Post-completion buttons - Show all three buttons
+                  // Post-completion buttons - Show all three buttons vertically
                   <motion.div
                     key="completion-buttons"
                     initial={{ opacity: 0 }}
@@ -2223,8 +2223,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex justify-start"
                   >
-                    <div className="flex gap-3 flex-wrap">
-                      {/* Go Live button - Primary action */}
+                    <div className="flex flex-col gap-3 w-full max-w-[280px]">
+                      {/* Edit Portfolio button - Primary action at top */}
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ 
@@ -2243,17 +2243,17 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                       >
                         <Button
                           size="lg"
-                          onClick={onGoLive}
-                          className="shadow-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 w-auto text-base md:text-lg px-8 py-4 transition-all duration-300 hover:scale-105 rounded-full font-bold"
+                          onClick={onEditPortfolio}
+                          className="shadow-2xl bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 w-full text-base md:text-lg px-8 py-4 transition-all duration-300 hover:scale-105 rounded-full font-bold"
                         >
                           <span>
-                            Go Live
-                            <ArrowRight className="ml-3 w-5 h-5 inline-block" />
+                            Edit Now
+                            <Edit3 className="ml-3 w-5 h-5 inline-block" />
                           </span>
                         </Button>
                       </motion.div>
                       
-                      {/* Edit Portfolio button */}
+                      {/* Ready to Go button - Opens Stripe */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -2262,15 +2262,15 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         <Button
                           size="lg"
                           variant="outline"
-                          onClick={onEditPortfolio}
-                          className="bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300 hover:border-gray-400 w-auto text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
+                          onClick={onGoLive}
+                          className="bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300 hover:border-gray-400 w-full text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
                         >
-                          Edit Portfolio
-                          <Edit3 className="ml-3 w-5 h-5 inline-block" />
+                          Ready to Go
+                          <ArrowRight className="ml-3 w-5 h-5 inline-block" />
                         </Button>
                       </motion.div>
                       
-                      {/* Learn more button */}
+                      {/* Get Inspired button */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -2280,9 +2280,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                           size="lg"
                           variant="outline"
                           onClick={onLearnMore}
-                          className="bg-black hover:bg-gray-800 text-white border-2 border-black hover:border-gray-800 w-auto text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
+                          className="bg-black hover:bg-gray-800 text-white border-2 border-black hover:border-gray-800 w-full text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
                         >
-                          Learn more
+                          Get Inspired
                           <ArrowDown className="ml-3 w-5 h-5 inline-block" />
                         </Button>
                       </motion.div>
@@ -2374,7 +2374,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         </div>
 
         {/* Right Side - Dynamic width based on stage and completion (desktop only, keep MacBookFrame) */}
-        <div className={`${hasCompletedGeneration ? "w-[75%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-2 pr-4 md:pr-6 lg:pr-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
+        <div className={`${hasCompletedGeneration ? "w-[80%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8 pr-12" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
 
 
 
@@ -2445,9 +2445,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     duration: 0.8,
                     ease: [0.34, 1.56, 0.64, 1],
                   }}
-                className="absolute inset-0 flex items-center justify-start pl-2"
+                className="absolute inset-0 flex items-center justify-center"
                 >
-                <div className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative">
+                <div className="w-[1400px] xs:w-[1500px] sm:w-[1650px] md:w-[1800px] lg:w-[2000px] xl:w-[2200px] 2xl:w-[2400px] relative">
                   <MacBookFrame isComplete={stage === "complete"}>
                     <div key={jobFlowContext.portfolioUrl || 'no-portfolio'}>
                     {isRestoringPortfolio ? (
