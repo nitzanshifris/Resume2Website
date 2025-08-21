@@ -1700,7 +1700,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       // The animation sequence takes about 6 seconds to reach "materializing" stage
       setTimeout(() => {
         console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
-        setShowPortfolioInMacBook(true)
+        // Don't set showPortfolioInMacBook here - wait for actual portfolio URL
+        // setShowPortfolioInMacBook(true)
         
         setTimeout(() => {
           console.log('⏰ Showing signup modal after full preview')
@@ -1733,7 +1734,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       
       setTimeout(() => {
         console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
-        setShowPortfolioInMacBook(true)
+        // Don't set showPortfolioInMacBook here - wait for actual portfolio URL
+        // setShowPortfolioInMacBook(true)
         
         setTimeout(() => {
           console.log('⏰ Showing signup modal after full preview')
@@ -1845,13 +1847,20 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   useEffect(() => {
     if (jobFlowContext.portfolioUrl && jobFlowContext.state === FlowState.Completed) {
       console.log('🎉 Portfolio ready! URL:', jobFlowContext.portfolioUrl)
-      // Automatically show the portfolio in MacBook when it's ready
-      setShowPortfolioInMacBook(true)
-      setStage("complete")
-      setIsPlaying(false)
-      setIsWaitingForAuth(false)
-      // Hide signup modal if it's still open
-      setShowSignupModal(false)
+      console.log('Current showPortfolioInMacBook:', showPortfolioInMacBook)
+      
+      // Force portfolio display - clear any previous state
+      setShowPortfolioInMacBook(false) // Reset first
+      setTimeout(() => {
+        // Then set to true to force re-render
+        setShowPortfolioInMacBook(true)
+        setStage("complete")
+        setIsPlaying(false)
+        setIsWaitingForAuth(false)
+        // Hide signup modal if it's still open
+        setShowSignupModal(false)
+        console.log('✅ Portfolio display triggered')
+      }, 100) // Small delay to ensure state change is detected
     }
   }, [jobFlowContext.portfolioUrl, jobFlowContext.state])
   
@@ -2559,6 +2568,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative"
                 >
                   <MacBookFrame isComplete={stage === "complete"}>
+                    <div key={jobFlowContext.portfolioUrl || 'no-portfolio'}>
                     {isRestoringPortfolio ? (
                       // Show loading state while restoring portfolio
                       <div className="absolute inset-0 w-full h-full bg-white z-50 flex items-center justify-center">
@@ -2702,6 +2712,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         />
                       )
                     )}
+                    </div>
                   </MacBookFrame>
                   
                 </motion.div>
