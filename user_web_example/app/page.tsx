@@ -3420,6 +3420,35 @@ function HomeWithJobFlow() {
     setShowAuthModal(false)
   }
 
+  // Authentication success handler for HomeWithJobFlow
+  const handleAuthSuccess = async (data: any) => {
+    console.log('✅ User authenticated successfully in HomeWithJobFlow:', data)
+    
+    // Update auth context - signIn is already in scope from useAuthContext above
+    if (signIn && data.session_id) {
+      await signIn(data.session_id, data.user || data)
+    }
+    
+    // Close auth modal
+    setShowAuthModal(false)
+    
+    // Continue JobFlow if there's a pending job
+    if (jobFlowContext.currentJobId && jobFlowContext.state === FlowState.WaitingAuth) {
+      console.log('🚀 Continuing portfolio generation after auth...')
+      startPostSignupFlow(jobFlowContext.currentJobId)
+      return
+    }
+    
+    // Check if there's a dropped file waiting
+    if (droppedFile) {
+      setShowUpload(true)
+    } else if (uploadedFile) {
+      setShowProcessing(true)
+    } else {
+      console.log('Authentication successful, staying on home page')
+    }
+  }
+
   // Helper function to parse error response and get standardized messages
   const getStandardizedError = (error: any): StandardizedError => {
     // Handle network errors, CORS, and fetch failures
