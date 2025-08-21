@@ -24,6 +24,7 @@ interface SimpleDashboardProps {
   userName?: string
   onBackToHome?: () => void
   initialPage?: string
+  portfolioUrl?: string | null
 }
 
 const navigationItems = [
@@ -43,7 +44,7 @@ const premiumFeatures = [
   { id: "recruiters", label: "Recruiter Outreach", icon: Users, premium: true },
 ]
 
-export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHome, initialPage = "overview" }: SimpleDashboardProps) {
+export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHome, initialPage = "overview", portfolioUrl }: SimpleDashboardProps) {
   const [activePage, setActivePage] = useState(initialPage)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
@@ -997,7 +998,7 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
       case "overview":
         return renderOverviewContent()
       case "website":
-        return <MyWebsitePage />
+        return <MyWebsitePage portfolioUrl={portfolioUrl} />
       case "resume":
         return <MyResumePage />
       case "cv-editor":
