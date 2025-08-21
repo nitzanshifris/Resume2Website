@@ -3827,6 +3827,9 @@ function HomeWithJobFlow() {
     // Clear auth state
     signOut()
     
+    // Clear JobFlow persisted state to prevent portfolio from showing after logout
+    localStorage.removeItem('jobFlowState')
+    
     // Clear all component states
     setShowDashboard(false)
     setUploadedFile(null)
