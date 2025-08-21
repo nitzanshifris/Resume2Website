@@ -1838,6 +1838,20 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }, [uploadedFile, prevUploadedFile, isAuthenticated])
   
+  // Watch for portfolio URL from JobFlow and update UI
+  useEffect(() => {
+    if (jobFlowContext.portfolioUrl && jobFlowContext.state === FlowState.Completed) {
+      console.log('🎉 Portfolio ready! URL:', jobFlowContext.portfolioUrl)
+      // Automatically show the portfolio in MacBook when it's ready
+      setShowPortfolioInMacBook(true)
+      setStage("complete")
+      setIsPlaying(false)
+      setIsWaitingForAuth(false)
+      // Hide signup modal if it's still open
+      setShowSignupModal(false)
+    }
+  }, [jobFlowContext.portfolioUrl, jobFlowContext.state])
+  
   // Wrapper for handleFileSelect that also sets showCVCard
   const handleLocalFileSelect = (file: File) => {
     // Call the parent's handleFileSelect
