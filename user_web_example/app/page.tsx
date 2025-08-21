@@ -22,7 +22,7 @@ import UploadResume from "@/components/upload-resume"
 import ResumeBuilder from "@/components/resume-builder"
 import InteractiveCVPile from "@/components/interactive-cv-pile"
 import ProcessingPage from "@/components/processing-page"
-import SimpleDashboard from "@/components/simple-dashboard"
+import PortfolioEditor from "@/components/portfolio-editor"
 import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal-new"
 import PricingSelector from "@/components/pricing-selector"
@@ -3873,14 +3873,12 @@ function HomeWithJobFlow() {
     }
   }, [currentSection, isScrolling, isMobile, sections, hasTriggeredPhase6Modal, isAuthenticated, handleOpenModal])
 
-  // Show dashboard if processing is complete
+  // Show portfolio editor if user wants to edit
   if (showDashboard && isAuthenticated) {
     return (
-      <SimpleDashboard 
-        userName={user?.name || "User"} 
-        onBackToHome={handleDashboardClose}
-        initialPage="website"
+      <PortfolioEditor 
         portfolioUrl={jobFlowContext.portfolioUrl}
+        onBackToHome={handleDashboardClose}
       />
     )
   }
