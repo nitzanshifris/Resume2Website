@@ -1759,10 +1759,10 @@ export default function FashionPortfolioPage() {
   /* ── Render ────────────────────────────────────────────────────── */
   if (isLoading) {
     return (
-      <main className="bg-background text-foreground antialiased min-h-screen flex items-center justify-center">
+      <main className="antialiased min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f8f5f0' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-lg text-muted-foreground">Loading your portfolio...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#f4c430' }}></div>
+          <p className="text-lg" style={{ color: '#6b7280' }}>Loading your portfolio...</p>
         </div>
       </main>
     )

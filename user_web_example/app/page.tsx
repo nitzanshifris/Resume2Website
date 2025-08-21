@@ -112,166 +112,19 @@ const TypewriterText = ({ text, delay, className }: { text: string; delay: numbe
   )
 }
 
-// Iframe component with fallback handling and timeout
+// Iframe component - simplified for debugging
 const IframeWithFallback = ({ src, title, className }: { src: string; title: string; className: string }) => {
-  const [loadError, setLoadError] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [showFallback, setShowFallback] = useState(false)
-  
-  useEffect(() => {
-    console.log('🖼️ IframeWithFallback initialized with URL:', src)
-    
-    // Check if URL is localhost
-    const isLocalhost = src.includes('localhost')
-    const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
-    
-    // For localhost URLs from production, show fallback immediately
-    if (isLocalhost && isProduction) {
-      console.log('🌐 Cross-origin detected: production → localhost, showing fallback immediately')
-      setLoadError(true)
-      setIsLoading(false)
-      setShowFallback(true)
-      return
-    }
-    
-    // For Vercel URLs, we now allow iframe embedding since we've configured CSP headers
-    // The templates have frame-ancestors * which allows embedding from anywhere
-    
-    // Set a timeout to show fallback if iframe doesn't load (for any reason)
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.log('⏰ Iframe timeout - showing fallback')
-        setLoadError(true)
-        setIsLoading(false)
-        setShowFallback(true)
-      }
-    }, 8000) // Give Vercel deployments more time to load
-    
-    return () => clearTimeout(timeout)
-  }, [isLoading, src])
+  console.log('🖼️ Rendering iframe with URL:', src)
   
   return (
-    <div className="relative w-full h-full">
-      {!loadError && !showFallback && (
-        <iframe
-          src={src}
-          title={title}
-          className={className}
-          style={{ backgroundColor: 'white' }}
-          onLoad={() => {
-            console.log('✅ Iframe loaded successfully for:', src)
-            setIsLoading(false)
-            setLoadError(false)
-            setShowFallback(false)
-          }}
-          onError={(e) => {
-            console.error('❌ Iframe failed to load:', src, e)
-            setLoadError(true)
-            setIsLoading(false)
-            setShowFallback(true)
-          }}
-          // Enhanced security and compatibility settings for localhost
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox allow-top-navigation"
-          referrerPolicy="no-referrer-when-downgrade"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        />
-      )}
-      
-      {/* Loading indicator */}
-      {isLoading && !loadError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white">
-          <div className="text-center">
-            <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your portfolio...</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Error/Timeout fallback */}
-      {(loadError || showFallback) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-          <div className="text-center p-8 max-w-lg">
-            <div className="mb-6">
-              {/* Success checkmark animation */}
-              <div className="w-20 h-20 mx-auto mb-4 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
-                <div className="relative w-full h-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                </div>
-              </div>
-              
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                {src.includes('.vercel.app') ? '🎉 Deployed to Vercel!' : 'Portfolio Generated Successfully!'}
-              </h3>
-              
-              <p className="text-gray-600 mb-4">
-                Your portfolio is live and ready to share!
-              </p>
-              
-              {/* URL display with copy button */}
-              <div className="bg-gray-100 rounded-lg p-3 mb-4">
-                <p className="text-xs text-gray-500 mb-1">Portfolio URL:</p>
-                <div className="flex items-center justify-between bg-white rounded border border-gray-200 p-2">
-                  <span className="font-mono text-xs text-gray-700 truncate flex-1 mr-2">{src}</span>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(src)
-                      // Could add a toast notification here
-                    }}
-                    className="text-gray-500 hover:text-gray-700 p-1"
-                    title="Copy URL"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              
-              <p className="text-xs text-gray-500 mb-4">
-                {src.includes('.vercel.app') 
-                  ? '🔒 For security, Vercel blocks iframe embedding. Open in a new tab to view.' 
-                  : '🔒 Browser security prevents embedding localhost in frames.'}
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <a
-                href={src}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <span className="inline-flex items-center">
-                  Open Portfolio in New Tab
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </span>
-              </a>
-              
-              <p className="text-xs text-gray-400">
-                Pro tip: Share this URL with anyone to showcase your portfolio!
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Direct link overlay - always visible */}
-      <div className="absolute top-4 right-4 z-10">
-        <a 
-          href={src} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="bg-black/70 text-white px-3 py-1 rounded text-sm hover:bg-black/90 transition-colors backdrop-blur-sm"
-        >
-          Open in New Tab ↗
-        </a>
-      </div>
-    </div>
+    <iframe
+      src={src}
+      title={title}
+      className={className}
+      style={{ backgroundColor: 'white' }}
+      onLoad={() => console.log('✅ Iframe loaded:', src)}
+      onError={(e) => console.error('❌ Iframe error:', src, e)}
+    />
   )
 }
 
@@ -1860,20 +1713,14 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   useEffect(() => {
     if (jobFlowContext.portfolioUrl && jobFlowContext.state === FlowState.Completed) {
       console.log('🎉 Portfolio ready! URL:', jobFlowContext.portfolioUrl)
-      console.log('Current showPortfolioInMacBook:', showPortfolioInMacBook)
       
-      // Force portfolio display - clear any previous state
-      setShowPortfolioInMacBook(false) // Reset first
-      setTimeout(() => {
-        // Then set to true to force re-render
-        setShowPortfolioInMacBook(true)
-        setStage("complete")
-        setIsPlaying(false)
-        setIsWaitingForAuth(false)
-        // Hide signup modal if it's still open
-        setShowSignupModal(false)
-        console.log('✅ Portfolio display triggered')
-      }, 100) // Small delay to ensure state change is detected
+      // Immediately show portfolio - no delays, no resets
+      setShowPortfolioInMacBook(true)
+      setStage("complete")
+      setIsPlaying(false)
+      setIsWaitingForAuth(false)
+      setShowSignupModal(false)
+      console.log('✅ Portfolio display triggered immediately')
     }
   }, [jobFlowContext.portfolioUrl, jobFlowContext.state])
   
@@ -2592,11 +2439,14 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                       </div>
                     ) : showPortfolioInMacBook && jobFlowContext.portfolioUrl ? (
                       // Show ONLY the portfolio - replaces ALL MacBook content
-                      <IframeWithFallback 
-                        src={jobFlowContext.portfolioUrl}
-                        title="Generated Portfolio"
-                        className="absolute inset-0 w-full h-full border-0 rounded-[inherit]"
-                      />
+                      <>
+                        {console.log('🖼️ Rendering portfolio iframe with URL:', jobFlowContext.portfolioUrl)}
+                        <IframeWithFallback 
+                          src={jobFlowContext.portfolioUrl}
+                          title="Generated Portfolio"
+                          className="absolute inset-0 w-full h-full border-0 rounded-[inherit]"
+                        />
+                      </>
                     ) : showNewTypewriter ? (
                       // Phase 3: Sequential fade-in content during progress bar animation
                       <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8">
