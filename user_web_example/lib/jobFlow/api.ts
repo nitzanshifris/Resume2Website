@@ -324,6 +324,8 @@ export const generate = async (jobId: string): Promise<GenerateResponse> => {
     
     const data = await response.json()
     
+    console.log('📦 Generate response data:', data)
+    
     // Try multiple possible URL fields
     const portfolioUrl = data.url || 
                         data.portfolio_url || 
@@ -331,6 +333,7 @@ export const generate = async (jobId: string): Promise<GenerateResponse> => {
                         data.custom_domain_url
     
     if (!portfolioUrl) {
+      console.error('❌ No portfolio URL found in response:', data)
       throw new Error('No portfolio URL in response')
     }
     
