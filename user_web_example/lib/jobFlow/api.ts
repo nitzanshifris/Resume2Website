@@ -6,6 +6,14 @@
 // API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'
 
+// Get session ID from localStorage
+const getSessionId = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('resume2website_session_id')
+  }
+  return null
+}
+
 // Retry configuration
 const MAX_RETRIES = 3
 const BASE_DELAY_MS = 1000
@@ -211,11 +219,17 @@ export const uploadAuthenticated = async (file: File): Promise<UploadResponse> =
  */
 export const claim = async (jobId: string): Promise<ClaimResponse> => {
   return retryWithBackoff(async () => {
+    const sessionId = getSessionId()
+    if (!sessionId) {
+      throw new Error('Authentication required to claim CV')
+    }
+    
     const response = await fetch(`${API_BASE_URL}/api/v1/claim`, {
       method: 'POST',
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Session-ID': sessionId
       },
       body: JSON.stringify({ job_id: jobId })
     })
@@ -244,9 +258,17 @@ export const claim = async (jobId: string): Promise<ClaimResponse> => {
  */
 export const extract = async (jobId: string): Promise<ExtractResponse> => {
   return retryWithBackoff(async () => {
+    const sessionId = getSessionId()
+    if (!sessionId) {
+      throw new Error('Authentication required to extract CV data')
+    }
+    
     const response = await fetch(`${API_BASE_URL}/api/v1/extract/${jobId}`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers: {
+        'X-Session-ID': sessionId
+      }
     })
     
     if (!response.ok) {
@@ -283,9 +305,17 @@ export const extract = async (jobId: string): Promise<ExtractResponse> => {
  */
 export const generate = async (jobId: string): Promise<GenerateResponse> => {
   return retryWithBackoff(async () => {
+    const sessionId = getSessionId()
+    if (!sessionId) {
+      throw new Error('Authentication required to generate portfolio')
+    }
+    
     const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/generate/${jobId}`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers: {
+        'X-Session-ID': sessionId
+      }
     })
     
     if (!response.ok) {
