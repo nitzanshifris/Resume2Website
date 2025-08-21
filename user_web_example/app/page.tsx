@@ -1743,6 +1743,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // handleAuthSuccess for Resume2WebsiteDemo component
   const handleAuthSuccess = async (data: any) => {
     console.log('✅ User authenticated successfully in Resume2WebsiteDemo:', data)
+    console.log('📊 Current JobFlow state:', {
+      jobId: jobFlowContext.currentJobId,
+      state: jobFlowContext.state,
+      stateString: FlowState[jobFlowContext.state]
+    })
     
     // Update auth context if signIn function is provided
     if (signIn && data.session_id) {
@@ -1754,9 +1759,17 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setIsWaitingForAuth(false)
     
     // Continue JobFlow if there's a pending job
-    if (jobFlowContext.currentJobId && jobFlowContext.state === FlowState.WaitingAuth) {
-      console.log('🚀 Continuing portfolio generation after auth...')
-      startPostSignupFlow(jobFlowContext.currentJobId)
+    if (jobFlowContext.currentJobId) {
+      // Check if in WaitingAuth OR Previewing state (both are valid for continuing)
+      if (jobFlowContext.state === FlowState.WaitingAuth || jobFlowContext.state === FlowState.Previewing) {
+        console.log('🚀 Continuing portfolio generation after auth...')
+        startPostSignupFlow(jobFlowContext.currentJobId)
+      } else {
+        console.log('⚠️ JobFlow not in expected state for continuation. Current state:', FlowState[jobFlowContext.state])
+        // Try to continue anyway if we have a job ID
+        console.log('🔄 Attempting to continue with job anyway...')
+        startPostSignupFlow(jobFlowContext.currentJobId)
+      }
       return
     }
     
@@ -1794,8 +1807,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   
   // Watch for JobFlow state changes to trigger animation AFTER validation
   useEffect(() => {
-    // For anonymous users: Check JobFlow state to trigger animation when needed
-    if (!isAuthenticated && jobFlowContext.currentJobId) {
+    // For anonymous users: Check JobFlow STATE not just jobId presence
+    if (!isAuthenticated) {
       // If we're in Previewing or WaitingAuth state, validation has passed and we should start the animation
       if (jobFlowContext.state === FlowState.Previewing || jobFlowContext.state === FlowState.WaitingAuth) {
         console.log('🎬 JobFlow validated and is previewing/waiting, starting animation for anonymous user')
@@ -3419,6 +3432,11 @@ function HomeWithJobFlow() {
   // Authentication success handler for HomeWithJobFlow
   const handleAuthSuccess = async (data: any) => {
     console.log('✅ User authenticated successfully in HomeWithJobFlow:', data)
+    console.log('📊 Current JobFlow state:', {
+      jobId: jobFlowContext.currentJobId,
+      state: jobFlowContext.state,
+      stateString: FlowState[jobFlowContext.state]
+    })
     
     // Update auth context - signIn is already in scope from useAuthContext above
     if (signIn && data.session_id) {
@@ -3429,9 +3447,17 @@ function HomeWithJobFlow() {
     setShowAuthModal(false)
     
     // Continue JobFlow if there's a pending job
-    if (jobFlowContext.currentJobId && jobFlowContext.state === FlowState.WaitingAuth) {
-      console.log('🚀 Continuing portfolio generation after auth...')
-      startPostSignupFlow(jobFlowContext.currentJobId)
+    if (jobFlowContext.currentJobId) {
+      // Check if in WaitingAuth OR Previewing state (both are valid for continuing)
+      if (jobFlowContext.state === FlowState.WaitingAuth || jobFlowContext.state === FlowState.Previewing) {
+        console.log('🚀 Continuing portfolio generation after auth...')
+        startPostSignupFlow(jobFlowContext.currentJobId)
+      } else {
+        console.log('⚠️ JobFlow not in expected state for continuation. Current state:', FlowState[jobFlowContext.state])
+        // Try to continue anyway if we have a job ID
+        console.log('🔄 Attempting to continue with job anyway...')
+        startPostSignupFlow(jobFlowContext.currentJobId)
+      }
       return
     }
     

@@ -183,7 +183,7 @@ export const JobFlowProvider: React.FC<{
    * Start preview flow for anonymous users
    */
   const startPreviewFlow = async (file: File) => {
-    // Clear any existing job to allow new upload (user is starting fresh)
+    // ALWAYS clear any existing job to allow new upload (user is starting fresh)
     if (context.currentJobId) {
       console.log('🔓 Clearing previous job lock to allow new upload (was in state:', context.state, ')')
       dispatch({ type: FlowAction.ClearLock })
@@ -375,7 +375,7 @@ export const JobFlowProvider: React.FC<{
    * For authenticated users: Upload → Extract → Generate (no claim needed)
    */
   const startAuthenticatedFlow = async (file: File) => {
-    // Clear any existing job to allow new upload (user is starting fresh)
+    // ALWAYS clear any existing job to allow new upload (user is starting fresh)
     if (context.currentJobId) {
       console.log('🔓 Clearing previous job lock to allow new upload (was in state:', context.state, ')')
       dispatch({ type: FlowAction.ClearLock })
