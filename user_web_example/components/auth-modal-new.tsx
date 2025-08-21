@@ -6,6 +6,7 @@ import { Mail, Linkedin } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/components/ui/toast-container';
 import EmailAuthForm from './email-auth-form';
+import { getGoogleAuthStatus } from '@/lib/googleAuthCache';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -23,22 +24,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [googleStatus, setGoogleStatus] = useState({ available: true, message: '', client_secret_configured: true });
   const { showToast } = useToast();
 
-  // Check if Google OAuth is available
+  // Check if Google OAuth is available (using cached version)
   useEffect(() => {
+    if (!isOpen) return; // Only fetch when modal is actually open
+    
     const checkGoogleAvailability = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000';
-        const response = await fetch(`${apiUrl}/api/v1/auth/google/status`);
-        const data = await response.json();
-        setGoogleStatus(data);
-      } catch (error) {
-        console.error('Failed to check Google OAuth availability:', error);
-        setGoogleStatus({ available: false, message: 'Could not check Google OAuth status', client_secret_configured: false });
-      }
+      const status = await getGoogleAuthStatus();
+      setGoogleStatus(status);
     };
 
     checkGoogleAvailability();
-  }, []);
+  }, [isOpen]); // Only re-fetch when modal opens
 
   const handleGoogleLogin = async () => {
     if (!googleStatus.available) {
