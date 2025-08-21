@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("bg-background", inter.variable, playfair.variable)}>
+      <body className={cn("bg-background", inter.variable, playfair.variable)} style={{ backgroundColor: '#f8f5f0' }}>
         <ThemeProvider>
           <EditModeProvider>
             <WatermarkProvider>
