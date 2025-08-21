@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Save, Edit3, X } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
 interface PortfolioEditorProps {
   portfolioUrl: string | null
@@ -10,22 +10,11 @@ interface PortfolioEditorProps {
 }
 
 export default function PortfolioEditor({ portfolioUrl, onBackToHome }: PortfolioEditorProps) {
-  const [isEditMode, setIsEditMode] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-
-  const handleSave = async () => {
-    setIsSaving(true)
-    // Send message to iframe to save changes
-    const iframe = document.getElementById('portfolio-iframe') as HTMLIFrameElement
-    if (iframe?.contentWindow) {
-      iframe.contentWindow.postMessage({ action: 'save' }, '*')
-    }
-    
-    // Simulate save delay
-    setTimeout(() => {
-      setIsSaving(false)
-      // Show success message or notification
-    }, 1000)
+  
+  const handleReadyToGo = () => {
+    // This will trigger the payment flow or deployment
+    // For now, just go back to home
+    onBackToHome?.()
   }
 
   // If no portfolio URL, show error state
@@ -65,29 +54,18 @@ export default function PortfolioEditor({ portfolioUrl, onBackToHome }: Portfoli
         
         <Button
           size="sm"
-          variant={isEditMode ? "default" : "ghost"}
-          onClick={() => setIsEditMode(!isEditMode)}
-          className={isEditMode ? "bg-blue-600 hover:bg-blue-700 text-white rounded-full" : "rounded-full hover:bg-gray-100"}
+          onClick={handleReadyToGo}
+          className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white rounded-full"
         >
-          <Edit3 className="h-4 w-4 mr-2" />
-          {isEditMode ? "Editing" : "Edit"}
-        </Button>
-        
-        <Button
-          size="sm"
-          onClick={handleSave}
-          disabled={!isEditMode || isSaving}
-          className="bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white rounded-full disabled:opacity-50"
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {isSaving ? "Saving..." : "Save"}
+          Ready to Go
+          <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
 
-      {/* Full screen iframe */}
+      {/* Full screen iframe - always in edit mode */}
       <iframe
         id="portfolio-iframe"
-        src={isEditMode ? `${portfolioUrl}?edit=true` : portfolioUrl}
+        src={`${portfolioUrl}?edit=true`}
         className="w-full h-full border-0"
         title="Portfolio Editor"
         allow="fullscreen"
