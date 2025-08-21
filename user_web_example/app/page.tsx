@@ -1745,32 +1745,41 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     
     // Update auth context if signIn function is provided
     if (signIn && data.session_id) {
-      await signIn(data.session_id, data)
+      // Handle both formats: data.session_id or data.user
+      await signIn(data.session_id, data.user || data)
     }
     
+    // Close any open auth modals
     setShowSignupModal(false)
+    setShowAuthModal(false)
     setIsWaitingForAuth(false)
     
     // Continue JobFlow if there's a pending job
     if (jobFlowContext.currentJobId && jobFlowContext.state === FlowState.WaitingAuth) {
       console.log('🚀 Continuing portfolio generation after auth...')
       startPostSignupFlow(jobFlowContext.currentJobId)
-      // JobFlow handles everything - no need for legacy fallback
+      // JobFlow handles everything - no need for other checks
       return
     }
     
-    // REMOVED: Legacy setTimeout block that duplicated JobFlow operations
-    // JobFlow's startPostSignupFlow already handles claim→extract→generate
-    // No need for manual fallback code
-    
-    // Only handle edge case if we have a pending file but no JobFlow context
-    if (!jobFlowContext.currentJobId && pendingFile) {
+    // Check if there's a dropped file waiting (from second handler)
+    if (droppedFile) {
+      // Go directly to upload with the file
+      setShowUpload(true)
+    } else if (uploadedFile && showProcessing) {
+      // If we have an uploaded file from CV card click, go to processing
+      setShowProcessing(true)
+    } else if (!jobFlowContext.currentJobId && pendingFile) {
+      // Edge case: have a pending file but no JobFlow context
       console.log('📤 No JobFlow context but have pending file, starting flow...')
       if (isAuthenticated) {
         startAuthenticatedFlow(pendingFile)
       } else {
         startPreviewFlow(pendingFile)
       }
+    } else {
+      // After signup/login without a file, stay on home page
+      console.log('Authentication successful, staying on home page')
     }
   }
 
@@ -3405,32 +3414,7 @@ function HomeWithJobFlow() {
     setShowUpload(false)
   }
 
-  // Authentication handlers
-  const handleAuthSuccess = async (data: any) => {
-    // Use the real auth system to sign in
-    await signIn(data.session_id, data.user)
-    setShowAuthModal(false)
-    
-    // Continue JobFlow if there's a pending job
-    if (jobFlowContext.currentJobId && jobFlowContext.state === FlowState.WaitingAuth) {
-      console.log('🚀 Continuing portfolio generation after auth...')
-      startPostSignupFlow(jobFlowContext.currentJobId)
-    }
-    
-    // Check if there's a dropped file waiting
-    if (droppedFile) {
-      // Go directly to upload with the file
-      setShowUpload(true)
-    } else if (uploadedFile) {
-      // If we have an uploaded file from CV card click, go to processing
-      setShowProcessing(true)
-    } else {
-      // After signup/login without a file, stay on home page
-      // Don't automatically go to dashboard
-      // User can navigate to dashboard manually if they want
-      console.log('Authentication successful, staying on home page')
-    }
-  }
+  // REMOVED: Duplicate handleAuthSuccess - merged with the first one above
 
   const handleAuthClose = () => {
     setShowAuthModal(false)
