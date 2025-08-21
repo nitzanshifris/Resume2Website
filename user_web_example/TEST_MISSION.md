@@ -230,14 +230,15 @@
 
 ### 5.1 Progress Bar Behavior
 **Steps:**
-1. Upload any valid CV
-2. Watch progress bar carefully
+1. Upload any valid CV as anonymous user
+2. Watch progress bar carefully during preview
 3. **Verify:**
-   - [ ] Starts at 0%
-   - [ ] Smooth animation (no jumps)
-   - [ ] Reaches exactly 80% when complete (visual)
+   - [ ] Stays at 0% during preview (before signup) ✅ FIXED
+   - [ ] Stays at 0% while waiting for auth
+   - [ ] Only starts moving after successful authentication
+   - [ ] Smooth animation to 80% after auth (no jumps)
    - [ ] Shows ready state at 80%
-   - [ ] Progress circle may pulse or have visual indicator at 80%
+   - [ ] Progress circle pulses when clickable at 80%
 
 ### 5.2 Portfolio Auto-Display at 80%
 **Steps:**
@@ -254,7 +255,11 @@
 2. When progress reaches 80%
 3. **Verify:**
    - [ ] MacBook frame appears on the right side
-   - [ ] Portfolio loads inside MacBook iframe
+   - [ ] Portfolio REPLACES entire MacBook content ✅ FIXED
+   - [ ] No title "Your resume tells people..." visible
+   - [ ] No subtitle "While we're working..." visible  
+   - [ ] No video carousel visible
+   - [ ] Portfolio fills entire MacBook screen (absolute positioning)
    - [ ] Portfolio URL is correct (localhost:4000-5000 range)
    - [ ] Can interact with portfolio inside iframe
    - [ ] URL in address bar updates with portfolio_url parameter
@@ -420,12 +425,53 @@
 - "📁 File selected, using JobFlow orchestrator"
 - "🚀 Continuing portfolio generation after auth"
 - "🔓 Clearing previous job lock to allow new upload"
+- "🎬 Starting animation for file:" (NOT "Validating file") ✅ FIXED
+- "⏭️ Skipping auto-start, already have job_id:" (uses JobFlow context) ✅ FIXED
 
 ❌ Bad logs (should NOT see):
 - "🛑 BLOCKED: handleStartDemo called but currentJobId exists" (except when intended)
 - Multiple "Uploading file..." for same action
 - "Already validating a file" repeatedly
+- "🔍 Validating file before animation..." (OLD - should not appear)
+- Duplicate handleAuthSuccess definitions (FIXED - merged into one)
 ```
+
+---
+
+## 🔧 RECENT FIXES TO VERIFY (Critical Tests)
+
+### Fixed Issues (Must Test):
+1. **Progress Bar at 0% Before Signup** ✅
+   - Anonymous users should see 0% progress until after authentication
+   - FlowState.Previewing and WaitingAuth now return 0% semantic progress
+
+2. **Portfolio Full Screen Display** ✅
+   - Portfolio replaces ENTIRE MacBook content (no container)
+   - Title, subtitle, and video carousel should be completely hidden
+   - Uses absolute positioning to fill entire MacBook frame
+
+3. **No Duplicate Uploads** ✅
+   - InteractiveCVPile now uses JobFlow orchestrators exclusively
+   - No direct uploadFile() calls remain in the flow
+   - Check Network tab for single /upload-anonymous call
+
+4. **Single handleAuthSuccess Function** ✅
+   - Merged duplicate functions (was causing shadowing bug)
+   - Both Resume2WebsiteDemo and HomeWithJobFlow have proper handlers
+   - pendingFile logic now properly accessible
+
+5. **Clean Code Base** ✅
+   - Removed dead processPortfolioGeneration function (180+ lines)
+   - Fixed misleading "Validating file" log message
+   - Using jobFlowContext.currentJobId for guards (not local state)
+
+### Regression Tests (Ensure Nothing Broke):
+- [ ] Anonymous → Authenticated flow preserves job_id
+- [ ] OAuth login continues portfolio generation
+- [ ] Error handling and retry flows work
+- [ ] Dashboard opens to "website" page with portfolioUrl
+- [ ] Post-generation three-button layout appears for all users
+- [ ] Portfolio Completion Popup shows at correct time
 
 ---
 
