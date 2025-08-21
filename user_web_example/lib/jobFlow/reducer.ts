@@ -38,7 +38,7 @@ const canTransition = (from: FlowState, action: FlowAction): boolean => {
     [FlowState.WaitingAuth]: [FlowAction.AuthSucceeded],
     [FlowState.Claiming]: [FlowAction.ClaimSucceeded, FlowAction.ClaimFailed],
     [FlowState.Extracting]: [FlowAction.ExtractSucceeded, FlowAction.ExtractFailed],
-    [FlowState.Generating]: [FlowAction.GenerateSucceeded, FlowAction.GenerateFailed],
+    [FlowState.Generating]: [FlowAction.GenerateSucceeded, FlowAction.GenerateFailed, FlowAction.PortfolioReady],
     [FlowState.Completed]: [],
     [FlowState.Failed]: [FlowAction.UploadRequested]
   }
