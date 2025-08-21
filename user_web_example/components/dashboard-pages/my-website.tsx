@@ -281,8 +281,9 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
   // Load CV data for the selected portfolio
   const loadPortfolioCVData = async (portfolioId: string) => {
     try {
+      // First try the portfolio endpoint
       const sessionId = localStorage.getItem('resume2website_session_id') || 'dev-session'
-      const response = await fetch(
+      let response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/portfolio/${portfolioId}/cv-data`,
         {
           headers: {
@@ -291,14 +292,35 @@ export default function MyWebsite({ userName = "Alex" }: MyWebsiteProps) {
         }
       )
 
+      // If portfolio endpoint fails and we have a job_id, try the CV endpoint directly
+      if (!response.ok && selectedPortfolio?.job_id) {
+        console.log(`Portfolio CV endpoint failed (${response.status}), trying job CV endpoint with job_id: ${selectedPortfolio.job_id}`)
+        response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2000'}/api/v1/cv/${selectedPortfolio.job_id}`,
+          {
+            headers: {
+              'X-Session-ID': sessionId
+            }
+          }
+        )
+      }
+
       if (!response.ok) {
-        throw new Error('Failed to load CV data')
+        console.error(`Failed to load CV data: ${response.status} ${response.statusText}`)
+        console.error(`Portfolio ID: ${portfolioId}, Job ID: ${selectedPortfolio?.job_id}`)
+        const errorText = await response.text()
+        console.error(`Error response:`, errorText)
+        throw new Error(`Failed to load CV data: ${response.status}`)
       }
 
       const data = await response.json()
+      console.log('CV data response:', data)
       if (data.cv_data) {
         // Store the original CV data
         setCurrentCVData(data.cv_data)
+      } else if (data) {
+        // Sometimes the response IS the CV data directly
+        setCurrentCVData(data)
       }
     } catch (error) {
       console.error('Error loading CV data:', error)
