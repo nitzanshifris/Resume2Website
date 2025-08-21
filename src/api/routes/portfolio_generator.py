@@ -273,7 +273,7 @@ class NextJSServerManager:
             )
             
             # Choose appropriate package manager
-            cmd = self._get_dev_command(config['project_path'])
+            cmd = self._get_dev_command(config['project_path'], config['port'])
             
             self.logger.info(f"🚀 Starting server with command: {' '.join(cmd)} on port {config['port']}")
             
@@ -338,7 +338,7 @@ class NextJSServerManager:
         
         return isolated_env
     
-    def _get_dev_command(self, project_path: str) -> list:
+    def _get_dev_command(self, project_path: str, port: int = None) -> list:
         """Get appropriate development command - use direct Next.js for reliability"""
         project_path = Path(project_path)
         
@@ -359,9 +359,14 @@ class NextJSServerManager:
         next_bin = project_path / "node_modules" / ".bin" / "next"
         if next_bin.exists():
             # Return as list to ensure shell=False works properly
-            return [str(next_bin.resolve()), 'dev']
+            # Include port flag if specified
+            cmd = [str(next_bin.resolve()), 'dev']
+            if port:
+                cmd.extend(['-p', str(port)])
+            return cmd
         
         # Fallback to package manager commands (all safe, no user input)
+        # Note: For these, we'll need to modify package.json to include the port
         if (project_path / 'pnpm-lock.yaml').exists() and shutil.which('pnpm'):
             return ['pnpm', 'run', 'dev']
         elif (project_path / 'yarn.lock').exists() and shutil.which('yarn'):
