@@ -325,7 +325,8 @@ export const JobFlowProvider: React.FC<{
    */
   const performGenerate = async (jobId: string) => {
     try {
-      dispatch({ type: FlowAction.GenerateStarted })
+      // GenerateStarted is not needed - we're already in Generating state from ExtractSucceeded
+      // dispatch({ type: FlowAction.GenerateStarted })
       
       const { portfolio_url, portfolio_id } = await api.generate(jobId)
       
