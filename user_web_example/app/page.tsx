@@ -2228,7 +2228,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex justify-start"
                   >
-                    <div className="flex flex-col gap-6 w-full max-w-[320px]">
+                    <div className="flex flex-col gap-10 w-full max-w-[380px]">
                       {/* Edit Portfolio button - Primary action at top */}
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -2245,9 +2245,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             repeatType: "reverse"
                           }
                         }}
-                        className="space-y-2"
+                        className="space-y-3"
                       >
-                        <p className="text-xs font-medium bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
+                        <p className="text-base font-semibold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           Bring your story to life—drop media, set the mood, make it yours.
                         </p>
                         <Button
@@ -2267,9 +2267,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
-                        className="space-y-2"
+                        className="space-y-3"
                       >
-                        <p className="text-xs font-medium bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
+                        <p className="text-base font-semibold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           Grab your link and start impressing.
                         </p>
                         <Button
@@ -2288,9 +2288,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="space-y-2"
+                        className="space-y-3"
                       >
-                        <p className="text-xs font-medium bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
+                        <p className="text-base font-semibold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           See how others shine.
                         </p>
                         <Button
