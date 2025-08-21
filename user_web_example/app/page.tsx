@@ -1220,16 +1220,17 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       //   console.log('⏸️ Animation paused at dissolving stage - waiting for authentication')
       //   return
       // }
-      // Trigger text change FIRST, then hide strike-through
-      setTimeout(() => {
-        setShowNewTypewriter(true)  // Change text immediately
-        // Then hide the strike-through after a tiny delay
-        setTimeout(() => setShowStrikeThrough(false), 50)
-      }, 1000)
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Stage 4: Website Materialization (MacBook appears)
+      
+      // Wait for dissolving animation
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      
+      // Stage 4: Website Materialization (MacBook appears) and text change happen TOGETHER
+      // This prevents the CV pile from shifting before animating out
       setStage("materializing")
+      setShowNewTypewriter(true)  // Change text at the SAME time as MacBook appears
+      // Hide the strike-through after a tiny delay
+      setTimeout(() => setShowStrikeThrough(false), 50)
+      
       await new Promise((resolve) => setTimeout(resolve, 1200))
 
       // Stage 5: Complete (final state)
