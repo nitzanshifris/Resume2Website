@@ -51,18 +51,18 @@ export default function PortfolioCompletionPopup({
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
           />
           
-          {/* Popup Container - Takes up most of the screen to make dismissal harder */}
+          {/* Popup Container */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the popup
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 pointer-events-none"
           >
             <div 
-              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden"
-              style={{ minHeight: '400px' }} // Make it large
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden pointer-events-auto"
+              style={{ minHeight: '400px' }}
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the card
             >
               {/* Gradient background decoration */}
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-sky-50 to-blue-50 opacity-50" />
