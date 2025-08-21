@@ -183,9 +183,9 @@ export const JobFlowProvider: React.FC<{
    * Start preview flow for anonymous users
    */
   const startPreviewFlow = async (file: File) => {
-    // If completed with a portfolio, clear lock to allow new upload
-    if (context.state === FlowState.Completed && context.currentJobId) {
-      console.log('🔓 Clearing previous job lock to allow new upload')
+    // Clear any existing job to allow new upload (user is starting fresh)
+    if (context.currentJobId) {
+      console.log('🔓 Clearing previous job lock to allow new upload (was in state:', context.state, ')')
       dispatch({ type: FlowAction.ClearLock })
       // Clear from tracking set as well
       startedForJobIds.current.delete(context.currentJobId)
@@ -195,7 +195,7 @@ export const JobFlowProvider: React.FC<{
     
     // CRITICAL GUARD - Check again after potential clear
     if (context.currentJobId) {
-      console.log('🛑 BLOCKED: Preview flow blocked, currentJobId exists:', context.currentJobId)
+      console.log('🛑 BLOCKED: Preview flow blocked, currentJobId still exists:', context.currentJobId)
       return
     }
     
@@ -375,9 +375,9 @@ export const JobFlowProvider: React.FC<{
    * For authenticated users: Upload → Extract → Generate (no claim needed)
    */
   const startAuthenticatedFlow = async (file: File) => {
-    // If completed with a portfolio, clear lock to allow new upload
-    if (context.state === FlowState.Completed && context.currentJobId) {
-      console.log('🔓 Clearing previous job lock to allow new upload')
+    // Clear any existing job to allow new upload (user is starting fresh)
+    if (context.currentJobId) {
+      console.log('🔓 Clearing previous job lock to allow new upload (was in state:', context.state, ')')
       dispatch({ type: FlowAction.ClearLock })
       // Clear from tracking set as well
       startedForJobIds.current.delete(context.currentJobId)
@@ -387,7 +387,7 @@ export const JobFlowProvider: React.FC<{
     
     // CRITICAL GUARD - Check again after potential clear
     if (context.currentJobId) {
-      console.log('🛑 BLOCKED: Authenticated flow blocked, currentJobId exists:', context.currentJobId)
+      console.log('🛑 BLOCKED: Authenticated flow blocked, currentJobId still exists:', context.currentJobId)
       return
     }
     
