@@ -1792,51 +1792,46 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // Track previous uploadedFile to detect changes
   const [prevUploadedFile, setPrevUploadedFile] = useState<File | null>(null)
   
-  // Watch for uploadedFile changes from ANY source (dropbox, navbar, button)
+  // Watch for JobFlow state changes to trigger animation AFTER validation
   useEffect(() => {
-    // Skip if we're handling file through handleFileSelect (prevents double upload)
-    if (typeof window !== 'undefined' && window.__isHandlingFileSelect) {
-      console.log('⏭️ Skipping auto-start in effect, file is being handled by handleFileSelect')
-      return
-    }
-    
     // For anonymous users: Check JobFlow state to trigger animation when needed
     if (!isAuthenticated && jobFlowContext.currentJobId) {
-      // If we're in Previewing or WaitingAuth state, we should start the animation
+      // If we're in Previewing or WaitingAuth state, validation has passed and we should start the animation
       if (jobFlowContext.state === FlowState.Previewing || jobFlowContext.state === FlowState.WaitingAuth) {
-        console.log('🎬 JobFlow is previewing/waiting, starting animation for anonymous user')
+        console.log('🎬 JobFlow validated and is previewing/waiting, starting animation for anonymous user')
         // Only start animation if not already playing to avoid duplicates
         if (!isPlaying && !isWaitingForAuth) {
-          startPreviewAnimation(undefined, true) // Skip validation since JobFlow already validated
+          // Wait a bit for CV card to appear before starting animation
+          setTimeout(() => {
+            startPreviewAnimation(undefined, true) // Skip validation since JobFlow already validated
+          }, 1500)
         }
       }
       return // Let JobFlow handle the rest
     }
     
-    // CRITICAL: Skip if we already have a job_id AND we're authenticated (anonymous user just signed up)
+    // For authenticated users with existing job (after signup), let JobFlow handle it
     if (isAuthenticated && jobFlowContext.currentJobId) {
-      console.log('⏭️ Skipping auto-start for authenticated user with job_id:', jobFlowContext.currentJobId)
+      console.log('⏭️ Authenticated user with job_id, JobFlow handles the flow:', jobFlowContext.currentJobId)
       return
     }
-    
+  }, [isAuthenticated, jobFlowContext.currentJobId, jobFlowContext.state, isPlaying, isWaitingForAuth])
+  
+  // Track uploadedFile changes just for UI updates (CV card display)
+  useEffect(() => {
     if (uploadedFile && uploadedFile !== prevUploadedFile) {
-      console.log('📁 New file detected from parent:', uploadedFile.name)
+      console.log('📁 New file detected, showing CV card:', uploadedFile.name)
       setPrevUploadedFile(uploadedFile)
       setShowCVCard(true)
       
-      // Trigger animation based on auth status
+      // For authenticated users, trigger the demo flow with validation
       if (isAuthenticated) {
         console.log('✅ User authenticated, will validate and start full process')
-        // Validate first, then start demo
-        handleStartDemo() // This now includes validation
-      } else {
-        console.log('⚠️ User not authenticated, starting preview sequence')
-        setTimeout(() => {
-          startPreviewAnimation()
-        }, 1500) // Wait for CV to appear first
+        handleStartDemo() // This includes validation
       }
+      // For anonymous users, do nothing here - wait for JobFlow state change above
     }
-  }, [uploadedFile, prevUploadedFile, isAuthenticated, jobFlowContext.currentJobId, jobFlowContext.state, isPlaying, isWaitingForAuth])
+  }, [uploadedFile, prevUploadedFile, isAuthenticated])
   
   // Wrapper for handleFileSelect that also sets showCVCard
   const handleLocalFileSelect = (file: File) => {
