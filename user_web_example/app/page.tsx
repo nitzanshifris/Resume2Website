@@ -2247,7 +2247,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         }}
                         className="space-y-3"
                       >
-                        <p className="text-base font-semibold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
+                        <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           Bring your story to life—drop media, set the mood, make it yours.
                         </p>
                         <Button
@@ -2269,7 +2269,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         transition={{ duration: 0.8, delay: 0.1 }}
                         className="space-y-3"
                       >
-                        <p className="text-base font-semibold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
+                        <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           Grab your link and start impressing.
                         </p>
                         <Button
@@ -2290,7 +2290,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="space-y-3"
                       >
-                        <p className="text-base font-semibold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
+                        <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           See how others shine.
                         </p>
                         <Button
