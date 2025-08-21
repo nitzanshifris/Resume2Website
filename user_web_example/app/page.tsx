@@ -1880,10 +1880,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       return
     }
     
-    // Start linear animation from 0 to 60 over 30 seconds
+    // Start linear animation from 0 to 55 over 30 seconds (won't reach 80% until actually complete)
     const startTime = Date.now()
     const duration = 30000 // 30 seconds
-    const targetEnd = 60
+    const targetEnd = 55 // Cap at 55 semantic (~73% visual) to prevent reaching 80% early
     
     const animate = () => {
       const elapsed = Date.now() - startTime
