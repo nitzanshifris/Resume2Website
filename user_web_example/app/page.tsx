@@ -2080,7 +2080,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className={isTransformationStage() ? "" : ""}
               >
                 <AnimatePresence mode="wait">
-                  {!showNewTypewriter ? (
+                  {/* Check if we have a completed portfolio first */}
+                  {(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? (
+                    // Always show nothing here when portfolio is complete - buttons are handled below
+                    null
+                  ) : !showNewTypewriter ? (
+                    // Only show the "Escape the No Pile" text in initial state before any generation
                     <motion.div
                       key="original-headline"
                       initial={{ opacity: 1 }}
@@ -2214,8 +2219,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
 
               {/* Button section - Show different buttons based on completion state */}
               <AnimatePresence mode="wait">
-                {showNewTypewriter && hasCompletedGeneration ? (
-                  // Post-completion buttons - Show all three buttons vertically
+                {(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? (
+                  // Post-completion buttons - Show all three buttons vertically when portfolio exists
                   <motion.div
                     key="completion-buttons"
                     initial={{ opacity: 0 }}
