@@ -1800,10 +1800,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       if (jobFlowContext.state === FlowState.Previewing || jobFlowContext.state === FlowState.WaitingAuth) {
         console.log('🎬 JobFlow validated and is previewing/waiting, starting animation for anonymous user')
         // Only start animation if not already playing to avoid duplicates
-        if (!isPlaying && !isWaitingForAuth) {
+        if (!isPlaying && !isWaitingForAuth && uploadedFile) {
           // Wait a bit for CV card to appear before starting animation
           setTimeout(() => {
-            startPreviewAnimation(undefined, true) // Skip validation since JobFlow already validated
+            startPreviewAnimation(uploadedFile, true) // Pass the file, skip validation since JobFlow already validated
           }, 1500)
         }
       }
@@ -1815,7 +1815,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       console.log('⏭️ Authenticated user with job_id, JobFlow handles the flow:', jobFlowContext.currentJobId)
       return
     }
-  }, [isAuthenticated, jobFlowContext.currentJobId, jobFlowContext.state, isPlaying, isWaitingForAuth])
+  }, [isAuthenticated, jobFlowContext.currentJobId, jobFlowContext.state, isPlaying, isWaitingForAuth, uploadedFile])
   
   // Track uploadedFile changes just for UI updates (CV card display)
   useEffect(() => {
