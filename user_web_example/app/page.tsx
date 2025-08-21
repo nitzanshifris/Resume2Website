@@ -2228,7 +2228,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex justify-start"
                   >
-                    <div className="flex flex-col gap-3 w-full max-w-[280px]">
+                    <div className="flex flex-col gap-6 w-full max-w-[320px]">
                       {/* Edit Portfolio button - Primary action at top */}
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -2245,7 +2245,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             repeatType: "reverse"
                           }
                         }}
+                        className="space-y-2"
                       >
+                        <p className="text-xs font-medium bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
+                          Bring your story to life—drop media, set the mood, make it yours.
+                        </p>
                         <Button
                           size="lg"
                           onClick={onEditPortfolio}
@@ -2263,7 +2267,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
+                        className="space-y-2"
                       >
+                        <p className="text-xs font-medium bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
+                          Grab your link and start impressing.
+                        </p>
                         <Button
                           size="lg"
                           variant="outline"
@@ -2280,7 +2288,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
+                        className="space-y-2"
                       >
+                        <p className="text-xs font-medium bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent">
+                          See how others shine.
+                        </p>
                         <Button
                           size="lg"
                           variant="outline"
