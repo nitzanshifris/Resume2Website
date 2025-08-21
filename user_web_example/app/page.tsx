@@ -1800,9 +1800,22 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       return
     }
     
-    // CRITICAL: Skip if we already have a job_id (anonymous user just signed up)
-    if (jobFlowContext.currentJobId) {
-      console.log('⏭️ Skipping auto-start, already have job_id:', jobFlowContext.currentJobId)
+    // For anonymous users: Check JobFlow state to trigger animation when needed
+    if (!isAuthenticated && jobFlowContext.currentJobId) {
+      // If we're in Previewing or WaitingAuth state, we should start the animation
+      if (jobFlowContext.state === FlowState.Previewing || jobFlowContext.state === FlowState.WaitingAuth) {
+        console.log('🎬 JobFlow is previewing/waiting, starting animation for anonymous user')
+        // Only start animation if not already playing to avoid duplicates
+        if (!isPlaying && !isWaitingForAuth) {
+          startPreviewAnimation(undefined, true) // Skip validation since JobFlow already validated
+        }
+      }
+      return // Let JobFlow handle the rest
+    }
+    
+    // CRITICAL: Skip if we already have a job_id AND we're authenticated (anonymous user just signed up)
+    if (isAuthenticated && jobFlowContext.currentJobId) {
+      console.log('⏭️ Skipping auto-start for authenticated user with job_id:', jobFlowContext.currentJobId)
       return
     }
     
@@ -1823,7 +1836,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         }, 1500) // Wait for CV to appear first
       }
     }
-  }, [uploadedFile, prevUploadedFile, isAuthenticated, currentJobId])
+  }, [uploadedFile, prevUploadedFile, isAuthenticated, jobFlowContext.currentJobId, jobFlowContext.state, isPlaying, isWaitingForAuth])
   
   // Wrapper for handleFileSelect that also sets showCVCard
   const handleLocalFileSelect = (file: File) => {
