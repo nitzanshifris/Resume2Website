@@ -2758,20 +2758,11 @@ const AppleNavbar = ({
           {/* Right Section - Auth and Upload CV */}
           <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {isAuthenticated ? (
-              // Logged in - show user info, dashboard button and logout
+              // Logged in - show user info and logout
               <>
                 <span className="text-sm text-gray-700">
                   Welcome, {user?.name || 'User'}
                 </span>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={onShowDashboard}
-                    variant="outline"
-                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
-                  >
-                    Dashboard
-                  </Button>
-                </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     onClick={onLogout}
@@ -2902,16 +2893,6 @@ const AppleNavbar = ({
                     <div className="px-3 py-2 text-sm text-gray-600">
                       Welcome, {user?.name || 'User'}
                     </div>
-                    <Button
-                      onClick={() => {
-                        setIsMobileMenuOpen(false)
-                        onShowDashboard()
-                      }}
-                      className="w-full mt-2 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
-                      variant="outline"
-                    >
-                      Dashboard
-                    </Button>
                     <Button
                       onClick={onLogout}
                       variant="outline"
