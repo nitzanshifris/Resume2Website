@@ -2062,7 +2062,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       {/* Keep the existing desktop layout but simplified */}
       <div className="w-full h-screen flex flex-row items-center justify-center gap-0">
         {/* Left Side - Text Content - Dynamic width based on stage and completion */}
-        <div className={`${hasCompletedGeneration ? "w-[20%]" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
+        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[20%]" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
           <div className="w-full h-full flex flex-col justify-center gap-12">
             <motion.div
               initial={{ opacity: 0 }}
@@ -2379,7 +2379,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         </div>
 
         {/* Right Side - Dynamic width based on stage and completion (desktop only, keep MacBookFrame) */}
-        <div className={`${hasCompletedGeneration ? "w-[80%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8 pr-12" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
+        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[80%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8 pr-12" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
 
 
 
