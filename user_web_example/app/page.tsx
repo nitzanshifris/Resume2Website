@@ -1740,46 +1740,34 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }
 
+  // handleAuthSuccess for Resume2WebsiteDemo component
   const handleAuthSuccess = async (data: any) => {
-    console.log('✅ User authenticated successfully:', data)
+    console.log('✅ User authenticated successfully in Resume2WebsiteDemo:', data)
     
     // Update auth context if signIn function is provided
     if (signIn && data.session_id) {
-      // Handle both formats: data.session_id or data.user
       await signIn(data.session_id, data.user || data)
     }
     
-    // Close any open auth modals
+    // Close signup modal
     setShowSignupModal(false)
-    setShowAuthModal(false)
     setIsWaitingForAuth(false)
     
     // Continue JobFlow if there's a pending job
     if (jobFlowContext.currentJobId && jobFlowContext.state === FlowState.WaitingAuth) {
       console.log('🚀 Continuing portfolio generation after auth...')
       startPostSignupFlow(jobFlowContext.currentJobId)
-      // JobFlow handles everything - no need for other checks
       return
     }
     
-    // Check if there's a dropped file waiting (from second handler)
-    if (droppedFile) {
-      // Go directly to upload with the file
-      setShowUpload(true)
-    } else if (uploadedFile && showProcessing) {
-      // If we have an uploaded file from CV card click, go to processing
-      setShowProcessing(true)
-    } else if (!jobFlowContext.currentJobId && pendingFile) {
-      // Edge case: have a pending file but no JobFlow context
+    // Edge case: have a pending file but no JobFlow context
+    if (!jobFlowContext.currentJobId && pendingFile) {
       console.log('📤 No JobFlow context but have pending file, starting flow...')
       if (isAuthenticated) {
         startAuthenticatedFlow(pendingFile)
       } else {
         startPreviewFlow(pendingFile)
       }
-    } else {
-      // After signup/login without a file, stay on home page
-      console.log('Authentication successful, staying on home page')
     }
   }
 
