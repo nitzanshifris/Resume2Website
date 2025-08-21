@@ -1364,7 +1364,12 @@ async def restart_portfolio_server(
                 }
         
         # For backward compatibility with local portfolios
-        portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
+        # Portfolio ID already contains the full directory name (user_id_job_id_suffix)
+        portfolio_dir = PORTFOLIOS_DIR / portfolio_id
+        
+        # If not found, try with user_id prefix (backward compatibility)
+        if not portfolio_dir.exists():
+            portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
         
         if not portfolio_dir.exists():
             raise HTTPException(status_code=404, detail="Portfolio not found")
@@ -1424,7 +1429,12 @@ async def get_portfolio_server_status(
     Get the status of a portfolio server
     """
     try:
-        portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
+        # Portfolio ID already contains the full directory name (user_id_job_id_suffix)
+        portfolio_dir = PORTFOLIOS_DIR / portfolio_id
+        
+        # If not found, try with user_id prefix (backward compatibility)
+        if not portfolio_dir.exists():
+            portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
         
         if not portfolio_dir.exists():
             raise HTTPException(status_code=404, detail="Portfolio not found")
@@ -1481,7 +1491,12 @@ async def update_portfolio_cv_data(
         # Parse the JSON body
         updated_data = await request.json()
         
-        portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
+        # Portfolio ID already contains the full directory name (user_id_job_id_suffix)
+        portfolio_dir = PORTFOLIOS_DIR / portfolio_id
+        
+        # If not found, try with user_id prefix (backward compatibility)
+        if not portfolio_dir.exists():
+            portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
         
         if not portfolio_dir.exists():
             raise HTTPException(status_code=404, detail="Portfolio not found")
@@ -1570,7 +1585,17 @@ async def get_portfolio_cv_data(
     Get the CV data associated with a portfolio
     """
     try:
-        portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
+        # Portfolio ID already contains the full directory name (user_id_job_id_suffix)
+        portfolio_dir = PORTFOLIOS_DIR / portfolio_id
+        
+        # If not found, try with user_id prefix (backward compatibility)
+        if not portfolio_dir.exists():
+            # Portfolio ID already contains the full directory name (user_id_job_id_suffix)
+        portfolio_dir = PORTFOLIOS_DIR / portfolio_id
+        
+        # If not found, try with user_id prefix (backward compatibility)
+        if not portfolio_dir.exists():
+            portfolio_dir = PORTFOLIOS_DIR / f"{current_user_id}_{portfolio_id}"
         
         if not portfolio_dir.exists():
             raise HTTPException(status_code=404, detail="Portfolio not found")
