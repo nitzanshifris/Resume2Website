@@ -288,7 +288,8 @@ export const JobFlowProvider: React.FC<{
    */
   const performExtract = async (jobId: string) => {
     try {
-      dispatch({ type: FlowAction.ExtractStarted })
+      // ExtractStarted is not needed - we're already in Extracting state from ClaimSucceeded
+      // dispatch({ type: FlowAction.ExtractStarted })
       
       const { cached } = await api.extract(jobId)
       
