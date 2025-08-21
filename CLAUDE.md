@@ -16,7 +16,7 @@ RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portf
 
 ## Tech Stack Essentials
 - **Backend**: FastAPI + Python 3.11+ (port 2000)
-- **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4 (port 3000)
+- **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4 (port 3019)
 - **AI**: Claude 4 Opus ONLY (temperature 0.0 for deterministic extraction)
 - **Database**: SQLite with session-based authentication
 - **Package Manager**: pnpm (main project), npm (sandboxes only)
@@ -26,7 +26,7 @@ RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portf
 ## Daily Development Commands
 ```bash
 # Frontend Development
-pnpm run dev                    # Start Next.js dev server (localhost:3000)
+pnpm run dev                    # Start Next.js dev server (localhost:3019)
 pnpm run typecheck             # ⚠️ MUST run before commits
 pnpm run build                 # Build for production
 pnpm run start                 # Start production build
@@ -232,7 +232,7 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 ### Common Issues & Quick Fixes
 - **CSS not loading**: Check postcss.config.mjs has autoprefixer, clear .next cache
 - **Next.js binary not found**: Sandboxes use npm, not pnpm - check PATH
-- **Port conflicts**: Backend=2000, Frontend=3000, Portfolios=4000-5000 range
+- **Port conflicts**: Backend=2000, Frontend=3019, Portfolios=4000-5000 range
 - **CV extraction hangs**: Check Claude API quota/credentials in keychain
 - **Portfolio stuck at 55%**: Check API response format, server startup logs
 - **Vercel deployment hangs**: Check `ps aux | grep vercel`, may be building
@@ -248,7 +248,7 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 ```bash
 # Health checks
 curl http://localhost:2000/health               # Backend health
-curl http://localhost:3000/api/health           # Frontend health
+curl http://localhost:3019/api/health           # Frontend health
 
 # Portfolio management
 curl http://localhost:2000/api/v1/portfolio/list              # List portfolios
@@ -303,7 +303,7 @@ The main app at resume2website.com is protected with authentication middleware:
 - **Coming Soon page**: Custom landing with email capture and gradient text styling
 - **Configuration**: Edit `user_web_example/middleware.ts` to change secret key
 - **Testing protection**: Use incognito window or clear cookies
-- **Local development**: Frontend on port 3000, Backend on port 2000 (no ngrok needed)
+- **Local development**: Frontend on port 3019, Backend on port 2000 (no ngrok needed)
 
 ## Directory Structure
 ```
