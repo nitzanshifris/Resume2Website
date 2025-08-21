@@ -1749,19 +1749,36 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       return
     }
     
-    // Start linear animation from 0 to 55 over 30 seconds (won't reach 80% until actually complete)
+    // Two-phase animation:
+    // Phase 1: Quickly animate from 0 to 52.5 (70% visual) over 20 seconds
+    // Phase 2: Slowly increment from 52.5 to 59.25 (70% to 79% visual) - 1% every 5 seconds
     const startTime = Date.now()
-    const duration = 30000 // 30 seconds
-    const targetEnd = 55 // Cap at 55 semantic (~73% visual) to prevent reaching 80% early
+    const phase1Duration = 20000 // 20 seconds to reach 70%
+    const phase1Target = 52.5 // 70% visual (52.5 semantic)
+    const phase2IncrementDelay = 5000 // 5 seconds per 1% increment
+    const phase2MaxTarget = 59.25 // 79% visual (59.25 semantic)
     
     const animate = () => {
       const elapsed = Date.now() - startTime
-      const progress = Math.min((elapsed / duration) * targetEnd, targetEnd)
+      let progress: number
+      
+      if (elapsed < phase1Duration) {
+        // Phase 1: Quick animation to 70%
+        progress = (elapsed / phase1Duration) * phase1Target
+      } else {
+        // Phase 2: Slow increments from 70% to 79%
+        const phase2Elapsed = elapsed - phase1Duration
+        const increments = Math.floor(phase2Elapsed / phase2IncrementDelay)
+        // Each increment is 0.75 semantic units (1% visual)
+        // We need 9 increments to go from 70% to 79%
+        const semanticIncrement = 0.75
+        progress = Math.min(phase1Target + (increments * semanticIncrement), phase2MaxTarget)
+      }
       
       setAnimatedProgress(progress)
       
-      // Continue until we reach target or state changes
-      if (progress < targetEnd && jobFlowContext.state !== FlowState.Completed) {
+      // Continue until we reach max target or state changes
+      if (progress < phase2MaxTarget && jobFlowContext.state !== FlowState.Completed) {
         animationRef.current = requestAnimationFrame(animate)
       }
     }
