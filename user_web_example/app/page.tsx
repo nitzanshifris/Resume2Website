@@ -2391,7 +2391,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         </div>
 
         {/* Right Side - Dynamic width based on stage and completion (desktop only, keep MacBookFrame) */}
-        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[80%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8 pr-12" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
+        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[80%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8 pr-20" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
 
 
 
@@ -2464,7 +2464,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   }}
                 className="absolute inset-0 flex items-center justify-center"
                 >
-                <div className="w-[1400px] xs:w-[1500px] sm:w-[1650px] md:w-[1800px] lg:w-[2000px] xl:w-[2200px] 2xl:w-[2400px] relative">
+                <div className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1750px] xl:w-[1900px] 2xl:w-[2050px] relative">
                   <MacBookFrame isComplete={stage === "complete"}>
                     <div key={jobFlowContext.portfolioUrl || 'no-portfolio'}>
                     {isRestoringPortfolio ? (
