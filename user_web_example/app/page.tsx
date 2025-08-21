@@ -3303,15 +3303,30 @@ function HomeWithJobFlow() {
   }, [isAuthenticated])
   
   // Show completion popup when portfolio reaches 80% for authenticated users
+  // Only show once per generation (tracked by job_id)
   useEffect(() => {
     if (isAuthenticated && isPortfolioReady && !showCompletionPopup && !hasCompletedGeneration) {
-      // Small delay to ensure smooth transition
-      const timer = setTimeout(() => {
-        setShowCompletionPopup(true)
-      }, 1000)
-      return () => clearTimeout(timer)
+      // Check if we've already shown the popup for this job_id
+      const shownPopupsKey = 'resume2website_shown_completion_popups'
+      const shownPopups = JSON.parse(localStorage.getItem(shownPopupsKey) || '[]')
+      const currentJobId = jobFlowContext.currentJobId
+      
+      // Clean up old entries (keep only last 10 job IDs to prevent infinite growth)
+      const recentPopups = shownPopups.slice(-10)
+      
+      // Only show if we haven't shown it for this job_id yet
+      if (currentJobId && !recentPopups.includes(currentJobId)) {
+        // Small delay to ensure smooth transition
+        const timer = setTimeout(() => {
+          setShowCompletionPopup(true)
+          // Mark this job_id as having shown the popup
+          recentPopups.push(currentJobId)
+          localStorage.setItem(shownPopupsKey, JSON.stringify(recentPopups))
+        }, 1000)
+        return () => clearTimeout(timer)
+      }
     }
-  }, [isAuthenticated, isPortfolioReady, showCompletionPopup, hasCompletedGeneration])
+  }, [isAuthenticated, isPortfolioReady, showCompletionPopup, hasCompletedGeneration, jobFlowContext.currentJobId])
 
   // Modal handlers
   const handleOpenModal = () => {
