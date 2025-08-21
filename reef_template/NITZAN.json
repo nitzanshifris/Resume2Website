@@ -1,738 +1,282 @@
 {
-  "analysis_timestamp": "2025-08-19",
-  "template_name": "v0_template_v10",
-  "template_version": "10.0.0",
-  
-  "data_mapping": {
-    "fully_mapped": {
-      "description": "Fields from backend that are properly displayed in frontend",
-      "fields": [
-        {
-          "backend_path": "hero.fullName",
-          "frontend_location": "components/hero-section.tsx:316",
-          "ui_element": "h1 tag in hero section with LampUnderline animation",
-          "is_required": true,
-          "has_fallback": true,
-          "fallback_value": "Your Name"
-        },
-        {
-          "backend_path": "hero.professionalTitle",
-          "frontend_location": "components/hero-section.tsx:334",
-          "ui_element": "h2 tag below name",
-          "is_required": true,
-          "has_fallback": true,
-          "fallback_value": "Professional Title"
-        },
-        {
-          "backend_path": "hero.profilePhotoUrl",
-          "frontend_location": "components/hero-section.tsx:168",
-          "ui_element": "Profile image with shape options and repositioning",
-          "is_required": false,
-          "has_fallback": true,
-          "fallback_value": "Upload icon placeholder"
-        },
-        {
-          "backend_path": "contact.email",
-          "frontend_location": "components/contact-section.tsx:80",
-          "ui_element": "Clickable email with copy-to-clipboard",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "contact.phone",
-          "frontend_location": "components/contact-section.tsx:71",
-          "ui_element": "Clickable phone with copy-to-clipboard",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "contact.location.city",
-          "frontend_location": "components/contact-section.tsx:89",
-          "ui_element": "Location display with MapPin icon",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "contact.location.country",
-          "frontend_location": "components/contact-section.tsx:95",
-          "ui_element": "Location display with city",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "contact.professionalLinks",
-          "frontend_location": "components/contact-section.tsx:134",
-          "ui_element": "Social media icons with links",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "contact.availability",
-          "frontend_location": "components/contact-section.tsx:54",
-          "ui_element": "Text under 'Let's Create Together' heading",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "summary.summaryText",
-          "frontend_location": "app/page.tsx:676",
-          "ui_element": "FlipText animation in summary section",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "experience.experienceItems",
-          "frontend_location": "app/page.tsx:716",
-          "ui_element": "SmartCard with AccordionLayout",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "education.educationItems",
-          "frontend_location": "app/page.tsx:1009",
-          "ui_element": "VerticalTimeline component",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "skills.skillCategories",
-          "frontend_location": "components/skills-section.tsx:18",
-          "ui_element": "SkillCategoryAccordion in carousel",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "skills.ungroupedSkills",
-          "frontend_location": "components/skills-section.tsx:19",
-          "ui_element": "Additional Skills category",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "projects.projectItems",
-          "frontend_location": "app/page.tsx:765",
-          "ui_element": "DraggableCardCarousel with SmartCard",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "certifications.certificationItems",
-          "frontend_location": "app/page.tsx:1255",
-          "ui_element": "DraggableCardCarousel with BentoGridItem",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "languages.languageItems",
-          "frontend_location": "app/page.tsx:2014",
-          "ui_element": "GlowingButton chips display",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "courses.courseItems",
-          "frontend_location": "app/page.tsx:1590",
-          "ui_element": "DraggableCardCarousel with SmartCard",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "volunteer.volunteerItems",
-          "frontend_location": "app/page.tsx:1368",
-          "ui_element": "DraggableCardCarousel with BentoGridItem",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "achievements.achievementItems",
-          "frontend_location": "app/page.tsx:1136",
-          "ui_element": "DraggableCardCarousel with SmartCard",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "publications.publicationItems",
-          "frontend_location": "app/page.tsx:1704",
-          "ui_element": "DraggableCardCarousel with link support",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "hobbies.hobbyItems",
-          "frontend_location": "app/page.tsx:1487",
-          "ui_element": "DraggableCardCarousel with HobbyCard",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "memberships.membershipItems",
-          "frontend_location": "app/page.tsx:1930",
-          "ui_element": "DraggableCardCarousel with MembershipCard",
-          "is_required": false,
-          "has_fallback": false
-        },
-        {
-          "backend_path": "speaking.speakingEngagements",
-          "frontend_location": "app/page.tsx:1822",
-          "ui_element": "DraggableCardCarousel mapped to engagementItems",
-          "is_required": false,
-          "has_fallback": false
-        }
-      ]
-    },
-    
-    "partially_mapped": {
-      "description": "Fields that exist in both but aren't fully utilized",
-      "fields": [
-        {
-          "backend_path": "hero.summaryTagline",
-          "frontend_location": "cv-data-adapter.tsx:215",
-          "issue": "Field is extracted and mapped in adapter but NOT displayed in hero section",
-          "recommendation": "Add summaryTagline display below professionalTitle or as subtitle"
-        },
-        {
-          "backend_path": "experience.experienceItems[].technologiesUsed",
-          "frontend_location": "app/page.tsx:696",
-          "issue": "Technologies field exists in add item but not properly displayed in experience cards",
-          "recommendation": "Display technologies as badges below job description"
-        },
-        {
-          "backend_path": "education.educationItems[].relevantCoursework",
-          "frontend_location": "cv-data-adapter.tsx:412",
-          "issue": "Coursework concatenated into description field, losing structure",
-          "recommendation": "Display as separate list or badges"
-        },
-        {
-          "backend_path": "education.educationItems[].honors",
-          "frontend_location": "cv-data-adapter.tsx:412",
-          "issue": "Honors concatenated with coursework into description",
-          "recommendation": "Display as highlighted badges or separate section"
-        },
-        {
-          "backend_path": "projects.projectItems[].technologiesUsed",
-          "frontend_location": "cv-data-adapter.tsx:472",
-          "issue": "Technologies mapped but display depends on viewMode",
-          "recommendation": "Always show technologies as tech stack badges"
-        },
-        {
-          "backend_path": "achievements.achievements[].timeframe",
-          "frontend_location": "cv-data-adapter.tsx:503",
-          "issue": "Timeframe mapped to 'year' field, losing specificity",
-          "recommendation": "Display full timeframe string if more than just year"
-        },
-        {
-          "backend_path": "testimonials.testimonialItems",
-          "frontend_location": "app/page.tsx:1064",
-          "issue": "Frontend expects testimonials but adapter provides empty array",
-          "recommendation": "Map backend testimonials data when available"
-        }
-      ]
-    },
-    
-    "unmapped_backend_fields": {
-      "description": "Backend provides these but frontend doesn't use them",
-      "fields": [
-        {
-          "backend_path": "contact.placeOfBirth",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Could add to detailed contact section if needed"
-        },
-        {
-          "backend_path": "contact.nationality",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Could display with location if relevant"
-        },
-        {
-          "backend_path": "contact.drivingLicense",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Add to contact details if job-relevant"
-        },
-        {
-          "backend_path": "contact.dateOfBirth",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Generally avoid displaying for privacy"
-        },
-        {
-          "backend_path": "contact.maritalStatus",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Generally avoid displaying for privacy"
-        },
-        {
-          "backend_path": "contact.visaStatus",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Could be important for international positions"
-        },
-        {
-          "backend_path": "contact.location.state",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Add between city and country if available"
-        },
-        {
-          "backend_path": "summary.yearsOfExperience",
-          "data_type": "number | null",
-          "importance": "medium",
-          "recommendation": "Display as highlight badge in summary section"
-        },
-        {
-          "backend_path": "summary.keySpecializations",
-          "data_type": "array | null",
-          "importance": "high",
-          "recommendation": "Display as tags or badges below summary text"
-        },
-        {
-          "backend_path": "summary.careerHighlights",
-          "data_type": "array | null",
-          "importance": "high",
-          "recommendation": "Display as bullet points or achievement cards"
-        },
-        {
-          "backend_path": "experience.experienceItems[].location",
-          "data_type": "Location object",
-          "importance": "medium",
-          "recommendation": "Already partially mapped, ensure all location fields shown"
-        },
-        {
-          "backend_path": "experience.experienceItems[].remoteWork",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Display as badge if remote/hybrid"
-        },
-        {
-          "backend_path": "experience.experienceItems[].employmentType",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Display as badge (Full-time, Contract, etc.)"
-        },
-        {
-          "backend_path": "experience.experienceItems[].teamSize",
-          "data_type": "number | null",
-          "importance": "low",
-          "recommendation": "Display in job details if available"
-        },
-        {
-          "backend_path": "experience.experienceItems[].reportingTo",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Include in detailed view if relevant"
-        },
-        {
-          "backend_path": "education.educationItems[].gpa",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Display if exceptional (>3.5)"
-        },
-        {
-          "backend_path": "education.educationItems[].minors",
-          "data_type": "array | null",
-          "importance": "medium",
-          "recommendation": "Display with degree information"
-        },
-        {
-          "backend_path": "education.educationItems[].exchangePrograms",
-          "data_type": "array | null",
-          "importance": "low",
-          "recommendation": "Include in education details"
-        },
-        {
-          "backend_path": "skills.proficiencyIndicators",
-          "data_type": "object | null",
-          "importance": "medium",
-          "recommendation": "Use for skill level visualization"
-        },
-        {
-          "backend_path": "projects.projectItems[].role",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Display as subtitle in project cards"
-        },
-        {
-          "backend_path": "projects.projectItems[].duration",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Display with project details"
-        },
-        {
-          "backend_path": "projects.projectItems[].keyFeatures",
-          "data_type": "array | null",
-          "importance": "medium",
-          "recommendation": "Display as bullet points or badges"
-        },
-        {
-          "backend_path": "projects.projectItems[].projectMetrics",
-          "data_type": "object | null",
-          "importance": "high",
-          "recommendation": "Display as achievement badges"
-        },
-        {
-          "backend_path": "certifications.certificationItems[].expirationDate",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Display if certification expires"
-        },
-        {
-          "backend_path": "certifications.certificationItems[].credentialId",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Display in detailed view"
-        },
-        {
-          "backend_path": "languages.languageItems[].certification",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Display as badge with language"
-        },
-        {
-          "backend_path": "volunteer.volunteerItems[].responsibilities",
-          "data_type": "array | null",
-          "importance": "medium",
-          "recommendation": "Display as bullet points"
-        },
-        {
-          "backend_path": "volunteer.volunteerItems[].impactMetrics",
-          "data_type": "object | null",
-          "importance": "high",
-          "recommendation": "Display as achievement badges"
-        },
-        {
-          "backend_path": "volunteer.volunteerItems[].commitment",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Display time commitment if relevant"
-        },
-        {
-          "backend_path": "publications.publications[].authors",
-          "data_type": "array | null",
-          "importance": "medium",
-          "recommendation": "Display co-authors if multiple"
-        },
-        {
-          "backend_path": "publications.publications[].doi",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Include as metadata link"
-        },
-        {
-          "backend_path": "publications.publications[].abstract",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Show in expanded view"
-        },
-        {
-          "backend_path": "speaking.speakingEngagements[].audienceSize",
-          "data_type": "number | null",
-          "importance": "low",
-          "recommendation": "Display as metric badge"
-        },
-        {
-          "backend_path": "speaking.speakingEngagements[].eventUrl",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Add as clickable link"
-        },
-        {
-          "backend_path": "speaking.speakingEngagements[].presentationUrl",
-          "data_type": "string | null",
-          "importance": "medium",
-          "recommendation": "Add as slides/video link"
-        },
-        {
-          "backend_path": "patents",
-          "data_type": "entire section",
-          "importance": "low",
-          "recommendation": "Add patents section if user has patents"
-        },
-        {
-          "backend_path": "memberships.memberships[].membershipId",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Display in detailed view"
-        },
-        {
-          "backend_path": "unclassified_text",
-          "data_type": "string | null",
-          "importance": "low",
-          "recommendation": "Could display as 'Additional Information' section"
-        }
-      ]
-    },
-    
-    "missing_in_backend": {
-      "description": "Frontend expects these but backend doesn't provide",
-      "fields": [
-        {
-          "frontend_expectation": "contact.copyright",
-          "frontend_location": "cv-data-adapter.tsx:254",
-          "current_handling": "Generated dynamically with current year",
-          "recommendation": "Keep as frontend-generated content"
-        },
-        {
-          "frontend_expectation": "experience.experienceItems[].icon",
-          "frontend_location": "app/page.tsx:696",
-          "current_handling": "Hardcoded briefcase icon",
-          "recommendation": "Generate based on job title or company"
-        },
-        {
-          "frontend_expectation": "projects.projectItems[].icon",
-          "frontend_location": "app/page.tsx:811",
-          "current_handling": "User-selectable icon in edit mode",
-          "recommendation": "Auto-generate based on project type"
-        },
-        {
-          "frontend_expectation": "projects.projectItems[].viewMode",
-          "frontend_location": "cv-data-adapter.tsx:463",
-          "current_handling": "Determined by URL analysis",
-          "recommendation": "Keep auto-detection logic"
-        },
-        {
-          "frontend_expectation": "projects.projectItems[].textVariant",
-          "frontend_location": "app/page.tsx:785",
-          "current_handling": "Default to 'detailed'",
-          "recommendation": "Keep as display preference"
-        },
-        {
-          "frontend_expectation": "projects.projectItems[].githubUrl",
-          "frontend_location": "cv-data-adapter.tsx:454",
-          "current_handling": "Detected from projectUrl if GitHub",
-          "recommendation": "Backend could provide separately"
-        },
-        {
-          "frontend_expectation": "projects.projectItems[].demoUrl",
-          "frontend_location": "cv-data-adapter.tsx:455",
-          "current_handling": "Not provided by backend",
-          "recommendation": "Add to backend schema"
-        },
-        {
-          "frontend_expectation": "projects.projectItems[].videoUrl",
-          "frontend_location": "cv-data-adapter.tsx:453",
-          "current_handling": "Auto-detected from URLs",
-          "recommendation": "Backend could provide separately"
-        },
-        {
-          "frontend_expectation": "education.educationItems[].imageUrl",
-          "frontend_location": "app/page.tsx:615",
-          "current_handling": "Not provided, optional field",
-          "recommendation": "Could add institution logos"
-        },
-        {
-          "frontend_expectation": "achievements.achievementItems[].icon",
-          "frontend_location": "app/page.tsx:1168",
-          "current_handling": "Random icon generation",
-          "recommendation": "Generate based on achievement type"
-        },
-        {
-          "frontend_expectation": "testimonials.testimonialItems[].avatar",
-          "frontend_location": "app/page.tsx:1089",
-          "current_handling": "Empty field",
-          "recommendation": "Backend should provide when testimonials added"
-        },
-        {
-          "frontend_expectation": "testimonials.testimonialItems[].rating",
-          "frontend_location": "app/page.tsx:1090",
-          "current_handling": "Default to 5",
-          "recommendation": "Optional rating system"
-        }
-      ]
-    },
-    
-    "hardcoded_content": {
-      "description": "Static content that could be dynamic",
-      "instances": [
-        {
-          "location": "components/contact-section.tsx:51",
-          "current_value": "Let's Create Together",
-          "should_be": "Dynamic heading from backend or customizable",
-          "backend_fields_needed": ["contact.ctaHeading"]
-        },
-        {
-          "location": "components/contact-section.tsx:126",
-          "current_value": "michelle-lopez-cv.pdf",
-          "should_be": "Dynamic filename based on user's name",
-          "backend_fields_needed": ["hero.fullName"]
-        },
-        {
-          "location": "app/page.tsx:836-855",
-          "current_value": "No projects added yet / Add Your First Project",
-          "should_be": "Configurable empty state messages",
-          "backend_fields_needed": ["ui.emptyStateMessages"]
-        },
-        {
-          "location": "cv-data-adapter.tsx:213-216",
-          "current_value": "Default fallback values in adapter",
-          "should_be": "Backend should provide all values or null",
-          "backend_fields_needed": ["All hero fields"]
-        }
-      ]
-    },
-    
-    "duplicate_mappings": {
-      "description": "Same backend data used in multiple places",
-      "instances": [
-        {
-          "backend_path": "hero.fullName",
-          "frontend_locations": [
-            "components/hero-section.tsx:316",
-            "components/hero-section.tsx:170 (alt text)",
-            "potentially in CV download filename"
-          ],
-          "note": "Name used consistently across template"
-        },
-        {
-          "backend_path": "contact.email",
-          "frontend_locations": [
-            "components/contact-section.tsx:80",
-            "potentially in contact form mailto"
-          ],
-          "note": "Email used for display and functionality"
-        },
-        {
-          "backend_path": "projects.projectItems[].title",
-          "frontend_locations": [
-            "app/page.tsx:816",
-            "app/page.tsx:824 (modal title)"
-          ],
-          "note": "Title used in card and modal"
-        }
-      ]
-    }
-  },
-  
-  "compatibility_score": {
-    "overall": 78,
-    "breakdown": {
-      "hero_section": 85,
-      "contact_section": 75,
-      "summary_section": 60,
-      "experience_section": 80,
-      "education_section": 75,
-      "skills_section": 90,
-      "projects_section": 85,
-      "achievements_section": 85,
-      "certifications_section": 80,
-      "languages_section": 85,
-      "courses_section": 85,
-      "volunteer_section": 75,
-      "publications_section": 80,
-      "speaking_section": 75,
-      "memberships_section": 85,
-      "hobbies_section": 90,
-      "testimonials_section": 20,
-      "patents_section": 0
-    }
-  },
-  
-  "critical_issues": [
-    {
-      "severity": "high",
-      "issue": "hero.summaryTagline is extracted but never displayed",
-      "impact": "Important tagline/headline is lost",
-      "fix": "Add summaryTagline display in HeroSection component below professionalTitle"
-    },
-    {
-      "severity": "high",
-      "issue": "CV download filename is hardcoded as 'michelle-lopez-cv.pdf'",
-      "impact": "All users download CV with wrong name",
-      "fix": "Generate filename dynamically using hero.fullName"
-    },
-    {
-      "severity": "medium",
-      "issue": "Testimonials section expects data but adapter returns empty array",
-      "impact": "Testimonials section appears empty even if backend has data",
-      "fix": "Wire up testimonials data from backend to frontend adapter"
-    },
-    {
-      "severity": "medium",
-      "issue": "Many valuable fields from summary section unused",
-      "impact": "yearsOfExperience, keySpecializations, careerHighlights not shown",
-      "fix": "Add these fields to summary section display"
-    },
-    {
-      "severity": "low",
-      "issue": "Patents section completely missing",
-      "impact": "Users with patents cannot display them",
-      "fix": "Add patents section similar to publications"
-    }
-  ],
-  
-  "recommendations": {
-    "immediate_fixes": [
-      "Fix CV download filename to use actual user's name",
-      "Display hero.summaryTagline in hero section",
-      "Add summary.keySpecializations as badges",
-      "Display summary.yearsOfExperience prominently",
-      "Wire up testimonials data if backend provides it"
-    ],
-    "nice_to_have": [
-      "Add patents section for users who need it",
-      "Display experience.technologiesUsed as tech stack badges",
-      "Show certifications.expirationDate for time-sensitive certs",
-      "Add projects.projectMetrics as achievement badges",
-      "Display volunteer.impactMetrics to highlight volunteer achievements",
-      "Add speaking.audienceSize as metric",
-      "Include contact.visaStatus for international positions"
-    ],
-    "remove_or_hide": [
-      "Remove hardcoded 'michelle-lopez' references",
-      "Hide demographic fields (dateOfBirth, maritalStatus) by default",
-      "Remove placeholder testimonials if no data"
-    ]
-  },
-  
-  "code_fixes": {
-    "fix_cv_download_filename": {
-      "file": "components/contact-section.tsx",
-      "current": "href=\"/michelle-lopez-cv.pdf\" download=\"michelle-lopez-cv.pdf\"",
-      "fixed": "href={`/${data.hero?.fullName?.toLowerCase().replace(/\\s+/g, '-') || 'resume'}-cv.pdf`} download={`${data.hero?.fullName?.toLowerCase().replace(/\\s+/g, '-') || 'resume'}-cv.pdf`}"
-    },
-    "add_summary_tagline": {
-      "file": "components/hero-section.tsx",
-      "location": "After professionalTitle (line 340)",
-      "add": "{\n  data.summaryTagline && (\n    <motion.div\n      initial={{ opacity: 0, y: 10 }}\n      animate={{ opacity: 1, y: 0 }}\n      transition={{ delay: 1.0, duration: 0.6 }}\n      className=\"mt-4 max-w-2xl mx-auto\"\n    >\n      <EditableText\n        as=\"p\"\n        initialValue={data.summaryTagline}\n        onSave={(value) => onSave(\"summaryTagline\", value)}\n        className=\"text-lg sm:text-xl text-muted-foreground font-light text-center\"\n      />\n    </motion.div>\n  )\n}"
-    },
-    "add_key_specializations": {
-      "file": "app/page.tsx",
-      "location": "In summary section after summaryText",
-      "add": "{data.summary.keySpecializations && data.summary.keySpecializations.length > 0 && (\n  <div className=\"flex flex-wrap gap-2 justify-center mt-6\">\n    {data.summary.keySpecializations.map((spec, i) => (\n      <span key={i} className=\"px-3 py-1 bg-accent/20 text-accent rounded-full text-sm font-medium\">\n        {spec}\n      </span>\n    ))}\n  </div>\n)}"
-    }
-  },
-  
-  "test_data_recommendations": {
-    "description": "Sample data structure to test all mappings",
-    "minimal_test": {
-      "hero": {
-        "fullName": "Test User",
-        "professionalTitle": "Test Title",
-        "summaryTagline": "Test Tagline - Should Display",
-        "profilePhotoUrl": null
-      },
-      "contact": {
-        "email": "test@example.com",
-        "phone": "+1234567890",
-        "location": {
-          "city": "Test City",
-          "state": "Test State",
-          "country": "Test Country"
-        },
-        "professionalLinks": [
-          {
-            "platform": "linkedin",
-            "url": "https://linkedin.com/in/test"
-          }
-        ],
-        "availability": "Available for opportunities"
-      },
-      "summary": {
-        "summaryText": "Test summary text",
-        "yearsOfExperience": 5,
-        "keySpecializations": ["Spec1", "Spec2", "Spec3"],
-        "careerHighlights": ["Highlight1", "Highlight2"]
-      }
-    }
-  }
+  "backend_path": "hero.summaryTagline",
+  "frontend_location": "cv-data-adapter.tsx:215",
+  "issue": "Field is extracted and mapped in adapter but NOT displayed in hero section",
+  "recommendation": "Add summaryTagline display below professionalTitle or as subtitle"     -done
+},
+
+IF LINK - SHOW LINK -    
+"frontend_expectation": "projects.projectItems[].viewMode",
+"frontend_location": "cv-data-adapter.tsx:463",
+"current_handling": "Determined by URL analysis",
+"recommendation": "Keep auto-detection logic"               -done
+},
+
+{
+  "backend_path": "experience.experienceItems[].technologiesUsed",
+  "frontend_location": "app/page.tsx:696",
+  "issue": "Technologies field exists in add item but not properly displayed in experience cards",
+  "recommendation": "Display technologies as badges below job description" -done
+},
+
+
+{
+  "backend_path": "achievements.achievements[].timeframe",
+  "frontend_location": "cv-data-adapter.tsx:503",
+  "issue": "Timeframe mapped to 'year' field, losing specificity",
+  "recommendation": "Display full timeframe string if more than just year" 
+},
+
+PROJECTS SECTION : SHOW AS PART OF DECRIPTION 
+{
+  "backend_path": "projects.projectItems[].technologiesUsed",
+  "frontend_location": "cv-data-adapter.tsx:472",
+  "issue": "Technologies mapped but display depends on viewMode",
+  "recommendation": "Always show technologies as tech stack badges"
+},
+
+{
+  "backend_path": "summary.yearsOfExperience",
+  "data_type": "number | null",
+  "importance": "medium",
+  "recommendation": "Display as highlight badge in summary section"        
+},
+{
+  "backend_path": "summary.keySpecializations",
+  "data_type": "array | null",
+  "importance": "high",
+  "recommendation": "Display as tags or badges below summary text"
+},
+{
+  "backend_path": "summary.careerHighlights",
+  "data_type": "array | null",
+  "importance": "high",
+  "recommendation": "Display as bullet points or achievement cards"     -go in achievments section 
+},
+
+"frontend_expectation": "testimonials.testimonialItems[].avatar",
+"frontend_location": "app/page.tsx:1089",
+"current_handling": "Empty field",
+"recommendation": "Backend should provide when testimonials added"
+},
+{
+"frontend_expectation": "testimonials.testimonialItems[].rating",
+"frontend_location": "app/page.tsx:1090",
+"current_handling": "Default to 5",
+"recommendation": "Optional rating system"
 }
+]
+},
+"frontend_expectation": "projects.projectItems[].githubUrl",
+"frontend_location": "cv-data-adapter.tsx:454",
+"current_handling": "Detected from projectUrl if GitHub",
+"recommendation": "Backend could provide separately"
+},
+{
+"frontend_expectation": "projects.projectItems[].demoUrl",
+"frontend_location": "cv-data-adapter.tsx:455",
+"current_handling": "Not provided by backend",
+"recommendation": "Add to backend schema"
+},
+{
+"frontend_expectation": "projects.projectItems[].videoUrl",
+"frontend_location": "cv-data-adapter.tsx:453",
+"current_handling": "Auto-detected from URLs",
+"recommendation": "Backend could provide separately"
+},
+{
+"frontend_expectation": "education.educationItems[].imageUrl",
+"frontend_location": "app/page.tsx:615",
+"current_handling": "Not provided, optional field",
+"recommendation": "Could add institution logos"
+},
+
+"hardcoded_content": {
+  "description": "Static content that could be dynamic",
+  "instances": [
+    {
+      "location": "components/contact-section.tsx:51",
+      "current_value": "Let's Create Together",
+      "should_be": "Dynamic heading from backend or customizable",
+      "backend_fields_needed": ["contact.ctaHeading"]
+    },
+    {
+      "location": "components/contact-section.tsx:126",
+      "current_value": "michelle-lopez-cv.pdf",
+      "should_be": "Dynamic filename based on user's name",
+      "backend_fields_needed": ["hero.fullName"]
+    },
+    {
+      "location": "app/page.tsx:836-855",
+      "current_value": "No projects added yet / Add Your First Project",
+      "should_be": "Configurable empty state messages",
+      "backend_fields_needed": ["ui.emptyStateMessages"]
+    },
+    {
+      "location": "cv-data-adapter.tsx:213-216",
+      "current_value": "Default fallback values in adapter",
+      "should_be": "Backend should provide all values or null",
+      "backend_fields_needed": ["All hero fields"]
+    }
+  ]
+},
+
+"duplicate_mappings": {
+  "description": "Same backend data used in multiple places",
+  "instances": [
+    {
+      "backend_path": "hero.fullName",
+      "frontend_locations": [
+        "components/hero-section.tsx:316",
+        "components/hero-section.tsx:170 (alt text)",
+        "potentially in CV download filename"
+      ],
+      "note": "Name used consistently across template"
+    },
+    {
+      "backend_path": "contact.email",
+      "frontend_locations": [
+        "components/contact-section.tsx:80",
+        "potentially in contact form mailto"
+      ],
+      "note": "Email used for display and functionality"
+    },
+    {
+      "backend_path": "projects.projectItems[].title",
+      "frontend_locations": [
+        "app/page.tsx:816",
+        "app/page.tsx:824 (modal title)"
+      ],
+      "note": "Title used in card and modal"
+    }
+  ]
+}
+},
+
+
+{
+  "backend_path": "skills.proficiencyIndicators",
+  "data_type": "object | null",
+  "importance": "medium",
+  "recommendation": "Use for skill level visualization"
+},
+{
+  "backend_path": "projects.projectItems[].role",
+  "data_type": "string | null",
+  "importance": "medium",
+  "recommendation": "Display as subtitle in project cards"
+},
+{
+  "backend_path": "projects.projectItems[].duration",
+  "data_type": "string | null",
+  "importance": "low",
+  "recommendation": "Display with project details"
+},
+{
+  "backend_path": "projects.projectItems[].keyFeatures",
+  "data_type": "array | null",
+  "importance": "medium",
+  "recommendation": "Display as bullet points or badges"
+},
+{
+  "backend_path": "projects.projectItems[].projectMetrics",
+  "data_type": "object | null",
+  "importance": "high",
+  "recommendation": "Display as achievement badges"
+},
+{
+  "backend_path": "certifications.certificationItems[].expirationDate",
+  "data_type": "string | null",
+  "importance": "medium",
+  "recommendation": "Display if certification expires" - remove from backend extraction 
+},
+{
+  "backend_path": "certifications.certificationItems[].credentialId",
+  "data_type": "string | null",
+  "importance": "low",
+  "recommendation": "Display in detailed view" 
+},
+
+{
+  "backend_path": "volunteer.volunteerItems[].responsibilities",
+  "data_type": "array | null",
+  "importance": "medium",
+  "recommendation": "Display as bullet points"
+},
+{
+  "backend_path": "volunteer.volunteerItems[].impactMetrics",
+  "data_type": "object | null",
+  "importance": "high",
+  "recommendation": "Display as achievement badges"
+},
+{
+  "backend_path": "volunteer.volunteerItems[].commitment",
+  "data_type": "string | null",
+  "importance": "low",
+  "recommendation": "Display time commitment if relevant"
+},
+{
+  "backend_path": "publications.publications[].authors",
+  "data_type": "array | null",
+  "importance": "medium",
+  "recommendation": "Display co-authors if multiple"
+},
+{
+  "backend_path": "publications.publications[].doi",
+  "data_type": "string | null",
+  "importance": "low",
+  "recommendation": "Include as metadata link"
+},
+{
+  "backend_path": "publications.publications[].abstract",
+  "data_type": "string | null",
+  "importance": "low",
+  "recommendation": "Show in expanded view"
+},
+{
+  "backend_path": "speaking.speakingEngagements[].audienceSize",
+  "data_type": "number | null",
+  "importance": "low",
+  "recommendation": "Display as metric badge"
+},
+{
+  "backend_path": "speaking.speakingEngagements[].eventUrl",
+  "data_type": "string | null",
+  "importance": "medium",
+  "recommendation": "Add as clickable link"
+},
+{
+  "backend_path": "speaking.speakingEngagements[].presentationUrl",
+  "data_type": "string | null",
+  "importance": "medium",
+  "recommendation": "Add as slides/video link"
+},
+{
+  "backend_path": "patents",
+  "data_type": "entire section",
+  "importance": "low",
+  "recommendation": "Add patents section if user has patents"
+},
+{
+  "backend_path": "memberships.memberships[].membershipId",
+  "data_type": "string | null",
+  "importance": "low",
+  "recommendation": "Display in detailed view"
+},
+{
+  "backend_path": "unclassified_text",
+  "data_type": "string | null",
+  "importance": "low",
+  "recommendation": "Could display as 'Additional Information' section"
+}
+]
+},
+
+
+HOBBIES -SIMPLE TEXT ALL OTHER DETAILED
+
+"frontend_expectation": "projects.projectItems[].textVariant",
+"frontend_location": "app/page.tsx:785",
+"current_handling": "Default to 'detailed'",
+"recommendation": "Keep as display preference"
+},

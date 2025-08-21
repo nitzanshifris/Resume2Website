@@ -1,0 +1,11 @@
+after a
+  signed in user website generation is complete and the progress bar showing 80% . we will raise a pop out text component- explaning the user what happend . using one of this 2 varients randomly
+  @code_review/text_for_pop_out_generation_end.md . the user will have 2 options: one - clicking the button  wich will lead the user to the dashboard . the dashboard will be the actual website that we generated in full screen with all the
+  edit featuers we allow , the user will be able the edit and save as he want. all of this without asking subscription . when the user exits the dashboard and going back to the home screen - he needs to see the macbook component showing his
+   updated website . and the vertical progress bar should disapear . that allows us the let the macbook component get even wider and present the website in a bigger view, wich is more convinient to the user to see  . option 2 : the user
+  could decide not to edit , but for going back to home screen he will need to click the screen in the part wich is "out" of the text component container . we want to make it hard for him doing this so we want the components to be preety
+  big and "catch " most of the screen . if the user will click the screen , it need to bring him back to the state of - no vertical progress bar and button but only wider macbook screen showing he current portfolio website (similar to the
+  view i asked you to do for the user who just finished editing and comes back to the home page ) + poping the first "conviction flow" button the we have right now with the text "lean more" . we will re map this button and change his text
+  in the future. if the user did edit -   after editing in the home page  , the user we be able to click a  "go live" button  (wich we will build in the future)  and deploy his site by paying the subscription . there the embed splice pop
+  out . after the user payed , we will used the code we have for deploying his website on vercel and give him a custom domain with hosting services and acess to continue editing and redeploy his site . if the user decides not to pay and
+  subscribe , we will keep his data and portfolio presented for him for a prieod of time that will be decided in the future .

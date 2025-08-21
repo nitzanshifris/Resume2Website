@@ -1549,186 +1549,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // Progress animation handled by JobFlow
   }
 
-  // Process portfolio generation in the background
-  const processPortfolioGeneration = async (file: File, skipValidation: boolean = false) => {
-    try {
-      setIsProcessing(true)
-      setProcessingError(null)
-      
-      // Start the smooth continuous progress animation
-      startSmoothProgress()
-      
-      // Step 1: Upload file
-      console.log('📤 Uploading file...', file.name, file.size, 'bytes')
-      
-      const uploadResponse = await uploadFile(file)
-      const jobId = uploadResponse.job_id
-      setCurrentJobId(jobId)
-      console.log('✅ Upload complete, job_id:', jobId)
-      
-      // Start extraction with proper timeout handling
-      const extractStartTime = Date.now()
-      
-      // Check if CV was already extracted during upload (common for cached files)
-      let extractionNeeded = true
-      try {
-        // First check if CV data already exists
-        const checkResponse = await fetch(`${API_BASE_URL}/api/v1/cv/${jobId}`, {
-          method: 'GET',
-          headers: {
-            'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
-          }
-        })
-        
-        if (checkResponse.ok) {
-          const cvData = await checkResponse.json()
-          if (cvData && cvData.cv_data && cvData.status === 'completed') {
-            console.log('✅ CV already extracted during upload (cached), skipping extraction')
-            extractionNeeded = false
-          }
-        }
-      } catch (e) {
-        console.log('Could not check CV status, will proceed with extraction')
-      }
-      
-      // Only extract if needed
-      if (extractionNeeded) {
-        // Set a longer timeout for CV extraction (60 seconds)
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 60000)
-        
-        try {
-          const extractResponse = await fetch(`${API_BASE_URL}/api/v1/extract/${jobId}`, {
-            method: 'POST',
-            headers: {
-              'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
-            },
-            signal: controller.signal
-          })
-          
-          clearTimeout(timeoutId)
-          
-          if (!extractResponse.ok) {
-            throw new Error('Failed to extract CV data')
-          }
-        
-          // Wait for response to ensure extraction completed
-          const extractData = await extractResponse.json()
-          console.log('✅ CV extraction response received:', extractData)
-          console.log('✅ CV extraction complete')
-        } catch (error) {
-          clearTimeout(timeoutId)
-          if (error instanceof Error && error.name === 'AbortError') {
-            throw new Error('CV extraction timed out after 60 seconds')
-          }
-          throw error
-        }
-      }
-      
-      // Step 3: Generate portfolio - final step
-      console.log('🎨 Generating portfolio...')
-      const templates = ['v0_template_v1.5', 'v0_template_v2.1']
-      const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
-      console.log('🎯 Selected template:', randomTemplate)
-      
-      const generateStartTime = Date.now()
-      const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate/${jobId}`
-      
-      // Set timeout for portfolio generation (5 minutes for Vercel CLI deployment)
-      const generateController = new AbortController()
-      const generateTimeoutId = setTimeout(() => generateController.abort(), 300000) // 5 minutes
-      
-      try {
-        const generateResponse = await fetch(generateUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
-        },
-        body: JSON.stringify({
-          template: randomTemplate
-        }),
-        signal: generateController.signal
-      })
-      
-      clearTimeout(generateTimeoutId)
-      
-      if (!generateResponse.ok) {
-        const errorData = await generateResponse.json().catch(() => ({ detail: `HTTP ${generateResponse.status}` }))
-        console.error('❌ Portfolio generation failed:', errorData)
-        throw new Error(errorData.detail || 'Failed to generate portfolio')
-      }
-      
-      const generateData = await generateResponse.json()
-      
-      // Calculate remaining time for smooth final animation
-      const generateElapsed = Date.now() - generateStartTime
-      const remainingGenerationTime = Math.max(200, TIMINGS.GENERATION_ANIMATION - generateElapsed)
-      
-      if (generateData.url || generateData.portfolio_url || generateData.custom_domain_url) {
-        const portfolioUrl = generateData.custom_domain_url || generateData.url || generateData.portfolio_url
-        const portfolioIdValue = generateData.portfolio_id || generateData.id
-        
-        // Use centralized finalization
-        console.log('🎉 Portfolio generation successful! URL:', portfolioUrl)
-        finalizePortfolioReady(portfolioUrl, portfolioIdValue)
-        
-        // Update URL without reload
-        const newUrl = new URL(window.location.href)
-        newUrl.searchParams.set('url', portfolioUrl)
-        if (portfolioIdValue) {
-          newUrl.searchParams.set('portfolio_id', portfolioIdValue)
-        }
-        window.history.pushState({}, '', newUrl)
-        
-        // Portfolio is already shown immediately above, no delay needed
-        console.log('✅ Portfolio generated successfully:', portfolioUrl)
-        console.log('🖥️ Portfolio should already be showing in MacBook frame')
-        
-      } else {
-        console.error('❌ No portfolio URL in response:', generateData)
-        // Check if generation was successful but URL format is different
-        if (generateData.status === 'success' && generateData.portfolio_id) {
-          // Construct URL from available data - use the actual generated URL if available
-          const baseUrl = generateData.url || generateData.portfolio_url || 'http://localhost:4000'
-          // REMOVED: setPortfolioUrl - now managed by JobFlow context
-        // jobFlowContext.portfolioUrl is set by JobFlow when portfolio is ready
-        // setPortfolioUrl(baseUrl)
-          completeSmoothProgress()
-          console.log('✅ Portfolio generated successfully (constructed URL):', baseUrl)
-          
-          setTimeout(() => {
-            setShowPortfolioInMacBook(true)
-            console.log('🖥️ Auto-showing portfolio in MacBook frame')
-          }, remainingGenerationTime + TIMINGS.PORTFOLIO_DISPLAY_DELAY)
-        } else {
-          // Only throw error if generation actually failed
-          throw new Error('Portfolio generation succeeded but no URL returned')
-        }
-      }
-      } catch (error) {
-        clearTimeout(generateTimeoutId)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Portfolio generation timed out after 5 minutes')
-        }
-        throw error
-      }
-      
-    } catch (error) {
-      console.error('❌ Processing error:', error)
-      stopSmoothProgress()
-      setProcessingError(error instanceof Error ? error.message : 'An error occurred')
-      setIsProcessing(false)
-      // Show error in UI using standardized ErrorToast
-      const errorInfo = getStandardizedError(error)
-      setErrorToast({
-        isOpen: true,
-        title: errorInfo.title,
-        message: errorInfo.message,  
-        suggestion: errorInfo.suggestion
-      })
-    }
-  }
+  // REMOVED: processPortfolioGeneration - replaced by JobFlow orchestrators
   
   const handleStartDemo = async () => {
     // JobFlow handles duplicate prevention internally
@@ -1884,8 +1705,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         }, 3000)
       }, 6000)
     } else {
-      // Need to validate first
-      console.log('🔍 Validating file before animation...', file.name)
+      // Start animation (JobFlow already validated the file)
+      console.log('🎬 Starting animation for file:', file.name)
       setShowCVCard(true)
       
       // REMOVED: Direct uploadFile call - JobFlow handles this via startPreviewFlow
@@ -1983,8 +1804,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
     
     // CRITICAL: Skip if we already have a job_id (anonymous user just signed up)
-    if (currentJobId) {
-      console.log('⏭️ Skipping auto-start, already have job_id:', currentJobId)
+    if (jobFlowContext.currentJobId) {
+      console.log('⏭️ Skipping auto-start, already have job_id:', jobFlowContext.currentJobId)
       return
     }
     
@@ -2652,7 +2473,22 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative"
                 >
                   <MacBookFrame isComplete={stage === "complete"}>
-                    {showNewTypewriter ? (
+                    {isRestoringPortfolio ? (
+                      // Show loading state while restoring portfolio
+                      <div className="absolute inset-0 w-full h-full bg-white z-50 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Restoring your last portfolio...</p>
+                        </div>
+                      </div>
+                    ) : showPortfolioInMacBook && jobFlowContext.portfolioUrl ? (
+                      // Show ONLY the portfolio - replaces ALL MacBook content
+                      <IframeWithFallback 
+                        src={jobFlowContext.portfolioUrl}
+                        title="Generated Portfolio"
+                        className="absolute inset-0 w-full h-full border-0 rounded-[inherit]"
+                      />
+                    ) : showNewTypewriter ? (
                       // Phase 3: Sequential fade-in content during progress bar animation
                       <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8">
                         {/* Phase 3A: Main Headline (0-800ms) - split into two lines */}
@@ -2688,24 +2524,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.8, delay: 1.6, ease: "easeOut" }}
                         >
-                          {isRestoringPortfolio ? (
-                            // Show loading state while restoring portfolio
-                            <div className="absolute inset-0 w-full h-full bg-white z-50 flex items-center justify-center">
-                              <div className="text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-                                <p className="text-gray-600">Restoring your last portfolio...</p>
-                              </div>
-                            </div>
-                          ) : showPortfolioInMacBook && jobFlowContext.portfolioUrl ? (
-                            // Show the generated portfolio automatically when ready or when clicked
-                            <div className="w-full" style={{ height: '500px' }}>
-                              <IframeWithFallback 
-                                src={jobFlowContext.portfolioUrl}
-                                title="Generated Portfolio"
-                                className="w-full h-full border-0 rounded-lg shadow-lg"
-                              />
-                            </div>
-                          ) : (jobFlowContext.portfolioUrl && realProgress >= 60) ? (
+                          {(jobFlowContext.portfolioUrl && realProgress >= 60) ? (
                             // Phase 5: Show portfolio URL info and debugging when ready
                             <div className="text-center p-8">
                               <div className="mb-4 text-sm text-gray-600">

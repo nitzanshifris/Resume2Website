@@ -18,10 +18,10 @@ export const getSemanticProgressForState = (state: FlowState): number => {
       return 5 // Starting
     
     case FlowState.Previewing:
-      return 10 // File validated
+      return 0 // Keep at 0% during preview (before auth)
     
     case FlowState.WaitingAuth:
-      return 15 // Waiting for user
+      return 0 // Keep at 0% while waiting for auth
     
     case FlowState.Claiming:
       return 20 // Claiming job

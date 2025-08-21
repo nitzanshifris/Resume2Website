@@ -97,6 +97,24 @@ const config = {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "shine": {
+          "0%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(-100%)" },
+        },
+        "ping-slow": {
+          "0%": {
+            transform: "scale(1)",
+            opacity: "0.5",
+          },
+          "50%": {
+            transform: "scale(1.2)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "scale(1)",
+            opacity: "0.5",
+          },
+        },
         ripple: {
           "0%, 100%": { transform: "translate(-50%, -50%) scale(1)" },
           "50%": { transform: "translate(-50%, -50%) scale(0.9)" },
@@ -118,6 +136,8 @@ const config = {
         "fade-in": "fade-in 0.5s ease-out forwards",
         ripple: "ripple 2s ease calc(var(--i, 0) * 0.2s) infinite",
         orbit: "orbit calc(var(--duration) * 1s) linear infinite",
+        shine: "shine 3s linear infinite",
+        "ping-slow": "ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite",
       },
     },
   },

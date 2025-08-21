@@ -302,7 +302,7 @@ Edge cases to cover
 - Claim 403 (owned by another): stop and show clear message; don’t attempt extract
 - Network down mid-flow: keep MacBook visible, show “Connection problem”, allow retry that continues the current state (idempotent)
 
-Acceptance checklist (no E2E; manual/log-based ok)
+Acceptance checklist 
 - Anonymous path: upload-anonymous → job_id; MacBook; signup; claim → extract → generate; no duplicate upload; MacBook never replaced by CV pile mid-flow
 - Authenticated path: upload → extract (or cache) → generate; no duplicates
 - After login with anonymous job_id persisted: claim→extract→generate resumes; MacBook stays continuous
