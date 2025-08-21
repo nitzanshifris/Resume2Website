@@ -2374,7 +2374,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         </div>
 
         {/* Right Side - Dynamic width based on stage and completion (desktop only, keep MacBookFrame) */}
-        <div className={`${hasCompletedGeneration ? "w-[75%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full flex items-center ${(stage === "materializing" || stage === "complete") ? "justify-start" : "justify-center"} relative ${(stage === "materializing" || stage === "complete") ? "pl-2 pr-4 md:pr-6 lg:pr-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
+        <div className={`${hasCompletedGeneration ? "w-[75%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-2 pr-4 md:pr-6 lg:pr-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
 
 
 
@@ -2390,7 +2390,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     transition: { duration: 0.6, ease: "easeInOut" },
                   }}
                   transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 1.0 }}
-                  className="relative flex justify-center"
+                  className="absolute inset-0 flex items-center justify-center"
                 >
                   {/* Interactive CV Pile - Upload area */}
                   <InteractiveCVPile 
@@ -2443,8 +2443,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     duration: 0.8,
                     ease: [0.34, 1.56, 0.64, 1],
                   }}
-                className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative"
+                className="absolute inset-0 flex items-center justify-start pl-2"
                 >
+                <div className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative">
                   <MacBookFrame isComplete={stage === "complete"}>
                     <div key={jobFlowContext.portfolioUrl || 'no-portfolio'}>
                     {isRestoringPortfolio ? (
@@ -2595,7 +2596,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     )}
                     </div>
                   </MacBookFrame>
-                  
+                </div>
                 </motion.div>
               )}
             </AnimatePresence>
