@@ -1087,7 +1087,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     startAuthenticatedFlow,
     startPostSignupFlow
   } = useJobFlow()
-  const realProgress = getSemanticProgressForState(jobFlowContext.state)
+  const targetProgress = getSemanticProgressForState(jobFlowContext.state)
+  const [animatedProgress, setAnimatedProgress] = useState(0)
+  const animationRef = useRef<number | null>(null)
+  const lastUpdateTime = useRef<number>(Date.now())
   const [showPortfolioInMacBook, setShowPortfolioInMacBook] = useState(false)
   const [isRestoringPortfolio, setIsRestoringPortfolio] = useState(false)
   
@@ -1851,6 +1854,65 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       setShowSignupModal(false)
     }
   }, [jobFlowContext.portfolioUrl, jobFlowContext.state])
+  
+  // Animate progress smoothly over time after auth
+  useEffect(() => {
+    // Only start animation after authentication (when processing begins)
+    const isProcessing = [
+      FlowState.Claiming,
+      FlowState.Extracting, 
+      FlowState.Generating
+    ].includes(jobFlowContext.state)
+    
+    if (!isProcessing && jobFlowContext.state !== FlowState.Completed) {
+      // Not processing yet, keep at 0
+      setAnimatedProgress(0)
+      return
+    }
+    
+    // If portfolio is ready, jump straight to 60 (80% visual)
+    if (jobFlowContext.state === FlowState.Completed) {
+      setAnimatedProgress(60)
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+        animationRef.current = null
+      }
+      return
+    }
+    
+    // Start linear animation from 0 to 60 over 30 seconds
+    const startTime = Date.now()
+    const duration = 30000 // 30 seconds
+    const targetEnd = 60
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min((elapsed / duration) * targetEnd, targetEnd)
+      
+      setAnimatedProgress(progress)
+      
+      // Continue until we reach target or state changes
+      if (progress < targetEnd && jobFlowContext.state !== FlowState.Completed) {
+        animationRef.current = requestAnimationFrame(animate)
+      }
+    }
+    
+    // Start animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current)
+    }
+    animationRef.current = requestAnimationFrame(animate)
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+        animationRef.current = null
+      }
+    }
+  }, [jobFlowContext.state])
+  
+  // Use animated progress instead of direct state progress
+  const realProgress = animatedProgress
   
   // Wrapper for handleFileSelect that also sets showCVCard
   const handleLocalFileSelect = (file: File) => {
