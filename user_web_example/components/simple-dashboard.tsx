@@ -47,6 +47,7 @@ const premiumFeatures = [
 export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHome, initialPage = "overview", portfolioUrl }: SimpleDashboardProps) {
   const [activePage, setActivePage] = useState(initialPage)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showClickOutsideHint, setShowClickOutsideHint] = useState(true)
   
   // Upload flow states
   const [isResumeFlowOpen, setIsResumeFlowOpen] = useState(false)
@@ -1015,7 +1016,16 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <>
+      {/* Backdrop for click outside - visible on all pages when onBackToHome is provided */}
+      {onBackToHome && (
+        <div 
+          className="fixed inset-0 bg-black/10 z-10"
+          onClick={onBackToHome}
+        />
+      )}
+      
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900 relative z-20">
       {/* Left Sidebar - WORKING VERSION */}
       <div className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out fixed md:relative z-30 w-64 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col`}>
         {/* Header */}
@@ -1215,5 +1225,6 @@ export default function SimpleDashboard({ userName = "Alex Johnson", onBackToHom
       )}
 
     </div>
+    </>
   )
 }

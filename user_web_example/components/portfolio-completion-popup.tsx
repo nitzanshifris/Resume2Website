@@ -129,12 +129,12 @@ export default function PortfolioCompletionPopup({
                   </Button>
                 </motion.div>
 
-                {/* Subtle dismiss hint (making it hard to find) */}
+                {/* Dismiss hint - more visible */}
                 <motion.p
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.3 }}
-                  transition={{ delay: 1 }}
-                  className="text-xs text-gray-400 text-center mt-8"
+                  animate={{ opacity: 0.6 }}
+                  transition={{ delay: 0.8 }}
+                  className="text-sm text-gray-500 text-center mt-8"
                 >
                   Click outside to continue without editing
                 </motion.p>
