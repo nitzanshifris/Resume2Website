@@ -2415,22 +2415,24 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     scale: 0.95
                   }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="w-[290px] xs:w-[335px] sm:w-[385px] md:w-[430px] lg:w-[480px] xl:w-[530px] h-[385px] xs:h-[430px] sm:h-[525px] md:h-[575px] lg:h-[625px] xl:h-[675px] relative"
+                  className="absolute inset-0 flex items-center justify-center"
                 >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 via-sky-400/30 to-blue-600/30 rounded-xl"
-                    animate={{
-                      opacity: [0.2, 0.5, 0.3],
-                      scale: [1, 1.03, 0.98, 1.01, 1],
-                      rotate: [0, 1, -1, 0],
-                    }}
-                    transition={{
-                      duration: 2.5,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                    }}
-                  />
+                  <div className="w-[290px] xs:w-[335px] sm:w-[385px] md:w-[430px] lg:w-[480px] xl:w-[530px] h-[385px] xs:h-[430px] sm:h-[525px] md:h-[575px] lg:h-[625px] xl:h-[675px] relative">
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 via-sky-400/30 to-blue-600/30 rounded-xl"
+                      animate={{
+                        opacity: [0.2, 0.5, 0.3],
+                        scale: [1, 1.03, 0.98, 1.01, 1],
+                        rotate: [0, 1, -1, 0],
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatType: "reverse",
+                        ease: "easeInOut",
+                      }}
+                    />
+                  </div>
                 </motion.div>
               )}
 
