@@ -1766,13 +1766,26 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
     if (jobFlowContext.currentJobId) {
       console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
-      startPostSignupFlow(jobFlowContext.currentJobId)
+      console.log('📊 Current JobFlow state before startPostSignupFlow:', jobFlowContext.state)
+      
+      // Call startPostSignupFlow and wait for it
+      startPostSignupFlow(jobFlowContext.currentJobId).then(() => {
+        console.log('✅ startPostSignupFlow completed successfully')
+      }).catch(error => {
+        console.error('❌ startPostSignupFlow failed:', error)
+      })
+      
+      // Clear pending file to prevent duplicate uploads
+      setPendingFile(null)
       return
     }
     
     // Edge case: have a pending file but no JobFlow context
+    // Don't start a new flow if we already handled the jobId above
     if (!jobFlowContext.currentJobId && pendingFile) {
       console.log('📤 No JobFlow context but have pending file, starting flow...')
+      // Clear pending file to prevent duplicate uploads
+      setPendingFile(null)
       if (isAuthenticated) {
         startAuthenticatedFlow(pendingFile)
       } else {
@@ -3528,7 +3541,17 @@ function HomeWithJobFlow() {
     // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
     if (jobFlowContext.currentJobId) {
       console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
-      startPostSignupFlow(jobFlowContext.currentJobId)
+      console.log('📊 Current JobFlow state before startPostSignupFlow:', jobFlowContext.state)
+      
+      // Call startPostSignupFlow and wait for it
+      startPostSignupFlow(jobFlowContext.currentJobId).then(() => {
+        console.log('✅ startPostSignupFlow completed successfully')
+      }).catch(error => {
+        console.error('❌ startPostSignupFlow failed:', error)
+      })
+      
+      // Clear pending file to prevent duplicate uploads
+      setPendingFile(null)
       return
     }
     
