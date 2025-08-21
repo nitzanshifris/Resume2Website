@@ -189,13 +189,21 @@ export const uploadAnonymous = async (file: File): Promise<UploadResponse> => {
  */
 export const uploadAuthenticated = async (file: File): Promise<UploadResponse> => {
   return retryWithBackoff(async () => {
+    const sessionId = getSessionId()
+    if (!sessionId) {
+      throw new Error('Authentication required to upload')
+    }
+    
     const formData = new FormData()
     formData.append('file', file)
     
     const response = await fetch(`${API_BASE_URL}/api/v1/upload`, {
       method: 'POST',
       credentials: 'include',
-      body: formData
+      body: formData,
+      headers: {
+        'X-Session-ID': sessionId
+      }
     })
     
     if (!response.ok) {
