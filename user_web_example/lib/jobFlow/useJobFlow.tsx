@@ -247,13 +247,9 @@ export const JobFlowProvider: React.FC<{
       console.log('⏰ Cleared auth timer due to early authentication')
     }
     
-    // Prevent duplicate processing
-    if (startedForJobIds.current.has(jobId)) {
-      console.log('✋ Already processing job:', jobId)
-      return
-    }
-    
-    startedForJobIds.current.add(jobId)
+    // DON'T block based on startedForJobIds - this is a continuation, not a new start
+    // The job was already started in startPreviewFlow, now we're continuing it after auth
+    console.log('📤 Continuing job after signup:', jobId)
     
     logFlowAction({
       timestamp: Date.now(),

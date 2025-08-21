@@ -1758,18 +1758,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     setShowSignupModal(false)
     setIsWaitingForAuth(false)
     
-    // Continue JobFlow if there's a pending job
+    // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
     if (jobFlowContext.currentJobId) {
-      // Check if in WaitingAuth OR Previewing state (both are valid for continuing)
-      if (jobFlowContext.state === FlowState.WaitingAuth || jobFlowContext.state === FlowState.Previewing) {
-        console.log('🚀 Continuing portfolio generation after auth...')
-        startPostSignupFlow(jobFlowContext.currentJobId)
-      } else {
-        console.log('⚠️ JobFlow not in expected state for continuation. Current state:', FlowState[jobFlowContext.state])
-        // Try to continue anyway if we have a job ID
-        console.log('🔄 Attempting to continue with job anyway...')
-        startPostSignupFlow(jobFlowContext.currentJobId)
-      }
+      console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
+      startPostSignupFlow(jobFlowContext.currentJobId)
       return
     }
     
@@ -3446,18 +3438,10 @@ function HomeWithJobFlow() {
     // Close auth modal
     setShowAuthModal(false)
     
-    // Continue JobFlow if there's a pending job
+    // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
     if (jobFlowContext.currentJobId) {
-      // Check if in WaitingAuth OR Previewing state (both are valid for continuing)
-      if (jobFlowContext.state === FlowState.WaitingAuth || jobFlowContext.state === FlowState.Previewing) {
-        console.log('🚀 Continuing portfolio generation after auth...')
-        startPostSignupFlow(jobFlowContext.currentJobId)
-      } else {
-        console.log('⚠️ JobFlow not in expected state for continuation. Current state:', FlowState[jobFlowContext.state])
-        // Try to continue anyway if we have a job ID
-        console.log('🔄 Attempting to continue with job anyway...')
-        startPostSignupFlow(jobFlowContext.currentJobId)
-      }
+      console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
+      startPostSignupFlow(jobFlowContext.currentJobId)
       return
     }
     
