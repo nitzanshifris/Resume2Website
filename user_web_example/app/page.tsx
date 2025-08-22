@@ -1357,48 +1357,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }
 
-  // Centralized function to finalize portfolio display
-  const finalizePortfolioReady = (portfolioUrl: string, portfolioId?: string) => {
-    console.log('🎆 Finalizing portfolio ready state:', portfolioUrl)
-    console.log('Current state before finalization:', {
-      realProgress,
-      showPortfolioInMacBook,
-      stage,
-      portfolioUrl: portfolioUrl
-    })
-    
-    // Stop any ongoing animations
-    if (animateSmoothProgress.current) {
-      animateSmoothProgress.current.isRunning = false
-      if (animateSmoothProgress.current.animationId) {
-        cancelAnimationFrame(animateSmoothProgress.current.animationId)
-      }
-    }
-    
-    // Set all states for portfolio display
-    // REMOVED: setPortfolioUrl - now managed by JobFlow context
-    // setPortfolioUrl(portfolioUrl)
-    if (portfolioId) {
-      setPortfolioId(portfolioId)
-    }
-    setShowPortfolioInMacBook(true)
-    setStage("complete")
-    
-    // CRITICAL: Set progress to exactly 60 (semantic) which should display as 80% (visual)
-    // Progress completion handled by JobFlow
-    
-    // Save to localStorage
-    const sessionId = localStorage.getItem('resume2website_session_id')
-    localStorage.setItem('lastPortfolio', JSON.stringify({
-      url: portfolioUrl,
-      id: portfolioId,
-      userId: sessionId,
-      timestamp: Date.now()
-    }))
-    
-    const visualProgress = mapSemanticToVisual(PROGRESS_CONFIG.SEMANTIC_READY)
-    console.log(`✅ Portfolio finalized - semantic: ${PROGRESS_CONFIG.SEMANTIC_READY}, visual: ${visualProgress}%`)
-  }
+  // REMOVED: Local finalizePortfolioDisplay - now using JobFlow's finalizePortfolioReady
+  // The JobFlow version handles portfolio URL state management properly
 
   // Keep the old function for backward compatibility but simplified
   const animateProgress = (from: number, to: number, duration: number = 1000) => {
@@ -1605,7 +1565,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     console.log('📊 Current JobFlow state:', {
       jobId: jobFlowContext.currentJobId,
       state: jobFlowContext.state,
-      stateString: FlowState[jobFlowContext.state]
+      stateString: jobFlowContext.state
     })
     
     // Update auth context if signIn function is provided
@@ -3411,7 +3371,7 @@ function HomeWithJobFlow() {
     console.log('📊 Current JobFlow state:', {
       jobId: jobFlowContext.currentJobId,
       state: jobFlowContext.state,
-      stateString: FlowState[jobFlowContext.state]
+      stateString: jobFlowContext.state
     })
     
     // Update auth context - signIn is already in scope from useAuthContext above
@@ -3435,7 +3395,7 @@ function HomeWithJobFlow() {
       })
       
       // Clear pending file to prevent duplicate uploads
-      setPendingFile(null)
+      // setPendingFile(null) // FIXED: Variable not in scope for this component
       return
     }
     
