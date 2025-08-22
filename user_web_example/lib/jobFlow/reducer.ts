@@ -56,6 +56,20 @@ export const jobFlowReducer = (
     return createInitialContext()
   }
   
+  // Always allow RestorePortfolio from any state (for login restoration)
+  if (action.type === FlowAction.RestorePortfolio) {
+    return {
+      ...context,
+      state: FlowState.Completed,
+      portfolioUrl: action.portfolioUrl,
+      portfolioId: action.portfolioId || null,
+      completedAt: Date.now(),
+      error: null,
+      currentJobId: null, // Clear job ID as this is a restored portfolio
+      startedAt: null
+    }
+  }
+  
   // Validate transition
   if (!canTransition(context.state, action.type)) {
     console.warn(`Invalid transition: ${context.state} -> ${action.type}`)

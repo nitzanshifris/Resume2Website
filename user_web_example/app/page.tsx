@@ -916,6 +916,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // Progress is now managed by JobFlow context
   const [isMobile, setIsMobile] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const hasRestoredRef = useRef(false) // Prevent infinite restoration loops
   const [showStrikeThrough, setShowStrikeThrough] = useState(false)
   const [showCVCard, setShowCVCard] = useState(true)
   const [hasScrolledHero, setHasScrolledHero] = useState(false)
@@ -938,7 +939,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     context: jobFlowContext,
     startPreviewFlow,
     startAuthenticatedFlow,
-    startPostSignupFlow
+    startPostSignupFlow,
+    restorePortfolio
   } = useJobFlow()
   const targetProgress = getSemanticProgressForState(jobFlowContext.state)
   const [animatedProgress, setAnimatedProgress] = useState(0)
@@ -982,7 +984,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   useEffect(() => {
     console.log('🔄 Portfolio restoration effect running. isHydrated:', isHydrated, 'sessionId:', sessionId)
     
-    const restorePortfolio = async () => {
+    // Prevent infinite restoration loops
+    if (hasRestoredRef.current) {
+      console.log('✅ Portfolio already restored, skipping')
+      return
+    }
+    
+    const restorePortfolioAsync = async () => {
       if (!isHydrated) {
         console.log('⏳ Not hydrated yet, skipping restoration')
         return
@@ -995,6 +1003,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         localStorage.removeItem('lastPortfolio')
         return
       }
+      
+      // Mark as restored to prevent re-runs
+      hasRestoredRef.current = true
       
       console.log('✅ Authenticated user detected, proceeding with restoration')
       
@@ -1014,9 +1025,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         setIsRestoringPortfolio(true)
         
         // Set all necessary states to show the portfolio
-        // REMOVED: setPortfolioUrl - now managed by JobFlow context
-        // jobFlowContext.portfolioUrl is set by JobFlow when portfolio is ready
-        // setPortfolioUrl(urlPortfolioUrl)
+        // Use the new restorePortfolio function that works from any state
+        restorePortfolio(urlPortfolioUrl, urlPortfolioId)
         // Progress is now managed by JobFlow context
         setShowPortfolioInMacBook(true)
         setStage("complete") // Go directly to complete stage for restored portfolios
@@ -1043,9 +1053,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           if (response.ok) {
             const data = await response.json()
             if (data.custom_domain_url || data.url) {
-              // REMOVED: setPortfolioUrl - now managed by JobFlow context
-        // jobFlowContext.portfolioUrl is set by JobFlow when portfolio is ready
-        // setPortfolioUrl(data.custom_domain_url || data.url)
+              // Use the new restorePortfolio function that works from any state
+              restorePortfolio(data.custom_domain_url || data.url, urlPortfolioId)
               setPortfolioId(urlPortfolioId)
               // Progress managed by JobFlow
               setShowPortfolioInMacBook(true)
@@ -1074,9 +1083,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               setIsRestoringPortfolio(true)
               
               // Set all necessary states to show the portfolio
-              // REMOVED: setPortfolioUrl - now managed by JobFlow context
-        // jobFlowContext.portfolioUrl is set by JobFlow when portfolio is ready
-        // setPortfolioUrl(portfolio.url)
+              // Use the new restorePortfolio function that works from any state
+              restorePortfolio(portfolio.url, portfolio.id)
               setPortfolioId(portfolio.id)
               // Progress managed by JobFlow
               setShowPortfolioInMacBook(true)
@@ -1134,9 +1142,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   custom_domain: latest.custom_domain_url,
                   vercel_url: latest.url
                 })
-                // REMOVED: setPortfolioUrl - now managed by JobFlow context
-        // jobFlowContext.portfolioUrl is set by JobFlow when portfolio is ready
-        // setPortfolioUrl(restoredUrl)
+                // Use the new restorePortfolio function that works from any state
+                restorePortfolio(restoredUrl, latest.portfolio_id || latest.id)
                 setPortfolioId(latest.portfolio_id || latest.id)
                 // Progress managed by JobFlow
                 setShowPortfolioInMacBook(true)
@@ -1158,7 +1165,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       }
     }
     
-    restorePortfolio()
+    restorePortfolioAsync()
   }, [isHydrated, sessionId])
 
   // Sequential loading for mobile
@@ -1681,6 +1688,19 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       setIsPlaying(false)
       setIsWaitingForAuth(false)
       setShowSignupModal(false)
+      
+      // Save to localStorage for future restoration
+      const sessionId = localStorage.getItem('resume2website_session_id')
+      if (sessionId && jobFlowContext.portfolioUrl) {
+        localStorage.setItem('lastPortfolio', JSON.stringify({
+          url: jobFlowContext.portfolioUrl,
+          id: jobFlowContext.portfolioId,
+          userId: sessionId,
+          timestamp: Date.now()
+        }))
+        console.log('💾 Portfolio saved to localStorage for future restoration')
+      }
+      
       console.log('✅ Portfolio display triggered immediately')
     }
   }, [jobFlowContext.portfolioUrl, jobFlowContext.state])
@@ -3151,6 +3171,7 @@ function HomeWithJobFlow() {
     startPreviewFlow, 
     startAuthenticatedFlow,
     startPostSignupFlow,
+    restorePortfolio,
     isAuthenticated: jobFlowAuth 
   } = useJobFlow()
   const [currentSection, setCurrentSection] = useState(0)
@@ -3674,12 +3695,16 @@ function HomeWithJobFlow() {
     // CRITICAL: Clear JobFlow persisted state to prevent completed portfolio from showing after logout
     localStorage.removeItem('jobFlowState')
     
+    // Clear portfolio from localStorage
+    localStorage.removeItem('lastPortfolio')
+    
     // Clear all component states
     setShowDashboard(false)
     setUploadedFile(null)
     setDroppedFile(null)
     
     // Force page refresh to reset everything to initial state
+    // Navigate to home with the secret key
     window.location.href = window.location.origin + '?key=nitzan-secret-2024'
   }
 

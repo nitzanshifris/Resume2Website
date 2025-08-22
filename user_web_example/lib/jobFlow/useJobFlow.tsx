@@ -30,6 +30,7 @@ const JobFlowContextReact = createContext<{
   startPostSignupFlow: (jobId: string) => Promise<void>
   resumeFromStorage: () => void
   finalizePortfolioReady: (url: string, id?: string) => void
+  restorePortfolio: (url: string, id?: string) => void  // New restoration function
   isAuthenticated: boolean
   setIsAuthenticated: (auth: boolean) => void
 } | null>(null)
@@ -369,6 +370,42 @@ export const JobFlowProvider: React.FC<{
   }
   
   /**
+   * Restore portfolio from previous session
+   * Used when user logs back in and has existing portfolio
+   * Can be called from any state (bypasses state machine)
+   */
+  const restorePortfolio = (url: string, id?: string) => {
+    console.log('🔄 Restoring portfolio:', { url, id })
+    
+    // Use the new RestorePortfolio action that works from any state
+    dispatch({ 
+      type: FlowAction.RestorePortfolio, 
+      portfolioUrl: url, 
+      portfolioId: id 
+    })
+    
+    logFlowAction({
+      timestamp: Date.now(),
+      jobId: null,
+      action: 'PORTFOLIO_RESTORED',
+      state: FlowState.Completed,
+      details: { url, id }
+    })
+    
+    // Save to localStorage for future restoration
+    const sessionId = localStorage.getItem('resume2website_session_id')
+    if (sessionId) {
+      localStorage.setItem('lastPortfolio', JSON.stringify({
+        url,
+        id,
+        userId: sessionId,
+        timestamp: Date.now()
+      }))
+      console.log('💾 Restored portfolio saved to localStorage')
+    }
+  }
+  
+  /**
    * Start authenticated upload flow
    * For authenticated users: Upload → Extract → Generate (no claim needed)
    */
@@ -424,6 +461,7 @@ export const JobFlowProvider: React.FC<{
       startPostSignupFlow,
       resumeFromStorage,
       finalizePortfolioReady,
+      restorePortfolio,  // Export the new restoration function
       isAuthenticated,
       setIsAuthenticated
     }}>

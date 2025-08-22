@@ -38,7 +38,8 @@ export enum FlowAction {
   PortfolioReady = 'PORTFOLIO_READY', // Semantic alias for GenerateSucceeded
   Reset = 'RESET',
   ClearLock = 'CLEAR_LOCK',
-  Hydrate = 'HYDRATE'
+  Hydrate = 'HYDRATE',
+  RestorePortfolio = 'RESTORE_PORTFOLIO' // Direct portfolio restoration from any state
 }
 
 // The complete flow context
@@ -95,6 +96,7 @@ export type FlowActionPayload =
   | { type: FlowAction.Reset }
   | { type: FlowAction.ClearLock }
   | { type: FlowAction.Hydrate; context: JobFlowContext }
+  | { type: FlowAction.RestorePortfolio; portfolioUrl: string; portfolioId?: string } // Direct restoration
 
 // Persisted state in localStorage
 export interface PersistedFlowState {
