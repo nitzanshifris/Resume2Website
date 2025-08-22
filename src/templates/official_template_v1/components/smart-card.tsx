@@ -1868,17 +1868,20 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
                       multiple
                       onChange={(e) => {
                         const files = Array.from(e.target.files || [])
-                        files.forEach(file => {
-                          const reader = new FileReader()
-                          reader.onloadend = () => {
-                            const base64String = reader.result as string
-                            setMultiImages(prev => {
-                              const newImages = [...prev, base64String]
-                              onUpdate?.('multiImages', newImages)
-                              return newImages
+                        Promise.all(
+                          files.map(file => {
+                            return new Promise<string>((resolve) => {
+                              const reader = new FileReader()
+                              reader.onloadend = () => {
+                                resolve(reader.result as string)
+                              }
+                              reader.readAsDataURL(file)
                             })
-                          }
-                          reader.readAsDataURL(file)
+                          })
+                        ).then(base64Strings => {
+                          const newImages = [...multiImages, ...base64Strings]
+                          setMultiImages(newImages)
+                          onUpdate?.('multiImages', newImages)
                         })
                       }}
                     />

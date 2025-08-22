@@ -8,8 +8,8 @@ export default function TestImageEditor() {
   const [testItem, setTestItem] = useState<BaseViewItem>({
     id: 'test-1',
     title: 'Test Image Card',
-    viewMode: 'images',
-    images: [],
+    viewMode: 'multi-images',
+    multiImages: [],
   })
 
   const handleUpdate = (field: string, value: any) => {
