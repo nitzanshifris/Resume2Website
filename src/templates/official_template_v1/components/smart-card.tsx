@@ -329,24 +329,12 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
     setViewMode(mode)
     onUpdate?.('viewMode', mode)
     
-    // Auto-populate URLs with defaults when switching modes if empty
-    if (mode === 'github-showcase' && !githubUrl) {
-      const defaultUrl = 'https://github.com/Reefnaaman/v0_template_v1.5'
-      setGithubUrl(defaultUrl)
-      onUpdate?.('githubUrl', defaultUrl)
-    }
-    if (mode === 'video' && !videoUrl) {
-      const defaultUrl = 'https://www.youtube.com/watch?v=SGLhrRCBu-s'
-      setVideoUrl(defaultUrl)
-      onUpdate?.('videoUrl', defaultUrl)
-    }
-    if (mode === 'uri' && !linkUrl) {
-      const defaultUrl = 'https://www.dreamsjournal.app/blog'
-      setLinkUrl(defaultUrl)
-      onUpdate?.('linkUrl', defaultUrl)
-    }
+    // Don't auto-populate URLs with hardcoded defaults
+    // The injected CV data should provide any URLs
+    // This prevents test data from appearing in production portfolios
     if (mode === 'tweet' && !tweetUrl) {
-      const defaultUrl = 'https://x.com/0x_Reef/status/1956757731957780758'
+      // Tweet mode can keep a placeholder since it's rarely used
+      const defaultUrl = 'https://x.com/example/status/123'
       setTweetUrl(defaultUrl)
       onUpdate?.('tweetUrl', defaultUrl)
     }
@@ -1654,7 +1642,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
                           setGithubUrl(e.target.value)
                           onUpdate?.('githubUrl', e.target.value)
                         }}
-                        placeholder="https://github.com/Reefnaaman/v0_template_v1.5"
+                        placeholder="https://github.com/username/repository"
                         className="w-full"
                       />
                     </div>
@@ -1836,7 +1824,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
                       setLinkUrl(e.target.value)
                       onUpdate?.('linkUrl', e.target.value)
                     }}
-                    placeholder="https://www.dreamsjournal.app/blog"
+                    placeholder="https://example.com/article"
                   />
                 </div>
               )}
@@ -1850,7 +1838,7 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
                       setTweetUrl(e.target.value)
                       onUpdate?.('tweetUrl', e.target.value)
                     }}
-                    placeholder="https://x.com/0x_Reef/status/1956757731957780758"
+                    placeholder="https://x.com/username/status/123"
                   />
                   <p className="text-xs text-muted-foreground">
                     Enter the full tweet URL from Twitter/X (supports both twitter.com and x.com)

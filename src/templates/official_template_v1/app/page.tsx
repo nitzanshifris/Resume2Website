@@ -135,13 +135,8 @@ export default function FashionPortfolioPage() {
             const injectedModule = await import('@/lib/injected-data')
             if (injectedModule.useRealData && injectedModule.portfolioData) {
               console.log('✅ Using injected CV data from portfolio generator')
-              // Merge injected data with initialData to preserve Beta sections
-              const mergedData = {
-                ...injectedModule.portfolioData,
-                // Preserve Beta sections from initialData
-                projects: initialData.projects
-              }
-              setData(mergedData)
+              // Use the injected data directly without merging test data
+              setData(injectedModule.portfolioData)
               toast.success('Portfolio loaded with your CV data!')
               return // Exit early - we have the data
             }

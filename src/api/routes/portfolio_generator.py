@@ -498,10 +498,9 @@ PORTFOLIOS_DIR = BASE_DIR / "data" / "generated_portfolios"
 
 # Available templates
 AVAILABLE_TEMPLATES = {
-    "v0_template_v1.5": "src/templates/v0_template_v1.5",
-    "v0_template_v2.1": "src/templates/v0_template_v2.1"
+    "official_template_v1": "src/templates/official_template_v1"
 }
-DEFAULT_TEMPLATE = "v0_template_v1.5"
+DEFAULT_TEMPLATE = "official_template_v1"
 
 # Ensure portfolios directory exists
 PORTFOLIOS_DIR.mkdir(parents=True, exist_ok=True)
@@ -614,7 +613,7 @@ async def generate_portfolio(
                 conn.close()
         
         # === 2. SELECT TEMPLATE ===
-        template_id = request.template or "v0_template_v1.5"  # Default template
+        template_id = request.template or "official_template_v1"  # Default template
         
         if template_id not in AVAILABLE_TEMPLATES:
             raise HTTPException(
@@ -699,13 +698,13 @@ async def generate_portfolio(
  * Job ID: {job_id}
  */
 
-import {{ adaptResume2WebsiteToTemplate }} from './cv-data-adapter'
+import {{ adaptCV2WebToTemplate }} from './cv-data-adapter'
 
 // CV Data from extraction (RESUME2WEBSITE format)
 const extractedCVData = {json.dumps(cv_data, indent=2)}
 
 // Convert CV data to template format using the cv-data-adapter
-export const portfolioData = adaptResume2WebsiteToTemplate(extractedCVData)
+export const portfolioData = adaptCV2WebToTemplate(extractedCVData)
 
 // Force use of real data instead of sample data
 export const useRealData = true
@@ -719,7 +718,7 @@ export {{ extractedCVData }}
                 f.write(injected_content)
             
             logger.info(f"✅ CV data injected into {injected_data_file}")
-            logger.info(f"📋 Template will use real CV data via adaptResume2WebsiteToTemplate()")
+            logger.info(f"📋 Template will use real CV data via adaptCV2WebToTemplate()")
             
         except Exception as e:
             logger.error(f"❌ Failed to inject CV data: {e}")
@@ -1521,13 +1520,13 @@ async def update_portfolio_cv_data(
  * Last updated: {datetime.now().isoformat()}
  */
 
-import {{ adaptResume2WebsiteToTemplate }} from './cv-data-adapter'
+import {{ adaptCV2WebToTemplate }} from './cv-data-adapter'
 
 // CV Data from extraction
 const extractedCVData = {json.dumps(updated_data, indent=2)}
 
 // Convert CV data to template format
-export const portfolioData = adaptResume2WebsiteToTemplate(extractedCVData)
+export const portfolioData = adaptCV2WebToTemplate(extractedCVData)
 
 // Force use of real data instead of sample data
 export const useRealData = true

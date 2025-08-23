@@ -56,6 +56,10 @@ interface CV2WebExperienceItem {
   responsibilitiesAndAchievements?: string[] | null
   technologiesUsed?: string[] | null
   summary?: string | null
+  duration?: string | null
+  employmentType?: string | null
+  remoteWork?: string | null
+  companyLogo?: string | null
 }
 
 interface CV2WebEducationItem {
@@ -64,9 +68,12 @@ interface CV2WebEducationItem {
   institution?: string | null
   location?: CV2WebLocation | null
   dateRange?: CV2WebDateRange | null
+  description?: string | null
   gpa?: string | null
   honors?: string[] | null
+  minors?: string[] | null
   relevantCoursework?: string[] | null
+  exchangePrograms?: string[] | null
 }
 
 interface CV2WebSkillCategory {
@@ -99,6 +106,7 @@ interface CV2WebLanguageItem {
 
 interface CV2WebCertificationItem {
   title?: string | null
+  description?: string | null
   issuingOrganization?: string | null
   issueDate?: string | null
   expirationDate?: string | null
@@ -128,18 +136,30 @@ interface CV2WebCourseItem {
 
 interface CV2WebPublicationItem {
   title?: string | null
+  description?: string | null
+  authors?: string[] | null
   publicationType?: string | null
-  publicationVenue?: string | null
+  journalName?: string | null
+  conferenceName?: string | null
+  publicationVenue?: string | null  // Backwards compatibility
   publicationDate?: string | null
-  url?: string | null
+  doi?: string | null
+  publicationUrl?: string | null
+  url?: string | null  // Backwards compatibility
+  abstract?: string | null
 }
 
 interface CV2WebSpeakingItem {
+  title?: string | null
+  description?: string | null
   eventName?: string | null
   topic?: string | null
   date?: string | null
   venue?: string | null
   role?: string | null
+  eventUrl?: string | null
+  presentationUrl?: string | null
+  videoUrl?: string | null
   audienceSize?: number | null
 }
 
@@ -202,7 +222,14 @@ interface CV2WebData {
   } | null
   hobbies?: {
     sectionTitle?: string | null
-    hobbies?: string[] | null
+    hobbies?: string[] | null  // Legacy string list
+    hobbyItems?: {  // SmartCard format
+      title?: string | null
+      description?: string | null
+      videoUrl?: string | null
+      imageUrl?: string | null
+      linkUrl?: string | null
+    }[] | null
   } | null
 }
 
@@ -212,7 +239,6 @@ function adaptHero(cv2webHero?: CV2WebHero | null): HeroData {
   return {
     fullName: cv2webHero?.fullName || "Portfolio Owner",
     professionalTitle: cv2webHero?.professionalTitle || "Professional",
-    summaryTagline: cv2webHero?.summaryTagline || "Creating amazing experiences",
     profilePhotoUrl: cv2webHero?.profilePhotoUrl || null
   }
 }
@@ -399,7 +425,13 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
         location: `${item?.location?.city || ""} ${item?.location?.country || ""}`.trim() || "Location",
         startDate: item?.dateRange?.startDate || "",
         endDate: item?.dateRange?.isCurrent ? "Present" : (item?.dateRange?.endDate || ""),
-        description: item?.responsibilitiesAndAchievements?.join(". ") || item?.summary || "Professional experience description."
+        description: item?.responsibilitiesAndAchievements?.join(". ") || item?.summary || "Professional experience description.",
+        // Pass through additional fields for display
+        duration: item?.duration || null,
+        employmentType: item?.employmentType || null,
+        remoteWork: item?.remoteWork || null,
+        technologiesUsed: item?.technologiesUsed || null,
+        companyLogo: item?.companyLogo || null
       }))
     },
 
@@ -409,7 +441,15 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
         institution: item?.institution || "Educational Institution",
         degree: item?.degree || "Degree",
         years: formatDateRange(item?.dateRange),
-        description: item?.relevantCoursework?.join(", ") || item?.honors?.join(", ") || "Educational achievement."
+        description: item?.description || item?.relevantCoursework?.join(", ") || item?.honors?.join(", ") || "Educational achievement.",
+        // Pass through all tag fields for the template to display
+        gpa: item?.gpa || null,
+        honors: item?.honors || null,
+        minors: item?.minors || null,
+        relevantCoursework: item?.relevantCoursework || null,
+        exchangePrograms: item?.exchangePrograms || null,
+        fieldOfStudy: item?.fieldOfStudy || null,
+        location: item?.location || null
       }))
     },
 
@@ -493,8 +533,11 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
       sectionTitle: cv2webData.certifications?.sectionTitle || "Certifications",
       certificationItems: (cv2webData.certifications?.certificationItems || []).map((item, index) => ({
         title: item?.title || "Certification",
+        description: item?.description || `${item?.issuingOrganization || "Issuing Body"}${item?.issueDate ? `, ${item?.issueDate}` : ""}`,
         issuingBody: item?.issuingOrganization || "Issuing Body",
         year: item?.issueDate || "",
+        expirationDate: item?.expirationDate || null,
+        credentialId: item?.credentialId || null,
         icon: getRandomIcon(),
         viewMode: item?.verificationUrl ? "uri" as const : "text" as const,
         textVariant: "detailed" as const,
@@ -516,15 +559,33 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     volunteer: {
       sectionTitle: cv2webData.volunteer?.sectionTitle || "Volunteer Experience",
-      volunteerItems: (cv2webData.volunteer?.volunteerItems || []).map((item, index) => ({
-        role: item?.role || "Volunteer Role",
-        organization: item?.organization || "Organization",
-        period: formatDateRange(item?.dateRange),
-        description: item?.description || "Volunteer experience description.",
-        icon: getRandomIcon(),
-        viewMode: "text" as const,
-        textVariant: "detailed" as const
-      }))
+      volunteerItems: (cv2webData.volunteer?.volunteerItems || []).map((item, index) => {
+        // Determine view mode based on available URLs
+        const viewModeData = determineViewMode({
+          projectUrl: item?.linkUrl,
+          imageUrl: item?.imageUrl,
+          videoUrl: item?.videoUrl,
+          githubUrl: item?.githubUrl
+        } as any)
+        
+        return {
+          title: item?.role || "Volunteer Role",
+          subtitle: item?.organization || "Organization",
+          description: item?.description || "Volunteer experience description.",
+          period: formatDateRange(item?.dateRange),
+          // Keep role and organization for backwards compatibility
+          role: item?.role || "Volunteer Role",
+          organization: item?.organization || "Organization",
+          icon: getRandomIcon(),
+          viewMode: viewModeData.viewMode as any,
+          textVariant: "detailed" as const,
+          // Add URL data based on view mode
+          ...(viewModeData.videoUrl && { videoUrl: viewModeData.videoUrl }),
+          ...(viewModeData.githubUrl && { githubUrl: viewModeData.githubUrl }),
+          ...(viewModeData.images && { images: viewModeData.images }),
+          ...(viewModeData.primaryUrl && { linkUrl: viewModeData.primaryUrl })
+        }
+      })
     },
 
     courses: {
@@ -542,28 +603,29 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     publications: {
       sectionTitle: cv2webData.publications?.sectionTitle || "Publications",
       publicationItems: (cv2webData.publications?.publications || []).map((item, index) => {
-        // Check if the publication URL is a video or special link
-        const hasUrl = item?.url && item.url !== "#"
-        let viewMode: string = "text"
-        
-        if (hasUrl) {
-          if (isVideoUrl(item.url)) {
-            viewMode = "video"
-          } else {
-            viewMode = "uri"
-          }
-        }
+        // Determine view mode based on available URLs
+        const viewModeData = determineViewMode({
+          projectUrl: item?.publicationUrl || item?.url,
+          videoUrl: item?.videoUrl,
+          imageUrl: item?.imageUrl
+        } as any)
         
         return {
           title: item?.title || "Publication",
-          journal: item?.publicationVenue || "Publication Venue",
+          subtitle: item?.journalName || item?.conferenceName || item?.publicationVenue || "Publication Venue",
+          description: item?.description || `Published research work${item?.publicationDate ? ` in ${item?.publicationDate}` : ""}.`,
+          journal: item?.journalName || item?.conferenceName || item?.publicationVenue || "Publication Venue",
           year: item?.publicationDate || "",
-          link: item?.url || "#",
+          authors: item?.authors || [],
+          doi: item?.doi || null,
+          link: item?.publicationUrl || item?.url || "#",
           icon: getRandomIcon(),
-          viewMode: viewMode as const,
+          viewMode: viewModeData.viewMode as any,
           textVariant: "detailed" as const,
-          ...(viewMode === "video" && { videoUrl: item?.url }),
-          ...(viewMode === "uri" && { linkUrl: item?.url })
+          // Add URL data based on view mode
+          ...(viewModeData.videoUrl && { videoUrl: viewModeData.videoUrl }),
+          ...(viewModeData.images && { images: viewModeData.images }),
+          ...(viewModeData.primaryUrl && { linkUrl: viewModeData.primaryUrl })
         }
       })
     },
@@ -571,18 +633,28 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     speakingEngagements: {
       sectionTitle: cv2webData.speaking?.sectionTitle || "Speaking Engagements",
       engagementItems: (cv2webData.speaking?.speakingEngagements || []).map((item, index) => {
-        // Check if venue contains a video URL (sometimes speakers put YouTube links in venue)
-        const venueIsVideoUrl = item?.venue && isVideoUrl(item.venue)
+        // Determine view mode based on available URLs
+        const viewModeData = determineViewMode({
+          videoUrl: item?.videoUrl,
+          projectUrl: item?.presentationUrl || item?.eventUrl,
+          imageUrl: item?.imageUrl
+        } as any)
         
         return {
-          title: item?.topic || "Speaking Engagement",
+          title: item?.title || item?.topic || "Speaking Engagement",
+          description: item?.description || `${item?.eventName || "Event"} - ${item?.venue || "Venue"}`,
           event: item?.eventName || "Event",
           year: item?.date || "",
-          location: venueIsVideoUrl ? "Online Event" : (item?.venue || "Venue"),
+          location: item?.venue || "Venue",
+          role: item?.role || null,
+          audienceSize: item?.audienceSize || null,
           icon: getRandomIcon(),
-          viewMode: venueIsVideoUrl ? "video" as const : "text" as const,
+          viewMode: viewModeData.viewMode as any,
           textVariant: "detailed" as const,
-          ...(venueIsVideoUrl && { videoUrl: item?.venue })
+          // Add URL data based on view mode
+          ...(viewModeData.videoUrl && { videoUrl: viewModeData.videoUrl }),
+          ...(viewModeData.images && { images: viewModeData.images }),
+          ...(viewModeData.primaryUrl && { linkUrl: viewModeData.primaryUrl })
         }
       })
     },
@@ -602,13 +674,30 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     hobbies: {
       sectionTitle: cv2webData.hobbies?.sectionTitle || "Hobbies & Interests",
-      hobbyItems: (cv2webData.hobbies?.hobbies || []).map((hobby, index) => ({
-        title: hobby || "Interest",
-        icon: getRandomIcon(),
-        viewMode: "text" as const,
-        textVariant: "detailed" as const,
-        description: "Add a description for this hobby"
-      }))
+      hobbyItems: (() => {
+        // Use hobbyItems if available (SmartCard format), otherwise use legacy hobbies list
+        if (cv2webData.hobbies?.hobbyItems && cv2webData.hobbies.hobbyItems.length > 0) {
+          return cv2webData.hobbies.hobbyItems.map((item, index) => ({
+            title: item?.title || "Interest",
+            description: item?.description || null,
+            icon: getRandomIcon(),
+            viewMode: "text" as const,
+            textVariant: "simple" as const,  // Hobbies use simple text overlay
+            // Pass through any URLs if available
+            ...(item?.videoUrl && { videoUrl: item.videoUrl }),
+            ...(item?.imageUrl && { imageUrl: item.imageUrl }),
+            ...(item?.linkUrl && { linkUrl: item.linkUrl })
+          }))
+        } else {
+          // Fallback to legacy hobbies string list
+          return (cv2webData.hobbies?.hobbies || []).map((hobby, index) => ({
+            title: hobby || "Interest",
+            icon: getRandomIcon(),
+            viewMode: "text" as const,
+            textVariant: "simple" as const  // Hobbies use simple text overlay
+          }))
+        }
+      })()
     },
 
     // Template expects testimonials but CV data doesn't have them

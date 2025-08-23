@@ -134,6 +134,7 @@ class EnhancementProcessor:
     def optimize_career_highlights(enhanced: Dict[str, Any]) -> Dict[str, Any]:
         """
         Optimize careerHighlights to avoid duplication with achievements.
+        Note: Template primarily uses summaryText, but we still extract highlights if present.
         
         Args:
             enhanced: The CV data dictionary
@@ -147,10 +148,9 @@ class EnhancementProcessor:
         if not enhanced.get('achievements') or not enhanced['achievements'].get('achievements'):
             return enhanced
         
-        # If we have many achievements, limit careerHighlights using config
+        # If we have many achievements, limit careerHighlights
         highlights = enhanced['summary']['careerHighlights']
         if len(highlights) > extraction_config.MAX_CAREER_HIGHLIGHTS:
-            # Keep only the most impactful highlights
             enhanced['summary']['careerHighlights'] = highlights[:extraction_config.MAX_CAREER_HIGHLIGHTS]
             logger.debug(f"Limited careerHighlights from {len(highlights)} to {extraction_config.MAX_CAREER_HIGHLIGHTS} items")
         
@@ -187,6 +187,7 @@ class EnhancementProcessor:
     def extract_years_of_experience_from_summary(enhanced: Dict[str, Any]) -> Dict[str, Any]:
         """
         Extract years of experience from summary text if not already present.
+        Note: Template primarily uses summaryText, this is for data completeness.
         
         Args:
             enhanced: The CV data dictionary
@@ -205,6 +206,7 @@ class EnhancementProcessor:
         
         # Extract from summary text if not already present
         if summary.get('summaryText') and not summary.get('yearsOfExperience'):
+            from .text_parsing import parse_year_range
             years, qualifier = parse_year_range(summary['summaryText'])
             if years:
                 summary['yearsOfExperience'] = years
@@ -277,6 +279,77 @@ class EnhancementProcessor:
         #         "fullName": EnhancementProcessor.extract_name_from_text(raw_text) or "Professional",
         #         "professionalTitle": EnhancementProcessor.extract_title_from_text(raw_text) or "Professional"
         #     }
+        return enhanced
+    
+    @staticmethod
+    def calculate_experience_durations(enhanced: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Calculate duration for each experience item from start and end dates.
+        Adds a 'duration' field with format like "2 years, 3 months".
+        """
+        if not enhanced.get('experience') or not isinstance(enhanced['experience'], dict):
+            return enhanced
+            
+        experience_items = enhanced['experience'].get('experienceItems', [])
+        if not isinstance(experience_items, list):
+            return enhanced
+            
+        from datetime import datetime
+        from dateutil import parser
+        
+        for item in experience_items:
+            if not isinstance(item, dict) or not item.get('dateRange'):
+                continue
+                
+            date_range = item['dateRange']
+            if not isinstance(date_range, dict):
+                continue
+                
+            try:
+                start_date_str = date_range.get('startDate')
+                end_date_str = date_range.get('endDate')
+                is_current = date_range.get('isCurrent', False)
+                
+                if not start_date_str:
+                    continue
+                    
+                # Parse start date
+                start_date = parser.parse(start_date_str, fuzzy=True)
+                
+                # Parse end date or use current date
+                if is_current or end_date_str in ['Present', 'Current', 'Now']:
+                    end_date = datetime.now()
+                elif end_date_str:
+                    end_date = parser.parse(end_date_str, fuzzy=True)
+                else:
+                    continue
+                    
+                # Calculate duration
+                delta = end_date - start_date
+                years = delta.days // 365
+                months = (delta.days % 365) // 30
+                
+                # Format duration string
+                duration_parts = []
+                if years > 0:
+                    duration_parts.append(f"{years} year{'s' if years != 1 else ''}")
+                if months > 0:
+                    duration_parts.append(f"{months} month{'s' if months != 1 else ''}")
+                    
+                if duration_parts:
+                    item['duration'] = ', '.join(duration_parts)
+                elif delta.days > 0:
+                    # Less than a month, show weeks or days
+                    weeks = delta.days // 7
+                    if weeks > 0:
+                        item['duration'] = f"{weeks} week{'s' if weeks != 1 else ''}"
+                    else:
+                        item['duration'] = f"{delta.days} day{'s' if delta.days != 1 else ''}"
+                        
+            except Exception as e:
+                logger.debug(f"Could not calculate duration for experience item: {e}")
+                continue
+                
         return enhanced
     
     @staticmethod
@@ -507,6 +580,151 @@ class EnhancementProcessor:
         return item
     
     @staticmethod
+    def reorganize_unused_fields_to_additional_data(enhanced: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Move fields that are extracted but not yet used by template into additionalData.
+        This preserves the data for future template updates.
+        """
+        # Summary section - move unused fields to additionalData
+        if enhanced.get('summary'):
+            summary = enhanced['summary']
+            additional = {}
+            
+            # Move unused fields
+            if 'yearsOfExperience' in summary:
+                additional['yearsOfExperience'] = summary.pop('yearsOfExperience')
+            if 'yearsOfExperienceQualifier' in summary:
+                additional['yearsOfExperienceQualifier'] = summary.pop('yearsOfExperienceQualifier')
+            if 'keySpecializations' in summary:
+                additional['keySpecializations'] = summary.pop('keySpecializations')
+            if 'careerHighlights' in summary:
+                additional['careerHighlights'] = summary.pop('careerHighlights')
+            
+            if additional:
+                summary['additionalData'] = additional
+        
+        # Experience section - move unused fields to additionalData
+        if enhanced.get('experience') and enhanced['experience'].get('experienceItems'):
+            for item in enhanced['experience']['experienceItems']:
+                if not isinstance(item, dict):
+                    continue
+                    
+                additional = {}
+                
+                # Move unused fields
+                if 'teamSize' in item:
+                    additional['teamSize'] = item.pop('teamSize')
+                if 'reportingTo' in item:
+                    additional['reportingTo'] = item.pop('reportingTo')
+                if 'summary' in item:
+                    additional['summary'] = item.pop('summary')
+                
+                if additional:
+                    item['additionalData'] = additional
+        
+        # Projects section - move unused fields to additionalData
+        if enhanced.get('projects') and enhanced['projects'].get('projectItems'):
+            for item in enhanced['projects']['projectItems']:
+                if not isinstance(item, dict):
+                    continue
+                    
+                additional = {}
+                
+                # Move unused fields
+                if 'role' in item:
+                    additional['role'] = item.pop('role')
+                if 'duration' in item:
+                    additional['duration'] = item.pop('duration')
+                if 'dateRange' in item:
+                    additional['dateRange'] = item.pop('dateRange')
+                if 'keyFeatures' in item:
+                    additional['keyFeatures'] = item.pop('keyFeatures')
+                # Keep technologiesUsed at top level for adapter compatibility
+                # Even though template doesn't display as tags yet
+                if 'projectMetrics' in item:
+                    additional['projectMetrics'] = item.pop('projectMetrics')
+                
+                if additional:
+                    item['additionalData'] = additional
+        
+        # Education section - create comprehensive description and organize fields
+        if enhanced.get('education') and enhanced['education'].get('educationItems'):
+            for item in enhanced['education']['educationItems']:
+                if not isinstance(item, dict):
+                    continue
+                    
+                additional = {}
+                
+                # Create comprehensive description from all available details
+                description_parts = []
+                
+                # Keep tag fields but also add them to description
+                if item.get('honors'):
+                    honors_text = "Honors: " + ", ".join(item['honors'])
+                    description_parts.append(honors_text)
+                    # Keep honors field for tags
+                
+                if item.get('relevantCoursework'):
+                    coursework_text = "Relevant coursework: " + ", ".join(item['relevantCoursework'])
+                    description_parts.append(coursework_text)
+                    # Keep relevantCoursework field for tags
+                
+                if item.get('gpa'):
+                    gpa_text = f"GPA: {item['gpa']}"
+                    description_parts.append(gpa_text)
+                    # Keep gpa field for tags
+                
+                if item.get('minors'):
+                    minors_text = "Minor(s): " + ", ".join(item['minors'])
+                    description_parts.append(minors_text)
+                    # Keep minors field for tags
+                
+                if item.get('exchangePrograms'):
+                    exchange_text = "Exchange: " + ", ".join(item['exchangePrograms'])
+                    description_parts.append(exchange_text)
+                    # Keep exchangePrograms field for tags
+                
+                # Add fieldOfStudy to description if different from degree
+                if item.get('fieldOfStudy') and item.get('fieldOfStudy') != item.get('degree'):
+                    field_text = f"Field of Study: {item['fieldOfStudy']}"
+                    description_parts.append(field_text)
+                    # Keep fieldOfStudy field for tags
+                
+                # Add location to description if present
+                if item.get('location'):
+                    loc = item['location']
+                    loc_parts = []
+                    if isinstance(loc, dict):
+                        if loc.get('city'):
+                            loc_parts.append(loc['city'])
+                        if loc.get('state'):
+                            loc_parts.append(loc['state'])
+                        if loc.get('country'):
+                            loc_parts.append(loc['country'])
+                        if loc_parts:
+                            location_text = f"Location: {', '.join(loc_parts)}"
+                            description_parts.append(location_text)
+                    # Keep location field for tags
+                
+                # Add any existing description that's not the degree name
+                existing_desc = item.get('description', '')
+                if existing_desc and item.get('degree') and existing_desc != item['degree']:
+                    description_parts.insert(0, existing_desc)
+                
+                # Set comprehensive description
+                if description_parts:
+                    item['description'] = ". ".join(description_parts)
+                elif item.get('description') == item.get('degree'):
+                    # If description is same as degree, clear it
+                    item['description'] = None
+                
+                # No fields moved to additionalData - all are kept for tags or display
+                if additional:
+                    item['additionalData'] = additional
+        
+        return enhanced
+    
+    @staticmethod
     def enhance_all_smart_card_sections(enhanced: Dict[str, Any]) -> Dict[str, Any]:
         """
         Process all sections that use smart cards to add URL metadata.
@@ -563,8 +781,12 @@ class EnhancementProcessor:
         enhanced = EnhancementProcessor.ensure_achievements_structure(enhanced)
         # Patents and memberships now extracted directly in achievements section
         enhanced = EnhancementProcessor.create_hero_if_missing(enhanced, raw_text)
+        enhanced = EnhancementProcessor.calculate_experience_durations(enhanced)
         enhanced = EnhancementProcessor.filter_technologies_in_experience(enhanced)
         enhanced = EnhancementProcessor.enhance_all_smart_card_sections(enhanced)
+        
+        # Move unused fields to additionalData (must be last to catch all unused fields)
+        enhanced = EnhancementProcessor.reorganize_unused_fields_to_additional_data(enhanced)
         
         # Apply demographic enhancements
         if enhanced.get('contact'):

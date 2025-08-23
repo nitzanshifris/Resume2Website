@@ -67,17 +67,24 @@ class ContactSectionFooter(BaseModel):
     visaStatus: Optional[str] = None
 
 class EducationItem(SmartCardFields):
-    degree: Optional[str] = None
-    fieldOfStudy: Optional[str] = None
+    # Fields used by template
     institution: Optional[str] = None
-    description: Optional[str] = None  # Humanized description combining all details
-    location: Optional[Location] = None
+    degree: Optional[str] = None  # Full degree name (e.g., "Bachelor of Marketing & Business Management")
     dateRange: Optional[DateRange] = None
+    description: Optional[str] = None  # Comprehensive text combining all education details (NOT degree name)
+    
+    # Fields for tags/buttons (template can display these as tags)
     gpa: Optional[str] = None
     honors: Optional[List[str]] = None
     minors: Optional[List[str]] = None
     relevantCoursework: Optional[List[str]] = None
     exchangePrograms: Optional[List[str]] = None
+    fieldOfStudy: Optional[str] = None  # Field of study if different from degree
+    location: Optional[Location] = None  # Location for tag display
+    
+    # Extracted but not yet displayed by template
+    additionalData: Optional[Dict[str, Any]] = None
+    # additionalData includes: any other extracted fields not used by template
     # Smart card fields inherited from SmartCardFields mixin
 
 class EducationSection(BaseModel):
@@ -85,17 +92,21 @@ class EducationSection(BaseModel):
     educationItems: Optional[List[EducationItem]] = None
 
 class ExperienceItem(SmartCardFields):
+    # Fields used by template
     jobTitle: Optional[str] = None
     companyName: Optional[str] = None
     location: Optional[Location] = None
     dateRange: Optional[DateRange] = None
-    remoteWork: Optional[str] = None
+    duration: Optional[str] = None  # Calculated field: "2 years, 3 months" - for template display
     responsibilitiesAndAchievements: Optional[List[str]] = None
-    technologiesUsed: Optional[List[str]] = None
-    summary: Optional[str] = None
-    employmentType: Optional[str] = None
-    teamSize: Optional[int] = None
-    reportingTo: Optional[str] = None
+    technologiesUsed: Optional[List[str]] = None  # For tags display in template
+    employmentType: Optional[str] = None  # For tags: Full-time, Part-time, Contract, Internship
+    remoteWork: Optional[str] = None  # For tags: Remote, On-site, Hybrid
+    companyLogo: Optional[str] = None  # URL or base64 for company logo/icon
+    
+    # Extracted but not yet displayed by template
+    additionalData: Optional[Dict[str, Any]] = None  
+    # additionalData includes: teamSize, reportingTo, summary
     # Smart card fields inherited from SmartCardFields mixin
 
 class ExperienceSection(BaseModel):
@@ -144,23 +155,23 @@ class CertificationsSection(BaseModel):
     certificationItems: Optional[List[CertificationItem]] = None
 
 class ProfessionalSummaryOverview(BaseModel):
-    summaryText: Optional[str] = None
-    yearsOfExperience: Optional[int] = None
-    keySpecializations: Optional[List[str]] = None
-    careerHighlights: Optional[List[str]] = None
+    summaryText: Optional[str] = None  # PRIMARY FIELD - used by template
+    additionalData: Optional[Dict[str, Any]] = None  # Extracted but not yet used by template
+    # additionalData includes: yearsOfExperience, keySpecializations, careerHighlights
 
 class ProjectItem(SmartCardFields):
+    # Fields used by template
     title: Optional[str] = None
-    role: Optional[str] = None
-    duration: Optional[str] = None
-    dateRange: Optional[DateRange] = None
-    description: Optional[str] = None
-    keyFeatures: Optional[List[str]] = None
-    technologiesUsed: Optional[List[str]] = None
+    description: Optional[str] = None  # Comprehensive description including all project details
     projectUrl: Optional[str] = None
-    projectMetrics: Optional[Dict[str, str]] = None
+    technologiesUsed: Optional[List[str]] = None  # Kept at top level for adapter compatibility
+    # SmartCard URLs for view mode determination (inherited from SmartCardFields):
+    # videoUrl, githubUrl, imageUrl - template uses these to determine display mode
+    
+    # Extracted but not yet displayed by template
+    additionalData: Optional[Dict[str, Any]] = None
+    # additionalData includes: role, duration, dateRange, keyFeatures, projectMetrics
     # Smart card fields inherited from SmartCardFields mixin
-    # Note: imageUrl is already defined in SmartCardFields
 
 class ProjectsSection(BaseModel):
     sectionTitle: Optional[str] = None
@@ -179,15 +190,17 @@ class SkillsSection(BaseModel):
     proficiencyIndicators: Optional[Dict[str, str]] = None
 
 class VolunteerExperienceItem(SmartCardFields):
-    role: Optional[str] = None
-    organization: Optional[str] = None
-    location: Optional[Location] = None
+    # Primary fields used by template
+    role: Optional[str] = None  # Used as title in SmartCard
+    organization: Optional[str] = None  # Used as subtitle
+    description: Optional[str] = None  # Comprehensive description
     dateRange: Optional[DateRange] = None
-    description: Optional[str] = None
+    
+    # Additional fields for future use
+    location: Optional[Location] = None
     responsibilities: Optional[List[str]] = None
     impactMetrics: Optional[Dict[str, str]] = None
     commitment: Optional[str] = None
-    # For simpler format
     period: Optional[str] = None  # Alternative to dateRange
     # Smart card fields inherited from SmartCardFields mixin
 
@@ -217,27 +230,34 @@ class CoursesSection(BaseModel):
 # Less common, typically for specific professions
 
 class PublicationItem(SmartCardFields):
-    title: Optional[str] = None
-    description: Optional[str] = None  # Humanized description combining all details
+    # Primary fields used by template (SmartCard)
+    title: Optional[str] = None  # Publication title (main SmartCard title)
+    description: Optional[str] = None  # Comprehensive description combining all details
+    
+    # Additional structured fields
     authors: Optional[List[str]] = None
     publicationType: Optional[str] = None
-    journalName: Optional[str] = None
-    conferenceName: Optional[str] = None
+    journalName: Optional[str] = None  # Used as subtitle if available
+    conferenceName: Optional[str] = None  # Alternative subtitle
     publicationDate: Optional[str] = None
     doi: Optional[str] = None
-    publicationUrl: Optional[str] = None
+    publicationUrl: Optional[str] = None  # Primary publication link
     abstract: Optional[str] = None
     # Smart card fields inherited from SmartCardFields mixin
+    # Note: videoUrl can be presentation video, imageUrl for figures
 
 class PublicationsResearchSection(BaseModel):
     sectionTitle: Optional[str] = None
     publications: Optional[List[PublicationItem]] = None
 
 class SpeakingEngagementItem(SmartCardFields):
-    title: Optional[str] = None  # Topic or presentation title
-    description: Optional[str] = None  # Humanized description combining all details
+    # Primary fields used by template
+    title: Optional[str] = None  # Topic or presentation title (main SmartCard title)
+    description: Optional[str] = None  # Comprehensive description combining all details
+    
+    # Additional structured fields
     eventName: Optional[str] = None
-    topic: Optional[str] = None
+    topic: Optional[str] = None  # Can be same as title
     date: Optional[str] = None
     venue: Optional[str] = None
     role: Optional[str] = None

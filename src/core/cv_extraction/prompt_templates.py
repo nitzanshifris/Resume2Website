@@ -99,6 +99,14 @@ PRESERVATION RULES:
 - If no group labels exist, categorize conservatively (e.g., "Programming Languages", "Frameworks", "Tools")
 - Keep original spelling and capitalization of skills
 
+SKILL FORMAT:
+- If a skill has additional context or proficiency, format as: "SkillName - Description"
+- Examples:
+  * "Microsoft Word - Expert level with 5+ years experience"
+  * "Python - Advanced proficiency in data analysis"
+  * "Adobe Photoshop - Professional image editing"
+- If no description exists, use just the skill name: "JavaScript"
+
 IMPORTANT:
 - Do not infer skills from job descriptions
 - Do not add skills mentioned only in context (e.g., "worked with team" doesn't mean "Teamwork" skill)
@@ -210,13 +218,20 @@ class ExperiencePromptTemplate(BasePromptTemplate):
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL work experience including internships, externships, and job shadowing.
 
-REQUIRED FIELDS (extract only if explicitly stated):
+PRIMARY FIELDS (used by template):
 - jobTitle: Exact title as written
 - companyName: Exact company name
+- location: City, state/country
 - dateRange: Preserve original date format (don't normalize)
 - responsibilitiesAndAchievements: Keep exact bullet phrasing and order; preserve metrics with units
 - technologiesUsed: Extract ONLY specific technologies mentioned IN THIS ROLE (see rules below)
-- employmentType: ONLY if stated (Internship, Externship, Part-time, Contract, etc.)
+- employmentType: Extract if stated or clear from context (Full-time, Part-time, Contract, Internship, Freelance, etc.)
+- remoteWork: Extract work mode if mentioned (Remote, On-site, Hybrid, or specific arrangement)
+
+ADDITIONAL FIELDS (extract for future use, will be stored in additionalData):
+- teamSize: Number of team members if mentioned
+- reportingTo: Direct manager/supervisor title if mentioned
+- summary: Brief summary of the role if different from responsibilities
 
 TECHNOLOGIES EXTRACTION RULES:
 INCLUDE if EXPLICITLY mentioned for THIS specific job:
@@ -370,7 +385,7 @@ class PublicationsPromptTemplate(BasePromptTemplate):
     """Template for publications section extraction."""
     
     def get_section_specific_instructions(self) -> str:
-        return """Extract ALL publications, research papers, and articles.
+        return """Extract ALL publications, research papers, articles, and media mentions.
 
 OUTPUT FORMAT (CRITICAL):
 For each publication:
@@ -389,12 +404,19 @@ Combine these elements naturally:
 EXAMPLE:
 title="Machine Learning Approaches for Network Security"
 description="Published in IEEE Transactions on Network Security, March 2023, co-authored with Dr. Smith and Prof. Johnson. This peer-reviewed paper presents novel algorithms for detecting network intrusions using deep learning, achieving 99.5% accuracy in real-world deployments. DOI: 10.1109/TNS.2023.123456."
+
+AVOID DUPLICATION:
+- If a conference presentation is already in Speaking section, focus on the paper/proceedings here
+- If a research project is in Projects section, focus on the publication/paper aspect here
+- Media mentions, press coverage, and interviews belong here, not in other sections
+
 Include:
-- Title, authors, publication name
-- Date published
-- DOI/URL if available
-- Brief description of research
-- Citations if mentioned
+- Academic papers and journal articles
+- Conference proceedings and posters
+- Books and book chapters
+- Media coverage and press mentions
+- Online articles and blog posts (if professional)
+- Patents (if not in Achievements)
 
 URL EXTRACTION:
 - publicationUrl: Direct link to publication
@@ -501,20 +523,23 @@ class HobbiesPromptTemplate(BasePromptTemplate):
 
 OUTPUT FORMAT (CRITICAL):
 For each hobby:
-- title: The hobby or interest name
-- description: Brief, natural text about this interest (1-2 sentences)
+- title: Format as "HobbyName - Brief description" for simple display
+  OR split into title and description for detailed cards
+- description: Optional additional details if not included in title
 
-DESCRIPTION BUILDING (SIMPLE):
-- Keep descriptions short and conversational
-- Mention any achievements or special aspects
-- Don't over-explain, keep it light
+FORMAT OPTIONS:
+1. SIMPLE (for text overlay): 
+   title="Writing - Tech blog with 1000+ subscribers"
+   
+2. DETAILED (if more info available):
+   title="Photography"
+   description="Nature and portrait photography specialist"
 
-EXAMPLE:
-title="Photography"
-description="Passionate landscape photographer with work featured in local galleries. Enjoy capturing natural beauty during weekend hiking trips."
-
-title="Chess"
-description="Competitive chess player rated 1800+ on chess.com. Regular participant in local tournaments."
+EXAMPLES:
+title="Running - Completed 3 marathons"
+title="Blogging - Personal marketing insights blog"
+title="Digital Art - Creating graphics for social media"
+title="Photography - Nature and portrait photography"
 
 This is important for understanding the person's full profile.
 Include all activities, interests, and pastimes mentioned.
@@ -534,31 +559,31 @@ class EducationPromptTemplate(BasePromptTemplate):
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL education information.
 
+PRIMARY FIELDS (used by template):
+- institution: Extract the EXACT institution name
+- degree: Full degree name (e.g., "Bachelor of Marketing & Business Management")
+- dateRange: Preserve original date format
+- description: Additional details about the education (thesis, projects, activities) but NOT the degree name
+
+TAG FIELDS (template displays as buttons/tags):
+- gpa: GPA exactly as stated (e.g., "3.8/4.0")
+- honors: List of honors, awards, distinctions (Dean's List, Cum Laude, etc.)
+- minors: List of minors if mentioned
+- relevantCoursework: List of relevant courses
+- exchangePrograms: List of exchange or study abroad programs
+- fieldOfStudy: Field of study if different from degree name
+- location: City, state, country (for location tag)
+
+CRITICAL:
+- degree should contain the FULL degree name including field (e.g., "Bachelor of Science in Computer Science")
+- description should NEVER duplicate the degree name
+- description should contain narrative details about the education experience
+- Tag fields are kept separate for button display but also included in description text
+
 INSTITUTION NAME RULES:
 - Extract the EXACT institution name without adding location prefixes
-- Do NOT prepend state names to university names (e.g., use "University" not "Texas University")
-- If institution name includes location (e.g. "Newtown Square University"), keep the full name
-- NEVER extract just "University" as the institution name - look for the full name
+- Do NOT prepend state names to university names
 - Keep location information separate in the location field
-
-DATE PRESERVATION:
-- Preserve date formats exactly as written
-- Do not normalize date strings (keep "January 2024" not "01/2024")
-- Keep original formatting for graduation dates
-
-HONORS & COURSEWORK:
-- Preserve honors text exactly as written
-- Include all degrees, minors, majors, concentrations
-- Extract GPA exactly as stated
-- Include relevant coursework if listed
-
-CERTIFICATIONS HANDLING:
-- If a certification appears in Education section, note it but ALSO extract it under Certifications
-- Do not move certifications here from other sections
-- PMI (Project Management Institute) is often located in Newtown Square, Pennsylvania
-
-LOCATION EXTRACTION:
-- When extracting location, include ALL parts (city, state, country) if mentioned
 - If you see "City, State" format, extract both city and state
 - For certifications like CAPM with location (e.g. "Newtown Square, Texas"), extract city and state separately
 
@@ -575,39 +600,44 @@ class ProjectsPromptTemplate(BasePromptTemplate):
     def get_section_specific_instructions(self) -> str:
         return """Extract ALL projects, both personal and professional.
 
-REQUIRED FIELDS (extract only if explicitly stated):
+PRIMARY FIELDS (used by template):
 - title: Exact project name
-- role: Role in project (if stated)
-- description: Project description exactly as written
-- outcomes/metrics: Quantified results, impact, or achievements
-- technologies: Technologies used (ONLY if explicitly mentioned)
-- dateRange: Keep original date format
+- description: COMPREHENSIVE project description that includes:
+  * The full project description from the CV
+  * Role/contribution if mentioned (e.g., "Led development as technical lead")
+  * Duration/timeline if mentioned (e.g., "3-month project from Jan-Mar 2023")
+  * Key features and functionality woven into the narrative
+  * Technologies used integrated into the description
+  * Outcomes, metrics, and achievements as part of the story
+  * Everything about the project in a complete narrative
+- technologiesUsed: List of technologies (extract separately for adapter compatibility)
 
-URL EXTRACTION (CRITICAL):
+URL EXTRACTION (CRITICAL for SmartCard view modes):
 - projectUrl: Main project website or demo link
 - githubUrl: GitHub repository links (must be github.com/user/repo format)
 - videoUrl: YouTube, Vimeo, or video file links
 - imageUrl: Screenshots or project images
-- linkUrl: Any other general website URLs
 
-IMPORTANT: Extract ALL URLs mentioned, even if embedded in description text.
-Example: "Built a portfolio site (https://example.com) using React"
-Should extract: projectUrl = "https://example.com"
+ADDITIONAL FIELDS (extract for future use, will be stored in additionalData):
+- role: Role in project if separately stated
+- duration: Project duration if mentioned
+- dateRange: Start and end dates if provided
+- keyFeatures: List of main features if itemized
+- projectMetrics: Quantified results (users, performance, etc.)
 
-🚨 CRITICAL EXCLUSIONS:
-- Job responsibilities that belong in Experience section
-- Work duties from employment positions
-- Routine tasks without project structure
+CRITICAL:
+- description must be COMPREHENSIVE and include all project information
+- Don't leave any project details out of the description
+- The additional fields are for future structured display but their content MUST also be in description
+- URLs determine the SmartCard display mode (video > github > uri > image > text)
 
-METRICS & OUTCOMES:
-- Explicitly capture outcomes, results, and metrics
-- Preserve exact numbers and units
-- Include user counts, performance improvements, etc.
-
-DATE & URL HANDLING:
-- Keep original date format (don't normalize)
-- Include all project-related URLs
-- Preserve URL format exactly"""
+Example:
+If CV says: "E-commerce Platform (Lead Developer, 6 months, React/Node.js) - Built scalable marketplace with 10K+ users"
+- title: "E-commerce Platform"
+- description: "Built a scalable marketplace platform as Lead Developer over 6 months using React and Node.js. The platform successfully serves over 10,000 active users with features including real-time inventory, payment processing, and vendor management."
+- technologiesUsed: ["React", "Node.js"] (kept at top level)
+- role: "Lead Developer" (in additionalData)
+- projectMetrics: {"users": "10,000+"} (in additionalData)"""
 
 
 class VolunteerPromptTemplate(BasePromptTemplate):
@@ -757,6 +787,80 @@ EXCLUSIONS:
 - Your own achievements"""
 
 
+class SummaryPromptTemplate(BasePromptTemplate):
+    """Template for professional summary extraction."""
+    
+    def get_section_specific_instructions(self) -> str:
+        return """Extract the professional summary information from the CV.
+
+PRIMARY FIELD (used by template):
+- summaryText: Extract a COMPREHENSIVE professional summary that includes:
+  * The full professional summary/overview text from the CV
+  * Years of experience integrated into the narrative
+  * Key specializations and expertise areas woven into the text
+  * Career highlights and major achievements as part of the summary
+  * Professional objectives and value proposition
+- This should be a complete narrative containing ALL summary-related information
+
+ADDITIONAL FIELDS (extract separately for future structured display):
+- yearsOfExperience: Extract as a number if mentioned (e.g., 8 for "8 years of experience")
+- keySpecializations: Extract as a list of specific expertise areas
+- careerHighlights: Extract as a list of major achievements
+
+CRITICAL:
+- summaryText must be COMPREHENSIVE and include all information
+- Don't leave any summary information out of summaryText
+- The additional fields are for future structured display but their content MUST also be in summaryText
+- If the CV mentions "10 years of experience in React and Node.js with 3 major product launches":
+  * summaryText includes all of this in narrative form
+  * yearsOfExperience: 10
+  * keySpecializations: ["React", "Node.js"]  
+  * careerHighlights: ["3 major product launches"]"""
+
+
+class HeroPromptTemplate(BasePromptTemplate):
+    """Template for hero section extraction."""
+    
+    def get_section_specific_instructions(self) -> str:
+        return """Extract ONLY the hero/header information from the CV.
+
+CRITICAL INSTRUCTIONS FOR professionalTitle:
+- Extract ONLY the actual job title/profession/role (e.g., "Senior Software Engineer", "Marketing Manager", "Data Scientist")
+- This should be the person's current or most recent professional title
+- DO NOT extract summary phrases, taglines, or mission statements
+- DO NOT extract phrases like "Creating amazing experiences" or "Passionate about innovation"
+- Look for professional titles typically found in:
+  * The header/top section of the CV
+  * Current position in experience section
+  * Professional headline or title section
+- If multiple titles exist, use the most prominent or current one
+- If no clear professional title exists, leave as null
+
+EXAMPLES OF CORRECT professionalTitle:
+✓ "Senior Software Engineer"
+✓ "Digital Marketing Specialist"
+✓ "Product Manager"
+✓ "Full Stack Developer"
+✓ "Financial Analyst"
+
+EXAMPLES OF INCORRECT professionalTitle (DO NOT EXTRACT):
+✗ "Creating innovative solutions"
+✗ "Passionate technology enthusiast"
+✗ "Results-driven professional"
+✗ "Making the world a better place"
+✗ Any summary or tagline text
+
+fullName:
+- Extract the person's complete name as it appears in the CV
+- Preserve original formatting and capitalization
+
+profilePhotoUrl:
+- Only if a photo URL or embedded image is present
+- Otherwise leave as null
+
+IMPORTANT: Do NOT extract or create a summaryTagline field - this field does not exist."""
+
+
 # Default template for sections without specific requirements
 class DefaultPromptTemplate(BasePromptTemplate):
     """Default template for sections without specific requirements."""
@@ -787,9 +891,9 @@ class PromptTemplateRegistry:
             "courses": CoursesPromptTemplate("courses"),
             # NOTE: TestimonialsPromptTemplate exists but not wired to schema yet
             # "testimonials": TestimonialsPromptTemplate("testimonials"),
-            # Default templates for other sections
-            "hero": DefaultPromptTemplate("hero"),
-            "summary": DefaultPromptTemplate("summary"),
+            # Section-specific templates
+            "hero": HeroPromptTemplate("hero"),
+            "summary": SummaryPromptTemplate("summary"),
         }
     
     def get_template(self, section_name: str) -> PromptTemplate:

@@ -39,10 +39,10 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
   useEffect(() => {
     if (!isProcessing) return
     
-    // Start linear progress that goes from 0 to 90 over ~15 seconds
-    // Backend typically takes 12-15 seconds
+    // Start linear progress that goes from 0 to 90 over ~35 seconds
+    // Backend typically takes 30-40 seconds with extraction
     let startTime = Date.now()
-    const duration = 15000 // 15 seconds to reach 90%
+    const duration = 35000 // 35 seconds to reach 90%
     
     progressIntervalRef.current = setInterval(() => {
       const elapsed = Date.now() - startTime
@@ -96,7 +96,19 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
 
   // Handle file upload and portfolio generation
   useEffect(() => {
-    if (!isOpen || isProcessing || portfolioUrl) return
+    // Skip processing if we're in the anonymous/demo flow
+    // The JobFlow system handles all the actual API calls
+    const isAnonymous = !localStorage.getItem('resume2website_session_id')
+    if (!isOpen || isProcessing || portfolioUrl || isAnonymous) {
+      if (isAnonymous && isOpen && !isProcessing) {
+        console.log('🎭 ProcessingPage: Anonymous user - showing visual progress only')
+        // Just show visual progress for anonymous users
+        setIsProcessing(true)
+      }
+      return
+    }
+
+    console.log('🎬 ProcessingPage: Starting processing for authenticated user', { isOpen, isProcessing, portfolioUrl, file: file?.name })
 
     const processFile = async () => {
       try {

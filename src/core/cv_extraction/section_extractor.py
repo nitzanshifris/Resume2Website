@@ -193,6 +193,7 @@ class SectionExtractor:
         
         # Process years of experience in summary
         if section_name == 'summary':
+            # Handle years of experience extraction from summaryText if needed
             if 'summaryText' in data:
                 from .text_parsing import parse_year_range
                 years, qualifier = parse_year_range(data['summaryText'])
@@ -201,7 +202,7 @@ class SectionExtractor:
                 elif years and isinstance(data.get('yearsOfExperience'), str):
                     data['yearsOfExperience'] = years
             
-            # Handle yearsOfExperience field directly
+            # Handle yearsOfExperience field directly if it's a string
             if 'yearsOfExperience' in data and isinstance(data['yearsOfExperience'], str):
                 from .text_parsing import parse_year_range
                 years, qualifier = parse_year_range(data['yearsOfExperience'])
