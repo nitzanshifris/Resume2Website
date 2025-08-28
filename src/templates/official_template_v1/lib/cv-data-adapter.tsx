@@ -460,7 +460,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
       sectionTitle: cv2webData.experience?.sectionTitle || "Experience",
       experienceItems: (cv2webData.experience?.experienceItems || []).map(item => ({
         title: item?.jobTitle || "Professional Role",
-        company: item?.companyName || "[Company Name]",
+        company: item?.companyName || "",
         location: `${item?.location?.city || ""} ${item?.location?.country || ""}`.trim() || "Location",
         startDate: item?.dateRange?.startDate || "",
         endDate: item?.dateRange?.isCurrent ? "Present" : (item?.dateRange?.endDate || ""),

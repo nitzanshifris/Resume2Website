@@ -194,12 +194,14 @@ export function AccordionLayout({ items, onSave, onReorder, showIconEditor = tru
                           initialValue={item.title}
                           onSave={(v) => onSave(i, "title", v)}
                         />
-                        <EditableText
-                          as="p"
-                          className="font-sans text-base sm:text-lg font-medium text-muted-foreground uppercase tracking-wider"
-                          initialValue={item.company}
-                          onSave={(v) => onSave(i, "company", v)}
-                        />
+                        {(item.company || isEditMode) && (
+                          <EditableText
+                            as="p"
+                            className="font-sans text-base sm:text-lg font-medium text-muted-foreground uppercase tracking-wider"
+                            initialValue={item.company}
+                            onSave={(v) => onSave(i, "company", v)}
+                          />
+                        )}
                       </div>
                       {isCurrentRole(item.endDate) && (
                         <motion.span
