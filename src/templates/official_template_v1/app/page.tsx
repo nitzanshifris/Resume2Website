@@ -55,12 +55,11 @@ const formatLabel = (key: string) => {
 
 type SectionKey = keyof Omit<PortfolioData, "hero" | "contact">
 
-const initialSectionKeys: (SectionKey | 'education_old')[] = [
+const initialSectionKeys: SectionKey[] = [
   "summary",
   "experience",
   "projects",
   "skills",
-  "education_old",
   "education",
   "testimonials",
   "achievements",
@@ -85,10 +84,19 @@ const hasContent = (data: any): boolean => {
     )
   }
 
+  // Check for nested items arrays (e.g., experience.experienceItems)
   const itemKeys = Object.keys(data).filter((k) => k.endsWith("Items") || k.endsWith("skills"))
-  if (itemKeys.length) return itemKeys.some((k) => Array.isArray(data[k]) && data[k].length)
+  if (itemKeys.length) {
+    return itemKeys.some((k) => Array.isArray(data[k]) && data[k].length > 0)
+  }
 
-  return Boolean(data.summaryText)
+  // Check for direct text content
+  if (data.summaryText) return Boolean(data.summaryText)
+  
+  // Check for section title (indicates section should show)
+  if (data.sectionTitle) return true
+
+  return false
 }
 
 
@@ -97,7 +105,7 @@ export default function FashionPortfolioPage() {
   /* State */ /* --------------------------------------------------- */
   const [data, setData] = useState<PortfolioData>(initialData)
   const [showPhoto, setShowPhoto] = useState(true)
-  const [orderedSections, setOrderedSections] = useState<(SectionKey | 'education_old')[]>(initialSectionKeys)
+  const [orderedSections, setOrderedSections] = useState<SectionKey[]>(initialSectionKeys)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { theme, setTheme, themes } = useTheme()
@@ -133,10 +141,33 @@ export default function FashionPortfolioPage() {
           try {
             // First try to load injected data dynamically (for portfolio generator)
             const injectedModule = await import('@/lib/injected-data')
-            if (injectedModule.useRealData && injectedModule.portfolioData) {
+            if (injectedModule.portfolioData) {
               console.log('✅ Using injected CV data from portfolio generator')
+              // Debug: Check what sections have content
+              const sections = ['experience', 'education', 'skills', 'projects', 'achievements']
+              sections.forEach(section => {
+                const sectionData = injectedModule.portfolioData[section]
+                if (sectionData) {
+                  const hasData = hasContent(sectionData)
+                  console.log(`  ${section}: hasContent=${hasData}`, sectionData)
+                }
+              })
               // Use the injected data directly without merging test data
               setData(injectedModule.portfolioData)
+              
+              // Update section visibility based on the real CV data
+              const newVisibility: Partial<Record<SectionKey, boolean>> = {}
+              for (const key of initialSectionKeys) {
+                if (key === 'testimonials') {
+                  newVisibility[key] = false // Keep testimonials hidden by default
+                } else if (key === 'projects') {
+                  newVisibility[key] = hasContent(injectedModule.portfolioData[key as SectionKey]) || isEditMode
+                } else {
+                  newVisibility[key] = hasContent(injectedModule.portfolioData[key as SectionKey])
+                }
+              }
+              setSectionVisibility(newVisibility as Record<SectionKey, boolean>)
+              
               toast.success('Portfolio loaded with your CV data!')
               return // Exit early - we have the data
             }
@@ -412,12 +443,10 @@ export default function FashionPortfolioPage() {
     return null
   }
 
-  const [sectionVisibility, setSectionVisibility] = useState<Record<SectionKey | 'education_old', boolean>>(() => {
-    const visibility: Partial<Record<SectionKey | 'education_old', boolean>> = {}
+  const [sectionVisibility, setSectionVisibility] = useState<Record<SectionKey, boolean>>(() => {
+    const visibility: Partial<Record<SectionKey, boolean>> = {}
     for (const key of initialSectionKeys) {
-      if (key === 'education_old') {
-        visibility[key] = false // Hide old education timeline by default
-      } else if (key === 'testimonials') {
+      if (key === 'testimonials') {
         visibility[key] = false // Hide testimonials by default (needs card improvements before MVP)
       } else if (key === 'projects') {
         // Always show projects section if it has content or in edit mode
@@ -426,7 +455,7 @@ export default function FashionPortfolioPage() {
         visibility[key] = hasContent(data[key as SectionKey])
       }
     }
-    return visibility as Record<SectionKey | 'education_old', boolean>
+    return visibility as Record<SectionKey, boolean>
   })
 
   /* Update section visibility when data changes */ /* ----------- */
@@ -477,7 +506,7 @@ export default function FashionPortfolioPage() {
   const toggleSection = (s: SectionKey) => setSectionVisibility((p) => ({ ...p, [s]: !p[s] }))
 
   /* Helper function for moving sections */
-  const moveSection = (section: SectionKey | 'education_old', direction: 'up' | 'down') => {
+  const moveSection = (section: SectionKey, direction: 'up' | 'down') => {
     setOrderedSections((current) => {
       const index = current.indexOf(section)
       if (index === -1) return current
@@ -621,60 +650,17 @@ export default function FashionPortfolioPage() {
     [orderedSections, sectionVisibility, data],
   )
 
-  /* Education timeline pre-map */ /* ------------------------------ */
-  const educationTimelineItems =
-    data.education_old?.educationItems.map((item, i) => ({
-      title: (
-        <EditableText
-          as="h3"
-          className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
-          initialValue={item.institution}
-          onSave={(v) => handleSave(`education.educationItems.${i}.institution`, v)}
-        />
-      ),
-      degree: (
-        <EditableText
-          as="p"
-          className="font-sans text-base sm:text-lg font-semibold text-card-foreground/90 mt-1"
-          initialValue={item.degree}
-          onSave={(v) => handleSave(`education.educationItems.${i}.degree`, v)}
-        />
-      ),
-      years: (
-        <EditableText
-          as="p"
-          className="font-sans text-base text-muted-foreground my-2"
-          initialValue={item.years}
-          onSave={(v) => handleSave(`education.educationItems.${i}.years`, v)}
-        />
-      ),
-      description: (
-        <EditableText
-          textarea
-          as="p"
-          className="font-sans text-muted-foreground text-sm sm:text-base mt-2"
-          initialValue={item.description}
-          onSave={(v) => handleSave(`education.educationItems.${i}.description`, v)}
-        />
-      ),
-      imageUrl: item.imageUrl,
-      imageAlt: item.imageAlt,
-      imageTransform: item.imageTransform,
-    })) ?? []
 
   /* Get visible sections for determining first/last */
   const visibleSectionKeys = useMemo(() => 
     orderedSections.filter(key => {
-      if (key === 'education_old') {
-        return sectionVisibility[key] && hasContent(data.education_old)
-      }
       return sectionVisibility[key] && hasContent(data[key as SectionKey])
     }),
     [orderedSections, sectionVisibility, data]
   )
 
   /* Section components map */ /* --------------------------------- */
-  const sectionComponents: Record<SectionKey | 'education_old', React.ReactNode> = {
+  const sectionComponents: Record<SectionKey, React.ReactNode> = {
     /* 1. Summary --------------------------------------------------- */
     summary:
       sectionVisibility.summary && data.summary.summaryText ? (
@@ -734,7 +720,7 @@ export default function FashionPortfolioPage() {
 
     /* 2. Experience (Accordion with SmartCard items) --------------- */
     experience:
-      sectionVisibility.experience && (isEditMode || data.experience.experienceItems.length) ? (
+      sectionVisibility.experience && (isEditMode || data.experience?.experienceItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('experience', {
             company: 'New Company',
@@ -1002,142 +988,11 @@ export default function FashionPortfolioPage() {
         </EditableSection>
       ) : null,
 
-    /* 5. Education Old Timeline ------------------------------------ */
-    education_old:
-      sectionVisibility.education_old && (isEditMode || data.education_old.educationItems.length) ? (
-        <EditableSection
-          onAddItem={() => addItem('education_old', {
-            institution: 'New Institution',
-            degree: 'New Degree',
-            years: '2024',
-            description: 'Description of education'
-          })}
-          sectionTitle="Education (Timeline)"
-          onMoveUp={() => moveSection('education_old', 'up')}
-          onMoveDown={() => moveSection('education_old', 'down')}
-          showMoveButtons={true}
-          isFirst={visibleSectionKeys[0] === 'education_old'}
-          isLast={visibleSectionKeys[visibleSectionKeys.length - 1] === 'education_old'}
-        >
-          <Section
-            id="education-old"
-            title={data.education_old.sectionTitle}
-            onSaveTitle={(v) => handleSave("education_old.sectionTitle", v)}
-            isVisible
-          >
-          {isEditMode ? (
-            <DraggableList
-              items={data.education_old.educationItems}
-              onReorder={(newItems) => {
-                handleSave("education.educationItems", newItems, false)
-              }}
-              renderItem={(educationItem, index) => {
-                const timelineItem = {
-                  title: (
-                    <EditableText
-                      as="h3"
-                      className="font-serif text-lg sm:text-2xl font-bold text-card-foreground"
-                      initialValue={educationItem.institution}
-                      onSave={(v) => handleSave(`education.educationItems.${index}.institution`, v)}
-                    />
-                  ),
-                  degree: (
-                    <EditableText
-                      as="p"
-                      className="font-sans text-base sm:text-lg font-semibold text-card-foreground/90 mt-1"
-                      initialValue={educationItem.degree}
-                      onSave={(v) => handleSave(`education.educationItems.${index}.degree`, v)}
-                    />
-                  ),
-                  years: (
-                    <EditableText
-                      as="p"
-                      className="font-sans text-base text-muted-foreground my-2"
-                      initialValue={educationItem.years}
-                      onSave={(v) => handleSave(`education.educationItems.${index}.years`, v)}
-                    />
-                  ),
-                  description: (
-                    <EditableText
-                      textarea
-                      as="p"
-                      className="font-sans text-muted-foreground text-sm sm:text-base mt-2"
-                      initialValue={educationItem.description}
-                      onSave={(v) => handleSave(`education.educationItems.${index}.description`, v)}
-                    />
-                  ),
-                  imageUrl: educationItem.imageUrl,
-                  imageAlt: educationItem.imageAlt,
-                  imageTransform: educationItem.imageTransform,
-                }
-                
-                return (
-                  <div className="mb-8">
-                    <VerticalTimeline 
-                      items={[timelineItem]} 
-                      isEditMode={isEditMode}
-                      onEdit={() => {
-                        // Handle edit functionality
-                        console.log('Edit education item:', index)
-                      }}
-                      onDelete={() => removeItem('education', index)}
-                      onUpdateImage={(_, imageUrl, imageAlt, imageTransform) => {
-                        const newItems = [...data.education_old.educationItems]
-                        newItems[index] = {
-                          ...newItems[index],
-                          imageUrl,
-                          imageAlt,
-                          imageTransform
-                        }
-                        setData(prev => ({
-                          ...prev,
-                          education: {
-                            ...prev.education,
-                            educationItems: newItems
-                          }
-                        }))
-                      }}
-                    />
-                  </div>
-                )
-              }}
-              keyExtractor={(item, index) => `education-${data.education_old.educationItems[index]?.institution || index}`}
-              className="w-full"
-            />
-          ) : (
-            <VerticalTimeline 
-              items={educationTimelineItems} 
-              isEditMode={isEditMode}
-              onEdit={(index) => {
-                // Handle edit functionality
-                console.log('Edit education item:', index)
-              }}
-              onDelete={(index) => removeItem('education', index)}
-              onUpdateImage={(index, imageUrl, imageAlt, imageTransform) => {
-                const newItems = [...data.education_old.educationItems]
-                newItems[index] = {
-                  ...newItems[index],
-                  imageUrl,
-                  imageAlt,
-                  imageTransform
-                }
-                setData(prev => ({
-                  ...prev,
-                  education: {
-                    ...prev.education,
-                    educationItems: newItems
-                  }
-                }))
-              }}
-            />
-          )}
-        </Section>
-        </EditableSection>
-      ) : null,
+    /* [REMOVED education_old - using new education SmartCard version] */
 
     /* 5. Education (SmartCard Version) ----------------------------- */
     education:
-      sectionVisibility.education && (isEditMode || data.education.educationItems.length) ? (
+      sectionVisibility.education && (isEditMode || data.education?.educationItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('education', {
             institution: 'New Institution',
@@ -1254,13 +1109,13 @@ export default function FashionPortfolioPage() {
               }}
               onAddItem={() => {
                 // Check if we're at the maximum limit
-                if (data.education_old.educationItems.length >= 12) {
+                if (data.education?.educationItems?.length >= 12) {
                   console.log('Cannot add more education items: maximum limit of 12 reached')
                   return
                 }
                 
                 // Determine which side the new item should go on (opposite of last item)
-                const lastIndex = data.education_old.educationItems.length - 1
+                const lastIndex = (data.education?.educationItems?.length || 1) - 1
                 const lastItemIsOnLeft = lastIndex % 2 === 0
                 const newItemShouldBeOnRight = lastItemIsOnLeft
                 
@@ -1352,7 +1207,7 @@ export default function FashionPortfolioPage() {
 
     /* 7. Achievements (carousel) --------------------------------------- */
     achievements:
-      sectionVisibility.achievements && (isEditMode || data.achievements.achievementItems.length) ? (
+      sectionVisibility.achievements && (isEditMode || data.achievements?.achievementItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('achievements', {
             title: 'New Achievement',
@@ -1389,7 +1244,7 @@ export default function FashionPortfolioPage() {
               />
             </div>
           )}
-          {data.achievements.achievementItems.length ? (
+          {data.achievements?.achievementItems?.length ? (
           (() => {
             const layoutConfig = data.achievements?.layoutConfig || { layoutType: 'horizontal-carousel', autoSizing: true, manualSize: 'medium', shape: 'wide', height: 'standard' }
             const { classes: cardClasses } = generateCardClasses(
@@ -1492,7 +1347,7 @@ export default function FashionPortfolioPage() {
 
     /* 8. Certifications (carousel) ------------------------------------- */
     certifications:
-      sectionVisibility.certifications && (isEditMode || data.certifications.certificationItems.length) ? (
+      sectionVisibility.certifications && (isEditMode || data.certifications?.certificationItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('certifications', {
             title: 'New Certification',
@@ -1530,7 +1385,7 @@ export default function FashionPortfolioPage() {
               />
             </div>
           )}
-          {data.certifications.certificationItems.length ? (
+          {data.certifications?.certificationItems?.length ? (
           (() => {
             const layoutConfig = data.certifications?.layoutConfig || { layoutType: 'horizontal-carousel', autoSizing: true, manualSize: 'medium', shape: 'wide', height: 'standard' }
             const { classes: cardClasses } = generateCardClasses(
@@ -1627,7 +1482,7 @@ export default function FashionPortfolioPage() {
 
     /* 9. Volunteer (carousel) ------------------------------------------ */
     volunteer:
-      sectionVisibility.volunteer && (isEditMode || data.volunteer.volunteerItems.length) ? (
+      sectionVisibility.volunteer && (isEditMode || data.volunteer?.volunteerItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('volunteer', {
             role: 'Volunteer Role',
@@ -1653,7 +1508,7 @@ export default function FashionPortfolioPage() {
             isVisible
             fullWidth
           >
-          {data.volunteer.volunteerItems.length ? (
+          {data.volunteer?.volunteerItems?.length ? (
           <DraggableCardCarousel
             items={data.volunteer.volunteerItems}
             onReorder={(newItems) => reorderItems('volunteer', newItems)}
@@ -1849,7 +1704,7 @@ export default function FashionPortfolioPage() {
 
     /* 11. Courses (carousel) --------------------------------------- */
     courses:
-      sectionVisibility.courses && (isEditMode || data.courses.courseItems.length) ? (
+      sectionVisibility.courses && (isEditMode || data.courses?.courseItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('courses', {
             title: 'New Course',
@@ -1874,7 +1729,7 @@ export default function FashionPortfolioPage() {
             isVisible
             fullWidth
           >
-          {data.courses.courseItems.length ? (
+          {data.courses?.courseItems?.length ? (
           <DraggableCardCarousel
             items={data.courses.courseItems}
             onReorder={(newItems) => reorderItems('courses', newItems)}
@@ -1960,7 +1815,7 @@ export default function FashionPortfolioPage() {
 
     /* 12. Publications (carousel) ---------------------------------- */
     publications:
-      sectionVisibility.publications && (isEditMode || data.publications.publicationItems.length) ? (
+      sectionVisibility.publications && (isEditMode || data.publications?.publicationItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('publications', {
             title: 'New Publication',
@@ -1987,7 +1842,7 @@ export default function FashionPortfolioPage() {
             className="bg-secondary/30"
             fullWidth
           >
-          {data.publications.publicationItems.length ? (
+          {data.publications?.publicationItems?.length ? (
           <DraggableCardCarousel
             items={data.publications.publicationItems}
             onReorder={(newItems) => reorderItems('publications', newItems)}
@@ -2098,7 +1953,7 @@ export default function FashionPortfolioPage() {
 
     /* 13. Speaking engagements (carousel) -------------------------- */
     speakingEngagements:
-      sectionVisibility.speakingEngagements && (isEditMode || data.speakingEngagements.engagementItems.length) ? (
+      sectionVisibility.speakingEngagements && (isEditMode || data.speakingEngagements?.engagementItems?.length) ? (
         <EditableSection
           onAddItem={() => addItem('speakingEngagements', {
             title: 'New Speaking Engagement',
@@ -2296,7 +2151,7 @@ export default function FashionPortfolioPage() {
 
     /* 15. Languages (chips) --------------------------------------- */
     languages:
-      sectionVisibility.languages && data.languages.sectionTitle ? (
+      sectionVisibility.languages && data.languages?.sectionTitle ? (
         <EditableSection
           onAddItem={() => addItem('languages', {
             language: 'New Language',

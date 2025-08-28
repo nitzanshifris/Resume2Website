@@ -8,8 +8,8 @@ import { FontProvider } from "@/contexts/font-context"
 import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
-  title: "Michelle Lopez | Fashion Designer",
-  description: "The professional portfolio of Michelle Lopez, expert fashion designer with 11+ years of experience.",
+  title: "Portfolio",
+  description: "Professional portfolio website",
     generator: 'v0.dev'
 }
 

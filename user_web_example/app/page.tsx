@@ -1715,8 +1715,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     ].includes(jobFlowContext.state)
     
     if (!isProcessing && jobFlowContext.state !== FlowState.Completed) {
-      // Not processing yet, keep at 0
-      setAnimatedProgress(0)
+      // Not processing yet, but don't reset if already animating
+      // Only reset to 0 if we're truly at the beginning
+      if (jobFlowContext.state === FlowState.Idle) {
+        setAnimatedProgress(0)
+      }
       return
     }
     
@@ -1730,11 +1733,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       return
     }
     
-    // Two-phase animation:
-    // Phase 1: Quickly animate from 0 to 52.5 (70% visual) over 20 seconds
-    // Phase 2: Slowly increment from 52.5 to 59.25 (70% to 79% visual) - 1% every 5 seconds
+    // Two-phase animation with slower, smoother progress:
+    // Phase 1: Slowly animate from current progress to 52.5 (70% visual) over 30 seconds
+    // Phase 2: Very slowly increment from 52.5 to 59.25 (70% to 79% visual)
     const startTime = Date.now()
-    const phase1Duration = 20000 // 20 seconds to reach 70%
+    const startProgress = animatedProgress // Start from current progress, not 0
+    const phase1Duration = 30000 // 30 seconds to reach 70% (slower)
     const phase1Target = 52.5 // 70% visual (52.5 semantic)
     const phase2IncrementDelay = 5000 // 5 seconds per 1% increment
     const phase2MaxTarget = 59.25 // 79% visual (59.25 semantic)
@@ -1743,17 +1747,17 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const elapsed = Date.now() - startTime
       let progress: number
       
-      if (elapsed < phase1Duration) {
-        // Phase 1: Quick animation to 70%
-        progress = (elapsed / phase1Duration) * phase1Target
+      if (startProgress < phase1Target) {
+        // Phase 1: Animate from current to 70%
+        const remainingToTarget = phase1Target - startProgress
+        const phase1Progress = Math.min(elapsed / phase1Duration, 1)
+        progress = startProgress + (remainingToTarget * phase1Progress)
       } else {
-        // Phase 2: Slow increments from 70% to 79%
-        const phase2Elapsed = elapsed - phase1Duration
+        // Already past phase 1, continue with phase 2
+        const phase2Elapsed = elapsed
         const increments = Math.floor(phase2Elapsed / phase2IncrementDelay)
-        // Each increment is 0.75 semantic units (1% visual)
-        // We need 9 increments to go from 70% to 79%
         const semanticIncrement = 0.75
-        progress = Math.min(phase1Target + (increments * semanticIncrement), phase2MaxTarget)
+        progress = Math.min(startProgress + (increments * semanticIncrement), phase2MaxTarget)
       }
       
       setAnimatedProgress(progress)

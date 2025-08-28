@@ -88,7 +88,6 @@ export interface BaseViewItem {
 export interface HeroData {
   fullName: string
   professionalTitle: string
-  summaryTagline: string
   profilePhotoUrl: string | null
   contactButtonText?: string
 }
@@ -308,7 +307,6 @@ export interface PortfolioData {
   contact: ContactData
   summary: { sectionTitle: string; summaryText: string }
   experience: { sectionTitle: string; experienceItems: ExperienceItem[] }
-  education_old: { sectionTitle: string; educationItems: EducationItem[]; layoutConfig?: SectionLayoutConfig }
   education: { 
     sectionTitle: string; 
     educationItems: EducationItem[];
@@ -339,7 +337,6 @@ export const initialData: PortfolioData = {
   hero: {
     fullName: "",
     professionalTitle: "",
-    summaryTagline: "",
     profilePhotoUrl: null,
     contactButtonText: "Contact Me",
   },
@@ -368,10 +365,18 @@ export const initialData: PortfolioData = {
   education: {
     sectionTitle: "Education",
     educationItems: [],
+    layoutConfig: {
+      layoutType: 'horizontal-carousel' as const,
+      autoSizing: false,
+      manualSize: 'small' as const,
+      shape: 'very-tall' as const,
+      height: 'standard' as const
+    },
   },
   skills: {
     sectionTitle: "Skills & Expertise",
     skillCategories: [],
+    ungroupedSkills: [],
   },
   projects: {
     sectionTitle: "Featured Projects",

@@ -240,7 +240,7 @@ export function ContactSection({ data, onSave, onSaveLocation, onSaveProfessiona
                     asChild
                     className="px-6 py-4 text-lg sm:px-10 sm:py-8 sm:text-xl font-semibold rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                   >
-                    <a href="/michelle-lopez-cv.pdf" download="michelle-lopez-cv.pdf">
+                    <a href="/cv.pdf" download="cv.pdf">
                       <Download className="mr-3 h-6 w-6" />
                       {data.downloadCvButtonText || "Download CV"}
                     </a>
@@ -314,7 +314,7 @@ export function ContactSection({ data, onSave, onSaveLocation, onSaveProfessiona
         </div>
         
         {/* Apple-style Additional Information Section - Theme Aware */}
-        {true && (
+        {(data.placeOfBirth || data.nationality || data.dateOfBirth || data.maritalStatus || data.drivingLicense || data.visaStatus) && (
           <div className="mt-6 w-full max-w-7xl mx-auto px-4">
             {/* Main glassmorphism container - Full width */}
             <div className="relative">
@@ -334,151 +334,7 @@ export function ContactSection({ data, onSave, onSaveLocation, onSaveProfessiona
                 {/* Single row grid for desktop */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-3">
                   
-                  {/* Editable cards with delete buttons */}
-                  <div className="group/card relative">
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
-                    {isEditMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
-                        onClick={() => {}}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                    <div className="relative p-3 flex flex-col space-y-1">
-                      <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Place of Birth</span>
-                      <EditableText
-                        as="span"
-                        initialValue="San Francisco, CA"
-                        onSave={(value) => onSave("placeOfBirth", value)}
-                        className="text-sm font-medium text-foreground leading-tight"
-                        isEditMode={isEditMode}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="group/card relative">
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
-                    {isEditMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
-                        onClick={() => {}}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                    <div className="relative p-3 flex flex-col space-y-1">
-                      <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Nationality</span>
-                      <EditableText
-                        as="span"
-                        initialValue="American"
-                        onSave={(value) => onSave("nationality", value)}
-                        className="text-sm font-medium text-foreground leading-tight"
-                        isEditMode={isEditMode}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="group/card relative">
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
-                    {isEditMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
-                        onClick={() => {}}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                    <div className="relative p-3 flex flex-col space-y-1">
-                      <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Date of Birth</span>
-                      <EditableText
-                        as="span"
-                        initialValue="March 15, 1992"
-                        onSave={(value) => onSave("dateOfBirth", value)}
-                        className="text-sm font-medium text-foreground leading-tight"
-                        isEditMode={isEditMode}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="group/card relative">
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
-                    {isEditMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
-                        onClick={() => {}}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                    <div className="relative p-3 flex flex-col space-y-1">
-                      <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Marital Status</span>
-                      <EditableText
-                        as="span"
-                        initialValue="Married"
-                        onSave={(value) => onSave("maritalStatus", value)}
-                        className="text-sm font-medium text-foreground leading-tight"
-                        isEditMode={isEditMode}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="group/card relative">
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
-                    {isEditMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
-                        onClick={() => {}}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                    <div className="relative p-3 flex flex-col space-y-1">
-                      <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Driving License</span>
-                      <EditableText
-                        as="span"
-                        initialValue="Class A Commercial"
-                        onSave={(value) => onSave("drivingLicense", value)}
-                        className="text-sm font-medium text-foreground leading-tight"
-                        isEditMode={isEditMode}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="group/card relative">
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
-                    {isEditMode && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
-                        onClick={() => {}}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                    <div className="relative p-3 flex flex-col space-y-1">
-                      <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Visa Status</span>
-                      <EditableText
-                        as="span"
-                        initialValue="H1-B Visa Holder"
-                        onSave={(value) => onSave("visaStatus", value)}
-                        className="text-sm font-medium text-foreground leading-tight"
-                        isEditMode={isEditMode}
-                      />
-                    </div>
-                  </div>
-                  
+                  {/* Only show cards for actual data */}
                   {data.placeOfBirth && (
                     <div className="group/card relative">
                       <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>

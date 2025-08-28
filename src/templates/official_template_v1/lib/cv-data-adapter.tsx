@@ -15,6 +15,18 @@ interface CV2WebLocation {
   country?: string | null
 }
 
+// SmartCard fields that can be added to any section
+interface SmartCardFields {
+  videoUrl?: string | null
+  githubUrl?: string | null
+  imageUrl?: string | null
+  linkUrl?: string | null
+  hasLink?: boolean | null
+  linkType?: 'website' | 'video' | 'github' | 'image' | 'pdf' | 'tweet' | null
+  viewMode?: 'text' | 'timeline' | 'video' | 'github' | 'images' | 'tweet' | 'uri' | null
+  textVariant?: 'detailed' | 'simple' | null
+}
+
 interface CV2WebProfessionalLink {
   platform?: string | null
   url?: string | null
@@ -34,11 +46,20 @@ interface CV2WebHero {
 }
 
 interface CV2WebContact {
+  // Contact Section fields (main contact info)
   email?: string | null
   phone?: string | null
-  location?: CV2WebLocation | null
+  location?: CV2WebLocation | null  // Current location, NOT place of birth
   professionalLinks?: CV2WebProfessionalLink[] | null
   availability?: string | null
+  
+  // Personal Information Footer fields (demographics - separate section)
+  placeOfBirth?: string | null
+  nationality?: string | null
+  drivingLicense?: string | null
+  dateOfBirth?: string | null
+  maritalStatus?: string | null
+  visaStatus?: string | null
 }
 
 interface CV2WebSummary {
@@ -87,15 +108,14 @@ interface CV2WebSkills {
   ungroupedSkills?: string[] | null
 }
 
-interface CV2WebProjectItem {
+interface CV2WebProjectItem extends SmartCardFields {
   title?: string | null
   description?: string | null
   technologiesUsed?: string[] | null
   projectUrl?: string | null
-  imageUrl?: string | null
-  githubUrl?: string | null
   demoUrl?: string | null
-  videoUrl?: string | null
+  // Note: imageUrl, videoUrl, githubUrl already included in SmartCardFields
+  // SmartCard fields inherited from SmartCardFields
 }
 
 interface CV2WebLanguageItem {
@@ -104,7 +124,7 @@ interface CV2WebLanguageItem {
   certification?: string | null
 }
 
-interface CV2WebCertificationItem {
+interface CV2WebCertificationItem extends SmartCardFields {
   title?: string | null
   description?: string | null
   issuingOrganization?: string | null
@@ -112,29 +132,35 @@ interface CV2WebCertificationItem {
   expirationDate?: string | null
   credentialId?: string | null
   verificationUrl?: string | null
+  // SmartCard fields inherited from SmartCardFields
 }
 
-interface CV2WebAchievementItem {
+interface CV2WebAchievementItem extends SmartCardFields {
   value?: string | null
   label?: string | null
   contextOrDetail?: string | null
   timeframe?: string | null
+  // SmartCard fields inherited from SmartCardFields
 }
 
-interface CV2WebVolunteerItem {
+interface CV2WebVolunteerItem extends SmartCardFields {
   role?: string | null
   organization?: string | null
   dateRange?: CV2WebDateRange | null
   description?: string | null
+  // SmartCard fields inherited from SmartCardFields
 }
 
-interface CV2WebCourseItem {
+interface CV2WebCourseItem extends SmartCardFields {
   title?: string | null
   institution?: string | null
   completionDate?: string | null
+  certificateNumber?: string | null
+  certificateUrl?: string | null
+  // SmartCard fields inherited from SmartCardFields
 }
 
-interface CV2WebPublicationItem {
+interface CV2WebPublicationItem extends SmartCardFields {
   title?: string | null
   description?: string | null
   authors?: string[] | null
@@ -147,9 +173,10 @@ interface CV2WebPublicationItem {
   publicationUrl?: string | null
   url?: string | null  // Backwards compatibility
   abstract?: string | null
+  // SmartCard fields inherited from SmartCardFields
 }
 
-interface CV2WebSpeakingItem {
+interface CV2WebSpeakingItem extends SmartCardFields {
   title?: string | null
   description?: string | null
   eventName?: string | null
@@ -159,15 +186,23 @@ interface CV2WebSpeakingItem {
   role?: string | null
   eventUrl?: string | null
   presentationUrl?: string | null
-  videoUrl?: string | null
   audienceSize?: number | null
+  // Note: videoUrl already included in SmartCardFields
+  // SmartCard fields inherited from SmartCardFields
 }
 
-interface CV2WebMembershipItem {
+interface CV2WebMembershipItem extends SmartCardFields {
   organization?: string | null
   role?: string | null
   membershipType?: string | null
   dateRange?: CV2WebDateRange | null
+  // SmartCard fields inherited from SmartCardFields
+}
+
+interface CV2WebHobbyItem extends SmartCardFields {
+  title?: string | null
+  description?: string | null
+  // SmartCard fields inherited from SmartCardFields
 }
 
 // Main CV Data Interface (from our extraction system)
@@ -223,13 +258,7 @@ interface CV2WebData {
   hobbies?: {
     sectionTitle?: string | null
     hobbies?: string[] | null  // Legacy string list
-    hobbyItems?: {  // SmartCard format
-      title?: string | null
-      description?: string | null
-      videoUrl?: string | null
-      imageUrl?: string | null
-      linkUrl?: string | null
-    }[] | null
+    hobbyItems?: CV2WebHobbyItem[] | null  // SmartCard format
   } | null
 }
 
@@ -269,15 +298,25 @@ function adaptContact(cv2webContact?: CV2WebContact | null): ContactData {
   }
 
   return {
+    // Contact Section fields (displayed in main contact area)
     email: cv2webContact?.email || "",
     phone: cv2webContact?.phone || "",
-    location: {
+    location: {  // Current location for contact purposes
       city: cv2webContact?.location?.city || "",
-      country: cv2webContact?.location?.country || ""
+      country: cv2webContact?.location?.country || "",
+      state: cv2webContact?.location?.state || ""
     },
     professionalLinks,
     availability: cv2webContact?.availability || "Available for new opportunities",
-    copyright: `© ${new Date().getFullYear()} Portfolio. All Rights Reserved.`
+    copyright: `© ${new Date().getFullYear()} Portfolio. All Rights Reserved.`,
+    
+    // Personal Information Footer fields (displayed separately at bottom)
+    placeOfBirth: cv2webContact?.placeOfBirth || "",
+    nationality: cv2webContact?.nationality || "",
+    drivingLicense: cv2webContact?.drivingLicense || "",
+    dateOfBirth: cv2webContact?.dateOfBirth || "",
+    maritalStatus: cv2webContact?.maritalStatus || "",
+    visaStatus: cv2webContact?.visaStatus || ""
   }
 }
 
@@ -370,17 +409,17 @@ function determineViewMode(item: {
 }): { viewMode: string; primaryUrl?: string; images?: string[]; videoUrl?: string; githubUrl?: string; tweetId?: string } {
   // Check for video URLs first (highest priority for visual impact)
   if (item.videoUrl && isVideoUrl(item.videoUrl)) {
-    return { viewMode: 'video', videoUrl: item.videoUrl }
+    return { viewMode: 'video', videoUrl: item.videoUrl || undefined }
   }
   
   // Check demo URL for video
   if (item.demoUrl && isVideoUrl(item.demoUrl)) {
-    return { viewMode: 'video', videoUrl: item.demoUrl }
+    return { viewMode: 'video', videoUrl: item.demoUrl || undefined }
   }
   
   // Check for GitHub
   if (item.githubUrl && isGitHubUrl(item.githubUrl)) {
-    return { viewMode: 'github', githubUrl: item.githubUrl }
+    return { viewMode: 'github', githubUrl: item.githubUrl || undefined }
   }
   
   // Check for images
@@ -398,7 +437,7 @@ function determineViewMode(item: {
   
   // Default to text mode with link if available
   if (item.projectUrl || item.demoUrl) {
-    return { viewMode: 'uri', primaryUrl: item.projectUrl || item.demoUrl }
+    return { viewMode: 'uri', primaryUrl: (item.projectUrl || item.demoUrl) || undefined }
   }
   
   return { viewMode: 'text' }
@@ -437,19 +476,26 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     education: {
       sectionTitle: cv2webData.education?.sectionTitle || "Education",
+      layoutConfig: {
+        layoutType: 'horizontal-carousel',
+        autoSizing: false,
+        manualSize: 'small',
+        shape: 'very-tall',
+        height: 'standard'
+      },
       educationItems: (cv2webData.education?.educationItems || []).map(item => ({
         institution: item?.institution || "Educational Institution",
         degree: item?.degree || "Degree",
         years: formatDateRange(item?.dateRange),
         description: item?.description || item?.relevantCoursework?.join(", ") || item?.honors?.join(", ") || "Educational achievement.",
         // Pass through all tag fields for the template to display
-        gpa: item?.gpa || null,
-        honors: item?.honors || null,
-        minors: item?.minors || null,
-        relevantCoursework: item?.relevantCoursework || null,
-        exchangePrograms: item?.exchangePrograms || null,
-        fieldOfStudy: item?.fieldOfStudy || null,
-        location: item?.location || null
+        gpa: item?.gpa || undefined,
+        honors: item?.honors || undefined,
+        minors: item?.minors || undefined,
+        relevantCoursework: item?.relevantCoursework || undefined,
+        exchangePrograms: item?.exchangePrograms || undefined,
+        fieldOfStudy: item?.fieldOfStudy || undefined,
+        location: item?.location || undefined
       }))
     },
 
@@ -524,8 +570,8 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     languages: {
       sectionTitle: cv2webData.languages?.sectionTitle || "Languages",
       languageItems: (cv2webData.languages?.languageItems || []).map(item => ({
-        language: item?.language || "Language",
-        proficiency: item?.proficiency || "Proficient"
+        language: item?.language || "",
+        proficiency: item?.proficiency || ""  // Keep exact proficiency levels (Native, Fluent, Intermediate, Beginner, etc.)
       }))
     },
 
@@ -566,7 +612,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
           imageUrl: item?.imageUrl,
           videoUrl: item?.videoUrl,
           githubUrl: item?.githubUrl
-        } as any)
+        })
         
         return {
           title: item?.role || "Volunteer Role",
@@ -607,8 +653,9 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
         const viewModeData = determineViewMode({
           projectUrl: item?.publicationUrl || item?.url,
           videoUrl: item?.videoUrl,
-          imageUrl: item?.imageUrl
-        } as any)
+          imageUrl: item?.imageUrl,
+          githubUrl: item?.githubUrl
+        })
         
         return {
           title: item?.title || "Publication",
@@ -637,8 +684,9 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
         const viewModeData = determineViewMode({
           videoUrl: item?.videoUrl,
           projectUrl: item?.presentationUrl || item?.eventUrl,
-          imageUrl: item?.imageUrl
-        } as any)
+          imageUrl: item?.imageUrl,
+          githubUrl: item?.githubUrl
+        })
         
         return {
           title: item?.title || item?.topic || "Speaking Engagement",
@@ -677,17 +725,29 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
       hobbyItems: (() => {
         // Use hobbyItems if available (SmartCard format), otherwise use legacy hobbies list
         if (cv2webData.hobbies?.hobbyItems && cv2webData.hobbies.hobbyItems.length > 0) {
-          return cv2webData.hobbies.hobbyItems.map((item, index) => ({
-            title: item?.title || "Interest",
-            description: item?.description || null,
-            icon: getRandomIcon(),
-            viewMode: "text" as const,
-            textVariant: "simple" as const,  // Hobbies use simple text overlay
-            // Pass through any URLs if available
-            ...(item?.videoUrl && { videoUrl: item.videoUrl }),
-            ...(item?.imageUrl && { imageUrl: item.imageUrl }),
-            ...(item?.linkUrl && { linkUrl: item.linkUrl })
-          }))
+          return cv2webData.hobbies.hobbyItems.map((item, index) => {
+            // Determine view mode based on available URLs
+            const viewModeData = determineViewMode({
+              projectUrl: item?.linkUrl,
+              imageUrl: item?.imageUrl,
+              videoUrl: item?.videoUrl,
+              githubUrl: item?.githubUrl
+            })
+            
+            return {
+              title: item?.title || "Interest",
+              description: item?.description || null,
+              icon: getRandomIcon(),
+              viewMode: viewModeData.viewMode as any,
+              textVariant: item?.description ? "detailed" as const : "simple" as const,
+              // Add URL data based on view mode
+              ...(viewModeData.videoUrl && { videoUrl: viewModeData.videoUrl }),
+              ...(viewModeData.images && { images: viewModeData.images }),
+              ...(viewModeData.githubUrl && { githubUrl: viewModeData.githubUrl }),
+              ...(viewModeData.primaryUrl && { linkUrl: viewModeData.primaryUrl }),
+              ...(viewModeData.tweetId && { tweetId: viewModeData.tweetId })
+            }
+          })
         } else {
           // Fallback to legacy hobbies string list
           return (cv2webData.hobbies?.hobbies || []).map((hobby, index) => ({
@@ -742,8 +802,8 @@ export async function fetchLatestCVData(sessionId: string): Promise<PortfolioDat
     // First check if we have injected data (generated portfolio)
     if (typeof window !== 'undefined') {
       try {
-        const { portfolioData, useRealData } = await import('./injected-data')
-        if (useRealData && portfolioData) {
+        const { portfolioData } = await import('./injected-data')
+        if (portfolioData) {
           console.log('📋 Using injected CV data from generated portfolio')
           return portfolioData
         }
