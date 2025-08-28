@@ -1570,17 +1570,17 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       const elapsed = Date.now() - startTime
       let progress: number
       
-      if (startProgress < phase1Target) {
+      if (elapsed < phase1Duration && startProgress < phase1Target) {
         // Phase 1: Animate from current to 70%
         const remainingToTarget = phase1Target - startProgress
         const phase1Progress = Math.min(elapsed / phase1Duration, 1)
         progress = startProgress + (remainingToTarget * phase1Progress)
       } else {
-        // Already past phase 1, continue with phase 2
-        const phase2Elapsed = elapsed
+        // Phase 2: Slow increments from 70% to 79%
+        const phase2Elapsed = elapsed - phase1Duration
         const increments = Math.floor(phase2Elapsed / phase2IncrementDelay)
-        const semanticIncrement = 0.75
-        progress = Math.min(startProgress + (increments * semanticIncrement), phase2MaxTarget)
+        const semanticIncrement = 0.75 // Each increment is 1% visual
+        progress = Math.min(phase1Target + (increments * semanticIncrement), phase2MaxTarget)
       }
       
       setAnimatedProgress(progress)
