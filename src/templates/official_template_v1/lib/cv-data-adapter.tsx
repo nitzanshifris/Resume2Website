@@ -311,12 +311,12 @@ function adaptContact(cv2webContact?: CV2WebContact | null): ContactData {
     copyright: `© ${new Date().getFullYear()} Portfolio. All Rights Reserved.`,
     
     // Personal Information Footer fields (displayed separately at bottom)
-    placeOfBirth: cv2webContact?.placeOfBirth || "",
-    nationality: cv2webContact?.nationality || "",
-    drivingLicense: cv2webContact?.drivingLicense || "",
-    dateOfBirth: cv2webContact?.dateOfBirth || "",
-    maritalStatus: cv2webContact?.maritalStatus || "",
-    visaStatus: cv2webContact?.visaStatus || ""
+    placeOfBirth: cv2webContact?.placeOfBirth || null,
+    nationality: cv2webContact?.nationality || null,
+    drivingLicense: cv2webContact?.drivingLicense || null,
+    dateOfBirth: cv2webContact?.dateOfBirth || null,
+    maritalStatus: cv2webContact?.maritalStatus || null,
+    visaStatus: cv2webContact?.visaStatus || null
   }
 }
 
@@ -452,26 +452,56 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     contact: adaptContact(cv2webData.contact),
     
     summary: {
-      sectionTitle: cv2webData.summary?.summaryText ? "Professional Summary" : "About Me",
-      summaryText: cv2webData.summary?.summaryText || "Passionate professional dedicated to excellence and innovation."
+      sectionTitle: cv2webData.summary?.summaryText ? "Professional Summary" : "",
+      summaryText: cv2webData.summary?.summaryText || ""
     },
 
     experience: {
       sectionTitle: cv2webData.experience?.sectionTitle || "Experience",
-      experienceItems: (cv2webData.experience?.experienceItems || []).map(item => ({
-        title: item?.jobTitle || "Professional Role",
-        company: item?.companyName || "",
-        location: `${item?.location?.city || ""} ${item?.location?.country || ""}`.trim() || "Location",
-        startDate: item?.dateRange?.startDate || "",
-        endDate: item?.dateRange?.isCurrent ? "Present" : (item?.dateRange?.endDate || ""),
-        description: item?.responsibilitiesAndAchievements?.join(". ") || item?.summary || "Professional experience description.",
-        // Pass through additional fields for display
-        duration: item?.duration || null,
-        employmentType: item?.employmentType || null,
-        remoteWork: item?.remoteWork || null,
-        technologiesUsed: item?.technologiesUsed || null,
-        companyLogo: item?.companyLogo || null
-      }))
+      experienceItems: (cv2webData.experience?.experienceItems || []).map(item => {
+        // Create additionalInfo array from technologiesUsed and other metadata
+        const additionalInfo: Array<{label: string, value: string}> = [];
+        
+        // Add technologies as individual tags with "Tools" label
+        if (item?.technologiesUsed && Array.isArray(item.technologiesUsed)) {
+          item.technologiesUsed.forEach(tech => {
+            additionalInfo.push({
+              label: "Tools",
+              value: tech
+            });
+          });
+        }
+        
+        // Add employment type if available
+        if (item?.employmentType) {
+          additionalInfo.push({
+            label: "Type",
+            value: item.employmentType
+          });
+        }
+        
+        // Add remote work status if available
+        if (item?.remoteWork) {
+          additionalInfo.push({
+            label: "Mode",
+            value: item.remoteWork
+          });
+        }
+        
+        return {
+          title: item?.jobTitle || "Professional Role",
+          company: item?.companyName || "",
+          location: `${item?.location?.city || ""} ${item?.location?.country || ""}`.trim() || "Location",
+          startDate: item?.dateRange?.startDate || "",
+          endDate: item?.dateRange?.isCurrent ? "Present" : (item?.dateRange?.endDate || ""),
+          description: item?.responsibilitiesAndAchievements?.join(". ") || item?.summary || "Professional experience description.",
+          // Pass through additional fields for display
+          duration: item?.duration || null,
+          companyLogo: item?.companyLogo || null,
+          // Add the formatted additionalInfo array for tag display
+          additionalInfo: additionalInfo.length > 0 ? additionalInfo : undefined
+        };
+      })
     },
 
     education: {
@@ -605,6 +635,13 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
 
     volunteer: {
       sectionTitle: cv2webData.volunteer?.sectionTitle || "Volunteer Experience",
+      layoutConfig: {
+        layoutType: 'horizontal-carousel',
+        autoSizing: false,
+        manualSize: 'small',  // Changed from default to small for volunteer cards
+        shape: 'standard',
+        height: 'standard'
+      },
       volunteerItems: (cv2webData.volunteer?.volunteerItems || []).map((item, index) => {
         // Determine view mode based on available URLs
         const viewModeData = determineViewMode({
@@ -721,7 +758,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     hobbies: {
-      sectionTitle: cv2webData.hobbies?.sectionTitle || "Hobbies & Interests",
+      sectionTitle: cv2webData.hobbies?.sectionTitle || "Hobbies",
       hobbyItems: (() => {
         // Use hobbyItems if available (SmartCard format), otherwise use legacy hobbies list
         if (cv2webData.hobbies?.hobbyItems && cv2webData.hobbies.hobbyItems.length > 0) {

@@ -414,7 +414,7 @@ export const initialData: PortfolioData = {
     publicationItems: [],
   },
   hobbies: {
-    sectionTitle: "Hobbies & Interests",
+    sectionTitle: "Hobbies",
     hobbyItems: [],
   },
   testimonials: {

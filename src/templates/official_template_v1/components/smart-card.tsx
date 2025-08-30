@@ -1171,16 +1171,25 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
                     placeholder="Add years..."
                     isEditMode={isEditMode}
                   />
-                  <div className="mt-3">
-                    <EditableText
-                      as="p"
-                      className="font-sans text-muted-foreground text-sm sm:text-base leading-relaxed text-left"
-                      initialValue={item.description || "Add description..."}
-                      onSave={(value) => onUpdate?.('description', value)}
-                      placeholder="Add description..."
-                      isEditMode={isEditMode}
-                    />
-                  </div>
+                  {/* Only show description if it exists and is different from the degree to avoid duplication */}
+                  {/* In edit mode, always show the field but empty if it matches the degree */}
+                  {(isEditMode || (item.description && item.description.trim() && 
+                    item.description.toLowerCase() !== item.degree?.toLowerCase())) ? (
+                    <div className="mt-3">
+                      <EditableText
+                        as="p"
+                        className="font-sans text-muted-foreground text-sm sm:text-base leading-relaxed text-left"
+                        initialValue={
+                          (item.description && item.description.toLowerCase() !== item.degree?.toLowerCase()) 
+                            ? item.description 
+                            : ""
+                        }
+                        onSave={(value) => onUpdate?.('description', value)}
+                        placeholder="Add description..."
+                        isEditMode={isEditMode}
+                      />
+                    </div>
+                  ) : null}
                 </div>
                 
                 {/* Image alongside text - EXACT same as original timeline */}

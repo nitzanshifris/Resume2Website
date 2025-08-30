@@ -1513,7 +1513,10 @@ export default function FashionPortfolioPage() {
             items={data.volunteer.volunteerItems}
             onReorder={(newItems) => reorderItems('volunteer', newItems)}
             keyExtractor={(item, index) => `volunteer-${index}-${item.title}`}
-            itemClassName="basis-full md:basis-1/2 lg:basis-1/3"
+            itemClassName={data.volunteer.volunteerItems.length === 1 
+              ? "basis-full sm:basis-2/3 md:basis-1/2 lg:basis-1/3 max-w-md mx-auto"
+              : "basis-full md:basis-1/2 lg:basis-1/3"
+            }
             renderItem={(item, i) => {
               const selectedGradient = getGradientForIndex(i)
               return (
@@ -1523,7 +1526,7 @@ export default function FashionPortfolioPage() {
                 onDelete={() => removeItem('volunteer', i)}
                 className={cn(
                   "h-full w-full shadow-lg overflow-hidden rounded-2xl",
-                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-[5/3]"
+                  item.viewMode === 'images' ? "aspect-[4/3]" : "aspect-auto min-h-[200px]"
                 )}
               >
                 {/* Render based on text variant */}

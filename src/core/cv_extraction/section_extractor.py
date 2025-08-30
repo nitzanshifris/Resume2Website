@@ -351,7 +351,7 @@ class SectionExtractor:
         if section_name == 'hobbies':
             hobbies_list = data if isinstance(data, list) else data.get('hobbies', [])
             return HobbiesSection(
-                sectionTitle="Hobbies & Interests",
+                sectionTitle="Hobbies",
                 hobbies=hobbies_list if isinstance(hobbies_list, list) else []
             ).model_dump()
         

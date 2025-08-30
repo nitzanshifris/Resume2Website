@@ -216,7 +216,9 @@ class ExperiencePromptTemplate(BasePromptTemplate):
     """Template for experience section extraction."""
     
     def get_section_specific_instructions(self) -> str:
-        return """Extract ALL work experience including internships, externships, and job shadowing.
+        return """Extract ALL work experience including internships, externships, military service, and job shadowing.
+        
+IMPORTANT: Military service should be treated as work experience and extracted here.
 
 PRIMARY FIELDS (used by template):
 - jobTitle: Exact title as written
@@ -337,8 +339,8 @@ FORMAT AS:
 AWARDS & RECOGNITIONS:
 - Employee of the Month/Year awards
 - Industry awards and honors
-- Academic honors (Dean's List, Honors, etc.)
 - Competition wins and rankings
+- DO NOT include academic honors (Dean's List, GPA, etc.) - these belong in Education section
 FORMAT AS:
   value="Employee of the Year"
   label="Company Award"
@@ -375,6 +377,10 @@ URL EXTRACTION:
 CRITICAL:
 - MUST scan entire CV for "Patents" section and extract all patents here
 - MUST scan entire CV for "Memberships" or "Professional Organizations" section and extract all here
+- NEVER invent or elaborate on achievements - extract ONLY what is explicitly written
+- DO NOT add explanatory text that wasn't in the original CV
+- DO NOT duplicate data from other sections (Education, Experience, Volunteering, etc.)
+- DO NOT include volunteer work or community service - these belong in Volunteering section
 - Combine everything into value + label + contextOrDetail format
 - Make contextOrDetail human-readable full sentences, not technical lists
 - If you find a dedicated Patents section, extract EVERY patent from it
@@ -495,13 +501,33 @@ CONTACT INFORMATION:
 - Any other social media or professional platform links
 - Availability information (e.g., "Willing to travel", "Available for remote work", etc.)
 
-DEMOGRAPHIC INFORMATION (extract when present, leave null if not found):
-- Place of birth (look for "Place of birth", "Born in", "Birthplace", "POB")
-- Nationality (look for "Nationality", "Citizenship", "Citizen")
-- Driving license (look for "Driving license", "Driver's license", "License")
-- Date of birth (look for "Date of birth", "DOB", "Born", "Birthdate")
-- Marital status (look for "Marital status", "Married", "Single", etc.)
-- Visa status / Work authorization (look for "Visa status", "Work authorization", "Authorized to work")
+DEMOGRAPHIC INFORMATION (AGGRESSIVELY SCAN ENTIRE CV - extract when present, leave null if not found):
+
+- Nationality (CRITICAL - SCAN EVERY SINGLE SECTION):
+  * Look for ANY mention of: passport, citizenship, nationality, citizen, national
+  * Check INSIDE parentheses: "(Israeli passport)" = Israeli nationality
+  * Check language sections: "Hebrew - Native (Israeli passport)" = Israeli nationality  
+  * Check military service: "IDF" or "Israeli Defense Forces" suggests Israeli
+  * If multiple passports/citizenships found, extract ALL (e.g., "Israeli, American" for dual citizenship)
+  * Common patterns: "X passport", "citizen of X", "X national", "X citizenship"
+  * DO NOT MISS: Text in parentheses, footnotes, side notes, language descriptions
+  
+- Place of birth: Any mention of birthplace, born in, POB, native of, originally from
+  
+- Date of birth: DOB, born on, birthdate, age (calculate backwards if age given)
+  
+- Driving license: Any mention of driving, driver's license, vehicle license, categories (A, B, C, etc.)
+  
+- Marital status: Single, married, divorced, widowed, partner, spouse references
+  
+- Visa status: Work permit, visa, authorization to work, eligible to work in, work rights
+
+EXTRACTION RULES:
+1. SCAN THE ENTIRE CV - demographic info can be ANYWHERE
+2. Check ALL sections including headers, footers, side panels, language sections
+3. Look INSIDE parentheses and brackets for passport/citizenship info
+4. If someone mentions a country's military service, infer that nationality
+5. Parse compound information: "Native Hebrew (Israeli passport)" → Language: Hebrew, Nationality: Israeli
 
 IMPORTANT INSTRUCTIONS:
 1. Preserve phone/email format exactly as written
@@ -791,16 +817,26 @@ class SummaryPromptTemplate(BasePromptTemplate):
     """Template for professional summary extraction."""
     
     def get_section_specific_instructions(self) -> str:
-        return """Extract the professional summary information from the CV.
+        return """Extract the summary/personal statement from the CV.
+
+IMPORTANT: Look for ANY section that summarizes the person, regardless of heading:
+- "About Me" / "About"
+- "Personal Statement" / "Personal Profile"  
+- "Professional Summary" / "Summary"
+- "Profile" / "Career Profile"
+- "Introduction" / "Bio"
+- Or any other section with personal/professional overview text
 
 PRIMARY FIELD (used by template):
-- summaryText: Extract a COMPREHENSIVE professional summary that includes:
-  * The full professional summary/overview text from the CV
-  * Years of experience integrated into the narrative
-  * Key specializations and expertise areas woven into the text
-  * Career highlights and major achievements as part of the summary
-  * Professional objectives and value proposition
-- This should be a complete narrative containing ALL summary-related information
+- summaryText: Extract the COMPLETE text that describes the person, including:
+  * Any personal introduction or "about me" text
+  * Professional summary/overview if present
+  * Personal interests, hobbies, or philosophy mentioned in overview sections
+  * Career objectives and aspirations
+  * Years of experience if mentioned
+  * Key specializations and expertise areas
+- This can be formal OR informal text - extract it exactly as written
+- Look ANYWHERE in the CV - beginning, middle, or end
 
 ADDITIONAL FIELDS (extract separately for future structured display):
 - yearsOfExperience: Extract as a number if mentioned (e.g., 8 for "8 years of experience")

@@ -361,30 +361,39 @@ export function ContactSection({ data, onSave, onSaveLocation, onSaveProfessiona
                     </div>
                   )}
                   
+                  {/* Handle multiple nationalities - split by comma and display as separate cards */}
                   {data.nationality && (
-                    <div className="group/card relative">
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
-                      {isEditMode && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
-                          onClick={() => onSave("nationality", "")}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                      <div className="relative p-3 flex flex-col space-y-1">
-                        <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Nationality</span>
-                        <EditableText
-                          as="span"
-                          initialValue={data.nationality}
-                          onSave={(value) => onSave("nationality", value)}
-                          className="text-sm font-medium text-foreground leading-tight"
-                          isEditMode={isEditMode}
-                        />
-                      </div>
-                    </div>
+                    <>
+                      {(typeof data.nationality === 'string' && data.nationality.includes(',') ? 
+                        data.nationality.split(',').map(n => n.trim()) : 
+                        [data.nationality]
+                      ).map((nationality, index) => (
+                        <div key={`nationality-${index}`} className="group/card relative">
+                          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/[0.08] to-white/[0.03] dark:from-white/[0.04] dark:to-white/[0.02] backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm group-hover/card:shadow-md transition-all duration-200"></div>
+                          {isEditMode && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="absolute -top-2 -right-2 z-10 h-6 w-6 p-0 rounded-full bg-red-500/90 hover:bg-red-600/90 text-white shadow-lg opacity-0 group-hover/card:opacity-100 transition-all duration-200"
+                              onClick={() => {
+                                // Remove this specific nationality
+                                const nationalities = data.nationality.split(',').map(n => n.trim());
+                                nationalities.splice(index, 1);
+                                onSave("nationality", nationalities.join(', ') || "");
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <div className="relative p-3 flex flex-col space-y-1">
+                            <span className="text-[10px] font-medium text-foreground/50 uppercase tracking-wider">Nationality</span>
+                            <span className="text-sm font-medium text-foreground leading-tight">
+                              {nationality}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </>
                   )}
                   
                   {data.dateOfBirth && (

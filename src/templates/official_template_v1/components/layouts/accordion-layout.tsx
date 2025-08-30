@@ -382,45 +382,81 @@ export function AccordionLayout({ items, onSave, onReorder, showIconEditor = tru
                             return acc
                           }, {} as Record<string, string[]>)
                           
-                          return Object.entries(groupedInfo).map(([label, values], idx) => {
-                            const combinedValues = values.join(', ')
-                            const fieldType = inferFieldType(label)
-                            const colorScheme = getFieldColorClass(fieldType, techTheme[i] as ThemeVariant || 'colorful', isEditMode ? 'edit' : 'preview')
-                            
-                            return (
-                              <motion.span
-                                key={label}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.15, ease: "easeOut" }}
-                                className={`group/tech relative inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ${colorScheme}`}
-                              >
-                                {label === "Custom" ? (
-                                  <span className="font-medium">{combinedValues}</span>
-                                ) : (
-                                  <>
-                                    <span className="font-semibold">{label}:</span>
-                                    <span>{combinedValues}</span>
-                                  </>
-                                )}
-                                {isEditMode && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="absolute inset-0 w-full h-full p-0 opacity-0 group-hover/tech:opacity-100 transition-opacity bg-red-500/90 hover:bg-red-600/90 text-white rounded-full flex items-center justify-center"
-                                    onClick={() => {
-                                      // Remove all items with this label
-                                      const newInfo = (item.additionalInfo || []).filter(info => info.label !== label)
-                                      onSave(i, "additionalInfo", newInfo)
-                                    }}
+                          return Object.entries(groupedInfo).flatMap(([label, values], idx) => {
+                            // Display each value as a separate tag for Tools, but combine for other labels
+                            if (label === "Tools") {
+                              // Each tool gets its own tag
+                              return values.map((value, valueIdx) => {
+                                const fieldType = inferFieldType(label)
+                                const colorScheme = getFieldColorClass(fieldType, techTheme[i] as ThemeVariant || 'colorful', isEditMode ? 'edit' : 'preview')
+                                
+                                return (
+                                  <motion.span
+                                    key={`${label}-${valueIdx}`}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.15, ease: "easeOut" }}
+                                    className={`group/tech relative inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ${colorScheme}`}
                                   >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                )}
+                                    <span className="font-medium">{value}</span>
+                                    {isEditMode && (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="absolute inset-0 w-full h-full p-0 opacity-0 group-hover/tech:opacity-100 transition-opacity bg-red-500/90 hover:bg-red-600/90 text-white rounded-full flex items-center justify-center"
+                                        onClick={() => {
+                                          // Remove this specific tool
+                                          const newInfo = (item.additionalInfo || []).filter(info => !(info.label === label && info.value === value))
+                                          onSave(i, "additionalInfo", newInfo)
+                                        }}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    )}
+                                  </motion.span>
+                                )
+                              })
+                            } else {
+                              // Other labels (Type, Mode, etc.) display combined
+                              const combinedValues = values.join(', ')
+                              const fieldType = inferFieldType(label)
+                              const colorScheme = getFieldColorClass(fieldType, techTheme[i] as ThemeVariant || 'colorful', isEditMode ? 'edit' : 'preview')
+                              
+                              return (
+                                <motion.span
+                                  key={label}
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ duration: 0.15, ease: "easeOut" }}
+                                  className={`group/tech relative inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ${colorScheme}`}
+                                >
+                                  {label === "Custom" ? (
+                                    <span className="font-medium">{combinedValues}</span>
+                                  ) : (
+                                    <>
+                                      <span className="font-semibold">{label}:</span>
+                                      <span>{combinedValues}</span>
+                                    </>
+                                  )}
+                                  {isEditMode && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="absolute inset-0 w-full h-full p-0 opacity-0 group-hover/tech:opacity-100 transition-opacity bg-red-500/90 hover:bg-red-600/90 text-white rounded-full flex items-center justify-center"
+                                      onClick={() => {
+                                        // Remove all items with this label
+                                        const newInfo = (item.additionalInfo || []).filter(info => info.label !== label)
+                                        onSave(i, "additionalInfo", newInfo)
+                                      }}
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  )}
                               </motion.span>
                             )
-                          })
-                        })()}
+                          }
+                        })
+                      })()}
                         {/* Edit mode input fields - Clickable buttons first, then textbox inputs */}
                         {isEditMode && (
                           <>

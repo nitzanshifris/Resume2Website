@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Tuple, Optional
 
 from .extraction_config import extraction_config
 from .date_validator import date_validator
+from .hallucination_validator import HallucinationValidator
 
 # Import schemas
 from src.core.schemas.unified_nullable import CVData
@@ -16,6 +17,65 @@ logger = logging.getLogger(__name__)
 
 class PostProcessor:
     """Handles post-processing of extracted CV data."""
+    
+    @staticmethod
+    def enhance_volunteer_roles(cv_data: CVData) -> CVData:
+        """
+        Enhance generic volunteer roles with more descriptive titles.
+        
+        Args:
+            cv_data: The CV data object
+            
+        Returns:
+            CV data with enhanced volunteer roles
+        """
+        if not cv_data.volunteer or not cv_data.volunteer.volunteerItems:
+            return cv_data
+            
+        for item in cv_data.volunteer.volunteerItems:
+            if item.role and item.organization:
+                # Handle generic "Member" roles
+                if item.role.lower() in ['member', 'volunteer', 'participant']:
+                    # Extract keywords from organization name to create better role
+                    org_lower = item.organization.lower()
+                    
+                    # Map organization types to role enhancements
+                    if 'scout' in org_lower:
+                        item.role = "Scout Movement Member"
+                    elif 'red cross' in org_lower or 'red crescent' in org_lower:
+                        item.role = "Red Cross Volunteer"
+                    elif 'church' in org_lower or 'religious' in org_lower:
+                        item.role = "Community Service Volunteer"
+                    elif 'hospital' in org_lower or 'medical' in org_lower or 'health' in org_lower:
+                        item.role = "Healthcare Volunteer"
+                    elif 'school' in org_lower or 'education' in org_lower or 'tutor' in org_lower:
+                        item.role = "Education Volunteer"
+                    elif 'animal' in org_lower or 'shelter' in org_lower or 'rescue' in org_lower:
+                        item.role = "Animal Welfare Volunteer"
+                    elif 'environment' in org_lower or 'conservation' in org_lower or 'green' in org_lower:
+                        item.role = "Environmental Volunteer"
+                    elif 'youth' in org_lower or 'children' in org_lower or 'kids' in org_lower:
+                        item.role = "Youth Program Volunteer"
+                    elif 'food' in org_lower or 'soup kitchen' in org_lower or 'hunger' in org_lower:
+                        item.role = "Food Service Volunteer"
+                    elif 'homeless' in org_lower or 'shelter' in org_lower:
+                        item.role = "Homeless Services Volunteer"
+                    elif 'community' in org_lower:
+                        item.role = "Community Service Volunteer"
+                    elif 'charity' in org_lower or 'foundation' in org_lower:
+                        item.role = "Charity Volunteer"
+                    elif 'sports' in org_lower or 'athletic' in org_lower:
+                        item.role = "Sports Program Volunteer"
+                    elif 'arts' in org_lower or 'museum' in org_lower or 'culture' in org_lower:
+                        item.role = "Arts & Culture Volunteer"
+                    else:
+                        # Generic improvement: capitalize and add "Volunteer" if not present
+                        if 'volunteer' not in item.role.lower():
+                            item.role = f"{item.role.title()} Volunteer"
+                    
+                    logger.info(f"Enhanced volunteer role from generic to: {item.role}")
+        
+        return cv_data
     
     @staticmethod
     def deduplicate_certifications_courses(cv_data: CVData) -> CVData:
@@ -175,17 +235,29 @@ class PostProcessor:
         Returns:
             Tuple of (processed CV data, confidence score, validation issues)
         """
+        all_issues = []
+        
         # 1. Deduplicate certifications and courses
         cv_data = PostProcessor.deduplicate_certifications_courses(cv_data)
         
-        # 2. Validate and fix dates
-        cv_data_dict = cv_data.model_dump()
-        cv_data_dict, validation_issues = PostProcessor.validate_and_fix_dates(cv_data_dict)
+        # 2. Enhance volunteer roles for better presentation
+        cv_data = PostProcessor.enhance_volunteer_roles(cv_data)
         
-        # 3. Clean empty sections  
+        # 3. Convert to dict for processing
+        cv_data_dict = cv_data.model_dump()
+        
+        # 4. CRITICAL: Validate against hallucinations
+        cv_data_dict, hallucination_issues = HallucinationValidator.validate_cv_data(cv_data_dict, raw_text)
+        all_issues.extend(hallucination_issues)
+        
+        # 5. Validate and fix dates
+        cv_data_dict, date_issues = PostProcessor.validate_and_fix_dates(cv_data_dict)
+        all_issues.extend(date_issues)
+        
+        # 6. Clean empty sections  
         cv_data_dict = PostProcessor.clean_empty_sections(cv_data_dict)
         
-        # 4. Recreate CVData with cleaned data
+        # 7. Recreate CVData with cleaned data
         try:
             cv_data = CVData(**cv_data_dict)
         except Exception as e:
@@ -193,10 +265,14 @@ class PostProcessor:
             # Return original if recreation fails
             pass
         
-        # 5. Calculate confidence score
+        # 7. Calculate confidence score
         confidence = PostProcessor.calculate_extraction_confidence(cv_data, raw_text)
         
-        return cv_data, confidence, validation_issues
+        # Log issues if any
+        if all_issues:
+            logger.warning(f"Post-processing found {len(all_issues)} issues")
+        
+        return cv_data, confidence, all_issues
 
 
 # Create singleton instance
