@@ -473,7 +473,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     experience: {
-      sectionTitle: cv2webData.experience?.sectionTitle || "Experience",
+      sectionTitle: "Experience", // Always use standard title - never allow user data to override
       experienceItems: (cv2webData.experience?.experienceItems || []).map(item => {
         // Create additionalInfo array from technologiesUsed and other metadata
         const additionalInfo: Array<{label: string, value: string}> = [];
@@ -521,7 +521,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     education: {
-      sectionTitle: cv2webData.education?.sectionTitle || "Education",
+      sectionTitle: "Education", // Always use standard title - never allow user data to override
       layoutConfig: {
         layoutType: 'horizontal-carousel',
         autoSizing: false,
@@ -546,7 +546,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     skills: {
-      sectionTitle: cv2webData.skills?.sectionTitle || "Skills",
+      sectionTitle: "Skills", // Always use "Skills" - never allow user data to override
       skillCategories: (cv2webData.skills?.skillCategories || []).map(category => ({
         categoryName: category?.categoryName || "Skills",
         skills: (category?.skills || []).map(skill => {
@@ -576,7 +576,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     projects: {
-      sectionTitle: cv2webData.projects?.sectionTitle || "Projects",
+      sectionTitle: "Projects", // Always use standard title - never allow user data to override
       layoutConfig: {
         layoutType: 'horizontal-carousel',
         autoSizing: false,
@@ -614,7 +614,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     languages: {
-      sectionTitle: cv2webData.languages?.sectionTitle || "Languages",
+      sectionTitle: "Languages", // Always use "Languages" - never allow user data to override
       languageItems: (cv2webData.languages?.languageItems || []).map(item => ({
         language: item?.language || "",
         proficiency: item?.proficiency || ""  // Keep exact proficiency levels (Native, Fluent, Intermediate, Beginner, etc.)
@@ -622,7 +622,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     certifications: {
-      sectionTitle: cv2webData.certifications?.sectionTitle || "Certifications",
+      sectionTitle: "Certifications", // Always use standard title - never allow user data to override
       certificationItems: (cv2webData.certifications?.certificationItems || []).map((item, index) => ({
         title: item?.title || "Certification",
         description: item?.description || `${item?.issuingOrganization || "Issuing Body"}${item?.issueDate ? `, ${item?.issueDate}` : ""}`,
@@ -638,7 +638,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     achievements: {
-      sectionTitle: cv2webData.achievements?.sectionTitle || "Achievements",
+      sectionTitle: "Achievements", // Always use standard title - never allow user data to override
       achievementItems: (cv2webData.achievements?.achievements || []).map((item, index) => ({
         title: item?.label || "Achievement",
         description: `${item?.value || ""} ${item?.contextOrDetail || ""}`.trim() || "Professional achievement.",
@@ -650,7 +650,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     volunteer: {
-      sectionTitle: cv2webData.volunteer?.sectionTitle || "Volunteer Experience",
+      sectionTitle: "Volunteer Experience", // Always use standard title - never allow user data to override
       layoutConfig: {
         layoutType: 'horizontal-carousel',
         autoSizing: false,
@@ -688,7 +688,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     courses: {
-      sectionTitle: cv2webData.courses?.sectionTitle || "Courses",
+      sectionTitle: "Courses", // Always use standard title - never allow user data to override
       courseItems: (cv2webData.courses?.courseItems || []).map((item, index) => ({
         title: item?.title || "Course",
         institution: item?.institution || "Institution",
@@ -700,7 +700,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     publications: {
-      sectionTitle: cv2webData.publications?.sectionTitle || "Publications",
+      sectionTitle: "Publications", // Always use standard title - never allow user data to override
       publicationItems: (cv2webData.publications?.publications || []).map((item, index) => {
         // Determine view mode based on available URLs
         const viewModeData = determineViewMode({
@@ -731,7 +731,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     speakingEngagements: {
-      sectionTitle: cv2webData.speaking?.sectionTitle || "Speaking Engagements",
+      sectionTitle: "Speaking Engagements", // Always use standard title - never allow user data to override
       engagementItems: (cv2webData.speaking?.speakingEngagements || []).map((item, index) => {
         // Determine view mode based on available URLs
         const viewModeData = determineViewMode({
@@ -761,7 +761,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     memberships: {
-      sectionTitle: cv2webData.memberships?.sectionTitle || "Professional Memberships",
+      sectionTitle: "Professional Memberships", // Always use standard title - never allow user data to override
       membershipItems: (cv2webData.memberships?.memberships || []).map(item => ({
         organization: item?.organization || "Organization",
         role: item?.role || "Member",
@@ -774,7 +774,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     },
 
     hobbies: {
-      sectionTitle: cv2webData.hobbies?.sectionTitle || "Hobbies",
+      sectionTitle: "Hobbies", // Always use standard title - never allow user data to override
       hobbyItems: (() => {
         // Use hobbyItems if available (SmartCard format), otherwise use legacy hobbies list
         if (cv2webData.hobbies?.hobbyItems && cv2webData.hobbies.hobbyItems.length > 0) {
