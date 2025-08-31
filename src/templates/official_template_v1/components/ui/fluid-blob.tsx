@@ -164,7 +164,6 @@ export const LavaLamp = () => {
 
   // Update blob color based on theme
   React.useEffect(() => {
-    // Small delay to ensure CSS variables are updated after theme change
     const updateColor = () => {
       const rootStyles = getComputedStyle(document.documentElement);
       
@@ -225,14 +224,38 @@ export const LavaLamp = () => {
       }
     };
     
-    // Update immediately
+    // Update immediately on mount
     updateColor();
     
-    // Also update after a small delay to catch any CSS transitions
-    const timer = setTimeout(updateColor, 100);
+    // Watch for changes to the document's class attribute (theme changes)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && 
+            (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme')) {
+          // Theme has changed, update color after a small delay for CSS to update
+          setTimeout(updateColor, 50);
+        }
+      });
+    });
     
-    return () => clearTimeout(timer);
-  }, [theme]);
+    // Observe changes to html element's class and data-theme attributes
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme']
+    });
+    
+    // Also listen for storage events (theme changes from other tabs)
+    const handleStorageChange = () => {
+      setTimeout(updateColor, 50);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []); // Remove theme dependency, use MutationObserver instead
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'transparent', position: "absolute" }}>
