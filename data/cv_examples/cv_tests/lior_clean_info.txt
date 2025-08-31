@@ -1,0 +1,3 @@
+Job ID: 912c98d9-6d14-4611-bae7-fdac33a72550
+Portfolio URL: http://localhost:4000
+Email: lior_clean_1756597980@example.com
