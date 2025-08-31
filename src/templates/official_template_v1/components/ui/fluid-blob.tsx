@@ -164,34 +164,74 @@ export const LavaLamp = () => {
 
   // Update blob color based on theme
   React.useEffect(() => {
-    // Get the CSS variable value for the accent color
-    const rootStyles = getComputedStyle(document.documentElement);
-    const accentColor = rootStyles.getPropertyValue('--accent').trim();
-    
-    // Parse HSL values (format: "h s% l%")
-    const [h, s, l] = accentColor.split(' ').map(v => parseFloat(v));
-    
-    // Convert HSL to RGB for Three.js
-    const hue = h / 360;
-    const sat = s / 100;
-    const light = l / 100;
-    
-    const hue2rgb = (p: number, q: number, t: number) => {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-      return p;
+    // Small delay to ensure CSS variables are updated after theme change
+    const updateColor = () => {
+      const rootStyles = getComputedStyle(document.documentElement);
+      
+      // Try multiple CSS variables in order of preference
+      let colorValue = rootStyles.getPropertyValue('--accent').trim() || 
+                       rootStyles.getPropertyValue('--primary').trim() ||
+                       rootStyles.getPropertyValue('--foreground').trim();
+      
+      if (!colorValue) {
+        // Fallback to a default if no CSS variable found
+        setThemeColor(new THREE.Vector3(1.0, 0.843, 0.0)); // Default gold
+        return;
+      }
+      
+      // Handle different color formats
+      if (colorValue.includes(' ')) {
+        // HSL format: "h s% l%" or "h s l"
+        const parts = colorValue.split(' ').map(v => parseFloat(v));
+        if (parts.length >= 3) {
+          const [h, s, l] = parts;
+          
+          // Convert HSL to RGB for Three.js
+          const hue = h / 360;
+          const sat = s / 100;
+          const light = l / 100;
+          
+          const hue2rgb = (p: number, q: number, t: number) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+          };
+          
+          const q = light < 0.5 ? light * (1 + sat) : light + sat - light * sat;
+          const p = 2 * light - q;
+          const r = hue2rgb(p, q, hue + 1/3);
+          const g = hue2rgb(p, q, hue);
+          const b = hue2rgb(p, q, hue - 1/3);
+          
+          setThemeColor(new THREE.Vector3(r, g, b));
+        }
+      } else if (colorValue.startsWith('#')) {
+        // Hex format
+        const hex = colorValue.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16) / 255;
+        const g = parseInt(hex.substr(2, 2), 16) / 255;
+        const b = parseInt(hex.substr(4, 2), 16) / 255;
+        setThemeColor(new THREE.Vector3(r, g, b));
+      } else if (colorValue.includes(',')) {
+        // RGB format: "r, g, b" or "r g b"
+        const parts = colorValue.split(/[,\s]+/).map(v => parseFloat(v));
+        if (parts.length >= 3) {
+          const [r, g, b] = parts.map(v => v / 255);
+          setThemeColor(new THREE.Vector3(r, g, b));
+        }
+      }
     };
     
-    const q = light < 0.5 ? light * (1 + sat) : light + sat - light * sat;
-    const p = 2 * light - q;
-    const r = hue2rgb(p, q, hue + 1/3);
-    const g = hue2rgb(p, q, hue);
-    const b = hue2rgb(p, q, hue - 1/3);
+    // Update immediately
+    updateColor();
     
-    setThemeColor(new THREE.Vector3(r, g, b));
+    // Also update after a small delay to catch any CSS transitions
+    const timer = setTimeout(updateColor, 100);
+    
+    return () => clearTimeout(timer);
   }, [theme]);
 
   return (
