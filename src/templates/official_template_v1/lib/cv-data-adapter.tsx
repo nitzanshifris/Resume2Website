@@ -320,6 +320,22 @@ function adaptContact(cv2webContact?: CV2WebContact | null): ContactData {
   }
 }
 
+function cleanSummaryText(text: string): string {
+  if (!text) return "";
+
+  // Split only when a list marker starts a line/sentence: -, – , — , •
+  const parts = text
+    .split(/(?:^|\n|\.\s*)\s*[-–—•]\s+/g)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  // If it looks like a list, join into sentences
+  if (parts.length > 1) {
+    return parts.join('. ').replace(/\s*\.\s*$/,'');
+  }
+  return text.trim();
+}
+
 function formatDateRange(dateRange?: CV2WebDateRange | null): string {
   if (!dateRange) return ""
   
@@ -453,7 +469,7 @@ export function adaptCV2WebToTemplate(cv2webData: CV2WebData): PortfolioData {
     
     summary: {
       sectionTitle: cv2webData.summary?.summaryText ? "Professional Summary" : "",
-      summaryText: cv2webData.summary?.summaryText || ""
+      summaryText: cleanSummaryText(cv2webData.summary?.summaryText || "")
     },
 
     experience: {

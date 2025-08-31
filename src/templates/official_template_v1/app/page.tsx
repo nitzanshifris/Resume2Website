@@ -880,8 +880,7 @@ export default function FashionPortfolioPage() {
                             </div>
                           )}
                           {!isEditMode ? (
-                            <a href={item.link} target="_blank" rel="noopener noreferrer" className="block h-full">
-                              <BentoGridItem
+                            <BentoGridItem
                               className="h-full"
                               icon={typeof item.icon === 'object' ? renderIcon(item.icon, "h-4 w-4 text-muted-foreground") : (contentIconMap[item.icon] || contentIconMap.Lightbulb)}
                               title={
@@ -899,8 +898,8 @@ export default function FashionPortfolioPage() {
                                   modalTitle={`${item.title} - Description`}
                                 />
                               }
+                              link={item.link}
                             />
-                            </a>
                           ) : (
                             <BentoGridItem
                               className="h-full"

@@ -21,6 +21,7 @@ export const BentoGridItem = ({
   iconData,
   onIconUpdate,
   onIconClick,
+  link,
 }: {
   className?: string
   title?: string | React.ReactNode
@@ -38,6 +39,7 @@ export const BentoGridItem = ({
   iconData?: any // The raw icon data object
   onIconUpdate?: (newIcon: any) => void // Function to update icon
   onIconClick?: () => void // Function to handle icon clicks
+  link?: string // Optional link for the project
 }) => {
   const { isEditMode } = useEditMode()
   const [mounted, setMounted] = useState(false)
@@ -150,15 +152,34 @@ export const BentoGridItem = ({
           )}
           <div className="flex-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
-              <div className={cn(
-                "transition-colors duration-300",
-                titleTextSize,
-                titleFontWeight,
-                titleFontFamily,
-                titleColor,
-                "group-hover:!text-accent",
-                "leading-tight"
-              )}>{title}</div>
+              {link && !isEditMode ? (
+                <a 
+                  href={link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "transition-colors duration-300 inline-block hover:underline",
+                    titleTextSize,
+                    titleFontWeight,
+                    titleFontFamily,
+                    titleColor,
+                    "group-hover:!text-accent",
+                    "leading-tight"
+                  )}
+                >
+                  {title}
+                </a>
+              ) : (
+                <div className={cn(
+                  "transition-colors duration-300",
+                  titleTextSize,
+                  titleFontWeight,
+                  titleFontFamily,
+                  titleColor,
+                  "group-hover:!text-accent",
+                  "leading-tight"
+                )}>{title}</div>
+              )}
               {description && (
                 <div className={cn(
                   "transition-all duration-300",
