@@ -440,9 +440,12 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
   
   const renderContent = () => {
     switch (viewMode) {
-      case 'text':
+case 'text':
         return (
-          <div className="relative h-full overflow-hidden">
+          <div className={cn(
+            "relative h-full overflow-hidden",
+            isEditMode && "border-2 border-dashed border-accent p-1 rounded-lg"
+          )}>
             {enhancedChildren}
           </div>
         )

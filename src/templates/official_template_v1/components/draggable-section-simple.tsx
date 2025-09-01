@@ -68,17 +68,17 @@ return (
         <>
 {isMobile ? (
             <>
-              {/* Mobile indicator - always visible in edit mode */}
-              <div className="absolute right-0 top-20 z-40">
+{/* Mobile indicator - always visible in edit mode */}
+              <div className="fixed right-0 top-1/3 z-[60]">
                 <div className={cn(
-                  "w-12 h-24 bg-gradient-to-b from-blue-500/20 to-blue-500/10 rounded-l-lg border-2 border-r-0 border-dashed border-blue-400/50 transition-opacity duration-200",
+                  "w-10 h-20 bg-gradient-to-b from-blue-500/20 to-blue-500/10 rounded-l-lg border-2 border-r-0 border-dashed border-blue-400/50 transition-opacity duration-200",
                   isHovered && "opacity-0"
                 )} />
               </div>
               
               {/* Mobile controls: Up/Down buttons - show when section is tapped */}
               <div className={cn(
-                "absolute right-0 top-20 z-40 flex flex-col gap-1 transition-opacity duration-200",
+                "fixed right-0 top-1/3 z-[70] flex flex-col gap-1 transition-opacity duration-200",
                 isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
               )}>
                 <button

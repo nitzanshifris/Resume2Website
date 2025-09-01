@@ -81,6 +81,8 @@ function DraggableSmartCard({
   position: TimelinePosition
 }) {
   const { isEditMode } = useEditMode()
+  const [isMobile, setIsMobile] = React.useState(false)
+  
   const {
     attributes,
     listeners,
@@ -89,6 +91,15 @@ function DraggableSmartCard({
     transition,
     isDragging,
   } = useDraggable({ id })
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
@@ -104,8 +115,8 @@ function DraggableSmartCard({
         isDragging && "z-50 opacity-50"
       )}
     >
-      {/* Drag Handle */}
-      {isEditMode && (
+      {/* Drag Handle - desktop only */}
+      {isEditMode && !isMobile && (
         <div
           {...attributes}
           {...listeners}
@@ -122,6 +133,23 @@ function DraggableSmartCard({
           style={{ top: '74px' }}
         >
           <GripVertical className="h-4 w-4" />
+        </div>
+      )}
+      {/* Mobile indicator - no drag on mobile for cards */}
+      {isEditMode && isMobile && (
+        <div
+          className={cn(
+            "absolute z-40",
+            "flex items-center justify-center",
+            "rounded-lg",
+            "bg-gray-400/50",
+            "text-white shadow-lg",
+            "cursor-not-allowed",
+            "right-2 w-8 h-8"
+          )}
+          style={{ top: '74px' }}
+        >
+          <GripVertical className="h-4 w-4 opacity-50" />
         </div>
       )}
       {children}
