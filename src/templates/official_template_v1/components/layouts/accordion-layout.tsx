@@ -106,7 +106,7 @@ export function AccordionLayout({ items, onSave, onReorder, showIconEditor = tru
             className={`
               relative border-2 rounded-2xl overflow-hidden transition-all duration-200 ease-out
               ${openItem === `item-${i}` 
-                ? 'border-accent bg-transparent shadow-2xl shadow-slate-900/15 scale-[1.01] backdrop-blur-md' 
+                ? 'border-accent bg-transparent shadow-2xl shadow-slate-900/15 backdrop-blur-md' 
                 : 'border-accent hover:border-accent hover:shadow-xl hover:shadow-slate-900/8 bg-transparent backdrop-blur-sm hover:backdrop-blur-md'
               }
               ${hoveredIndex === i ? 'z-10 shadow-lg shadow-slate-900/10' : 'z-0'}
