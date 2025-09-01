@@ -2268,11 +2268,18 @@ export default function FashionPortfolioPage() {
         <SortableContext
           items={orderedSections.filter(key => sectionComponents[key] !== null && sectionComponents[key] !== undefined)}
           strategy={verticalListSortingStrategy}
-        >
+>
           {orderedSections
             .filter((key) => sectionComponents[key] !== null && sectionComponents[key] !== undefined)
-            .map((key) => (
-              <DraggableSection key={key} id={key}>
+            .map((key, index, arr) => (
+              <DraggableSection 
+                key={key} 
+                id={key}
+                onMoveUp={() => moveSection(key, 'up')}
+                onMoveDown={() => moveSection(key, 'down')}
+                isFirst={index === 0}
+                isLast={index === arr.length - 1}
+              >
                 {sectionComponents[key]}
               </DraggableSection>
             ))}
