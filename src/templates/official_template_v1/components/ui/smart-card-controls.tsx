@@ -133,6 +133,7 @@ export function SmartCardControls({
             style={{ right: `${rightOffset}px` }}
             onClick={onSettings}
             title="Settings"
+            data-sheet-trigger="true"
           >
             <Settings className="h-4 w-4" />
           </Button>

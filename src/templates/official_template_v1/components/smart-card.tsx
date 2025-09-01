@@ -219,6 +219,21 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
   const safeShowIconEditor = isEditAllowed('SmartCard') ? showIconEditor : false
   const [viewMode, setViewMode] = useState<ViewMode>(item.viewMode || 'text')
   const [sheetOpen, setSheetOpen] = useState(defaultSettingsOpen)
+  const [isMobile, setIsMobile] = useState(false)
+  const [sheetHeight, setSheetHeight] = useState(40) // Default 40% height on mobile
+  const [isDragging, setIsDragging] = useState(false)
+  const [startY, setStartY] = useState(0)
+  const [startHeight, setStartHeight] = useState(40)
+  
+  // Detect mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   const [images, setImages] = useState<string[]>(item.images || [])
   const [codeContent, setCodeContent] = useState(item.codeSnippet || '\n'.repeat(7))
   const [codeLanguage, setCodeLanguage] = useState(item.codeLanguage || 'typescript')
@@ -260,6 +275,89 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
       onIconClick()
     }
   }
+
+  // Handle drag to resize bottom sheet on mobile
+  const handleDragStart = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!isMobile) return
+    e.preventDefault() // Prevent text selection during drag
+    setIsDragging(true)
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    setStartY(clientY)
+    setStartHeight(sheetHeight)
+  }
+
+  const handleDragMove = (e: TouchEvent | MouseEvent) => {
+    if (!isDragging || !isMobile) return
+    e.preventDefault() // Prevent page scroll during drag
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const deltaY = startY - clientY
+    const deltaPercent = (deltaY / window.innerHeight) * 100
+    const newHeight = Math.min(80, Math.max(20, startHeight + deltaPercent))
+    
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      setSheetHeight(newHeight)
+    })
+  }
+
+  const handleDragEnd = () => {
+    setIsDragging(false)
+    // Snap to certain positions for better UX
+    if (sheetHeight < 30) {
+      setSheetHeight(25)
+    } else if (sheetHeight > 65) {
+      setSheetHeight(70)
+    }
+  }
+
+  // Add event listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      const handleMove = (e: TouchEvent | MouseEvent) => handleDragMove(e)
+      const handleEnd = () => handleDragEnd()
+      
+      document.addEventListener('touchmove', handleMove, { passive: false })
+      document.addEventListener('touchend', handleEnd)
+      document.addEventListener('mousemove', handleMove)
+      document.addEventListener('mouseup', handleEnd)
+      
+      return () => {
+        document.removeEventListener('touchmove', handleMove)
+        document.removeEventListener('touchend', handleEnd)
+        document.removeEventListener('mousemove', handleMove)
+        document.removeEventListener('mouseup', handleEnd)
+      }
+    }
+  }, [isDragging, startY, startHeight])
+
+  // Handle clicking outside on mobile when modal is false
+  useEffect(() => {
+    if (isMobile && sheetOpen) {
+      const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+        const target = e.target as HTMLElement
+        // Check if click is on the sheet content or overlay
+        const sheetContent = document.querySelector('[role="dialog"]')
+        if (sheetContent && !sheetContent.contains(target)) {
+          // Check if it's not the trigger button
+          if (!target.closest('[data-sheet-trigger]')) {
+            setSheetOpen(false)
+          }
+        }
+      }
+      
+      // Add delay to avoid immediate close on open
+      const timer = setTimeout(() => {
+        document.addEventListener('click', handleClickOutside)
+        document.addEventListener('touchstart', handleClickOutside)
+      }, 100)
+      
+      return () => {
+        clearTimeout(timer)
+        document.removeEventListener('click', handleClickOutside)
+        document.removeEventListener('touchstart', handleClickOutside)
+      }
+    }
+  }, [isMobile, sheetOpen])
 
   // Clone children and pass down the icon click handler
   const enhancedChildren = React.isValidElement(children) && children.type === 'div' 
@@ -1437,18 +1535,53 @@ export function SmartCard({ item, children, className, onUpdate, onDelete, showI
       {/* Universal Smart Card Controls - FULLY PROTECTED by EditGuard */}
       <EditGuard>
         {/* Settings Sheet */}
-        <Sheet open={sheetOpen} onOpenChange={(open) => {
-          setSheetOpen(open)
-          // Reset all sections to closed when sheet is closed
-          if (!open) {
-            setCollapsedSections({
-              display: false,
-              icon: true
-            })
-          }
-        }}>
-          <SheetContent side="right" className="overflow-hidden flex flex-col w-[26rem] sm:w-[31rem]">
-            <SheetHeader className="shrink-0">
+        <Sheet 
+          open={sheetOpen} 
+          onOpenChange={(open) => {
+            setSheetOpen(open)
+            // Reset all sections to closed when sheet is closed
+            if (!open) {
+              setCollapsedSections({
+                display: false,
+                icon: true
+              })
+            }
+          }}
+          modal={!isMobile} // Disable modal behavior on mobile to allow page scrolling
+        >
+          <SheetContent 
+            side={isMobile ? "bottom" : "right"} 
+            className={cn(
+              "overflow-hidden flex flex-col",
+              isMobile 
+                ? "w-full" 
+                : "sm:w-[26rem] md:w-[31rem] sm:max-w-[31rem]"
+            )}
+            style={isMobile ? { 
+              height: `${sheetHeight}vh`,
+              transition: isDragging ? 'none' : 'height 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)'
+            } : {}}>
+            {/* Draggable handle for mobile bottom sheet */}
+            {isMobile && (
+              <div 
+                className="absolute top-0 left-0 right-0 h-12 flex flex-col items-center justify-center cursor-ns-resize touch-none bg-gradient-to-b from-background via-background/95 to-transparent z-10"
+                onTouchStart={handleDragStart}
+                onMouseDown={handleDragStart}
+              >
+                <div className="absolute inset-x-0 top-0 h-12 flex flex-col items-center justify-center gap-1">
+                  <div className={cn(
+                    "w-12 h-1.5 rounded-full transition-all",
+                    isDragging 
+                      ? "bg-blue-500 dark:bg-blue-400 w-20 h-2" 
+                      : "bg-gray-400 dark:bg-gray-500 hover:bg-gray-500 dark:hover:bg-gray-400"
+                  )} />
+                  {!isDragging && (
+                    <span className="text-[10px] text-muted-foreground select-none">Drag to resize</span>
+                  )}
+                </div>
+              </div>
+            )}
+            <SheetHeader className={cn("shrink-0", isMobile && "mt-8")}>
               <SheetTitle className="text-lg font-semibold text-foreground">
                 Card Settings
               </SheetTitle>

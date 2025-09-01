@@ -257,7 +257,7 @@ export function DraggableCardTimelineV2<T>({
         {/* Flexbox Layout - Support smartcard sizing with directional growth */}
         <div className="flex items-start">
           {/* Left Container - grows to the left */}
-          <div className="flex justify-end flex-1 pr-3 md:pr-6">
+          <div className="hidden md:flex justify-end flex-1 pr-3 md:pr-6">
             <DropZone
               id={`dropzone-${rowIndex}-left`}
               position={{ row: rowIndex, side: 'left' }}
@@ -277,8 +277,8 @@ export function DraggableCardTimelineV2<T>({
             </DropZone>
           </div>
 
-          {/* Center Timeline - Fixed width */}
-          <div className="relative flex flex-col items-center w-12 flex-shrink-0">
+          {/* Center Timeline - Fixed width on desktop, adjusted for mobile */}
+          <div className="relative flex flex-col items-center w-8 md:w-12 flex-shrink-0 ml-4 md:ml-0">
             {/* Timeline Dot */}
             <motion.div
               initial={{ scale: 0 }}
@@ -291,13 +291,14 @@ export function DraggableCardTimelineV2<T>({
               
               {/* Main dot with icon */}
               <div className={cn(
-                "relative flex h-12 w-12 items-center justify-center rounded-full",
-                "bg-accent shadow-xl border-4 border-background",
+                "relative flex items-center justify-center rounded-full",
+                "h-10 w-10 md:h-12 md:w-12",
+                "bg-accent shadow-xl border-2 md:border-4 border-background",
                 "transition-all duration-300",
                 "hover:scale-110 hover:shadow-2xl"
               )}>
                 {timelineIcon || (
-                  <div className="h-3 w-3 rounded-full bg-accent-foreground" />
+                  <div className="h-2 w-2 md:h-3 md:w-3 rounded-full bg-accent-foreground" />
                 )}
               </div>
             </motion.div>
@@ -308,31 +309,46 @@ export function DraggableCardTimelineV2<T>({
                 initial={{ height: 0 }}
                 animate={{ height: "100%" }}
                 transition={{ delay: rowIndex * 0.1 + 0.3, duration: 0.5 }}
-                className="absolute top-12 w-0.5 bg-gradient-to-b from-accent/40 via-accent/20 to-accent/40"
+                className="absolute top-10 md:top-12 w-0.5 bg-gradient-to-b from-accent/40 via-accent/20 to-accent/40"
                 style={{ height: "calc(100% + 3rem)" }}
               />
             )}
           </div>
 
-          {/* Right Container - grows to the right */}
+          {/* Right Container - grows to the right, but on mobile shows both items */}
           <div className="flex justify-start flex-1 pl-3 md:pl-6">
-            <DropZone
-              id={`dropzone-${rowIndex}-right`}
-              position={{ row: rowIndex, side: 'right' }}
-              isEmpty={!rightItem}
-              cardClasses={cardClasses}
-            >
-              {rightItem && (
-                <div className={cn("flex", cardClasses)}>
+            <div className="flex flex-col space-y-4 md:space-y-0 w-full md:w-auto">
+              {/* On mobile, show left item first if it exists */}
+              {leftItem && (
+                <div className="md:hidden">
                   <DraggableSmartCard 
-                    id={rightItem.id} 
-                    position={rightItem.position}
+                    id={leftItem.id} 
+                    position={leftItem.position}
                   >
-                    {renderSmartCard(rightItem.item, rightItem.index, rightItem.position)}
+                    {renderSmartCard(leftItem.item, leftItem.index, leftItem.position)}
                   </DraggableSmartCard>
                 </div>
               )}
-            </DropZone>
+              
+              {/* Right item - always visible */}
+              <DropZone
+                id={`dropzone-${rowIndex}-right`}
+                position={{ row: rowIndex, side: 'right' }}
+                isEmpty={!rightItem && !leftItem}
+                cardClasses={cardClasses}
+              >
+                {rightItem && (
+                  <div className={cn("flex", cardClasses)}>
+                    <DraggableSmartCard 
+                      id={rightItem.id} 
+                      position={rightItem.position}
+                    >
+                      {renderSmartCard(rightItem.item, rightItem.index, rightItem.position)}
+                    </DraggableSmartCard>
+                  </div>
+                )}
+              </DropZone>
+            </div>
           </div>
         </div>
       </div>
@@ -349,8 +365,8 @@ export function DraggableCardTimelineV2<T>({
         onDragEnd={handleDragEnd}
       >
         <div className={cn("w-full mx-auto px-4 relative", containerClassName)}>
-          {/* Continuous Timeline Line */}
-          <div className="absolute left-1/2 top-6 bottom-6 w-0.5 bg-gradient-to-b from-accent/20 via-accent/10 to-transparent -translate-x-1/2 z-0" />
+          {/* Continuous Timeline Line - adjusted for mobile */}
+          <div className="absolute left-7 md:left-1/2 top-6 bottom-6 w-0.5 bg-gradient-to-b from-accent/20 via-accent/10 to-transparent md:-translate-x-1/2 z-0" />
           
           {/* Timeline Rows */}
           <div className="relative space-y-8 md:space-y-12">
@@ -405,12 +421,12 @@ export function DraggableCardTimelineV2<T>({
   // Preview mode - same visual layout but no drag functionality
   return (
     <div className={cn("w-full mx-auto px-4 relative", containerClassName)}>
-      {/* Continuous Timeline Line */}
+      {/* Continuous Timeline Line - adjusted for mobile */}
       <motion.div
         initial={{ height: 0 }}
         animate={{ height: "100%" }}
         transition={{ duration: 0.8, ease: "easeInOut" }}
-        className="absolute left-1/2 top-6 bottom-6 w-0.5 bg-gradient-to-b from-accent/20 via-accent/10 to-transparent -translate-x-1/2 z-0"
+        className="absolute left-7 md:left-1/2 top-6 bottom-6 w-0.5 bg-gradient-to-b from-accent/20 via-accent/10 to-transparent md:-translate-x-1/2 z-0"
       />
       
       {/* Timeline Rows */}
