@@ -46,6 +46,7 @@ import { EditableSection } from "@/components/editable-section"
 import { StylePanel } from "@/components/style-panel"
 import { SectionLayoutSettings } from "@/components/section-layout-settings"
 import { generateCardClasses, type SectionLayoutConfig } from "@/lib/smart-sizing"
+import { LavaLamp } from "@/components/ui/fluid-blob"
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 const formatLabel = (key: string) => {
@@ -108,6 +109,7 @@ export default function FashionPortfolioPage() {
   const [orderedSections, setOrderedSections] = useState<SectionKey[]>(initialSectionKeys)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
   const { theme, setTheme, themes } = useTheme()
   const { isEditMode } = useEditMode()
   
@@ -118,6 +120,16 @@ export default function FashionPortfolioPage() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
+  
+  /* Detect mobile screen */
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   /* Load CV Data */ /* ------------------------------------------- */
   useEffect(() => {
@@ -2247,8 +2259,15 @@ export default function FashionPortfolioPage() {
       title: (data as any)[key]?.sectionTitle || formatLabel(key)
     }))
 
-  return (
-    <main className="bg-background text-foreground antialiased w-full max-w-full overflow-x-hidden">
+return (
+    <main className="bg-background text-foreground antialiased w-full max-w-full overflow-x-hidden relative">
+      {/* Mobile Fluid Blob Background - travels across entire page */}
+      {isMobile && (
+        <div className="fixed inset-0 z-0 opacity-10 pointer-events-none">
+          <LavaLamp />
+        </div>
+      )}
+      
       <SidebarNav 
         navItems={navItems} 
         onMoveSection={moveSection}
@@ -2256,35 +2275,39 @@ export default function FashionPortfolioPage() {
       <EditModeToggle />
       <StylePanel />
 
-      {/* Hero */}
-      <HeroSection data={data.hero} onSave={(field, v) => handleSave(`hero.${field}`, v)} showPhoto={showPhoto} />
+{/* Hero */}
+      <div className="relative z-10">
+        <HeroSection data={data.hero} onSave={(field, v) => handleSave(`hero.${field}`, v)} showPhoto={showPhoto} />
+      </div>
 
-      {/* Dynamic sections */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={orderedSections.filter(key => sectionComponents[key] !== null && sectionComponents[key] !== undefined)}
-          strategy={verticalListSortingStrategy}
->
-          {orderedSections
-            .filter((key) => sectionComponents[key] !== null && sectionComponents[key] !== undefined)
-            .map((key, index, arr) => (
-              <DraggableSection 
-                key={key} 
-                id={key}
-                onMoveUp={() => moveSection(key, 'up')}
-                onMoveDown={() => moveSection(key, 'down')}
-                isFirst={index === 0}
-                isLast={index === arr.length - 1}
-              >
-                {sectionComponents[key]}
-              </DraggableSection>
-            ))}
-        </SortableContext>
-      </DndContext>
+{/* Dynamic sections */}
+      <div className="relative z-10">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={orderedSections.filter(key => sectionComponents[key] !== null && sectionComponents[key] !== undefined)}
+            strategy={verticalListSortingStrategy}
+  >
+            {orderedSections
+              .filter((key) => sectionComponents[key] !== null && sectionComponents[key] !== undefined)
+              .map((key, index, arr) => (
+                <DraggableSection 
+                  key={key} 
+                  id={key}
+                  onMoveUp={() => moveSection(key, 'up')}
+                  onMoveDown={() => moveSection(key, 'down')}
+                  isFirst={index === 0}
+                  isLast={index === arr.length - 1}
+                >
+                  {sectionComponents[key]}
+                </DraggableSection>
+              ))}
+          </SortableContext>
+        </DndContext>
+      </div>
 
       {/* Contact */}
       <ContactSection
