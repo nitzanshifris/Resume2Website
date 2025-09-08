@@ -2,7 +2,7 @@
 
 ## Identity
 - **Purpose**: [One-line description of agent's primary function]
-- **Model**: [Recommended: Haiku for simple tasks | Sonnet for balanced | Opus for complex]
+- **Model**: inherit (uses parent Claude Code model)
 - **Domain**: [Primary area of expertise]
 - **Project**: Resume2Website V4 - AI-powered CV to Portfolio Platform
 
@@ -28,149 +28,237 @@
 ### Architecture Knowledge
 - **Backend**: FastAPI on port 2000, Python 3.11+, SQLite database
 - **Frontend**: Next.js 15 on port 3019, TypeScript, Tailwind CSS v4
-- **AI Integration**: Claude 4 Opus (temperature 0.0) for deterministic CV extraction
-- **Portfolio Generation**: Two-stage process (Preview → Optional Deployment)
-- **Key Patterns**: [Specific patterns this agent needs to know]
+- **AI Integration**: Claude 4 Opus ONLY (temperature 0.0) for deterministic CV extraction
+- **CV Structure**: 15 sections (Hero, Contact, Summary, Experience, Education, Skills, Projects, Achievements, Certifications, Languages, Volunteer, Publications, Speaking, Courses, Hobbies)
+- **Portfolio Generation**: Two-stage process (Preview on ports 4000-5000 → Optional Vercel Deployment)
+- **Template**: official_template_v1 (ONLY active template)
+- **Authentication**: Email/password + Google OAuth + LinkedIn OAuth
+- **Payments**: Stripe Embedded Checkout
+- **Advanced Systems**: SSE (9 endpoints), Workflows (9 endpoints), Metrics (8 endpoints)
 
 ### Critical Files & Locations
 ```
-[List key files this agent needs to know about]
-- config.py - Backend configuration
-- main.py - FastAPI entry point
-- [Other relevant files for this agent's domain]
+Core System Files:
+- config.py - Backend configuration and environment variables
+- main.py - FastAPI application entry with routing
+- src/api/routes/portfolio_generator.py - Portfolio generation logic
+- src/api/routes/cv.py - CV CRUD operations (NO auth routes)
+- src/api/routes/user_auth.py - OAuth authentication (CANONICAL auth source)
+- src/api/routes/payments.py - Stripe payment integration
+- src/api/db.py - SQLite database operations
+- src/core/cv_extraction/data_extractor.py - Factory-based extraction orchestrator
+- src/utils/cv_resume_gate.py - Resume validation with image-specific rules
+- user_web_example/app/page.tsx - Main frontend entry
+- user_web_example/postcss.config.mjs - MUST include autoprefixer
+
+Advanced System Files:
+- src/api/routes/metrics.py - Real-time metrics system
+- src/api/routes/workflows.py - Advanced workflow orchestration
+- src/api/routes/sse.py - Server-Sent Events for real-time updates
+- src/api/routes/cv_enhanced.py - Enhanced CV processing with tracking
+
+Template Files:
+- src/templates/official_template_v1/ - Active portfolio template
+- src/templates/future_templates/ - Archived templates (not active)
+
+Management Files:
+- .claude/agents/data/[agent-name]/ - Agent output directory
+- data/uploads/ - Preserved user files
+- data/resume2website.db - SQLite database
+- scripts/utilities/ - Database and utility scripts
+- scripts/testing/ - Testing scripts
 ```
 
 ### Business Rules
-- [Domain-specific business rules]
-- [Constraints and requirements]
-- [Quality standards and thresholds]
+- **Claude 4 Opus ONLY**: No other AI models allowed
+- **Temperature 0.0**: Maximum determinism for CV extraction
+- **Resource Limits**: Max 20 portfolios, 512MB each, 24-hour cleanup
+- **Confidence Threshold**: 0.75 for caching extraction results
+- **Circuit Breaker**: 5 failures → exponential backoff (30s, 60s, 120s...)
+- **File Validation**: Resume Gate with stricter rules for images
+- **Package Management**: pnpm (main project), npm (sandboxes only)
+- **Git Workflow**: Feature branches only, never commit to main
+- **Anonymous Flow**: Validate → Animation → Signup → Extract
+- **Authenticated Flow**: Upload → Validate → Extract immediately
 
 ## Tools & Permissions
 
 ### Available Tools
-- **Read**: [Specific file patterns, e.g., "src/**/*.py"]
-- **Write**: [Specific file patterns where writing is allowed]
-- **Edit**: [Files that can be edited]
-- **Execute**: [Commands that can be run, e.g., "pytest", "pnpm run dev"]
-- **Search**: [Grep, Glob patterns allowed]
+- **Read**: All project files except sensitive configs
+- **Write**: Agent-specific output directory only
+- **Edit**: Source files within agent's domain
+- **MultiEdit**: Batch edits to single file
+- **Bash**: Development commands, no destructive operations
+- **Grep**: Search with ripgrep patterns
+- **Glob**: File pattern matching
+- **Task**: Launch specialized sub-agents
+- **TodoWrite**: Task management and tracking
 
 ### Restricted Operations
-- [Operations this agent should never perform]
-- [Files/directories that are off-limits]
-- [Commands that should not be executed]
+- **Never modify**: main branch, production configs, .env files
+- **Never execute**: rm -rf, git push/merge/rebase without approval
+- **Never access**: API keys, passwords, sensitive credentials
+- **Never create**: Root-level files without approval
+- **Always preserve**: User data in data/uploads/
 
 ## Approach & Methodology
 
 ### Problem-Solving Process
 1. **Analysis Phase**
-   - [How agent analyzes the problem]
-   - [Information gathering approach]
+   - Read relevant files first
+   - Use Grep/Glob for discovery
+   - Check existing patterns in codebase
+   - Understand current implementation
 
 2. **Planning Phase**
-   - [How agent plans the solution]
-   - [Decision-making criteria]
+   - Use TodoWrite for complex tasks
+   - Break down into manageable steps
+   - Consider existing patterns
+   - Plan testing approach
 
 3. **Implementation Phase**
-   - [How agent implements solutions]
-   - [Quality checks performed]
+   - Follow existing code style
+   - Use TypeScript/Python type hints
+   - Implement incrementally
+   - Test as you go
 
 4. **Verification Phase**
-   - [How agent verifies the solution]
-   - [Testing approach]
+   - Run pnpm run typecheck for TypeScript
+   - Test with pytest for Python
+   - Verify no breaking changes
+   - Update documentation if needed
 
 ## Output Standards
 
 ### Code Style
-- **Python**: Type hints required, PEP 8 compliance, absolute imports
-- **TypeScript**: Arrow functions, ES modules, absolute imports from 'src/'
-- **General**: No comments unless requested, follow existing patterns
+- **Python**: 
+  - Type hints required: `async def func(param: str) -> Optional[Dict]:`
+  - PEP 8 compliance
+  - Absolute imports: `from src.api.routes import cv`
+  
+- **TypeScript/React**:
+  - Arrow functions: `export const Component: React.FC = () => {}`
+  - ES modules only: `import { x } from 'y'`
+  - Absolute imports: `import { foo } from 'src/components/foo'`
+
+- **General**: 
+  - No comments unless explicitly requested
+  - Follow existing patterns in codebase
+  - Use existing libraries, don't add new ones
 
 ### Documentation
-- [Documentation requirements for this agent's outputs]
-- [Format and structure expectations]
+- Save outputs to: `.claude/agents/data/[agent-name]/YYYY-MM-DD_HH-MM-SS_task.md`
+- Use descriptive filenames with timestamps
+- Include summary, findings, and actions
+- Update index.md in data directory
 
 ### Testing
-- [Test requirements for code produced]
-- [Coverage expectations]
+- **Python**: pytest with isolated tests
+- **TypeScript**: pnpm run typecheck must pass
+- **Integration**: Test with existing flows
+- **Coverage**: Maintain or improve existing coverage
 
 ### Logging
-- Structured prefixes: 🚀 (start), ⏳ (progress), ✅ (success), ⚠️ (warning), ❌ (error)
-- [Specific logging requirements for this domain]
+- Structured prefixes: 
+  - 🚀 Start/Launch
+  - ⏳ Progress/Processing
+  - ✅ Success/Complete
+  - ⚠️ Warning/Caution
+  - ❌ Error/Failed
 
 ## Example Scenarios
 
-### Scenario 1: [Common Use Case Title]
-**User Request**: "[Example user request]"
+### Scenario 1: [Common Use Case]
+**User Request**: "[Example request]"
 
 **Agent Process**:
-1. [Step 1 of handling]
-2. [Step 2 of handling]
-3. [Step 3 of handling]
+1. Analyze current implementation
+2. Plan changes with TodoWrite
+3. Implement following patterns
+4. Test and verify
+5. Save findings to data directory
 
 **Expected Output**:
 ```[language]
-[Example code or output]
+[Example code following Resume2Website V4 patterns]
 ```
 
-### Scenario 2: [Edge Case Title]
-**User Request**: "[Example edge case request]"
+### Scenario 2: [Error Handling]
+**User Request**: "Fix [specific error]"
 
 **Agent Process**:
-1. [How agent handles edge case]
-2. [Special considerations]
-
-**Expected Output**:
-[Description of expected result]
+1. Reproduce the error
+2. Identify root cause
+3. Check for similar patterns
+4. Implement fix
+5. Verify across system
 
 ## Integration Points
 
 ### Collaborates With
-- **[Agent Name]**: [When and why collaboration occurs]
-- **[Agent Name]**: [When and why collaboration occurs]
+- **Code-Reviewer Agent**: For code quality checks
+- **Security Agent**: For authentication/authorization
+- **Database Agent**: For schema changes
+- **Testing Agent**: For test coverage
 
-### Hands Off To
-- **[Agent Name]**: [Conditions for handoff]
-- **[Agent Name]**: [Conditions for handoff]
-
-### Receives From
-- **[Agent Name]**: [What inputs are received]
-- **User**: [Direct user requests handled]
+### Priority Order
+1. Security vulnerabilities
+2. Breaking bugs
+3. Performance issues
+4. Code quality
+5. Documentation
 
 ## Knowledge Base
 
 ### Common Issues & Solutions
-1. **Issue**: [Common problem in this domain]
-   **Solution**: [Standard solution approach]
+1. **Issue**: CSS not loading in portfolio
+   **Solution**: Check postcss.config.mjs has autoprefixer
 
-2. **Issue**: [Another common problem]
-   **Solution**: [Standard solution approach]
+2. **Issue**: CV extraction hangs
+   **Solution**: Check Claude API key and circuit breaker status
+
+3. **Issue**: Portfolio stuck at 55%
+   **Solution**: Check sandbox npm installation and server startup
+
+4. **Issue**: Authentication routes conflict
+   **Solution**: Use user_auth.py only, not cv.py
 
 ### Best Practices
-- [Best practice 1 for this domain]
-- [Best practice 2 for this domain]
-- [Best practice 3 for this domain]
+- Always use factory pattern for extractor instances
+- Implement circuit breaker for external API calls
+- Use correlation IDs for workflow tracking
+- Cache high-confidence extractions (>0.75)
+- Validate files with Resume Gate before processing
 
 ### Anti-Patterns to Avoid
-- [Anti-pattern 1 to avoid]
-- [Anti-pattern 2 to avoid]
+- Direct Claude API calls (use LLMService)
+- Hardcoded API keys (use keychain)
+- Synchronous long-running operations
+- N+1 database queries
+- Duplicate authentication routes
 
 ## Performance Considerations
-- [Performance guidelines for this agent's domain]
-- [Resource limits to consider]
-- [Optimization strategies]
+- **Portfolio Limits**: Max 20 active, 512MB each
+- **Extraction Cache**: File hash deduplication
+- **Circuit Breaker**: Exponential backoff on failures
+- **SSE Connections**: Proper cleanup required
+- **Database**: SQLite with proper indexing
 
 ## Security Considerations
-- [Security practices for this domain]
-- [Data handling requirements]
-- [Access control considerations]
+- **Authentication**: Session-based with secure cookies
+- **API Keys**: Stored in keychain, never in code
+- **Input Validation**: SQL injection prevention
+- **Rate Limiting**: User and endpoint specific
+- **Admin Access**: Proper role verification required
 
 ## Maintenance Notes
-- **Update Frequency**: [How often agent knowledge should be updated]
-- **Key Dependencies**: [Critical dependencies to monitor]
-- **Version Compatibility**: [Important version requirements]
+- **Update Frequency**: When new features added
+- **Key Dependencies**: Claude API, Vercel CLI, Stripe SDK
+- **Version Compatibility**: Node 18+, Python 3.11+, pnpm 8+
+- **Breaking Changes**: Check CLAUDE.md for updates
 
 ---
 
-*Agent Version: 1.0*  
-*Last Updated: [Date]*  
-*Maintained By: [Team/Person]*
+*Template Version: 2.0*  
+*Last Updated: 2025-01-08*  
+*For: Resume2Website V4 Custom Agents*

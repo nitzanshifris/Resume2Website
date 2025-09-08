@@ -32,7 +32,7 @@ graph TD
     Extract -->|Raw Text| Claude[🧠 Claude 4 Opus]
     Extract2 -->|Raw Text| Claude
     Claude -->|Temperature 0.0| Extraction[🎯 Deterministic Extraction]
-    Extraction -->|18 Sections| CVData[📋 CV Data]
+    Extraction -->|15 Sections| CVData[📋 CV Data]
     Extraction -->|Confidence Score| Cache{Cache if > 0.75}
     
     %% Advanced Classification
@@ -94,7 +94,7 @@ graph TD
 
 ### 3. AI-Powered Data Extraction
 - **Claude 4 Opus ONLY** with temperature 0.0 for deterministic results
-- **18 CV sections** extracted:
+- **15 CV sections** extracted:
   - Hero (name, title, summary)
   - Contact (email, phone, location)
   - Experience (work history with achievements)
@@ -105,13 +105,11 @@ graph TD
   - Achievements & Awards
   - Publications & Research
   - Speaking Engagements
-  - Patents
   - Professional Memberships
   - Volunteer Experience
   - Languages
   - Courses & Training
   - Hobbies & Interests
-  - References
   - Social Links
 - **Advanced classification**: Prevents cross-section contamination
 - **Confidence scoring**: Caches high-confidence extractions (≥75%)

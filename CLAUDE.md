@@ -4,7 +4,7 @@
 RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portfolio websites using FastAPI backend + Next.js frontend with Claude 4 Opus for deterministic data extraction.
 
 ### What RESUME2WEBSITE Does
-- **Extracts** CV data using Claude 4 Opus (temperature 0.0) into 18 structured sections
+- **Extracts** CV data using Claude 4 Opus (temperature 0.0) into 15 structured sections
 - **Generates** portfolio websites in isolated sandbox environments 
 - **Preview Mode**: Instant local portfolio preview (ports 4000-5000) before deployment
 - **Manages** multiple portfolio instances with real-time health monitoring
@@ -183,7 +183,7 @@ GET /api/v1/cv-enhanced/test-with-sample      # Test with sample data
 - **Portfolio Generation**: Two-stage process - Preview first, then optional deployment
 - **Preview Mode**: Instant local preview on ports 4000-5000 (no deployment needed)
 - **Deployment**: Optional Vercel deployment after preview approval (~2-3 min)
-- **Templates**: 2 active (v0_template_v1.5, v0_template_v2.1)
+- **Templates**: 1 active template (official_template_v1)
 - **Authentication**: Email/password + Google OAuth + LinkedIn OAuth, session-based
 - **File Storage**: Preserved in data/uploads/ with hash-based deduplication
 - **Build Optimization**: .npmrc for legacy-peer-deps, no recursive install scripts
@@ -253,8 +253,7 @@ GET /api/v1/cv-enhanced/test-with-sample      # Test with sample data
 
 // Register in portfolio_generator.py:
 AVAILABLE_TEMPLATES = {
-    "v0_template_v1.5": "src/templates/v0_template_v1.5",
-    "v0_template_v2.1": "src/templates/v0_template_v2.1"
+    "official_template_v1": "src/templates/official_template_v1"
 }
 ```
 
@@ -379,7 +378,7 @@ Resume2Website-V4/
 │   │   │   ├── portfolio_generator.py  # Main portfolio creation
 │   │   │   ├── cv.py         # CV CRUD operations
 │   │   │   ├── auth.py       # Authentication dependencies
-│   │   │   └── future_use/   # Ready but not mounted
+│   │   │   └── [active routes only]
 │   │   └── db.py            # Database operations
 │   ├── core/               # Business logic
 │   │   ├── cv_extraction/ # AI-powered CV parsing
@@ -387,8 +386,9 @@ Resume2Website-V4/
 │   ├── services/          # Business services
 │   ├── templates/         # Portfolio templates
 │   │   ├── official_template_v1/  # Active template (ONLY)
-│   │   └── future_templates/      # Templates for future use
-│   └── utils/            # Utility functions
+│   │   └── future_templates/      # Old templates (v0_template_v1.5, v0_template_v2.1)
+│   ├── utils/            # Utility functions
+│   └── legacy/           # Old code for reference
 ├── user_web_example/          # Main frontend (Next.js)
 │   ├── app/              # App router pages
 │   ├── components/       # React components

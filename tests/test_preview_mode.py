@@ -61,7 +61,7 @@ def test_preview_generation(job_id):
     response = requests.post(
         f"{API_URL}/portfolio/generate/{job_id}",
         headers=headers,
-        json={"template": "v0_template_v1.5"}
+        json={"template": "official_template_v1"}
     )
     
     if response.status_code == 200:

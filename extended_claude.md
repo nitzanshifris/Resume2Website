@@ -54,18 +54,15 @@ pnpm >= 8.0.0          # Package manager for main project (NOT npm/yarn)
 git                    # Version control
 ```
 
-### One-Command Setup
+### Setup
 ```bash
-# Clone and setup everything
-git clone <repo-url> && cd RESUME2WEBSITE-V4
-./quickstart.sh
-
-# This script will:
-# 1. Install all dependencies
-# 2. Setup Python virtual environment
-# 3. Configure environment variables
-# 4. Initialize database
-# 5. Start development servers
+# Clone and setup
+git clone <repo-url> && cd Resume2Website-V4
+pnpm install                           # Frontend dependencies
+python3 -m venv venv                   # Create Python environment
+source venv/bin/activate               # Activate environment
+pip install -r requirements.txt       # Backend dependencies
+python3 src/utils/setup_keychain.py   # Setup API keys securely
 ```
 
 ## 📋 Development Workflow
@@ -73,7 +70,7 @@ git clone <repo-url> && cd RESUME2WEBSITE-V4
 ### Daily Development Commands
 ```bash
 # Frontend development
-pnpm run dev            # Start Next.js dev server (http://localhost:3000)
+pnpm run dev            # Start Next.js dev server (http://localhost:3019)
 pnpm run typecheck      # ⚠️ MUST run before committing
 pnpm run build          # Build for production
 
@@ -96,12 +93,12 @@ python3 main.py                              # Alternative start method
 ```bash
 # 1. MANDATORY: Check current branch first
 git branch --show-current  # Must NOT be 'main'
-# Note: Currently on 'main' branch (as of 2025-08-05)
+# Note: Currently on 'development-flow-rebuild2' branch (as of 2025-01-08)
 
 # 2. Create feature branch (REQUIRED)
 git checkout -b feature/description
 # Branch naming: feature/*, fix/*, docs/*, refactor/*
-# Current branch: nitzan-4
+# Current branch: development-flow-rebuild2
 
 # 3. Make changes and verify
 cd user_web_example && npx tsc --noEmit  # No TypeScript errors
@@ -153,8 +150,7 @@ RESUME2WEBSITE-V4/
 │   ├── services/          # Business services
 │   │   └── claude_portfolio_expert.py # AI expert service
 │   └── templates/         # Portfolio templates with data adapters
-│       ├── v0_template_v1.5/ # Modern portfolio template v1.5
-│       └── v0_template_v2.1/ # Modern portfolio template v2.1
+│       └── official_template_v1/ # Active portfolio template
 │           └── lib/       # Data transformation adapters
 ├── user_web_example/      # Main frontend (Next.js)
 │   ├── app/              # App router pages
@@ -225,7 +221,7 @@ User Upload → File Validation → AI Extraction → CV Editor → Portfolio Ex
 # Backend configuration (config.py)
 BACKEND_PORT = 2000             # ⚠️ Not 8000!
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
-ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:3001"]
+ALLOWED_ORIGINS = ["http://localhost:3019", "http://localhost:3000", "http://localhost:3001"]
 
 # AI Models
 PRIMARY_MODEL = "claude-opus-4-20250514"  # Claude 4 Opus for deterministic extraction
@@ -383,10 +379,9 @@ export const adaptCVData = (cvData: CVData): TemplateData => {
 // 3. Register template in portfolio generator
 // src/api/routes/portfolio_generator.py
 AVAILABLE_TEMPLATES = {
-    "v0_template_v1.5": "src/templates/v0_template_v1.5",
-    "v0_template_v2.1": "src/templates/v0_template_v2.1"
+    "official_template_v1": "src/templates/official_template_v1"
 }
-DEFAULT_TEMPLATE = "v0_template_v1.5"
+DEFAULT_TEMPLATE = "official_template_v1"
 ```
 
 ### Adding a New API Endpoint
@@ -435,7 +430,7 @@ POST /api/v1/portfolio-expert/chat
 POST /api/v1/portfolio-expert/generate
 {
     "session_id": "session_123",
-    "template_id": "v0_template_v1.5",
+    "template_id": "official_template_v1",
     "customizations": {...}
 }
 ```
@@ -449,14 +444,14 @@ POST /api/v1/portfolio-expert/generate
 # 1. Create new portfolio (anonymous access allowed)
 POST /api/v1/portfolio/generate-anonymous/{job_id}
 {
-    "template": "v0_template_v1.5",  # or "v0_template_v2.1"
+    "template": "official_template_v1",  # Only active template
     "config": {...}
 }
 
 # 1b. Create new portfolio (authenticated)
 POST /api/v1/portfolio/generate/{job_id}
 {
-    "template": "v0_template_v1.5",
+    "template": "official_template_v1",
     "config": {...}
 }
 
@@ -1339,7 +1334,7 @@ uvicorn.run(app, reload_excludes=reload_excludes)
   - Consolidated .claude/commands/ directory (deleted old scripts/)
   - Cleaned tests/ folder (46 → 26 files)
 - **⚙️ Configuration Updates**: Made all hardcoded values environment-configurable for K8s readiness
-- **📦 Template Simplification**: Reduced from 9 templates to 2 active templates (v0_template_v1.5, v0_template_v2.1)
+- **📦 Template Simplification**: Single active template (official_template_v1) for consistency
 - **🔧 Performance Enhancements**: Added automatic portfolio cleanup, resource monitoring, and metrics tracking
 
 ### Kubernetes Preparation & Major Cleanup (2025-08-05)
@@ -1353,7 +1348,7 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 
 ### Git Branch Consolidation & CV Extraction Fix (2025-08-05)
 - **🌿 Branch Consolidation**: Successfully merged all work from nitzan-development-2 into main branch
-- **🏷️ Backup Tags Created**: Created backup tags for safety: backup-main-2025-08-05, backup-nitzan-development-2-2025-08-05
+- **🏷️ Backup Tags**: Historical backups available in git tags
 - **🧹 Branch Cleanup**: Deleted local branches (nitzan, Nitzan-development, nitzan-development-2) after merging
 - **🐛 Fixed Double CV Extraction**: Fixed issue where CV was extracted twice for anonymous users - now properly checks database cache
 - **⚡ Performance Improvement**: Eliminated redundant Claude API calls, significantly reducing processing time and costs

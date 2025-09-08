@@ -8,7 +8,9 @@ import os
 import json
 import subprocess
 import shutil
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Add project root to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.core.local.keychain_manager import KeychainManager
 
@@ -17,14 +19,29 @@ print("🚀 VERCEL CLI DEPLOYMENT (No Size Limits)")
 print("="*70)
 
 # Select portfolio
-portfolio_path = "sandboxes/portfolios/07df66a9-3799-4035-9fc7-82f142151f9f_5940821a-8f8c-49c9-b526-3024bebf6841_0594991c"
-
-if not os.path.exists(portfolio_path):
-    portfolios_dir = "sandboxes/portfolios"
+portfolios_dir = "sandboxes/portfolios"
+if os.path.exists(portfolios_dir):
     portfolios = [d for d in os.listdir(portfolios_dir) 
                   if os.path.isdir(os.path.join(portfolios_dir, d))]
     if portfolios:
-        portfolio_path = os.path.join(portfolios_dir, portfolios[0])
+        print(f"\n📂 Found {len(portfolios)} portfolio(s)")
+        if len(portfolios) > 1:
+            print("\nAvailable portfolios:")
+            for i, p in enumerate(portfolios, 1):
+                print(f"  {i}. {p}")
+            choice = input("\nSelect portfolio (1-{}): ".format(len(portfolios)))
+            try:
+                portfolio_path = os.path.join(portfolios_dir, portfolios[int(choice)-1])
+            except:
+                portfolio_path = os.path.join(portfolios_dir, portfolios[0])
+        else:
+            portfolio_path = os.path.join(portfolios_dir, portfolios[0])
+    else:
+        print("❌ No portfolios found in sandboxes/portfolios/")
+        sys.exit(1)
+else:
+    print("❌ Portfolios directory not found")
+    sys.exit(1)
 
 print(f"\n📁 Portfolio: {os.path.basename(portfolio_path)}")
 

@@ -21,9 +21,9 @@
        - 🟡 **Medium**: Minor bugs, style inconsistencies, missing tests
        - 🟢 **Low**: Documentation improvements, minor optimizations
 
-    ## TASK.md Management
+    ## Task Management
 
-    Always read the existing TASK.md file first. Then update it by:
+    Always save findings to `.claude/agents/data/code-review-tasks/` directory. Create a new timestamped file and update the index.md:
 
     ### Adding New Tasks
     - Append new review findings to the appropriate priority sections
@@ -81,15 +81,15 @@
 
     1. **Review Summary** - High-level overview of findings
     2. **Key Issues Found** - Brief list of most important problems
-    3. **Updated TASK.md** - The complete updated file content
+    3. **Task Findings** - Complete list of actionable tasks with priorities
 
     ## Commands to Execute
 
     When invoked, you should:
     1. Scan the entire codebase for issues
-    2. Read the current TASK.md file
+    2. Check existing tasks in `.claude/agents/data/code-review-tasks/`
     3. Analyze and categorize all findings
-    4. Update TASK.md with new actionable tasks
+    4. Save findings to new timestamped file in organized directory
     5. Provide a comprehensive review summary
 
     Focus on being thorough but practical - aim for improvements that will genuinely make the codebase more secure, performant, and maintainable.
