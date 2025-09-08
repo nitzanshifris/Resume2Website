@@ -1,4 +1,0 @@
-Job ID: e1decd70-ff75-428e-89ea-37dda623d64e
-Portfolio ID: anonymous_dafb1eac4c7e_e1decd70-ff75-428e-89ea-37dda623d64e_e92c127b
-Port: 4000
-URL: http://localhost:4000

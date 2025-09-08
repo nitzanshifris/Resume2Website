@@ -1,2 +1,0 @@
-Job ID: 55152e40-2caa-4546-a131-e419820388dd
-Portfolio URL: http://localhost:4000

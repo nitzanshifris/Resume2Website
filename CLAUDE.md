@@ -80,7 +80,7 @@ const config = {
 };
 ```
 
-## CV Data Structure (18 Sections)
+## CV Data Structure (15 Sections)
 CV extraction creates structured data with these sections:
 1. **Hero** - fullName, professionalTitle, summaryTagline, profilePhotoUrl
 2. **Contact** - email, phone, location, professionalLinks, availability
@@ -89,17 +89,16 @@ CV extraction creates structured data with these sections:
 5. **Education** - Array of degrees with institution, field, dates, gpa, honors
 6. **Skills** - skillCategories (grouped) + ungroupedSkills
 7. **Projects** - title, description, role, technologies, urls
-8. **Achievements** - value, label, context, timeframe
+8. **Achievements** - value, label, context, timeframe (includes patents)
 9. **Certifications** - title, organization, dates, credentials
 10. **Languages** - language, proficiency, certification
-11. **Volunteer** - role, organization, dates, description
-12. **Publications** - title, type, venue, date, url
-13. **Speaking** - events, topics, venues, presentations
-14. **Courses** - title, institution, completion, certificates
-15. **Memberships** - organization, role, type, dates
-16. **Hobbies** - Array of interests
-17. **Patents** - title, number, status, dates
-18. **Testimonials** - name, role, company, text, date
+11. **Courses** - title, institution, completion, certificates
+12. **Volunteer** - role, organization, dates, description
+13. **Publications** - title, type, venue, date, url
+14. **Speaking** - events, topics, venues, presentations
+15. **Hobbies** - Array of interests
+
+**Note**: Testimonials are handled in the frontend template editing, not in CV extraction.
 
 ## Key API Endpoints
 ```python
@@ -132,15 +131,52 @@ GET /api/v1/auth/me                       # Get current user
 POST /api/v1/auth/google/callback         # Google OAuth callback
 POST /api/v1/auth/linkedin/callback       # LinkedIn OAuth callback
 GET /api/v1/auth/google/status            # Check Google OAuth availability
+
+# Real-Time Metrics System (/api/v1/metrics/*)
+GET /api/v1/metrics/health                    # Service health check
+GET /api/v1/metrics/current                   # Real-time aggregate metrics (PUBLIC)
+GET /api/v1/metrics/detailed                  # Detailed metrics with history (ADMIN)
+GET /api/v1/metrics/extraction/{extraction_id} # Single extraction metrics (ADMIN)
+GET /api/v1/metrics/performance/summary       # Dashboard-ready performance data (PUBLIC)
+GET /api/v1/metrics/circuit-breaker/status    # Circuit breaker health (PUBLIC)
+POST /api/v1/metrics/circuit-breaker/reset    # Manual circuit breaker reset (ADMIN)
+POST /api/v1/metrics/reset                    # Reset all metrics data (ADMIN)
+
+# Advanced Workflows System (/workflows/*)
+GET /workflows/test                           # System test endpoint
+POST /workflows/start                         # Start complex workflow with SSE tracking
+GET /workflows/status/{workflow_id}           # Get workflow execution status
+GET /workflows/logs/{workflow_id}             # Retrieve workflow execution logs
+GET /workflows/metrics                        # Workflow system metrics and analytics
+GET /workflows/alerts                         # Active workflow alerts and issues
+POST /workflows/alerts/{alert_id}/resolve     # Resolve workflow alerts
+GET /workflows/analysis/patterns              # Workflow pattern analysis
+GET /workflows/stream/{workflow_id}           # Real-time workflow updates via SSE
+
+# Server-Sent Events System (/api/v1/sse/*)
+GET /api/v1/sse/cv/extract-streaming/{job_id} # Real-time CV extraction updates
+POST /api/v1/sse/cv/extract-streaming         # Start streaming CV extraction
+GET /api/v1/sse/portfolio/generate-streaming/{job_id} # Real-time portfolio generation
+GET /api/v1/sse/sandbox/status-streaming/{sandbox_id} # Sandbox status streaming
+GET /api/v1/sse/heartbeat                     # SSE connection health check
+GET /api/v1/sse/test-error-handling           # Error handling testing
+GET /api/v1/sse/test-timeout/{duration}       # Timeout behavior testing
+GET /api/v1/sse/rate-limit-status             # User rate limit status
+GET /api/v1/sse/admin/rate-limit-stats        # Admin rate limit analytics (ADMIN)
+
+# Enhanced CV Processing (/api/v1/cv-enhanced/*)
+POST /api/v1/cv-enhanced/upload               # Upload with enhanced tracking
+GET /api/v1/cv-enhanced/stream/{job_id}       # Real-time processing stream
+GET /api/v1/cv-enhanced/test-with-sample      # Test with sample data
 ```
 
 ## Architecture Essentials
 - **Resume Gate Validation**: Stricter for images (requires 500+ chars, 3+ signal types, both contact AND experience)
   - Smart rejection reasons with helpful suggestions
   - Image-specific validation rules to prevent screenshot abuse
-- **CV Extraction**: 18 sections, cached in SQLite, hash-based deduplication
+- **CV Extraction**: 15 sections, cached in SQLite, hash-based deduplication
   - Modular architecture with specialized components (section_extractor, post_processor, etc.)
-  - Circuit breaker pattern for LLM resilience (5 failures → 60s timeout)
+  - Circuit breaker pattern for LLM resilience (5 failures → exponential backoff: 30s, 60s, 120s...)
   - Factory pattern for extractor instances (no singleton conflicts)
   - Confidence scoring for extraction quality (caches only >0.75 confidence)
   - Real-time metrics tracking at `/api/v1/metrics/current`
@@ -153,6 +189,35 @@ GET /api/v1/auth/google/status            # Check Google OAuth availability
 - **Build Optimization**: .npmrc for legacy-peer-deps, no recursive install scripts
 - **Payment Integration**: Stripe Embedded Checkout (test & live modes)
 - **Portfolio Restoration**: Automatic portfolio recovery on page refresh/re-login
+
+## Advanced Features & Systems
+
+### Real-Time Metrics & Monitoring
+- **Performance Tracking**: Success rates, processing times, confidence scores
+- **Circuit Breaker Monitoring**: LLM health and failure detection
+- **Active Extractions**: Real-time count of concurrent operations
+- **Dashboard-Ready Data**: Public metrics API for frontend integration
+- **Admin Controls**: System resets and manual interventions
+
+### Workflow Orchestration
+- **Multi-step Workflows**: Complex operation coordination with phase tracking
+- **SSE Integration**: Real-time progress streaming to frontend
+- **Correlation Management**: Links related operations across services
+- **Alert System**: Proactive notification of workflow failures
+- **Pattern Analysis**: Workflow optimization insights
+
+### Server-Sent Events (SSE)
+- **Real-time Updates**: Live CV extraction and portfolio generation progress
+- **Connection Management**: Heartbeat, reconnection, graceful degradation
+- **Rate Limiting**: User-specific and IP-based limits
+- **Sandbox Monitoring**: Live resource usage and build status
+- **Error Handling**: Comprehensive error recovery mechanisms
+
+### Enhanced CV Processing
+- **Advanced Tracking**: Comprehensive workflow logging throughout processing
+- **Background Coordination**: Improved task management and error recovery
+- **Performance Metrics**: Built-in analytics for optimization
+- **Testing Infrastructure**: Sample data testing capabilities
 
 ## Development Workflow Patterns
 ### CV Processing Flow
@@ -321,8 +386,8 @@ Resume2Website-V4/
 │   │   └── schemas/      # Data models
 │   ├── services/          # Business services
 │   ├── templates/         # Portfolio templates
-│   │   ├── v0_template_v1.5/  # Active template
-│   │   └── v0_template_v2.1/  # Active template
+│   │   ├── official_template_v1/  # Active template (ONLY)
+│   │   └── future_templates/      # Templates for future use
 │   └── utils/            # Utility functions
 ├── user_web_example/          # Main frontend (Next.js)
 │   ├── app/              # App router pages
