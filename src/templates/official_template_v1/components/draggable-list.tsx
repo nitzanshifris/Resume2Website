@@ -44,6 +44,8 @@ interface DraggableItemProps {
 
 function DraggableItem({ id, children, index, handlePosition = 'left' }: DraggableItemProps) {
   const { isEditMode } = useEditMode()
+  const [isMobile, setIsMobile] = React.useState(false)
+  
   const {
     attributes,
     listeners,
@@ -52,6 +54,15 @@ function DraggableItem({ id, children, index, handlePosition = 'left' }: Draggab
     transition,
     isDragging,
   } = useSortable({ id })
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -74,7 +85,7 @@ function DraggableItem({ id, children, index, handlePosition = 'left' }: Draggab
         getPositionClass()
       )}
     >
-      {isEditMode && (
+      {isEditMode && !isMobile && (
         <div
           {...attributes}
           {...listeners}
@@ -93,6 +104,28 @@ function DraggableItem({ id, children, index, handlePosition = 'left' }: Draggab
           style={handlePosition === 'top-right' ? { top: '74px' } : {}}
         >
           <GripVertical className={cn(
+            handlePosition === 'left' ? "h-5 w-5" : "h-4 w-4"
+          )} />
+        </div>
+      )}
+      {/* Mobile: Show disabled drag handle as indicator */}
+      {isEditMode && isMobile && (
+        <div
+          className={cn(
+            "absolute z-40",
+            "flex items-center justify-center",
+            "rounded-lg",
+            "bg-gray-400/50",
+            "text-white shadow-lg",
+            "cursor-not-allowed",
+            handlePosition === 'left' && "-left-12 top-8 w-10 h-10",
+            handlePosition === 'right' && "right-2 top-1/2 -translate-y-1/2 w-8 h-8",
+            handlePosition === 'top-right' && "right-2 w-8 h-8"
+          )}
+          style={handlePosition === 'top-right' ? { top: '74px' } : {}}
+        >
+          <GripVertical className={cn(
+            "opacity-50",
             handlePosition === 'left' ? "h-5 w-5" : "h-4 w-4"
           )} />
         </div>

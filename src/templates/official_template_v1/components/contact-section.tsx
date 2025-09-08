@@ -13,7 +13,6 @@ import { IconWithZoom } from "@/components/ui/icon-with-zoom"
 import { useEditMode } from "@/contexts/edit-mode-context"
 import { EditGuard } from "@/components/ui/edit-guard"
 import { ContactForm } from "@/components/contact-form"
-import { LavaLamp } from "@/components/ui/fluid-blob"
 
 interface ContactSectionProps {
   data: ContactData
@@ -36,11 +35,6 @@ export function ContactSection({ data, onSave, onSaveLocation, onSaveProfessiona
 
   return (
     <footer id="contact" className="relative bg-background overflow-hidden">
-      {/* Fluid Blob Background */}
-      <div className="absolute inset-0 z-0 opacity-15">
-        <LavaLamp />
-      </div>
-      
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}

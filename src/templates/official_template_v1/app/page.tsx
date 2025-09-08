@@ -2261,12 +2261,10 @@ export default function FashionPortfolioPage() {
 
 return (
     <main className="bg-background text-foreground antialiased w-full max-w-full overflow-x-hidden relative">
-      {/* Mobile Fluid Blob Background - travels across entire page */}
-      {isMobile && (
-        <div className="fixed inset-0 z-0 opacity-10 pointer-events-none">
-          <LavaLamp />
-        </div>
-      )}
+      {/* Fluid Blob Background - travels across entire page */}
+      <div className="fixed inset-0 z-0 opacity-15 pointer-events-none">
+        <LavaLamp />
+      </div>
       
       <SidebarNav 
         navItems={navItems} 
