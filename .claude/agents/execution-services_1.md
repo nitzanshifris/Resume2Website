@@ -409,6 +409,35 @@ from src.api.routes.portfolio_generator import cleanup_zombie_processes
 cleanup_zombie_processes()
 ```
 
+## ⚠️ CRITICAL: API Call Standards
+
+**MANDATORY**: All API calls MUST follow the patterns in `/docs/API_USAGE_STANDARDS.md`
+
+### The Golden Rule: File-Based JSON Only
+```bash
+# NEVER use inline JSON - ALWAYS use files:
+cat > /tmp/data.json << 'EOF'
+{
+  "key": "value"
+}
+EOF
+curl -X POST http://localhost:2000/api/endpoint \
+  -H "Content-Type: application/json" \
+  -d @/tmp/data.json
+```
+
+### Authentication Pattern:
+```bash
+# Get session from login
+SESSION_ID=$(curl -s -X POST http://localhost:2000/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d @/tmp/login.json | jq -r '.session_id')
+
+# Use in requests
+curl -s http://localhost:2000/api/endpoint \
+  -H "Cookie: session_id=$SESSION_ID"
+```
+
 ## Agent Capabilities
 
 This agent can:
