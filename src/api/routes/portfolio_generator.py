@@ -489,7 +489,7 @@ class NextJSServerManager:
 server_manager = NextJSServerManager(base_port=4000)
 
 # Create router
-router = APIRouter(prefix="/portfolio", tags=["portfolio"])
+router = APIRouter(tags=["portfolio"])
 
 # Base directories
 BASE_DIR = Path(__file__).parent.parent.parent.parent

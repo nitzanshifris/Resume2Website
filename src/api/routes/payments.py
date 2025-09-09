@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 # Create router
 router = APIRouter(
-    prefix="/api/v1/payments",
     tags=["payments"]
 )
 

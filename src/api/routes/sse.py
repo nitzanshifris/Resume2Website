@@ -22,7 +22,7 @@ from src.utils.sse_live_logger import SSELiveLogger, create_job_logger
 import config
 
 # Setup
-router = APIRouter(prefix="/sse", tags=["sse"])
+router = APIRouter(tags=["sse"])
 logger = logging.getLogger(__name__)
 
 # SSE Headers

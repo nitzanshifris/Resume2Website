@@ -56,23 +56,23 @@ GET  /api/v1/extraction-stats          # CV extraction statistics
 DELETE /api/v1/cleanup                 # Cleanup old CV data
 ```
 
-#### Portfolio Generation Routes (`/api/v1/portfolio/*`)
+#### Portfolio Generation Routes (`/api/v1/generation/*`)
 ```python
 # Core Operations
-POST /api/v1/portfolio/generate/{job_id}        # Generate portfolio preview (local)
-POST /api/v1/portfolio/{id}/deploy              # Deploy to Vercel (after preview)
-GET  /api/v1/portfolio/list                     # List user portfolios
-GET  /api/v1/portfolio/{id}/status              # Check portfolio status
-POST /api/v1/portfolio/{id}/restart             # Restart portfolio server
-DELETE /api/v1/portfolio/{id}                   # Delete portfolio
+POST /api/v1/generation/generate/{job_id}        # Generate portfolio preview (local)
+POST /api/v1/generation/{id}/deploy              # Deploy to Vercel (after preview)
+GET  /api/v1/generation/list                     # List user portfolios
+GET  /api/v1/generation/{id}/status              # Check portfolio status
+POST /api/v1/generation/{id}/restart             # Restart portfolio server
+DELETE /api/v1/generation/{id}                   # Delete portfolio
 
 # Data Management
-GET  /api/v1/portfolio/{id}/cv-data             # Get portfolio CV data
-PUT  /api/v1/portfolio/{id}/cv-data             # Update portfolio CV data
+GET  /api/v1/generation/{id}/cv-data             # Get portfolio CV data
+PUT  /api/v1/generation/{id}/cv-data             # Update portfolio CV data
 
 # Domain & Metrics
-POST /api/v1/portfolio/{id}/setup-custom-domain # Setup custom domain
-GET  /api/v1/portfolio/portfolios/metrics       # Portfolio system metrics
+POST /api/v1/generation/{id}/setup-custom-domain # Setup custom domain
+GET  /api/v1/generation/portfolios/metrics       # Portfolio system metrics
 ```
 
 #### Payment Routes (`/api/v1/payments/*`)
@@ -294,8 +294,8 @@ curl http://localhost:2000/api/v1/metrics/current    # Current metrics
 
 #### Portfolio Management
 ```bash
-curl http://localhost:2000/api/v1/portfolio/list     # List portfolios
-curl http://localhost:2000/api/v1/portfolio/portfolios/metrics # Metrics
+curl http://localhost:2000/api/v1/generation/list     # List portfolios
+curl http://localhost:2000/api/v1/generation/portfolios/metrics # Metrics
 ps aux | grep node                                   # Check running portfolios
 lsof -i :4000-5000                                  # Check portfolio ports
 ```

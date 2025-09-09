@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create router
-router = APIRouter(prefix="/api/v1/metrics", tags=["metrics"])
+router = APIRouter(tags=["metrics"])
 
 
 @router.get("/health")

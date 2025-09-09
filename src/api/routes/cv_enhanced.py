@@ -35,7 +35,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 # Create router
-router = APIRouter(prefix="/api/v1/cv-enhanced", tags=["cv-enhanced"])
+router = APIRouter(tags=["cv-enhanced"])
 
 # Upload directory
 BASE_DIR = Path(__file__).parent.parent.parent.parent  # Go up to project root
