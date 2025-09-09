@@ -33,7 +33,7 @@ pnpm run start                 # Start production build
 
 # Backend Development  
 source venv/bin/activate       # Activate Python environment
-python3 -m uvicorn main:app --host 127.0.0.1 --port 2000  # Start FastAPI (localhost:2000)
+python3 -m uvicorn main:app --host 127.0.0.1 --port 2000 --reload  # Start FastAPI with auto-reload
 python main.py                 # Alternative with optimizations
 
 # Testing & Quality
@@ -43,8 +43,9 @@ python3 tests/unit/test_cv_helpers_isolated.py  # Run isolated unit tests (no DB
 pnpm run typecheck            # TypeScript validation
 
 # Utilities
-.claude/commands/cleanup.sh    # Clean build artifacts and cache
-.claude/commands/prime.sh      # Initialize development environment
+.claude/commands/maintenance/cleanup.sh    # Clean build artifacts and cache
+.claude/commands/development/prime.sh      # Initialize development environment
+.claude/commands/development/commit-and-push.sh  # Git workflow with safety checks
 ```
 
 ## Git Workflow Rules (CRITICAL)
@@ -100,6 +101,27 @@ CV extraction creates structured data with these sections:
 
 **Note**: Testimonials are handled in the frontend template editing, not in CV extraction.
 
+## ⚠️ CRITICAL: API Usage Standards
+
+**MANDATORY**: All API calls MUST use file-based JSON to avoid 422 errors. See `/docs/API_USAGE_STANDARDS.md`
+
+```bash
+# ✅ CORRECT - The ONLY way that works:
+cat > /tmp/data.json << 'EOF'
+{
+  "key": "value"
+}
+EOF
+curl -X POST http://localhost:2000/api/endpoint \
+  -H "Content-Type: application/json" \
+  -d @/tmp/data.json
+
+# ❌ WRONG - Will cause 422 Unprocessable Entity:
+curl -X POST http://localhost:2000/api/endpoint \
+  -H "Content-Type: application/json" \
+  -d '{"key": "value"}'
+```
+
 ## Key API Endpoints
 ```python
 # CV Management
@@ -112,21 +134,21 @@ GET /api/v1/my-cvs                        # List user's CVs
 GET /api/v1/download/{job_id}             # Download original file
 
 # Portfolio Generation (PRIMARY)
-POST /api/v1/portfolio/generate/{job_id}  # Generate portfolio preview (local)
-POST /api/v1/portfolio/deploy/{job_id}    # Deploy portfolio to Vercel (after preview)
-POST /api/v1/portfolio/generate-anonymous/{job_id}  # Anonymous generation
-GET /api/v1/portfolio/list                # List user portfolios
-GET /api/v1/portfolio/{id}/status         # Check portfolio status
-POST /api/v1/portfolio/{id}/restart       # Restart portfolio server
+POST /api/v1/generation/generate/{job_id}  # Generate portfolio preview (local)
+POST /api/v1/generation/{id}/deploy        # Deploy portfolio to Vercel (after preview)
+GET /api/v1/generation/list                # List user portfolios
+GET /api/v1/generation/{id}/status         # Check portfolio status
+POST /api/v1/generation/{id}/restart       # Restart portfolio server
+DELETE /api/v1/generation/{id}             # Delete portfolio
 
 # Payment Processing
 POST /api/v1/payments/create-checkout-session  # Create Stripe checkout
 GET /api/v1/payments/session-status/{id}       # Check payment status
 
 # Authentication
-POST /api/v1/auth/register                # Register user
-POST /api/v1/auth/login                   # Login user
-POST /api/v1/auth/logout                  # Logout
+POST /api/v1/register                     # Register user
+POST /api/v1/login                        # Login user  
+POST /api/v1/logout                       # Logout
 GET /api/v1/auth/me                       # Get current user
 POST /api/v1/auth/google/callback         # Google OAuth callback
 POST /api/v1/auth/linkedin/callback       # LinkedIn OAuth callback
@@ -142,26 +164,26 @@ GET /api/v1/metrics/circuit-breaker/status    # Circuit breaker health (PUBLIC)
 POST /api/v1/metrics/circuit-breaker/reset    # Manual circuit breaker reset (ADMIN)
 POST /api/v1/metrics/reset                    # Reset all metrics data (ADMIN)
 
-# Advanced Workflows System (/workflows/*)
-GET /workflows/test                           # System test endpoint
-POST /workflows/start                         # Start complex workflow with SSE tracking
-GET /workflows/status/{workflow_id}           # Get workflow execution status
-GET /workflows/logs/{workflow_id}             # Retrieve workflow execution logs
-GET /workflows/metrics                        # Workflow system metrics and analytics
-GET /workflows/alerts                         # Active workflow alerts and issues
-POST /workflows/alerts/{alert_id}/resolve     # Resolve workflow alerts
-GET /workflows/analysis/patterns              # Workflow pattern analysis
-GET /workflows/stream/{workflow_id}           # Real-time workflow updates via SSE
+# Advanced Workflows System (/api/v1/workflows/*)
+GET /api/v1/workflows/test                    # System test endpoint
+POST /api/v1/workflows/start                  # Start complex workflow with SSE tracking
+GET /api/v1/workflows/status/{workflow_id}    # Get workflow execution status
+GET /api/v1/workflows/logs/{workflow_id}      # Retrieve workflow execution logs
+GET /api/v1/workflows/metrics                 # Workflow system metrics and analytics
+GET /api/v1/workflows/alerts                  # Active workflow alerts and issues
+POST /api/v1/workflows/alerts/{alert_id}/resolve  # Resolve workflow alerts
+GET /api/v1/workflows/analysis/patterns       # Workflow pattern analysis
+GET /api/v1/workflows/stream/{workflow_id}    # Real-time workflow updates via SSE
 
 # Server-Sent Events System (/api/v1/sse/*)
 GET /api/v1/sse/cv/extract-streaming/{job_id} # Real-time CV extraction updates
-POST /api/v1/sse/cv/extract-streaming         # Start streaming CV extraction
-GET /api/v1/sse/portfolio/generate-streaming/{job_id} # Real-time portfolio generation
-GET /api/v1/sse/sandbox/status-streaming/{sandbox_id} # Sandbox status streaming
-GET /api/v1/sse/heartbeat                     # SSE connection health check
-GET /api/v1/sse/test-error-handling           # Error handling testing
-GET /api/v1/sse/test-timeout/{duration}       # Timeout behavior testing
-GET /api/v1/sse/rate-limit-status             # User rate limit status
+POST /api/v1/sse/cv/extract-streaming         # Start extraction with streaming
+GET /api/v1/sse/portfolio/generate-streaming/{job_id}  # Portfolio generation stream
+GET /api/v1/sse/sandbox/status-streaming/{sandbox_id}  # Sandbox status monitoring
+GET /api/v1/sse/heartbeat                     # SSE connection heartbeat
+GET /api/v1/sse/rate-limit-status             # Check rate limiting status
+GET /api/v1/sse/test-error-handling           # Test SSE error handling
+GET /api/v1/sse/test-timeout/{duration}       # Test timeout handling
 GET /api/v1/sse/admin/rate-limit-stats        # Admin rate limit analytics (ADMIN)
 
 # Enhanced CV Processing (/api/v1/cv-enhanced/*)
@@ -451,6 +473,25 @@ HTTP/2 200
 - **DNS issues**: Wait 2-3 minutes for propagation
 - **Cache issues**: Clear browser cache if seeing old protected version
 
+## Claude Code Agents
+
+### Available Specialized Agents:
+1. **code-reviewer** - Comprehensive code review for Resume2Website V4
+   - Location: `.claude/agents/code-reviewer.md`
+   - Specializes in: SSE, workflows, metrics, security patterns, 29 undocumented endpoints
+   - Usage: `Task(subagent_type="code-reviewer", prompt="Review this code...")`
+
+2. **execution-services** - Complete API execution and monitoring
+   - Location: `.claude/agents/execution-services_1.md`
+   - Specializes in: All API endpoints, database operations, background tasks, debugging
+   - **CRITICAL**: Follows mandatory API standards in `/docs/API_USAGE_STANDARDS.md`
+   - Usage: `Task(subagent_type="execution-services", prompt="Execute this operation...")`
+
+### Agent Usage Guide:
+- Documentation: `.claude/agents/usage-guide.md`
+- Results saved to: `.claude/agents/data/[agent-name]/`
+- Templates: `.claude/agents/templates/`
+
 ## Important Files to Know
 - **config.py** - Backend configuration, environment variables, AI model settings
 - **main.py** - FastAPI application entry point with routing
@@ -476,6 +517,7 @@ HTTP/2 200
 - **requirements.txt** - Python backend dependencies
 - **.claude/commands/** - Development utility scripts
 - **docs/PORTFOLIO_IFRAME_SETUP.md** - Portfolio iframe embedding guide
+- **docs/API_USAGE_STANDARDS.md** - MANDATORY API call patterns to avoid 422 errors
 
 ---
 *For comprehensive documentation, architecture details, and troubleshooting guides, see: `extended_claude.md`*
