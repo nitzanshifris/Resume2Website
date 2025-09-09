@@ -15,18 +15,18 @@ Complete knowledge and execution capabilities for all Resume2Website V4 services
 
 ### 🚀 API Endpoints Registry (All Routes)
 
-#### Authentication Routes (`/api/v1/auth/*`)
+#### Authentication Routes (`/api/v1/*`)
 ```python
-POST /api/v1/auth/register          # Register new user
-POST /api/v1/auth/login             # Login with email/password
-POST /api/v1/auth/logout            # Logout current session
-GET  /api/v1/auth/me                # Get current user info
-GET  /api/v1/auth/google/status     # Check Google OAuth availability
-POST /api/v1/auth/google/callback   # Google OAuth callback
-GET  /api/v1/auth/facebook/status   # Check Facebook OAuth availability  
-POST /api/v1/auth/facebook/callback # Facebook OAuth callback
-GET  /api/v1/auth/linkedin/status   # Check LinkedIn OAuth availability
-POST /api/v1/auth/linkedin/callback # LinkedIn OAuth callback
+POST /api/v1/register                # Register new user
+POST /api/v1/login                   # Login with email/password
+POST /api/v1/logout                  # Logout current session
+GET  /api/v1/auth/me                 # Get current user info
+GET  /api/v1/auth/google/status      # Check Google OAuth availability
+POST /api/v1/auth/google/callback    # Google OAuth callback
+GET  /api/v1/auth/facebook/status    # Check Facebook OAuth availability  
+POST /api/v1/auth/facebook/callback  # Facebook OAuth callback
+GET  /api/v1/auth/linkedin/status    # Check LinkedIn OAuth availability
+POST /api/v1/auth/linkedin/callback  # LinkedIn OAuth callback
 ```
 
 #### CV Management Routes (`/api/v1/*`)
