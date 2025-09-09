@@ -69,6 +69,11 @@ export async function apiRequest<T>(
 
 // File upload function
 export async function uploadFile(file: File): Promise<UploadResponse> {
+  // Safety check for null/undefined file
+  if (!file) {
+    throw new Error('No file provided for upload')
+  }
+  
   const sessionId = getSessionId()
   console.log('🔑 Session ID retrieved for upload:', sessionId)
   console.log('📦 localStorage content:', {
@@ -81,7 +86,8 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
   const formData = new FormData()
   formData.append('file', file)
   
-  // Use anonymous upload endpoint if no session
+  // IMPORTANT: Use anonymous upload endpoint if no session
+  // This allows users to upload and validate files before signing up
   const uploadUrl = sessionId 
     ? `${API_BASE_URL}/api/v1/upload`
     : `${API_BASE_URL}/api/v1/upload-anonymous`
@@ -105,8 +111,34 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      console.error('Upload error response:', response.status, errorData)
-      throw new Error(`Upload failed: ${errorData.message || response.statusText}`)
+      // Only log in development, not in production
+      if (window.location.hostname === 'localhost' && process.env.NODE_ENV === 'development') {
+        console.log('Upload validation failed:', response.status)
+      }
+      
+      // Check if this is an authentication error
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`Authentication required (${response.status}): ${errorData.message || 'Please sign in to continue'}`)
+      }
+      
+      // Check if this is a Resume Gate rejection
+      if (response.status === 400 && errorData.detail) {
+        // Handle Resume Gate detailed error
+        if (typeof errorData.detail === 'object') {
+          const { error, score, reason, suggestion } = errorData.detail
+          // Create a structured error that preserves the details
+          const err = new Error(error || 'Please upload a valid resume/CV file')
+          // Add custom properties to preserve the backend details
+          ;(err as any).statusCode = 400
+          ;(err as any).resumeGateReason = reason
+          ;(err as any).resumeGateSuggestion = suggestion
+          ;(err as any).isResumeGateError = true
+          throw err
+        }
+        throw new Error(errorData.detail)
+      }
+      
+      throw new Error(`Upload failed: ${errorData.message || errorData.detail || response.statusText}`)
     }
     
     return await response.json()
@@ -119,11 +151,93 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
   }
 }
 
+// Extract CV data from an already uploaded file
+// Claim ownership of an anonymous CV after signup
+export async function claimAnonymousCV(jobId: string): Promise<any> {
+  const sessionId = getSessionId()
+  if (!sessionId) {
+    throw new Error('Authentication required to claim CV')
+  }
+  
+  const claimUrl = `${API_BASE_URL}/api/v1/claim`
+  console.log('🔄 Claiming anonymous CV with job_id:', jobId)
+  
+  try {
+    const response = await fetch(claimUrl, {
+      method: 'POST',
+      headers: {
+        'X-Session-ID': sessionId,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ job_id: jobId })
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('Claim error response:', response.status, errorData)
+      
+      if (response.status === 404) {
+        throw new Error('CV not found')
+      }
+      if (response.status === 403) {
+        throw new Error('CV is owned by another user')
+      }
+      
+      throw new Error(errorData.detail || errorData.message || `Claim failed with status ${response.status}`)
+    }
+    
+    const result = await response.json()
+    console.log('✅ Successfully claimed CV:', result)
+    return result
+  } catch (error) {
+    console.error('Failed to claim CV:', error)
+    throw error
+  }
+}
+
+export async function extractCVData(jobId: string): Promise<any> {
+  const sessionId = getSessionId()
+  if (!sessionId) {
+    throw new Error('Authentication required: Please sign in to extract CV data')
+  }
+  
+  const extractUrl = `${API_BASE_URL}/api/v1/extract/${jobId}`
+  console.log('📊 Extracting CV data for job:', jobId)
+  
+  try {
+    const response = await fetch(extractUrl, {
+      method: 'POST',
+      headers: {
+        'X-Session-ID': sessionId,
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('Extract error response:', response.status, errorData)
+      
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`Authentication required: ${errorData.message || 'Please sign in to continue'}`)
+      }
+      
+      throw new Error(errorData.detail || errorData.message || `Extraction failed with status ${response.status}`)
+    }
+    
+    const result = await response.json()
+    console.log('✅ CV extraction completed:', result.status)
+    return result
+  } catch (error: any) {
+    console.error('Extract error:', error)
+    throw error
+  }
+}
+
 // Multiple file upload function
 export async function uploadMultipleFiles(files: File[]): Promise<UploadResponse> {
   const sessionId = getSessionId()
   if (!sessionId) {
-    throw new Error('Not authenticated. Please sign in.')
+    throw new Error('Authentication required: Please sign in to upload multiple files')
   }
   
   const formData = new FormData()
@@ -150,7 +264,30 @@ export async function uploadMultipleFiles(files: File[]): Promise<UploadResponse
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       console.error('Multiple upload error response:', response.status, errorData)
-      throw new Error(`Upload failed: ${errorData.message || response.statusText}`)
+      
+      // Check if this is an authentication error
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`Authentication required (${response.status}): ${errorData.message || 'Please sign in to continue'}`)
+      }
+      
+      // Check if this is a Resume Gate rejection
+      if (response.status === 400 && errorData.detail) {
+        // Handle Resume Gate detailed error
+        if (typeof errorData.detail === 'object') {
+          const { error, score, reason, suggestion } = errorData.detail
+          // Create a structured error that preserves the details
+          const err = new Error(error || 'Please upload valid resume/CV files')
+          // Add custom properties to preserve the backend details
+          ;(err as any).statusCode = 400
+          ;(err as any).resumeGateReason = reason
+          ;(err as any).resumeGateSuggestion = suggestion
+          ;(err as any).isResumeGateError = true
+          throw err
+        }
+        throw new Error(errorData.detail)
+      }
+      
+      throw new Error(`Upload failed: ${errorData.message || errorData.detail || response.statusText}`)
     }
     
     return await response.json()
@@ -271,6 +408,9 @@ export function setSessionId(sessionId: string): void {
 export function clearSession(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('resume2website_session_id')
+    localStorage.removeItem('resume2website_user')
+    // CRITICAL: Clear portfolio data to prevent showing to next user
+    localStorage.removeItem('lastPortfolio')
   }
 }
 

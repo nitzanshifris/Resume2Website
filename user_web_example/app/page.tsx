@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, ArrowDown, Menu, X } from "lucide-react"
+import { ArrowRight, ArrowDown, Menu, X, Edit3 } from "lucide-react"
 import { MacBookFrame } from "@/components/macbook-frame"
 import IPhoneFrame from "@/components/iphone-frame"
 import { cn } from "@/lib/utils"
@@ -22,14 +22,24 @@ import UploadResume from "@/components/upload-resume"
 import ResumeBuilder from "@/components/resume-builder"
 import InteractiveCVPile from "@/components/interactive-cv-pile"
 import ProcessingPage from "@/components/processing-page"
-import PricingModal from "@/components/pricing-modal"
-import SimpleDashboard from "@/components/simple-dashboard"
+import PortfolioEditor from "@/components/portfolio-editor"
 import PortfolioHeroPreview from "@/components/portfolio-hero-preview-wrapper"
 import AuthModal from "@/components/auth-modal-new"
+import PricingSelector from "@/components/pricing-selector"
+import ErrorToast from "@/components/ui/error-toast"
+import PortfolioCompletionPopup from "@/components/portfolio-completion-popup"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
-import { uploadFile, API_BASE_URL } from "@/lib/api"
+import { uploadFile, extractCVData, claimAnonymousCV, API_BASE_URL } from "@/lib/api"
+import { 
+  JobFlowProvider, 
+  useJobFlow, 
+  ProgressBarVertical, 
+  FlowState,
+  getSemanticProgressForState,
+  mapSemanticToVisual 
+} from "@/lib/jobFlow"
 
 // Linear progress milestones - evenly distributed for predictable progress
 const PROGRESS_MILESTONES = {
@@ -51,6 +61,16 @@ const TIMINGS = {
   IFRAME_TIMEOUT_LOCAL: 10000,
   IFRAME_TIMEOUT_REMOTE: 5000,
 } as const
+
+// Progress Constants
+const PROGRESS_CONFIG = {
+  SEMANTIC_READY: 60,           // Semantic completion point
+  VISUAL_READY: 80,             // Visual display percentage
+  ROUND_EPSILON: 0.5,           // Rounding threshold
+} as const
+
+// mapSemanticToVisual is now imported from JobFlow for consistency
+// This ensures all progress displays use the same 60→80 mapping
 
 // Client-only RoughNotation to prevent hydration issues
 const ClientRoughNotation = dynamic(
@@ -92,166 +112,19 @@ const TypewriterText = ({ text, delay, className }: { text: string; delay: numbe
   )
 }
 
-// Iframe component with fallback handling and timeout
+// Iframe component - simplified for debugging
 const IframeWithFallback = ({ src, title, className }: { src: string; title: string; className: string }) => {
-  const [loadError, setLoadError] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [showFallback, setShowFallback] = useState(false)
-  
-  useEffect(() => {
-    console.log('🖼️ IframeWithFallback initialized with URL:', src)
-    
-    // Check if URL is localhost
-    const isLocalhost = src.includes('localhost')
-    const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
-    
-    // For localhost URLs from production, show fallback immediately
-    if (isLocalhost && isProduction) {
-      console.log('🌐 Cross-origin detected: production → localhost, showing fallback immediately')
-      setLoadError(true)
-      setIsLoading(false)
-      setShowFallback(true)
-      return
-    }
-    
-    // For Vercel URLs, we now allow iframe embedding since we've configured CSP headers
-    // The templates have frame-ancestors * which allows embedding from anywhere
-    
-    // Set a timeout to show fallback if iframe doesn't load (for any reason)
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.log('⏰ Iframe timeout - showing fallback')
-        setLoadError(true)
-        setIsLoading(false)
-        setShowFallback(true)
-      }
-    }, 8000) // Give Vercel deployments more time to load
-    
-    return () => clearTimeout(timeout)
-  }, [isLoading, src])
+  console.log('🖼️ Rendering iframe with URL:', src)
   
   return (
-    <div className="relative w-full h-full">
-      {!loadError && !showFallback && (
-        <iframe
-          src={src}
-          title={title}
-          className={className}
-          style={{ backgroundColor: 'white' }}
-          onLoad={() => {
-            console.log('✅ Iframe loaded successfully for:', src)
-            setIsLoading(false)
-            setLoadError(false)
-            setShowFallback(false)
-          }}
-          onError={(e) => {
-            console.error('❌ Iframe failed to load:', src, e)
-            setLoadError(true)
-            setIsLoading(false)
-            setShowFallback(true)
-          }}
-          // Enhanced security and compatibility settings for localhost
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox allow-top-navigation"
-          referrerPolicy="no-referrer-when-downgrade"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        />
-      )}
-      
-      {/* Loading indicator */}
-      {isLoading && !loadError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white">
-          <div className="text-center">
-            <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your portfolio...</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Error/Timeout fallback */}
-      {(loadError || showFallback) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-          <div className="text-center p-8 max-w-lg">
-            <div className="mb-6">
-              {/* Success checkmark animation */}
-              <div className="w-20 h-20 mx-auto mb-4 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
-                <div className="relative w-full h-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                </div>
-              </div>
-              
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                {src.includes('.vercel.app') ? '🎉 Deployed to Vercel!' : 'Portfolio Generated Successfully!'}
-              </h3>
-              
-              <p className="text-gray-600 mb-4">
-                Your portfolio is live and ready to share!
-              </p>
-              
-              {/* URL display with copy button */}
-              <div className="bg-gray-100 rounded-lg p-3 mb-4">
-                <p className="text-xs text-gray-500 mb-1">Portfolio URL:</p>
-                <div className="flex items-center justify-between bg-white rounded border border-gray-200 p-2">
-                  <span className="font-mono text-xs text-gray-700 truncate flex-1 mr-2">{src}</span>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(src)
-                      // Could add a toast notification here
-                    }}
-                    className="text-gray-500 hover:text-gray-700 p-1"
-                    title="Copy URL"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              
-              <p className="text-xs text-gray-500 mb-4">
-                {src.includes('.vercel.app') 
-                  ? '🔒 For security, Vercel blocks iframe embedding. Open in a new tab to view.' 
-                  : '🔒 Browser security prevents embedding localhost in frames.'}
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <a
-                href={src}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <span className="inline-flex items-center">
-                  Open Portfolio in New Tab
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </span>
-              </a>
-              
-              <p className="text-xs text-gray-400">
-                Pro tip: Share this URL with anyone to showcase your portfolio!
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Direct link overlay - always visible */}
-      <div className="absolute top-4 right-4 z-10">
-        <a 
-          href={src} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="bg-black/70 text-white px-3 py-1 rounded text-sm hover:bg-black/90 transition-colors backdrop-blur-sm"
-        >
-          Open in New Tab ↗
-        </a>
-      </div>
-    </div>
+    <iframe
+      src={src}
+      title={title}
+      className={className}
+      style={{ backgroundColor: 'white' }}
+      onLoad={() => console.log('✅ Iframe loaded:', src)}
+      onError={(e) => console.error('❌ Iframe error:', src, e)}
+    />
   )
 }
 
@@ -671,174 +544,28 @@ const SimpleTypewriter = ({
   )
 }
 
-// Vertical Progress Bar Component - Modern Glassmorphism Design
-const VerticalProgressBar = ({ 
-  onProgressChange, 
-  externalProgress,
-  isClickable = false,
-  onCircleClick
-}: { 
-  onProgressChange?: (percentage: number) => void
-  externalProgress?: number
-  isClickable?: boolean
-  onCircleClick?: () => void
-}) => {
-  const [percentage, setPercentage] = useState(0)
-  const [isClient, setIsClient] = useState(false)
-  
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-  
-  useEffect(() => {
-    // Always use external progress when provided - no time-based animation
-    if (externalProgress !== undefined) {
-      const integerProgress = Math.floor(externalProgress)
-      setPercentage(integerProgress)
-      onProgressChange?.(integerProgress)
-      return
-    }
-    
-    // Only use time-based animation if no external progress is provided
-    // This prevents conflicts between backend progress and time-based progress
-    if (!isClient) return
-    
-    // Fallback time-based animation (only when no backend progress)
-    const startTime = Date.now()
-    const duration = 60000 // 60 seconds
-    
-    const updateProgress = () => {
-      // Check again if external progress was provided during animation
-      if (externalProgress !== undefined) {
-        return // Stop time-based animation
-      }
-      
-      const elapsed = Date.now() - startTime
-      const progress = Math.min((elapsed / duration) * 60, 60)
-      const newPercentage = Math.floor(progress)
-      setPercentage(newPercentage)
-      onProgressChange?.(newPercentage)
-      
-      if (progress < PROGRESS_MILESTONES.GENERATION_COMPLETE && externalProgress === undefined) {
-        requestAnimationFrame(updateProgress)
-      }
-    }
-    
-    requestAnimationFrame(updateProgress)
-  }, [onProgressChange, isClient, externalProgress])
-  
-  return (
-    <div className="relative flex items-center justify-center h-full">
-      {/* Ambient glow */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-emerald-500/30 via-sky-400/30 to-blue-600/30 blur-3xl rounded-full animate-pulse" />
-      </div>
-      
-      {/* Glass container with centered elements */}
-      <div className="relative w-20 h-96">
-        {/* Progress Track - Narrower, centered within container */}
-        <div className="absolute left-1/2 -translate-x-1/2 w-12 h-full rounded-full overflow-hidden">
-          {/* Glass background */}
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full" />
-          
-          {/* Inner shadow for depth */}
-          <div className="absolute inset-[2px] bg-black/10 rounded-full" />
-          
-          {/* Progress Fill - stops where the button center is */}
-          <motion.div
-            className="absolute bottom-0 left-0 right-0 rounded-full overflow-hidden"
-            initial={{ height: 0 }}
-            animate={{ height: `${percentage}%` }} // Direct percentage - 60% means 60% of bar height
-            transition={{ 
-              type: "spring",
-              stiffness: 40,
-              damping: 15
-            }}
-          >
-            {/* Gradient fill */}
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-500 via-sky-400 to-blue-600">
-              {/* Animated shine effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent"
-                animate={{
-                  y: ["-100%", "100%"]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-              />
-            </div>
-          </motion.div>
-          
-          {/* Subtle milestone marks */}
-          {[20, 40, 60].map((milestone) => (
-            <div
-              key={milestone}
-              className="absolute left-1 right-1 h-[1px] bg-white/20"
-              style={{ bottom: `${milestone}%` }} // Direct percentage positions
-            />
-          ))}
-        </div>
-        
-        {/* Traveling Percentage Button - centered on same axis as bar */}
-        <motion.div
-          className="absolute left-1/2 -translate-x-1/2 w-20 h-20 z-30"
-          initial={{ bottom: "-40px" }} // Start with center at bottom
-          animate={{ bottom: `${(percentage * 384) / 100 - 40}px` }} // Direct percentage of bar height (384px)
-          transition={{
-            type: "spring",
-            stiffness: 40,
-            damping: 15
-          }}
-        >
-          {/* Glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 blur-xl opacity-70" />
-          
-          {/* Glass button */}
-          <div 
-            className={`relative w-full h-full rounded-full bg-white/30 backdrop-blur-lg border-2 border-white/40 shadow-2xl flex items-center justify-center ${
-              isClickable && percentage >= 60 ? 'cursor-pointer hover:scale-110 transition-transform' : ''
-            }`}
-            onClick={() => {
-              if (isClickable && percentage >= 60 && onCircleClick) {
-                onCircleClick()
-              }
-            }}
-          >
-            {/* Inner glass layer */}
-            <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/30 to-white/10" />
-            
-            {/* Percentage text */}
-            <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
-              {percentage}%
-            </span>
-            
-            {/* Click indicator when ready */}
-            {isClickable && percentage >= 60 && (
-              <motion.div
-                className="absolute inset-0 rounded-full border-2 border-white"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.5, 0, 0.5]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-            )}
-          </div>
-        </motion.div>
-      </div>
-    </div>
-  )
+
+// Type definition for standardized errors
+interface StandardizedError {
+  title: string
+  message: string
+  suggestion?: string
+  isAuthError?: boolean
+}
+
+// Constant for custom event name to avoid typos
+const RESUME_AUTO_START_EVENT = 'resume2web:autoStart'
+
+// TypeScript declaration for window flags
+declare global {
+  interface Window {
+    __isHandlingFileSelect?: boolean
+    __autoStartListeners?: number
+  }
 }
 
 // Resume2Website Demo Component - Mobile-First WOW Experience
-function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn }: { 
+function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUploadedFile, onFileClick, handleFileSelect, signIn, setErrorToast, isRetrying, setIsRetrying, hasCompletedGeneration, onLearnMore, onGoLive, onEditPortfolio }: { 
   onOpenModal: () => void; 
   setShowPricing: (value: boolean) => void;
   uploadedFile: File | null;
@@ -846,15 +573,173 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   onFileClick: (file: File) => void;
   handleFileSelect: (file: File) => void;
   signIn?: (sessionId: string, userData: any) => Promise<void>;
+  setErrorToast: (toast: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    suggestion?: string;
+  }) => void;
+  isRetrying: boolean;
+  setIsRetrying: (value: boolean) => void;
+  hasCompletedGeneration?: boolean;
+  onLearnMore?: () => void;
+  onGoLive?: () => void;
+  onEditPortfolio?: () => void;
 }) {
+  // Helper function to parse error response and get standardized messages
+  const getStandardizedError = (error: any): StandardizedError => {
+    // Handle network errors, CORS, and fetch failures
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        title: 'Connection problem',
+        message: 'Unable to connect to the server.',
+        suggestion: 'Check your internet connection and try again.'
+      }
+    }
+    
+    // Handle AbortError (client-side timeout)
+    if (error.name === 'AbortError' || (error instanceof Error && error.message.includes('AbortError'))) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    // Handle CORS errors
+    if (error instanceof TypeError && (error.message.includes('CORS') || error.message.includes('cross-origin'))) {
+      return {
+        title: 'Connection blocked',
+        message: 'The server blocked the connection for security reasons.',
+        suggestion: 'Try refreshing the page or contact support if this persists.'
+      }
+    }
+    
+    // Handle Resume Gate errors with custom properties
+    if (error.isResumeGateError) {
+      return {
+        title: 'Not a resume',
+        message: error.resumeGateReason || "This file doesn't look like a resume (CV).",
+        suggestion: error.resumeGateSuggestion || 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
+    const errorMessage = error.message || 'File validation failed'
+    const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
+    
+    // Check for specific error patterns in the message
+    if (statusCode === 400 && (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate'))) {
+      // Check if we have more specific error details from backend
+      if (errorMessage.includes("doesn't contain enough readable text")) {
+        return {
+          title: 'Not a resume',
+          message: "The image doesn't contain enough readable text for a resume.",
+          suggestion: 'Please upload a complete resume document or a high-quality scan with all resume sections visible.'
+        }
+      }
+      if (errorMessage.includes("lacks the variety of content")) {
+        return {
+          title: 'Not a resume',
+          message: "The image lacks the variety of content expected in a resume.",
+          suggestion: 'Upload a full resume with multiple sections (Experience, Education, Skills, Contact info).'
+        }
+      }
+      if (errorMessage.includes("missing core resume elements")) {
+        return {
+          title: 'Not a resume',
+          message: "The image is missing core resume elements.",
+          suggestion: 'Make sure your resume image includes both contact information and work experience.'
+        }
+      }
+      // Default resume error
+      return {
+        title: 'Not a resume',
+        message: "This file doesn't look like a resume (CV).",
+        suggestion: 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
+    if (statusCode === 400 && (errorMessage.includes('corrupted') || errorMessage.includes('unreadable'))) {
+      return {
+        title: 'Unsupported or corrupted file',
+        message: "The file type doesn't match its contents or can't be read.",
+        suggestion: 'Upload a PDF, DOC/DOCX, TXT, PNG, JPG, or WEBP exported directly from your editor.'
+      }
+    }
+    
+    if (statusCode === 401 || statusCode === 403 || errorMessage.includes('Authentication required')) {
+      return {
+        title: 'Sign in to continue',
+        message: 'Creating a portfolio requires an account.',
+        suggestion: 'Sign in to link this upload to your workspace.',
+        isAuthError: true  // Special flag for auth errors, but still returns standard object
+      }
+    }
+    
+    if (statusCode === 408 || errorMessage.includes('timed out')) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    if (statusCode === 413 || errorMessage.includes('too large')) {
+      return {
+        title: 'File is too large',
+        message: 'Maximum file size is 10 MB.',
+        suggestion: 'Reduce the file size (export to PDF, compress images) and try again.'
+      }
+    }
+    
+    if (statusCode === 415 || errorMessage.includes('Unsupported')) {
+      return {
+        title: 'File type not supported',
+        message: 'Supported types: PDF, DOC/DOCX, TXT, PNG, JPG, WEBP, RTF.',
+        suggestion: 'Export your resume to one of the supported formats and re-upload.'
+      }
+    }
+    
+    if (statusCode === 429 || errorMessage.includes('rate limit')) {
+      return {
+        title: 'Too many uploads',
+        message: "You've reached the upload limit for now.",
+        suggestion: 'Please wait and try again later. Sign in for higher limits.'
+      }
+    }
+    
+    if (statusCode === 422 || errorMessage.includes('extract text')) {
+      return {
+        title: "Couldn't read the file",
+        message: "We couldn't extract text from this file.",
+        suggestion: 'Try a higher-quality scan or export a text-based PDF.'
+      }
+    }
+    
+    if (statusCode === 404) {
+      return {
+        title: 'Item not found',
+        message: "We couldn't find that upload (it may have expired).",
+        suggestion: 'Upload the file again to continue.'
+      }
+    }
+    
+    // Default 500 error
+    return {
+      title: 'Something went wrong',
+      message: "We couldn't process the file due to a server error.",
+      suggestion: 'Try again in a few minutes. If this keeps happening, export to PDF or contact support.'
+    }
+  }
+  
   const [stage, setStage] = useState<
     "typewriter" | "intro" | "initial" | "morphing" | "dissolving" | "materializing" | "complete"
   >("typewriter")
   const [isPlaying, setIsPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [progressBarPercentage, setProgressBarPercentage] = useState(0)
+  // Progress is now managed by JobFlow context
   const [isMobile, setIsMobile] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const hasRestoredRef = useRef(false) // Prevent infinite restoration loops
   const [showStrikeThrough, setShowStrikeThrough] = useState(false)
   const [showCVCard, setShowCVCard] = useState(true)
   const [hasScrolledHero, setHasScrolledHero] = useState(false)
@@ -866,12 +751,24 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const { isAuthenticated, sessionId } = useAuthContext()
   
   // Backend processing states
-  const [portfolioUrl, setPortfolioUrl] = useState<string | null>(null)
+  // REMOVED: Local portfolioUrl state - now using jobFlowContext.portfolioUrl
+  // This ensures hydration from JobFlow works correctly on refresh
   const [portfolioId, setPortfolioId] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingError, setProcessingError] = useState<string | null>(null)
   const [currentJobId, setCurrentJobId] = useState<string | null>(null)
-  const [realProgress, setRealProgress] = useState(0)
+  // Get progress from JobFlow context instead of local state
+  const { 
+    context: jobFlowContext,
+    startPreviewFlow,
+    startAuthenticatedFlow,
+    startPostSignupFlow,
+    restorePortfolio
+  } = useJobFlow()
+  const targetProgress = getSemanticProgressForState(jobFlowContext.state)
+  const [animatedProgress, setAnimatedProgress] = useState(0)
+  const animationRef = useRef<number | null>(null)
+  const lastUpdateTime = useRef<number>(Date.now())
   const [showPortfolioInMacBook, setShowPortfolioInMacBook] = useState(false)
   const [isRestoringPortfolio, setIsRestoringPortfolio] = useState(false)
   
@@ -879,6 +776,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  
+  // Dedupe ref to prevent duplicate processing
+  const startedForJobIdRef = useRef<Set<string>>(new Set())
   
   // Loading sequence states for mobile
   const [loadingStep, setLoadingStep] = useState(0) // 0: backgrounds, 1: headline, 2: subheadline, 3: cv image
@@ -907,7 +807,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   useEffect(() => {
     console.log('🔄 Portfolio restoration effect running. isHydrated:', isHydrated, 'sessionId:', sessionId)
     
-    const restorePortfolio = async () => {
+    // Prevent infinite restoration loops
+    if (hasRestoredRef.current) {
+      console.log('✅ Portfolio already restored, skipping')
+      return
+    }
+    
+    const restorePortfolioAsync = async () => {
       if (!isHydrated) {
         console.log('⏳ Not hydrated yet, skipping restoration')
         return
@@ -920,6 +826,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         localStorage.removeItem('lastPortfolio')
         return
       }
+      
+      // Mark as restored to prevent re-runs
+      hasRestoredRef.current = true
       
       console.log('✅ Authenticated user detected, proceeding with restoration')
       
@@ -939,8 +848,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         setIsRestoringPortfolio(true)
         
         // Set all necessary states to show the portfolio
-        setPortfolioUrl(urlPortfolioUrl)
-        setRealProgress(60) // Show as completed
+        // Use the new restorePortfolio function that works from any state
+        restorePortfolio(urlPortfolioUrl, urlPortfolioId)
+        // Progress is now managed by JobFlow context
         setShowPortfolioInMacBook(true)
         setStage("complete") // Go directly to complete stage for restored portfolios
         setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
@@ -966,9 +876,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           if (response.ok) {
             const data = await response.json()
             if (data.custom_domain_url || data.url) {
-              setPortfolioUrl(data.custom_domain_url || data.url)
+              // Use the new restorePortfolio function that works from any state
+              restorePortfolio(data.custom_domain_url || data.url, urlPortfolioId)
               setPortfolioId(urlPortfolioId)
-              setRealProgress(60)
+              // Progress managed by JobFlow
               setShowPortfolioInMacBook(true)
               setStage("complete")
               setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
@@ -995,9 +906,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               setIsRestoringPortfolio(true)
               
               // Set all necessary states to show the portfolio
-              setPortfolioUrl(portfolio.url)
+              // Use the new restorePortfolio function that works from any state
+              restorePortfolio(portfolio.url, portfolio.id)
               setPortfolioId(portfolio.id)
-              setRealProgress(60)
+              // Progress managed by JobFlow
               setShowPortfolioInMacBook(true)
               setStage("complete") // Go directly to complete stage for restored portfolios
               setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
@@ -1053,9 +965,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                   custom_domain: latest.custom_domain_url,
                   vercel_url: latest.url
                 })
-                setPortfolioUrl(restoredUrl)
+                // Use the new restorePortfolio function that works from any state
+                restorePortfolio(restoredUrl, latest.portfolio_id || latest.id)
                 setPortfolioId(latest.portfolio_id || latest.id)
-                setRealProgress(60)
+                // Progress managed by JobFlow
                 setShowPortfolioInMacBook(true)
                 setStage("complete")
                 setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
@@ -1075,7 +988,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       }
     }
     
-    restorePortfolio()
+    restorePortfolioAsync()
   }, [isHydrated, sessionId])
 
   // Sequential loading for mobile
@@ -1137,16 +1050,17 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       //   console.log('⏸️ Animation paused at dissolving stage - waiting for authentication')
       //   return
       // }
-      // Trigger text change FIRST, then hide strike-through
-      setTimeout(() => {
-        setShowNewTypewriter(true)  // Change text immediately
-        // Then hide the strike-through after a tiny delay
-        setTimeout(() => setShowStrikeThrough(false), 50)
-      }, 1000)
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Stage 4: Website Materialization (MacBook appears)
+      
+      // Wait for dissolving animation
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      
+      // Stage 4: Website Materialization (MacBook appears) and text change happen TOGETHER
+      // This prevents the CV pile from shifting before animating out
       setStage("materializing")
+      setShowNewTypewriter(true)  // Change text at the SAME time as MacBook appears
+      // Hide the strike-through after a tiny delay
+      setTimeout(() => setShowStrikeThrough(false), 50)
+      
       await new Promise((resolve) => setTimeout(resolve, 1200))
 
       // Stage 5: Complete (final state)
@@ -1165,16 +1079,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     sequence()
   }, [isPlaying, isWaitingForAuth])
 
-  // Progress tracking
-  useEffect(() => {
-    if (isPlaying) {
-      const interval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 1.5, 100))
-      }, 50)
-      return () => clearInterval(interval)
-    }
-  }, [isPlaying])
+  // Progress tracking is now handled entirely by JobFlow
 
+  // Auto-start animation listener will be added after handleFileClick is defined
+  
   // Trigger new typewriter is now handled in the animation sequence
   // This useEffect is disabled to prevent duplicate triggers
   /*
@@ -1194,290 +1102,116 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }, [stage])
 
-  // Linear progress animation helper - more predictable and backend-synchronized
-  const animateProgress = (from: number, to: number, duration: number = 1000) => {
-    const startTime = Date.now()
-    const diff = to - from
-    let lastIntegerProgress = Math.floor(from)
+  // LEGACY: Smooth continuous progress animation - will be replaced by JobFlow
+  // TODO: Remove once JobFlow is fully integrated
+  const animateSmoothProgress = useRef<{
+    isRunning: boolean;
+    startTime: number;
+    expectedDuration: number;
+    animationId: number | null;
+    processComplete: boolean;
+  }>({
+    isRunning: false,
+    startTime: 0,
+    expectedDuration: 40000, // 40 seconds to reach near 60
+    animationId: null,
+    processComplete: false
+  })
+
+  // LEGACY: Start smooth progress - will be replaced by JobFlow state transitions
+  const startSmoothProgress = () => {
+    // Reset progress to 0 and start the smooth animation
+    // Progress reset handled by JobFlow
+    
+    animateSmoothProgress.current = {
+      isRunning: true,
+      startTime: Date.now(),
+      expectedDuration: 40000, // 40 seconds expected
+      animationId: null,
+      processComplete: false
+    }
     
     const updateProgress = () => {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
+      if (!animateSmoothProgress.current.isRunning) return
       
-      // Use linear interpolation for more predictable progress
-      // This ensures progress moves steadily without jumps
-      const currentProgress = from + (diff * progress)
+      const elapsed = Date.now() - animateSmoothProgress.current.startTime
+      const expectedDuration = animateSmoothProgress.current.expectedDuration
       
-      // Update every integer change for smooth visual progression
-      const currentInteger = Math.floor(currentProgress)
-      if (currentInteger !== lastIntegerProgress && currentInteger <= to) {
-        setRealProgress(currentInteger)
-        lastIntegerProgress = currentInteger
-        console.log(`📊 Progress: ${currentInteger}% (${from}% → ${to}%)`)
+      // If process completed, quickly go to 60
+      if (animateSmoothProgress.current.processComplete) {
+        // Progress animation now handled by JobFlow
+        // The context will update automatically based on state transitions
+        return
       }
       
-      // Continue animation until we reach the target
-      if (progress < 1) {
-        requestAnimationFrame(updateProgress)
+      // Calculate smooth progress
+      let targetProgress: number
+      
+      if (elapsed < expectedDuration) {
+        // Linear progression from 0 to 55
+        targetProgress = (elapsed / expectedDuration) * 55
       } else {
-        // Ensure we set the final value
-        const finalValue = Math.floor(to)
-        setRealProgress(finalValue)
-        console.log(`✅ Progress complete: ${finalValue}%`)
+        // Asymptotic approach from 55 to 60
+        // Using exponential decay: 60 - 5 * e^(-t)
+        const overtime = (elapsed - expectedDuration) / 5000 // Scale overtime
+        targetProgress = 60 - 5 * Math.exp(-overtime)
       }
+      
+      // Always show integers only
+      const intProgress = Math.floor(targetProgress)
+      
+      // Never exceed 59 until process is complete
+      const cappedProgress = Math.min(59, intProgress)
+      
+      // Progress updates now handled by JobFlow context
+      // Visual progress is calculated from state transitions
+      
+      // Continue animation
+      animateSmoothProgress.current.animationId = requestAnimationFrame(updateProgress)
     }
     
-    requestAnimationFrame(updateProgress)
+    // Start the animation
+    updateProgress()
   }
 
-  // Process portfolio generation in the background
-  const processPortfolioGeneration = async (file: File) => {
-    try {
-      setIsProcessing(true)
-      setProcessingError(null)
-      
-      // Step 1: Upload file (0-20%)
-      console.log('📤 Uploading file...', file.name, file.size, 'bytes')
-      animateProgress(0, PROGRESS_MILESTONES.UPLOAD_START, 500) // Quick start
-      
-      const uploadResponse = await uploadFile(file)
-      const jobId = uploadResponse.job_id
-      setCurrentJobId(jobId)
-      console.log('✅ Upload complete, job_id:', jobId)
-      
-      // Step 2: Check if extraction is needed (might already be done during upload)
-      // For cached uploads, extraction happens during upload, so we can skip this step
-      console.log('🔍 Checking if CV extraction is needed...')
-      
-      // Start smooth linear progress from 5 to 20 (like we do for 20-60)
-      // This will increment smoothly: 5, 6, 7, 8... up to 20
-      let currentProgress = PROGRESS_MILESTONES.UPLOAD_START // Start from 5
-      const progressTo20Interval = setInterval(() => {
-        currentProgress++
-        setRealProgress(currentProgress)
-        if (currentProgress >= PROGRESS_MILESTONES.EXTRACTION_START) {
-          clearInterval(progressTo20Interval)
-        }
-      }, 200) // Update every 200ms for smooth progression from 5 to 20 (15 steps * 200ms = 3 seconds)
-      
-      // Continue with extraction progress from 20 to 45
-      let progressInterval: NodeJS.Timeout | null = null
-      setTimeout(() => {
-        progressInterval = setInterval(() => {
-          setRealProgress(prev => {
-            if (prev >= PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5) {
-              if (progressInterval) clearInterval(progressInterval)
-              return prev
-            }
-            return Math.min(prev + 1, PROGRESS_MILESTONES.EXTRACTION_COMPLETE - 5)
-          })
-        }, 800) // Update every 800ms
-      }, 3000) // Start after the 5-20 animation completes
-      
-      // Start extraction with proper timeout handling
-      const extractStartTime = Date.now()
-      
-      // Check if CV was already extracted during upload (common for cached files)
-      let extractionNeeded = true
-      try {
-        // First check if CV data already exists
-        const checkResponse = await fetch(`${API_BASE_URL}/api/v1/cv/${jobId}`, {
-          method: 'GET',
-          headers: {
-            'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
-          }
-        })
-        
-        if (checkResponse.ok) {
-          const cvData = await checkResponse.json()
-          if (cvData && cvData.cv_data && cvData.status === 'completed') {
-            console.log('✅ CV already extracted during upload (cached), skipping extraction')
-            extractionNeeded = false
-            // Jump progress to extraction complete
-            clearInterval(progressTo20Interval)
-            if (progressInterval) clearInterval(progressInterval)
-            setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
-          }
-        }
-      } catch (e) {
-        console.log('Could not check CV status, will proceed with extraction')
-      }
-      
-      // Only extract if needed
-      if (extractionNeeded) {
-        // Set a longer timeout for CV extraction (60 seconds)
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 60000)
-        
-        try {
-          const extractResponse = await fetch(`${API_BASE_URL}/api/v1/cv/extract/${jobId}`, {
-            method: 'POST',
-            headers: {
-              'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
-            },
-            signal: controller.signal
-          })
-          
-          clearTimeout(timeoutId)
-          
-          if (!extractResponse.ok) {
-            throw new Error('Failed to extract CV data')
-          }
-        
-          // Wait for response to ensure extraction completed
-          const extractData = await extractResponse.json()
-          console.log('✅ CV extraction response received:', extractData)
-          
-          // Clear the progress intervals and complete extraction
-          clearInterval(progressTo20Interval) // Clear first interval if still running
-          if (progressInterval) clearInterval(progressInterval) // Clear second interval
-          setRealProgress(PROGRESS_MILESTONES.EXTRACTION_COMPLETE)
-          console.log('✅ CV extraction complete')
-        } catch (error) {
-          clearTimeout(timeoutId)
-          clearInterval(progressTo20Interval)
-          if (progressInterval) clearInterval(progressInterval)
-          if (error instanceof Error && error.name === 'AbortError') {
-            throw new Error('CV extraction timed out after 60 seconds')
-          }
-          throw error
-        }
-      }
-      
-      // Step 3: Generate portfolio (45-60%) - final step
-      console.log('🎨 Generating portfolio...')
-      const templates = ['v0_template_v1.5', 'v0_template_v2.1']
-      const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
-      console.log('🎯 Selected template:', randomTemplate)
-      
-      // Jump directly to generation phase since extraction is complete
-      setRealProgress(PROGRESS_MILESTONES.GENERATION_START)
-      
-      // Simulate progress during generation
-      const generateProgressInterval = setInterval(() => {
-        setRealProgress(prev => {
-          if (prev >= PROGRESS_MILESTONES.GENERATION_COMPLETE - 2) {
-            clearInterval(generateProgressInterval)
-            return prev
-          }
-          return Math.min(prev + 1, PROGRESS_MILESTONES.GENERATION_COMPLETE - 2)
-        })
-      }, 2000) // Update every 2 seconds to avoid decimals
-      
-      const generateStartTime = Date.now()
-      const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate/${jobId}`
-      
-      // Set timeout for portfolio generation (5 minutes for Vercel CLI deployment)
-      const generateController = new AbortController()
-      const generateTimeoutId = setTimeout(() => generateController.abort(), 300000) // 5 minutes
-      
-      try {
-        const generateResponse = await fetch(generateUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-ID': localStorage.getItem('resume2website_session_id') || ''
-        },
-        body: JSON.stringify({
-          template: randomTemplate
-        }),
-        signal: generateController.signal
-      })
-      
-      clearTimeout(generateTimeoutId)
-      
-      if (!generateResponse.ok) {
-        const errorData = await generateResponse.json().catch(() => ({ detail: `HTTP ${generateResponse.status}` }))
-        console.error('❌ Portfolio generation failed:', errorData)
-        throw new Error(errorData.detail || 'Failed to generate portfolio')
-      }
-      
-      const generateData = await generateResponse.json()
-      
-      // Calculate remaining time for smooth final animation
-      const generateElapsed = Date.now() - generateStartTime
-      const remainingGenerationTime = Math.max(200, TIMINGS.GENERATION_ANIMATION - generateElapsed)
-      
-      if (generateData.url || generateData.portfolio_url || generateData.custom_domain_url) {
-        const portfolioUrl = generateData.custom_domain_url || generateData.url || generateData.portfolio_url
-        const portfolioIdValue = generateData.portfolio_id || generateData.id
-        
-        setPortfolioUrl(portfolioUrl)
-        setPortfolioId(portfolioIdValue)
-        
-        // Save to localStorage with user association
-        localStorage.setItem('lastPortfolio', JSON.stringify({
-          url: portfolioUrl,
-          id: portfolioIdValue,
-          userId: sessionId, // Associate with current user
-          timestamp: Date.now()
-        }))
-        
-        // Update URL without reload
-        const newUrl = new URL(window.location.href)
-        newUrl.searchParams.set('url', portfolioUrl)
-        if (portfolioIdValue) {
-          newUrl.searchParams.set('portfolio_id', portfolioIdValue)
-        }
-        window.history.pushState({}, '', newUrl)
-        
-        // Clear progress interval and jump to completion
-        clearInterval(generateProgressInterval)
-        setRealProgress(PROGRESS_MILESTONES.GENERATION_COMPLETE)
-        console.log('✅ Portfolio generated successfully:', portfolioUrl)
-        
-        // Show portfolio immediately with a small delay for UX
-        setTimeout(() => {
-          setShowPortfolioInMacBook(true)
-          console.log('🖥️ Auto-showing portfolio in MacBook frame')
-        }, TIMINGS.PORTFOLIO_DISPLAY_DELAY)
-        
-      } else {
-        console.error('❌ No portfolio URL in response:', generateData)
-        // Check if generation was successful but URL format is different
-        if (generateData.status === 'success' && generateData.portfolio_id) {
-          // Construct URL from available data - use the actual generated URL if available
-          const baseUrl = generateData.url || generateData.portfolio_url || 'http://localhost:4000'
-          setPortfolioUrl(baseUrl)
-          animateProgress(PROGRESS_MILESTONES.GENERATION_START, PROGRESS_MILESTONES.GENERATION_COMPLETE, remainingGenerationTime)
-          console.log('✅ Portfolio generated successfully (constructed URL):', baseUrl)
-          
-          setTimeout(() => {
-            setShowPortfolioInMacBook(true)
-            console.log('🖥️ Auto-showing portfolio in MacBook frame')
-          }, remainingGenerationTime + TIMINGS.PORTFOLIO_DISPLAY_DELAY)
-        } else {
-          // Only throw error if generation actually failed
-          throw new Error('Portfolio generation succeeded but no URL returned')
-        }
-      }
-      } catch (error) {
-        clearTimeout(generateTimeoutId)
-        clearInterval(generateProgressInterval)
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new Error('Portfolio generation timed out after 5 minutes')
-        }
-        throw error
-      }
-      
-    } catch (error) {
-      console.error('❌ Processing error:', error)
-      setProcessingError(error instanceof Error ? error.message : 'An error occurred')
-      setIsProcessing(false)
-      // Show error in UI
-      alert(`Error: ${error instanceof Error ? error.message : 'Processing failed'}`)
+  // LEGACY: Complete smooth progress - will be replaced by JobFlow completion
+  const completeSmoothProgress = () => {
+    animateSmoothProgress.current.processComplete = true
+  }
+
+  // LEGACY: Stop smooth progress - will be replaced by JobFlow state management
+  const stopSmoothProgress = () => {
+    animateSmoothProgress.current.isRunning = false
+    if (animateSmoothProgress.current.animationId) {
+      cancelAnimationFrame(animateSmoothProgress.current.animationId)
     }
   }
+
+  // REMOVED: Local finalizePortfolioDisplay - now using JobFlow's finalizePortfolioReady
+  // The JobFlow version handles portfolio URL state management properly
+
+  // Keep the old function for backward compatibility but simplified
+  const animateProgress = (from: number, to: number, duration: number = 1000) => {
+    // This is now just used for specific jumps when needed
+    // Progress animation handled by JobFlow
+  }
+
+  // REMOVED: processPortfolioGeneration - replaced by JobFlow orchestrators
   
   const handleStartDemo = async () => {
+    // JobFlow handles duplicate prevention internally
+    if (jobFlowContext.currentJobId) {
+      console.log('🛑 JobFlow already processing:', jobFlowContext.currentJobId)
+      return
+    }
     
     // Reset everything to initial state before starting
     setStage("typewriter")
-    setProgress(0)
     setShowNewTypewriter(false)
     setShowStrikeThrough(false)
     setShowCVCard(true)
-    setPortfolioUrl(null)
+    // REMOVED: setPortfolioUrl - now managed by JobFlow context
+    // setPortfolioUrl(null)
     setPortfolioId(null)
     // Clear saved state
     localStorage.removeItem('lastPortfolio')
@@ -1487,27 +1221,71 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     newUrl.searchParams.delete('portfolio_id')
     window.history.pushState({}, '', newUrl)
     setProcessingError(null)
-    setRealProgress(0)
+    // Progress reset handled by JobFlow
     
-    // Start the animation
-    setIsPlaying(true)
-    
-    // Start backend processing in parallel
+    // Use JobFlow orchestrators for file processing
     if (uploadedFile) {
-      processPortfolioGeneration(uploadedFile)
+      console.log('🔍 Starting demo with JobFlow...')
+      try {
+        // Start the animation
+        setIsPlaying(true)
+        
+        // Use JobFlow orchestrator based on auth state
+        if (isAuthenticated) {
+          await startAuthenticatedFlow(uploadedFile)
+        } else {
+          await startPreviewFlow(uploadedFile)
+        }
+      } catch (error: any) {
+        // Don't log to console - we'll show the nice error toast
+        // Keep CV card visible so user can see what file failed
+        setProcessingError(error.message || 'Please upload a valid resume/CV file')
+        
+        // Reset all animation and progress states
+        setIsPlaying(false)
+        // Progress reset handled by JobFlow
+        setStage("typewriter")
+        setShowPortfolioInMacBook(false)
+        
+        // Parse error message
+        const errorMessage = error.message || 'Please upload a valid resume/CV file'
+        
+        // Use standardized error messages
+        const errorInfo = getStandardizedError(error)
+        
+        // Show auth modal if needed
+        if (errorInfo.isAuthError) {
+          setShowSignupModal(true)
+          return
+        }
+        
+        // Show error toast with standardized message
+        setErrorToast({
+          isOpen: true,
+          title: errorInfo.title,
+          message: errorInfo.message,
+          suggestion: errorInfo.suggestion
+        })
+      }
+    } else {
+      // No file, just start animation (shouldn't happen)
+      setIsPlaying(true)
     }
   }
 
-  const startPreviewAnimation = () => {
+  const startPreviewAnimation = (fileToProcess?: File, skipValidation: boolean = false) => {
     console.log('🎬 Starting preview animation (no backend processing)')
+    
+    // Use provided file or fall back to uploadedFile
+    const file = fileToProcess || uploadedFile
     
     // Reset states for preview
     setStage("initial") // Start from initial stage to show CV immediately
-    setProgress(0)
     setShowNewTypewriter(false)
     setShowStrikeThrough(false)
     setShowCVCard(true)
-    setPortfolioUrl(null)
+    // REMOVED: setPortfolioUrl - now managed by JobFlow context
+    // setPortfolioUrl(null)
     setPortfolioId(null)
     // Clear saved state
     localStorage.removeItem('lastPortfolio')
@@ -1517,12 +1295,24 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     newUrl.searchParams.delete('portfolio_id')
     window.history.pushState({}, '', newUrl)
     setProcessingError(null)
-    setRealProgress(0)
+    // Progress reset handled by JobFlow
     setShowPortfolioInMacBook(false)
     
     // Don't start animation immediately - wait for CV to appear in card
     setIsWaitingForAuth(true)
-    setPendingFile(uploadedFile)
+    setPendingFile(file)
+    
+    // Check if we have a file to upload
+    if (!file) {
+      console.error('❌ No file to upload')
+      setErrorToast({
+        isOpen: true,
+        title: 'No file selected',
+        message: 'Please select a file first',
+        suggestion: 'Drag and drop a file or click to browse'
+      })
+      return
+    }
     
     // Timeline:
     // 1. Wait for CV to fully appear in card (estimated 4 seconds)
@@ -1532,59 +1322,120 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // 5. Show progress bar for 3 seconds
     // 6. Then show signup modal
     
-    // Step 1: Wait for CV to appear (~1.5 seconds for upload/display)
-    console.log('⏳ Waiting for CV to appear in card...')
-    
-    setTimeout(() => {
-      // Step 2: CV is now visible, start MacBook animation immediately
-      console.log('✅ CV visible in card, starting MacBook animation immediately...')
+    // Step 1: Check if we need to validate
+    if (skipValidation) {
+      // File already validated - just start the animation
+      console.log('✅ Skipping validation (already done), starting animation...')
+      setShowCVCard(true)
+      
+      // Get job ID from localStorage if available
+      const jobId = localStorage.getItem('pending_job_id')
+      if (jobId) {
+        setCurrentJobId(jobId)
+      }
+      
+      // Start MacBook animation
       console.log('🎬 Starting MacBook animation...')
       setIsPlaying(true)
       
       // Keep progress at 0% - it should NOT animate until user signs up
-      setRealProgress(0)
-      
-      // DO NOT animate progress bar - keep it at 0% while waiting for auth
+      // Progress reset handled by JobFlow
       
       // The animation sequence takes about 6 seconds to reach "materializing" stage
-      // where the MacBook appears and opens
       setTimeout(() => {
-        // Step 3: MacBook should be fully open now
         console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
-        setShowPortfolioInMacBook(true) // Ensure MacBook content is visible
+        // Don't set showPortfolioInMacBook here - wait for actual portfolio URL
+        // setShowPortfolioInMacBook(true)
         
-        // Step 4: Wait 3 seconds with progress bar visible
         setTimeout(() => {
-          // Step 5: Now show the signup modal
           console.log('⏰ Showing signup modal after full preview')
           setShowSignupModal(true)
         }, 3000)
-      }, 6000) // Time for animation to reach MacBook stage
-    }, 1500) // 1.5 seconds for CV to appear
+      }, 6000)
+    } else {
+      // Start animation (JobFlow already validated the file)
+      console.log('🎬 Starting animation for file:', file.name)
+      setShowCVCard(true)
+      
+      // REMOVED: Direct uploadFile call - JobFlow handles this via startPreviewFlow
+      // JobFlow's startPreviewFlow already uploaded the file and set currentJobId
+      // We just need to start the visual animation
+      console.log('✅ Starting animation (JobFlow already handled upload)...')
+      setShowCVCard(true)
+      
+      // Get job ID from JobFlow context if available
+      const storedState = localStorage.getItem('jobflow_state')
+      if (storedState) {
+        const parsed = JSON.parse(storedState)
+        if (parsed.currentJobId) {
+          console.log('✅ Using JobFlow job ID:', parsed.currentJobId)
+          setCurrentJobId(parsed.currentJobId)
+        }
+      }
+      
+      console.log('🎬 Starting MacBook animation...')
+      setIsPlaying(true)
+      
+      setTimeout(() => {
+        console.log('✅ MacBook fully open, showing progress bar for 3 seconds...')
+        // Don't set showPortfolioInMacBook here - wait for actual portfolio URL
+        // setShowPortfolioInMacBook(true)
+        
+        setTimeout(() => {
+          console.log('⏰ Showing signup modal after full preview')
+          setShowSignupModal(true)
+        }, 3000)
+      }, 6000)
+    }
   }
 
+  // handleAuthSuccess for Resume2WebsiteDemo component
   const handleAuthSuccess = async (data: any) => {
-    console.log('✅ User authenticated successfully:', data)
+    console.log('✅ User authenticated successfully in Resume2WebsiteDemo:', data)
+    console.log('📊 Current JobFlow state:', {
+      jobId: jobFlowContext.currentJobId,
+      state: jobFlowContext.state,
+      stateString: jobFlowContext.state
+    })
     
     // Update auth context if signIn function is provided
     if (signIn && data.session_id) {
-      await signIn(data.session_id, data)
+      await signIn(data.session_id, data.user || data)
     }
     
+    // Close signup modal
     setShowSignupModal(false)
     setIsWaitingForAuth(false)
     
-    // Wait a moment for auth context to update
-    setTimeout(() => {
-      // Now start the real backend processing with the pending file
-      if (pendingFile) {
-        // Start the actual portfolio generation - this will update realProgress from backend
-        processPortfolioGeneration(pendingFile)
-        // The progress bar will now animate based on real backend progress
-        // No need to manually set progress values - backend handles it
-        setIsPlaying(true)
+    // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
+    if (jobFlowContext.currentJobId) {
+      console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
+      console.log('📊 Current JobFlow state before startPostSignupFlow:', jobFlowContext.state)
+      
+      // Call startPostSignupFlow and wait for it
+      startPostSignupFlow(jobFlowContext.currentJobId).then(() => {
+        console.log('✅ startPostSignupFlow completed successfully')
+      }).catch(error => {
+        console.error('❌ startPostSignupFlow failed:', error)
+      })
+      
+      // Clear pending file to prevent duplicate uploads
+      setPendingFile(null)
+      return
+    }
+    
+    // Edge case: have a pending file but no JobFlow context
+    // Don't start a new flow if we already handled the jobId above
+    if (!jobFlowContext.currentJobId && pendingFile) {
+      console.log('📤 No JobFlow context but have pending file, starting flow...')
+      // Clear pending file to prevent duplicate uploads
+      setPendingFile(null)
+      if (isAuthenticated) {
+        startAuthenticatedFlow(pendingFile)
+      } else {
+        startPreviewFlow(pendingFile)
       }
-    }, 100)
+    }
   }
 
   const handleSignupModalClose = () => {
@@ -1608,28 +1459,154 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // Track previous uploadedFile to detect changes
   const [prevUploadedFile, setPrevUploadedFile] = useState<File | null>(null)
   
-  // Watch for uploadedFile changes from ANY source (dropbox, navbar, button)
+  // Watch for JobFlow state changes to trigger animation AFTER validation
+  useEffect(() => {
+    // For anonymous users: Check JobFlow STATE not just jobId presence
+    if (!isAuthenticated) {
+      // If we're in Previewing or WaitingAuth state, validation has passed and we should start the animation
+      if (jobFlowContext.state === FlowState.Previewing || jobFlowContext.state === FlowState.WaitingAuth) {
+        console.log('🎬 JobFlow validated and is previewing/waiting, starting animation for anonymous user')
+        // Only start animation if not already playing to avoid duplicates
+        if (!isPlaying && !isWaitingForAuth && uploadedFile) {
+          // Wait a bit for CV card to appear before starting animation
+          setTimeout(() => {
+            startPreviewAnimation(uploadedFile, true) // Pass the file, skip validation since JobFlow already validated
+          }, 1500)
+        }
+      }
+      return // Let JobFlow handle the rest
+    }
+    
+    // For authenticated users with existing job (after signup), let JobFlow handle it
+    if (isAuthenticated && jobFlowContext.currentJobId) {
+      console.log('⏭️ Authenticated user with job_id, JobFlow handles the flow:', jobFlowContext.currentJobId)
+      return
+    }
+  }, [isAuthenticated, jobFlowContext.currentJobId, jobFlowContext.state, isPlaying, isWaitingForAuth, uploadedFile])
+  
+  // Track uploadedFile changes just for UI updates (CV card display)
   useEffect(() => {
     if (uploadedFile && uploadedFile !== prevUploadedFile) {
-      console.log('📁 New file detected from parent:', uploadedFile.name)
+      console.log('📁 New file detected, showing CV card:', uploadedFile.name)
       setPrevUploadedFile(uploadedFile)
       setShowCVCard(true)
       
-      // Trigger animation based on auth status
+      // For authenticated users, trigger the demo flow with validation
       if (isAuthenticated) {
-        console.log('✅ User authenticated, will start full process after CV appears')
-        setTimeout(() => {
-          console.log('🚀 Starting full process for authenticated user')
-          handleStartDemo()
-        }, 1500) // Wait for CV to appear first
-      } else {
-        console.log('⚠️ User not authenticated, starting preview sequence')
-        setTimeout(() => {
-          startPreviewAnimation()
-        }, 1500) // Wait for CV to appear first
+        console.log('✅ User authenticated, will validate and start full process')
+        handleStartDemo() // This includes validation
       }
+      // For anonymous users, do nothing here - wait for JobFlow state change above
     }
   }, [uploadedFile, prevUploadedFile, isAuthenticated])
+  
+  // Watch for portfolio URL from JobFlow and update UI
+  useEffect(() => {
+    if (jobFlowContext.portfolioUrl && jobFlowContext.state === FlowState.Completed) {
+      console.log('🎉 Portfolio ready! URL:', jobFlowContext.portfolioUrl)
+      
+      // Immediately show portfolio - no delays, no resets
+      setShowPortfolioInMacBook(true)
+      setStage("complete")
+      setIsPlaying(false)
+      setIsWaitingForAuth(false)
+      setShowSignupModal(false)
+      
+      // Save to localStorage for future restoration
+      const sessionId = localStorage.getItem('resume2website_session_id')
+      if (sessionId && jobFlowContext.portfolioUrl) {
+        localStorage.setItem('lastPortfolio', JSON.stringify({
+          url: jobFlowContext.portfolioUrl,
+          id: jobFlowContext.portfolioId,
+          userId: sessionId,
+          timestamp: Date.now()
+        }))
+        console.log('💾 Portfolio saved to localStorage for future restoration')
+      }
+      
+      console.log('✅ Portfolio display triggered immediately')
+    }
+  }, [jobFlowContext.portfolioUrl, jobFlowContext.state])
+  
+  // Animate progress smoothly over time after auth
+  useEffect(() => {
+    // Only start animation after authentication (when processing begins)
+    const isProcessing = [
+      FlowState.Claiming,
+      FlowState.Extracting, 
+      FlowState.Generating
+    ].includes(jobFlowContext.state)
+    
+    if (!isProcessing && jobFlowContext.state !== FlowState.Completed) {
+      // Not processing yet, but don't reset if already animating
+      // Only reset to 0 if we're truly at the beginning
+      if (jobFlowContext.state === FlowState.Idle) {
+        setAnimatedProgress(0)
+      }
+      return
+    }
+    
+    // If portfolio is ready, jump straight to 60 (80% visual)
+    if (jobFlowContext.state === FlowState.Completed) {
+      setAnimatedProgress(60)
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+        animationRef.current = null
+      }
+      return
+    }
+    
+    // Two-phase animation with slower, smoother progress:
+    // Phase 1: Slowly animate from current progress to 52.5 (70% visual) over 30 seconds
+    // Phase 2: Very slowly increment from 52.5 to 59.25 (70% to 79% visual)
+    const startTime = Date.now()
+    const startProgress = animatedProgress // Start from current progress, not 0
+    const phase1Duration = 30000 // 30 seconds to reach 70% (slower)
+    const phase1Target = 52.5 // 70% visual (52.5 semantic)
+    const phase2IncrementDelay = 5000 // 5 seconds per 1% increment
+    const phase2MaxTarget = 59.25 // 79% visual (59.25 semantic)
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      let progress: number
+      
+      if (elapsed < phase1Duration && startProgress < phase1Target) {
+        // Phase 1: Animate from current to 70%
+        const remainingToTarget = phase1Target - startProgress
+        const phase1Progress = Math.min(elapsed / phase1Duration, 1)
+        progress = startProgress + (remainingToTarget * phase1Progress)
+      } else {
+        // Phase 2: Slow increments from 70% to 79%
+        const phase2Elapsed = elapsed - phase1Duration
+        const increments = Math.floor(phase2Elapsed / phase2IncrementDelay)
+        const semanticIncrement = 0.75 // Each increment is 1% visual
+        progress = Math.min(phase1Target + (increments * semanticIncrement), phase2MaxTarget)
+      }
+      
+      setAnimatedProgress(progress)
+      
+      // Continue until we reach max target or state changes
+      if (progress < phase2MaxTarget && jobFlowContext.state !== FlowState.Completed) {
+        animationRef.current = requestAnimationFrame(animate)
+      }
+    }
+    
+    // Start animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current)
+    }
+    animationRef.current = requestAnimationFrame(animate)
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+        animationRef.current = null
+      }
+    }
+  }, [jobFlowContext.state])
+  
+  // Use animated progress instead of direct state progress
+  const realProgress = animatedProgress
   
   // Wrapper for handleFileSelect that also sets showCVCard
   const handleLocalFileSelect = (file: File) => {
@@ -1659,6 +1636,49 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       startPreviewAnimation()
     }
   }
+
+  // Listen for auto-start animation event (from retry flow)
+  // Using useCallback to ensure stable reference for event handler
+  const handleAutoStart = useCallback((event: CustomEvent) => {
+    if (uploadedFile && !isPlaying) {
+      console.log('🎬 Auto-starting animation from retry')
+      
+      // Check if user is authenticated
+      if (isAuthenticated) {
+        console.log('✅ User authenticated, starting full process')
+        handleStartDemo()
+      } else {
+        console.log('⚠️ User not authenticated, starting preview with skip validation')
+        // For anonymous users, skip validation since it was already done
+        startPreviewAnimation(uploadedFile, true)
+      }
+    }
+  }, [uploadedFile, isPlaying, isAuthenticated])
+  
+  useEffect(() => {
+    // Log listener registration in dev mode to catch leaks
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📌 Registering autoStartAnimation listener')
+      // Check for existing listeners (dev only)
+      const existingListeners = (window as any).__autoStartListeners || 0
+      if (existingListeners > 0) {
+        console.warn(`⚠️ Potential listener leak: ${existingListeners} existing listeners found`)
+      }
+      (window as any).__autoStartListeners = existingListeners + 1
+    }
+    
+    window.addEventListener(RESUME_AUTO_START_EVENT, handleAutoStart as EventListener)
+    return () => {
+      console.log('🧹 Cleaning up autoStartAnimation listener')
+      window.removeEventListener(RESUME_AUTO_START_EVENT, handleAutoStart as EventListener)
+      
+      // Decrement listener count in dev mode
+      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+        (window as any).__autoStartListeners = ((window as any).__autoStartListeners || 1) - 1
+        console.log(`📉 Listeners remaining: ${(window as any).__autoStartListeners}`)
+      }
+    }
+  }, [handleAutoStart])
 
   // Mobile-First Layout
   if (isMobile) {
@@ -1770,6 +1790,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className="relative w-full max-w-[340px] h-[485px]"
               >
                 <InteractiveCVPile 
+                  key={uploadedFile ? `${uploadedFile.name}-${uploadedFile.size}-${uploadedFile.lastModified}` : 'empty'}
                   className="w-full h-full" 
                   onFileSelect={handleLocalFileSelect}
                   onFileClick={handleFileClick}
@@ -1798,9 +1819,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className="relative w-full max-w-[340px] h-[485px]"
               >
                 <IPhoneFrame>
-                  {portfolioUrl ? (
+                  {jobFlowContext.portfolioUrl ? (
                     <IframeWithFallback
-                      src={portfolioUrl}
+                      src={jobFlowContext.portfolioUrl}
                       title="Generated Portfolio"
                       className="w-full h-full border-0"
                     />
@@ -1847,8 +1868,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       <div className="relative z-10 min-h-screen w-full flex items-center justify-center">
       {/* Keep the existing desktop layout but simplified */}
       <div className="w-full h-screen flex flex-row items-center justify-center gap-0">
-        {/* Left Side - Text Content - Dynamic width based on stage */}
-        <div className={`${isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
+        {/* Left Side - Text Content - Dynamic width based on stage and completion */}
+        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[20%]" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
           <div className="w-full h-full flex flex-col justify-center gap-12">
             <motion.div
               initial={{ opacity: 0 }}
@@ -1866,7 +1887,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 className={isTransformationStage() ? "" : ""}
               >
                 <AnimatePresence mode="wait">
-                  {!showNewTypewriter ? (
+                  {/* Check if we have a completed portfolio first */}
+                  {(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? (
+                    // Always show nothing here when portfolio is complete - buttons are handled below
+                    null
+                  ) : !showNewTypewriter ? (
+                    // Only show the "Escape the No Pile" text in initial state before any generation
                     <motion.div
                       key="original-headline"
                       initial={{ opacity: 1 }}
@@ -1926,7 +1952,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                                 // For consistency, use the same file upload flow as the dropbox
                                 const fileInput = document.createElement('input')
                                 fileInput.type = 'file'
-                                fileInput.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg'
+                                fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
                                 fileInput.onchange = (e) => {
                                   const target = e.target as HTMLInputElement
                                   if (target.files && target.files[0]) {
@@ -1969,35 +1995,125 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         </div>
                       </motion.span>
                     </motion.div>
-                  ) : (
+                  ) : !hasCompletedGeneration ? (
                     <motion.div
                       key="progress-bar"
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 1.2, ease: "easeInOut" }}
                       className="flex items-center w-full"
-                      style={{ height: "400px", paddingLeft: "120px" }} // Move progress bar to center above both buttons
+                      style={{ height: "400px", paddingLeft: "120px" }}
                     >
-                      <VerticalProgressBar 
-                        onProgressChange={setProgressBarPercentage}
-                        externalProgress={realProgress}
+                      <ProgressBarVertical 
+                        semanticProgress={realProgress}
+                        onProgressChange={(visualProgress) => {
+                          // Visual progress is already mapped (60 semantic = 80 visual)
+                          console.log(`Progress: ${visualProgress}%`)
+                        }}
                         isClickable={true}
                         onCircleClick={() => {
-                          if (portfolioUrl && realProgress >= 60) {
+                          if (jobFlowContext.portfolioUrl && realProgress >= 60) {
                             // Load portfolio in MacBook iframe
-                            console.log('🎯 Loading portfolio in MacBook:', portfolioUrl)
+                            console.log('🎯 Loading portfolio in MacBook:', jobFlowContext.portfolioUrl)
                             setShowPortfolioInMacBook(true)
                           }
                         }}
                       />
                     </motion.div>
-                  )}
+                  ) : null}
                 </AnimatePresence>
               </motion.div>
 
-              {/* Start now button - keep in original position on left side */}
+              {/* Button section - Show different buttons based on completion state */}
               <AnimatePresence mode="wait">
-                {showNewTypewriter ? (
+                {(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? (
+                  // Post-completion buttons - Show all three buttons vertically when portfolio exists
+                  <motion.div
+                    key="completion-buttons"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="flex justify-start"
+                  >
+                    <div className="flex flex-col gap-10 w-full max-w-[380px]">
+                      {/* Edit Portfolio button - Primary action at top */}
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ 
+                          opacity: 1,
+                          scale: [1, 1.05, 1]
+                        }}
+                        transition={{
+                          duration: 0.8,
+                          ease: "easeOut",
+                          scale: {
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }
+                        }}
+                        className="space-y-3"
+                      >
+                        <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
+                          Bring your story to life—drop media, set the mood, make it yours.
+                        </p>
+                        <Button
+                          size="lg"
+                          onClick={onEditPortfolio}
+                          className="shadow-2xl bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 w-full text-base md:text-lg px-8 py-4 transition-all duration-300 hover:scale-105 rounded-full font-bold"
+                        >
+                          <span>
+                            Edit Now
+                            <Edit3 className="ml-3 w-5 h-5 inline-block" />
+                          </span>
+                        </Button>
+                      </motion.div>
+                      
+                      {/* Ready to Go button - Opens Stripe */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8, delay: 0.1 }}
+                        className="space-y-3"
+                      >
+                        <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
+                          Grab your link and start impressing.
+                        </p>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={onGoLive}
+                          className="bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300 hover:border-gray-400 w-full text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
+                        >
+                          Ready to Go
+                          <ArrowRight className="ml-3 w-5 h-5 inline-block" />
+                        </Button>
+                      </motion.div>
+                      
+                      {/* Get Inspired button */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="space-y-3"
+                      >
+                        <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
+                          See how others shine.
+                        </p>
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={onLearnMore}
+                          className="bg-black hover:bg-gray-800 text-white border-2 border-black hover:border-gray-800 w-full text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
+                        >
+                          Get Inspired
+                          <ArrowDown className="ml-3 w-5 h-5 inline-block" />
+                        </Button>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                ) : showNewTypewriter ? (
+                  // Original buttons during transformation
                   <motion.div
                     key="transform-button"
                     initial={{ opacity: 0 }}
@@ -2016,14 +2132,14 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         initial={{ opacity: 0 }}
                         animate={{ 
                           opacity: 1,
-                          scale: progressBarPercentage >= 60 ? [1, 1.05, 1] : 1
+                          scale: realProgress >= 60 ? [1, 1.05, 1] : 1
                         }}
                         transition={{
                           duration: 0.8,
                           ease: "easeOut",
                           scale: {
                             duration: 2,
-                            repeat: progressBarPercentage >= 60 ? Infinity : 0,
+                            repeat: realProgress >= 60 ? Infinity : 0,
                             repeatType: "reverse"
                           }
                         }}
@@ -2035,7 +2151,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             if (isWaitingForAuth && !isAuthenticated) {
                               // Re-open the signup modal for preview users
                               setShowSignupModal(true)
-                            } else if (progressBarPercentage >= 60) {
+                            } else if (realProgress >= 60) {
                               // Phase 7: When progress reaches 60%, Start now opens pricing modal
                               setShowPricing(true)
                             } else {
@@ -2043,7 +2159,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                               onOpenModal()
                             }
                           }}
-                          className={`${progressBarPercentage >= 60 ? 'shadow-2xl' : ''} bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 w-auto text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full`}
+                          className={`${realProgress >= 60 ? 'shadow-2xl' : ''} bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 hover:from-emerald-600 hover:via-sky-500 hover:to-blue-700 text-white border-0 w-auto text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full`}
                         >
                           <span>
                             Start now
@@ -2081,13 +2197,13 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           </div>
         </div>
 
-        {/* Right Side - Dynamic width based on stage (desktop only, keep MacBookFrame) */}
-        <div className={`${isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full flex items-center ${(stage === "materializing" || stage === "complete") ? "justify-start" : "justify-center"} relative ${(stage === "materializing" || stage === "complete") ? "pl-2 pr-4 md:pr-6 lg:pr-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
+        {/* Right Side - Dynamic width based on stage and completion (desktop only, keep MacBookFrame) */}
+        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[80%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8 pr-20" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
 
 
 
             <AnimatePresence mode="wait">
-              {(stage === "initial" || stage === "intro" || stage === "typewriter") && !showNewTypewriter && (
+              {(stage === "initial" || stage === "intro" || stage === "typewriter") && (
                 <motion.div
                   key="initial"
                   initial={{ opacity: 0, scale: 0.95, y: 30 }}
@@ -2098,10 +2214,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     transition: { duration: 0.6, ease: "easeInOut" },
                   }}
                   transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 1.0 }}
-                  className="relative flex justify-start pl-8"
+                  className="absolute inset-0 flex items-center justify-center"
                 >
                   {/* Interactive CV Pile - Upload area */}
                   <InteractiveCVPile 
+                    key={uploadedFile ? `${uploadedFile.name}-${uploadedFile.size}-${uploadedFile.lastModified}` : 'empty'}
                     className="relative z-5 w-[268px] xs:w-[308px] sm:w-[344px] md:w-[384px] lg:w-[424px] xl:w-[460px] 2xl:w-[500px] h-[344px] xs:h-[384px] sm:h-[460px] md:h-[500px] lg:h-[540px] xl:h-[576px]" 
                     onFileSelect={handleLocalFileSelect}
                     onFileClick={handleFileClick}
@@ -2111,7 +2228,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                 </motion.div>
               )}
 
-              {(stage === "morphing" || stage === "dissolving") && !showNewTypewriter && (
+              {(stage === "morphing" || stage === "dissolving") && (
                 <motion.div
                   key="transforming"
                   initial={{ opacity: 0 }}
@@ -2122,22 +2239,24 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     scale: 0.95
                   }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                className="w-[290px] xs:w-[335px] sm:w-[385px] md:w-[430px] lg:w-[480px] xl:w-[530px] h-[385px] xs:w-[430px] sm:h-[525px] md:h-[575px] lg:h-[625px] xl:h-[675px] relative"
+                  className="absolute inset-0 flex items-center justify-center"
                 >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 via-sky-400/30 to-blue-600/30 rounded-xl"
-                    animate={{
-                      opacity: [0.2, 0.5, 0.3],
-                      scale: [1, 1.03, 0.98, 1.01, 1],
-                      rotate: [0, 1, -1, 0],
-                    }}
-                    transition={{
-                      duration: 2.5,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                    }}
-                  />
+                  <div className="w-[290px] xs:w-[335px] sm:w-[385px] md:w-[430px] lg:w-[480px] xl:w-[530px] h-[385px] xs:h-[430px] sm:h-[525px] md:h-[575px] lg:h-[625px] xl:h-[675px] relative">
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 via-sky-400/30 to-blue-600/30 rounded-xl"
+                      animate={{
+                        opacity: [0.2, 0.5, 0.3],
+                        scale: [1, 1.03, 0.98, 1.01, 1],
+                        rotate: [0, 1, -1, 0],
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatType: "reverse",
+                        ease: "easeInOut",
+                      }}
+                    />
+                  </div>
                 </motion.div>
               )}
 
@@ -2150,10 +2269,30 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     duration: 0.8,
                     ease: [0.34, 1.56, 0.64, 1],
                   }}
-                className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1800px] xl:w-[2000px] 2xl:w-[2200px] relative"
+                className="absolute inset-0 flex items-center justify-center"
                 >
+                <div className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1750px] xl:w-[1900px] 2xl:w-[2050px] relative">
                   <MacBookFrame isComplete={stage === "complete"}>
-                    {showNewTypewriter ? (
+                    <div key={jobFlowContext.portfolioUrl || 'no-portfolio'}>
+                    {isRestoringPortfolio ? (
+                      // Show loading state while restoring portfolio
+                      <div className="absolute inset-0 w-full h-full bg-white z-50 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Restoring your last portfolio...</p>
+                        </div>
+                      </div>
+                    ) : showPortfolioInMacBook && jobFlowContext.portfolioUrl ? (
+                      // Show ONLY the portfolio - replaces ALL MacBook content
+                      <>
+                        {console.log('🖼️ Rendering portfolio iframe with URL:', jobFlowContext.portfolioUrl)}
+                        <IframeWithFallback 
+                          src={jobFlowContext.portfolioUrl}
+                          title="Generated Portfolio"
+                          className="absolute inset-0 w-full h-full border-0 rounded-[inherit]"
+                        />
+                      </>
+                    ) : showNewTypewriter ? (
                       // Phase 3: Sequential fade-in content during progress bar animation
                       <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8">
                         {/* Phase 3A: Main Headline (0-800ms) - split into two lines */}
@@ -2183,42 +2322,23 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
 
                         {/* Phase 3C/5: Video Carousel OR Gate-kept Website Preview */}
                         <motion.div
-                          className="w-full max-w-4xl -mt-8"
+                          className="w-full max-w-4xl -mt-8 relative" 
+                          style={{ minHeight: '400px' }}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.8, delay: 1.6, ease: "easeOut" }}
                         >
-                          
-                          {console.log('🔍 MacBook content state:', { isRestoringPortfolio, showPortfolioInMacBook, portfolioUrl, realProgress, stage })}
-                        {isRestoringPortfolio ? (
-                            // Show loading state while restoring portfolio
-                            <div className="absolute inset-0 w-full h-full bg-white z-50 flex items-center justify-center">
-                              <div className="text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-                                <p className="text-gray-600">Restoring your last portfolio...</p>
-                              </div>
-                            </div>
-                          ) : (showPortfolioInMacBook || realProgress >= 60) && portfolioUrl ? (
-                            // Show the generated portfolio automatically when ready or when clicked
-                            <div className="absolute inset-0 w-full h-full bg-white z-50">
-                              {console.log('🎯 Rendering IframeWithFallback with URL:', portfolioUrl, 'showPortfolioInMacBook:', showPortfolioInMacBook, 'realProgress:', realProgress)}
-                              <IframeWithFallback 
-                                src={portfolioUrl}
-                                title="Generated Portfolio"
-                                className="w-full h-full border-0"
-                              />
-                            </div>
-                          ) : (portfolioUrl && realProgress >= 60) ? (
+                          {(jobFlowContext.portfolioUrl && realProgress >= 60) ? (
                             // Phase 5: Show portfolio URL info and debugging when ready
                             <div className="text-center p-8">
                               <div className="mb-4 text-sm text-gray-600">
                                 Debug Info:<br/>
                                 Progress: {realProgress}%<br/>
-                                Portfolio URL: {portfolioUrl || 'Not set'}<br/>
+                                Portfolio URL: {jobFlowContext.portfolioUrl || 'Not set'}<br/>
                                 Show Portfolio: {showPortfolioInMacBook ? 'Yes' : 'No'}
                               </div>
                               
-                              {portfolioUrl && (
+                              {jobFlowContext.portfolioUrl && (
                                 <div className="mb-4">
                                   <button
                                     onClick={() => {
@@ -2231,7 +2351,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                                   </button>
                                   <br/>
                                   <a 
-                                    href={portfolioUrl} 
+                                    href={jobFlowContext.portfolioUrl} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="text-blue-600 underline text-sm mt-2 inline-block"
@@ -2279,11 +2399,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             }
                           }}
                         />
-                      ) : portfolioUrl ? (
+                      ) : jobFlowContext.portfolioUrl ? (
                         <div className="absolute inset-0 w-full h-full bg-white z-50">
-                          {console.log('🎯 Rendering IframeWithFallback with URL:', portfolioUrl, 'showPortfolioInMacBook:', showPortfolioInMacBook, 'realProgress:', realProgress)}
                           <IframeWithFallback 
-                            src={portfolioUrl}
+                            src={jobFlowContext.portfolioUrl}
                             title="Generated Portfolio"
                             className="w-full h-full border-0"
                           />
@@ -2301,8 +2420,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         />
                       )
                     )}
+                    </div>
                   </MacBookFrame>
-                  
+                </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -2365,7 +2485,7 @@ const AppleNavbar = ({
       // This will create a consistent experience across all upload methods
       const fileInput = document.createElement('input')
       fileInput.type = 'file'
-      fileInput.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg'
+      fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
       fileInput.onchange = (e) => {
         const target = e.target as HTMLInputElement
         if (target.files && target.files[0]) {
@@ -2457,20 +2577,11 @@ const AppleNavbar = ({
           {/* Right Section - Auth and Upload CV */}
           <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {isAuthenticated ? (
-              // Logged in - show user info, dashboard button and logout
+              // Logged in - show user info and logout
               <>
                 <span className="text-sm text-gray-700">
                   Welcome, {user?.name || 'User'}
                 </span>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={onShowDashboard}
-                    variant="outline"
-                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
-                  >
-                    Dashboard
-                  </Button>
-                </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     onClick={onLogout}
@@ -2601,16 +2712,6 @@ const AppleNavbar = ({
                     <div className="px-3 py-2 text-sm text-gray-600">
                       Welcome, {user?.name || 'User'}
                     </div>
-                    <Button
-                      onClick={() => {
-                        setIsMobileMenuOpen(false)
-                        onShowDashboard()
-                      }}
-                      className="w-full mt-2 bg-gradient-to-r from-emerald-50 via-sky-50 to-blue-50 border-emerald-200 hover:border-emerald-300"
-                      variant="outline"
-                    >
-                      Dashboard
-                    </Button>
                     <Button
                       onClick={onLogout}
                       variant="outline"
@@ -2890,7 +2991,16 @@ const VideoCarousel = () => {
   )
 }
 
-export default function Home() {
+// Main component that uses JobFlow
+function HomeWithJobFlow() {
+  const { 
+    context: jobFlowContext, 
+    startPreviewFlow, 
+    startAuthenticatedFlow,
+    startPostSignupFlow,
+    restorePortfolio,
+    isAuthenticated: jobFlowAuth 
+  } = useJobFlow()
   const [currentSection, setCurrentSection] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -2898,7 +3008,6 @@ export default function Home() {
   const [showUpload, setShowUpload] = useState(false)
   const [showBuilder, setShowBuilder] = useState(false)
   const [showProcessing, setShowProcessing] = useState(false)
-  const [showPricing, setShowPricing] = useState(false)
   const [isPostPayment, setIsPostPayment] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -2906,9 +3015,64 @@ export default function Home() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [hasTriggeredPhase6Modal, setHasTriggeredPhase6Modal] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const [showPricing, setShowPricing] = useState(false)
+  const [isRetrying, setIsRetrying] = useState(false)
+  const [showCompletionPopup, setShowCompletionPopup] = useState(false)
+  const [hasCompletedGeneration, setHasCompletedGeneration] = useState(false)
+  
+  // Error toast state
+  const [errorToast, setErrorToast] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    suggestion?: string
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    suggestion: undefined
+  })
+  
+  // Validation guard to prevent concurrent uploads
+  const isValidatingRef = useRef(false)
+  const currentFileFingerprint = useRef<string | null>(null)
+  
+  // Helper to get file fingerprint
+  const getFileFingerprint = (file: File): string => {
+    return `${file.name}-${file.size}-${file.lastModified}`
+  }
+  
+  // Cleanup window flags on unmount to prevent leaks
+  useEffect(() => {
+    return () => {
+      // Clean up global flags on unmount
+      if (typeof window !== 'undefined') {
+        window.__isHandlingFileSelect = false
+      }
+      // Also clean up refs
+      isValidatingRef.current = false
+      currentFileFingerprint.current = null
+    }
+  }, [])
   
   // Use the real authentication system
   const { isAuthenticated, user, signIn, signOut } = useAuthContext()
+  
+  // Get JobFlow context for progress tracking
+  const semanticProgress = getSemanticProgressForState(jobFlowContext.state)
+  
+  // Check if portfolio is ready (80% visual = 60% semantic)
+  const isPortfolioReady = semanticProgress >= 60 && jobFlowContext.portfolioUrl
+  
+  // Clear validation state when auth changes to prevent leaks
+  useEffect(() => {
+    // Reset validation state on auth change
+    isValidatingRef.current = false
+    currentFileFingerprint.current = null
+    if (typeof window !== 'undefined') {
+      window.__isHandlingFileSelect = false
+    }
+  }, [isAuthenticated])
   
   const sections = ['hero', 'demo', 'research', 'ugc-reels', 'faq']
   
@@ -2917,12 +3081,53 @@ export default function Home() {
     setIsHydrated(true)
   }, [])
   
+  // Handle retry file upload from error toast
+  useEffect(() => {
+    const handleRetryUpload = (event: CustomEvent) => {
+      const file = event.detail as File
+      if (file) {
+        handleFileSelect(file)
+      }
+    }
+    
+    window.addEventListener('retryFileUpload', handleRetryUpload as EventListener)
+    return () => {
+      window.removeEventListener('retryFileUpload', handleRetryUpload as EventListener)
+    }
+  }, [])
+  
   // Reset Phase 6 modal trigger when authentication state changes
   useEffect(() => {
     if (isAuthenticated) {
       setHasTriggeredPhase6Modal(false) // Reset so it can trigger again if user logs out
     }
   }, [isAuthenticated])
+  
+  // Show completion popup when portfolio reaches 80% for authenticated users
+  // Only show once per generation (tracked by job_id)
+  useEffect(() => {
+    if (isAuthenticated && isPortfolioReady && !showCompletionPopup && !hasCompletedGeneration) {
+      // Check if we've already shown the popup for this job_id
+      const shownPopupsKey = 'resume2website_shown_completion_popups'
+      const shownPopups = JSON.parse(localStorage.getItem(shownPopupsKey) || '[]')
+      const currentJobId = jobFlowContext.currentJobId
+      
+      // Clean up old entries (keep only last 10 job IDs to prevent infinite growth)
+      const recentPopups = shownPopups.slice(-10)
+      
+      // Only show if we haven't shown it for this job_id yet
+      if (currentJobId && !recentPopups.includes(currentJobId)) {
+        // Small delay to ensure smooth transition
+        const timer = setTimeout(() => {
+          setShowCompletionPopup(true)
+          // Mark this job_id as having shown the popup
+          recentPopups.push(currentJobId)
+          localStorage.setItem(shownPopupsKey, JSON.stringify(recentPopups))
+        }, 1000)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [isAuthenticated, isPortfolioReady, showCompletionPopup, hasCompletedGeneration, jobFlowContext.currentJobId])
 
   // Modal handlers
   const handleOpenModal = () => {
@@ -2933,6 +3138,42 @@ export default function Home() {
       // User not logged in - show auth modal
       setShowAuthModal(true)
     }
+  }
+  
+  // Handle portfolio completion popup actions
+  const handleStartEditing = () => {
+    setShowCompletionPopup(false)
+    setHasCompletedGeneration(true)
+    setShowDashboard(true)
+  }
+  
+  const handleDismissCompletion = () => {
+    setShowCompletionPopup(false)
+    setHasCompletedGeneration(true)
+  }
+  
+  // Handle returning from dashboard after editing
+  const handleDashboardClose = () => {
+    setShowDashboard(false)
+    setHasCompletedGeneration(true)
+  }
+  
+  // Handle Edit Portfolio button - opens dashboard
+  const handleEditPortfolio = () => {
+    setShowDashboard(true)
+  }
+  
+  // Handle Learn More button - scrolls to demo section
+  const handleLearnMore = () => {
+    const demoSection = document.getElementById('demo')
+    if (demoSection) {
+      demoSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+  
+  // Handle Go Live button - opens Stripe checkout
+  const handleGoLive = () => {
+    setShowPricing(true) // This opens the Stripe embedded checkout
   }
 
   const handleCloseModal = () => {
@@ -2966,75 +3207,297 @@ export default function Home() {
     setShowUpload(false)
   }
 
-  // Authentication handlers
-  const handleAuthSuccess = async (data: any) => {
-    // Use the real auth system to sign in
-    await signIn(data.session_id, data.user)
-    setShowAuthModal(false)
-    
-    // Check if there's a dropped file waiting
-    if (droppedFile) {
-      // Go directly to upload with the file
-      setShowUpload(true)
-    } else if (uploadedFile) {
-      // If we have an uploaded file from CV card click, go to processing
-      setShowProcessing(true)
-    } else {
-      // After signup/login without a file, stay on home page
-      // Don't automatically go to dashboard
-      // User can navigate to dashboard manually if they want
-      console.log('Authentication successful, staying on home page')
-    }
-  }
+  // REMOVED: Duplicate handleAuthSuccess - merged with the first one above
 
   const handleAuthClose = () => {
     setShowAuthModal(false)
   }
 
-  const handleFileSelect = async (file: File) => {
-    // Set the uploaded file - this will trigger CV to appear in the card
-    console.log('📁 File selected, showing CV in card:', file.name)
+  // Authentication success handler for HomeWithJobFlow
+  const handleAuthSuccess = async (data: any) => {
+    console.log('✅ User authenticated successfully in HomeWithJobFlow:', data)
+    console.log('📊 Current JobFlow state:', {
+      jobId: jobFlowContext.currentJobId,
+      state: jobFlowContext.state,
+      stateString: jobFlowContext.state
+    })
     
-    // If user is authenticated and has an existing portfolio, clear it
-    if (isAuthenticated) {
-      console.log('🗑️ Clearing any existing portfolio data for new upload...')
-      
-      // Clear saved portfolio data
-      localStorage.removeItem('lastPortfolio')
-      
-      // Clear URL params
-      const url = new URL(window.location.href)
-      url.searchParams.delete('url')
-      url.searchParams.delete('portfolio_id')
-      window.history.replaceState({}, '', url.toString())
-      
-      // Delete all existing portfolios from backend and Vercel
-      console.log('🗑️ Deleting existing portfolios from backend...')
-      try {
-        const { deleteAllUserPortfolios } = await import('@/lib/api')
-        await deleteAllUserPortfolios()
-      } catch (error) {
-        console.log('⚠️ Could not delete existing portfolios:', error)
-        // Continue anyway - user might not have any portfolios
-      }
-      
-      // The Resume2WebsiteDemo component will reset its own state when
-      // it detects a new file upload
+    // Update auth context - signIn is already in scope from useAuthContext above
+    if (signIn && data.session_id) {
+      await signIn(data.session_id, data.user || data)
     }
     
-    setUploadedFile(file)
+    // Close auth modal
+    setShowAuthModal(false)
     
-    // Don't open auth modal here - just store the file
-    // The auth modal will open when user clicks "Transform into portfolio"
-    if (!isAuthenticated) {
-      // Store the file for later use after authentication
-      setDroppedFile(file)
+    // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
+    if (jobFlowContext.currentJobId) {
+      console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
+      console.log('📊 Current JobFlow state before startPostSignupFlow:', jobFlowContext.state)
+      
+      // Call startPostSignupFlow and wait for it
+      startPostSignupFlow(jobFlowContext.currentJobId).then(() => {
+        console.log('✅ startPostSignupFlow completed successfully')
+      }).catch(error => {
+        console.error('❌ startPostSignupFlow failed:', error)
+      })
+      
+      // Clear pending file to prevent duplicate uploads
+      // setPendingFile(null) // FIXED: Variable not in scope for this component
+      return
+    }
+    
+    // Check if there's a dropped file waiting
+    if (droppedFile) {
+      setShowUpload(true)
+    } else if (uploadedFile) {
+      setShowProcessing(true)
+    } else {
+      console.log('Authentication successful, staying on home page')
     }
   }
 
+  // Helper function to parse error response and get standardized messages
+  const getStandardizedError = (error: any): StandardizedError => {
+    // Handle network errors, CORS, and fetch failures
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        title: 'Connection problem',
+        message: 'Unable to connect to the server.',
+        suggestion: 'Check your internet connection and try again.'
+      }
+    }
+    
+    // Handle AbortError (client-side timeout)
+    if (error.name === 'AbortError' || (error instanceof Error && error.message.includes('AbortError'))) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    // Handle CORS errors
+    if (error instanceof TypeError && (error.message.includes('CORS') || error.message.includes('cross-origin'))) {
+      return {
+        title: 'Connection blocked',
+        message: 'The server blocked the connection for security reasons.',
+        suggestion: 'Try refreshing the page or contact support if this persists.'
+      }
+    }
+    
+    // Handle Resume Gate errors with custom properties
+    if (error.isResumeGateError) {
+      return {
+        title: 'Not a resume',
+        message: error.resumeGateReason || "This file doesn't look like a resume (CV).",
+        suggestion: error.resumeGateSuggestion || 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
+    const errorMessage = error.message || 'File validation failed'
+    const statusCode = error.statusCode || (errorMessage.includes('(401)') ? 401 : errorMessage.includes('(403)') ? 403 : errorMessage.includes('(400)') ? 400 : 500)
+    
+    // Check for specific error patterns in the message
+    if (statusCode === 400 && (errorMessage.includes('resume') || errorMessage.includes('CV') || errorMessage.includes('Resume Gate'))) {
+      // Check if we have more specific error details from backend
+      if (errorMessage.includes("doesn't contain enough readable text")) {
+        return {
+          title: 'Not a resume',
+          message: "The image doesn't contain enough readable text for a resume.",
+          suggestion: 'Please upload a complete resume document or a high-quality scan with all resume sections visible.'
+        }
+      }
+      if (errorMessage.includes("lacks the variety of content")) {
+        return {
+          title: 'Not a resume',
+          message: "The image lacks the variety of content expected in a resume.",
+          suggestion: 'Upload a full resume with multiple sections (Experience, Education, Skills, Contact info).'
+        }
+      }
+      if (errorMessage.includes("missing core resume elements")) {
+        return {
+          title: 'Not a resume',
+          message: "The image is missing core resume elements.",
+          suggestion: 'Make sure your resume image includes both contact information and work experience.'
+        }
+      }
+      // Default resume error
+      return {
+        title: 'Not a resume',
+        message: "This file doesn't look like a resume (CV).",
+        suggestion: 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+      }
+    }
+    
+    if (statusCode === 400 && (errorMessage.includes('corrupted') || errorMessage.includes('unreadable'))) {
+      return {
+        title: 'Unsupported or corrupted file',
+        message: "The file type doesn't match its contents or can't be read.",
+        suggestion: 'Upload a PDF, DOC/DOCX, TXT, PNG, JPG, or WEBP exported directly from your editor.'
+      }
+    }
+    
+    if (statusCode === 401 || statusCode === 403 || errorMessage.includes('Authentication required')) {
+      return {
+        title: 'Sign in to continue',
+        message: 'Creating a portfolio requires an account.',
+        suggestion: 'Sign in to link this upload to your workspace.',
+        isAuthError: true  // Special flag for auth errors, but still returns standard object
+      }
+    }
+    
+    if (statusCode === 408 || errorMessage.includes('timed out')) {
+      return {
+        title: 'Upload timed out',
+        message: 'The connection took too long and the upload was interrupted.',
+        suggestion: 'Check your network and try again; large files work best on a stable connection.'
+      }
+    }
+    
+    if (statusCode === 413 || errorMessage.includes('too large')) {
+      return {
+        title: 'File is too large',
+        message: 'Maximum file size is 10 MB.',
+        suggestion: 'Reduce the file size (export to PDF, compress images) and try again.'
+      }
+    }
+    
+    if (statusCode === 415 || errorMessage.includes('Unsupported')) {
+      return {
+        title: 'File type not supported',
+        message: 'Supported types: PDF, DOC/DOCX, TXT, PNG, JPG, WEBP, RTF.',
+        suggestion: 'Export your resume to one of the supported formats and re-upload.'
+      }
+    }
+    
+    if (statusCode === 429 || errorMessage.includes('rate limit')) {
+      return {
+        title: 'Too many uploads',
+        message: "You've reached the upload limit for now.",
+        suggestion: 'Please wait and try again later. Sign in for higher limits.'
+      }
+    }
+    
+    if (statusCode === 422 || errorMessage.includes('extract text')) {
+      return {
+        title: "Couldn't read the file",
+        message: "We couldn't extract text from this file.",
+        suggestion: 'Try a higher-quality scan or export a text-based PDF.'
+      }
+    }
+    
+    if (statusCode === 404) {
+      return {
+        title: 'Item not found',
+        message: "We couldn't find that upload (it may have expired).",
+        suggestion: 'Upload the file again to continue.'
+      }
+    }
+    
+    // Default 500 error
+    return {
+      title: 'Something went wrong',
+      message: "We couldn't process the file due to a server error.",
+      suggestion: 'Try again in a few minutes. If this keeps happening, export to PDF or contact support.'
+    }
+  }
+  
+  const handleFileSelect = async (file: File) => {
+    // Use JobFlow orchestrators for all file uploads
+    console.log('📁 File selected, using JobFlow orchestrator:', file.name)
+    
+    // JobFlow handles all duplicate prevention internally
+    if (isAuthenticated) {
+      await startAuthenticatedFlow(file)
+    } else {
+      await startPreviewFlow(file)
+    }
+    
+    // Set uploaded file for UI tracking
+    setUploadedFile(file)
+    
+    return // JobFlow handles everything else
+    
+    // LEGACY CODE BELOW - keeping for reference during migration
+    // Check if it's the same file we're currently processing
+    const fingerprint = getFileFingerprint(file)
+    if (currentFileFingerprint.current === fingerprint && isValidatingRef.current) {
+      console.log('⚠️ Same file already being processed, ignoring duplicate')
+      return
+    }
+    
+    // Set validation guard
+    isValidatingRef.current = true
+    currentFileFingerprint.current = fingerprint
+    
+    // Close any error toast
+    setErrorToast(prev => ({ ...prev, isOpen: false }))
+    
+    // Clear old files first
+    setUploadedFile(null)
+    setDroppedFile(null)
+    
+    // Mark that we're handling file selection to prevent double processing
+    // This flag will be read by Resume2WebsiteDemo to skip its auto-start effect
+    window.__isHandlingFileSelect = true
+    
+    // Use requestAnimationFrame to ensure clean render boundary
+    requestAnimationFrame(() => {
+      // Set the new file after paint
+      setUploadedFile(file)
+      
+      // For unauthenticated users, also set dropped file
+      if (!isAuthenticated) {
+        setDroppedFile(file)
+      }
+      
+      // Use JobFlow orchestrators instead of direct uploadFile
+      console.log('🔍 Using JobFlow to handle file upload...')
+      
+      // JobFlow will handle validation, upload, and state management
+      const flowPromise = isAuthenticated 
+        ? startAuthenticatedFlow(file)
+        : startPreviewFlow(file)
+        
+      flowPromise.then(() => {
+        console.log('✅ JobFlow flow started successfully')
+        // JobFlow handles all state management and event dispatching
+      }).catch(error => {
+        console.error('❌ JobFlow error:', error)
+        
+        // Get standardized error message
+        const errorInfo = getStandardizedError(error)
+        
+        // Show auth modal if needed
+        if (errorInfo.isAuthError) {
+          setShowAuthModal(true)
+          return
+        }
+        
+        // Show error toast with standardized message
+        setErrorToast({
+          isOpen: true,
+          title: errorInfo.title,
+          message: errorInfo.message,
+          suggestion: errorInfo.suggestion
+        })
+        
+        // Clear the invalid file and reset all animation states
+        setUploadedFile(null)
+        setDroppedFile(null)
+      }).finally(() => {
+        // Clear all guards on both success and error
+        window.__isHandlingFileSelect = false
+        isValidatingRef.current = false
+        // Keep the fingerprint until next file to detect true duplicates
+      })
+    })
+  }
+
   const handleCVCardClick = (file: File) => {
-    // The Resume2WebsiteDemo component will handle everything internally
-    // This is just a placeholder for the prop
+    // This function is not used since Resume2WebsiteDemo handles clicks internally
+    // We can't directly trigger the animation from here
   }
 
   const handleLogout = async () => {
@@ -3056,12 +3519,19 @@ export default function Home() {
     // Clear auth state
     signOut()
     
+    // CRITICAL: Clear JobFlow persisted state to prevent completed portfolio from showing after logout
+    localStorage.removeItem('jobFlowState')
+    
+    // Clear portfolio from localStorage
+    localStorage.removeItem('lastPortfolio')
+    
     // Clear all component states
     setShowDashboard(false)
     setUploadedFile(null)
     setDroppedFile(null)
     
     // Force page refresh to reset everything to initial state
+    // Navigate to home with the secret key
     window.location.href = window.location.origin + '?key=nitzan-secret-2024'
   }
 
@@ -3227,13 +3697,12 @@ export default function Home() {
     }
   }, [currentSection, isScrolling, isMobile, sections, hasTriggeredPhase6Modal, isAuthenticated, handleOpenModal])
 
-  // Show dashboard if processing is complete
+  // Show portfolio editor if user wants to edit
   if (showDashboard && isAuthenticated) {
     return (
-      <SimpleDashboard 
-        userName={user?.name || "User"} 
-        onBackToHome={() => setShowDashboard(false)}
-        initialPage="resume"
+      <PortfolioEditor 
+        portfolioUrl={jobFlowContext.portfolioUrl}
+        onBackToHome={handleDashboardClose}
       />
     )
   }
@@ -3271,6 +3740,13 @@ export default function Home() {
           onFileClick={handleCVCardClick}
           handleFileSelect={handleFileSelect}
           signIn={signIn}
+          setErrorToast={setErrorToast}
+          isRetrying={isRetrying}
+          setIsRetrying={setIsRetrying}
+          hasCompletedGeneration={hasCompletedGeneration}
+          onLearnMore={handleLearnMore}
+          onGoLive={handleGoLive}
+          onEditPortfolio={handleEditPortfolio}
         />
       </section>
       <section id="demo" className="min-h-screen">
@@ -3387,6 +3863,7 @@ export default function Home() {
         onBack={handleUploadBack}
         onSuccess={handleUploadSuccess}
         initialFile={droppedFile}
+        onAuthRequired={() => setShowAuthModal(true)}
       />
 
       {/* Resume Builder Modal */}
@@ -3413,12 +3890,6 @@ export default function Home() {
         }}
       />
 
-      {/* Pricing Modal */}
-      <PricingModal
-        isOpen={showPricing}
-        onPlanSelected={handlePlanSelected}
-        onClose={() => setShowPricing(false)}
-      />
 
       {/* Authentication Modal */}
       <AuthModal
@@ -3426,6 +3897,52 @@ export default function Home() {
         onClose={handleAuthClose}
         onAuthSuccess={handleAuthSuccess}
       />
+      
+      {/* Portfolio Completion Popup */}
+      <PortfolioCompletionPopup
+        isOpen={showCompletionPopup}
+        onStartEditing={handleStartEditing}
+        onDismiss={handleDismissCompletion}
+      />
+
+      {/* Pricing Modal */}
+      {showPricing && (
+        <PricingSelector
+          portfolioId={undefined}
+          onPaymentSuccess={() => {
+            setShowPricing(false)
+            // Handle payment success
+          }}
+        />
+      )}
+      
+      {/* Error Toast - Global for all components */}
+      <ErrorToast
+        isOpen={errorToast.isOpen}
+        onClose={() => setErrorToast(prev => ({ ...prev, isOpen: false }))}
+        title={errorToast.title}
+        message={errorToast.message}
+        suggestion={errorToast.suggestion}
+        onRetryUpload={handleFileSelect}
+      />
     </main>
+  )
+}
+
+// Export with JobFlowProvider wrapper
+export default function Home() {
+  const { isAuthenticated } = useAuthContext()
+  
+  return (
+    <JobFlowProvider 
+      isAuthenticated={isAuthenticated}
+      onAuthRequired={() => {
+        // This will be called when auth is needed
+        // The modal handling is already in HomeWithJobFlow
+        console.log('Auth required for portfolio generation')
+      }}
+    >
+      <HomeWithJobFlow />
+    </JobFlowProvider>
   )
 }

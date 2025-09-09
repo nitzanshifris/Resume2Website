@@ -41,26 +41,46 @@ curl -X POST http://localhost:2000/api/v1/login \
 
 ## CV Processing
 
-### Upload CV
+### Upload CV - Authenticated Users
 ```bash
-# With authentication (always required)
+# Validates and extracts immediately
 curl -X POST http://localhost:2000/api/v1/upload \
   -H "X-Session-ID: your-session-id-here" \
   -F "file=@/path/to/your/cv.pdf"
 
 # Response:
 {
-  "message": "CV uploaded successfully. Building your portfolio website...",
-  "job_id": "770e8400-e29b-41d4-a716-446655440000",
-  "cv_data": {
-    "sections_extracted": 17,
-    "archetype": "Technical Developer",
-    "components_selected": 8
-  }
+  "message": "CV uploaded successfully",
+  "job_id": "770e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
-**Note:** Authentication is always required. Use the session_id from login/register.
+### Upload CV - Anonymous Users  
+```bash
+# Validates only, NO extraction until after signup
+curl -X POST http://localhost:2000/api/v1/upload-anonymous \
+  -F "file=@/path/to/your/cv.pdf"
+
+# Response:
+{
+  "message": "CV uploaded successfully",
+  "job_id": "770e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+### Extract CV Data (After Signup)
+```bash
+# Called after anonymous user signs up
+curl -X POST http://localhost:2000/api/v1/extract/770e8400-e29b-41d4-a716-446655440000 \
+  -H "X-Session-ID: your-session-id-here"
+
+# Response:
+{
+  "status": "completed",
+  "cv_data": { ... },
+  "confidence_score": 0.85
+}
+```
 
 ## Portfolio Generation
 
@@ -114,7 +134,19 @@ curl -X DELETE http://localhost:2000/api/v1/cleanup
 
 ## Error Responses
 
-### 400 Bad Request
+### 400 Bad Request - Resume Gate Rejection
+```json
+{
+  "detail": {
+    "error": "Please upload a valid resume/CV file",
+    "score": 45,
+    "reason": "No contact information found",
+    "suggestion": "Make sure your CV includes email, phone, or LinkedIn profile"
+  }
+}
+```
+
+### 400 Bad Request - Other
 ```json
 {
   "detail": "File is empty"

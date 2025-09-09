@@ -4,7 +4,7 @@
 RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portfolio websites using FastAPI backend + Next.js frontend with Claude 4 Opus for deterministic data extraction.
 
 ### What RESUME2WEBSITE Does
-- **Extracts** CV data using Claude 4 Opus (temperature 0.0) into 18 structured sections
+- **Extracts** CV data using Claude 4 Opus (temperature 0.0) into 15 structured sections
 - **Generates** portfolio websites in isolated sandbox environments 
 - **Preview Mode**: Instant local portfolio preview (ports 4000-5000) before deployment
 - **Manages** multiple portfolio instances with real-time health monitoring
@@ -16,7 +16,7 @@ RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portf
 
 ## Tech Stack Essentials
 - **Backend**: FastAPI + Python 3.11+ (port 2000)
-- **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4 (port 3000)
+- **Frontend**: Next.js 15 + TypeScript + Tailwind CSS v4 (port 3019)
 - **AI**: Claude 4 Opus ONLY (temperature 0.0 for deterministic extraction)
 - **Database**: SQLite with session-based authentication
 - **Package Manager**: pnpm (main project), npm (sandboxes only)
@@ -26,14 +26,14 @@ RESUME2WEBSITE is an AI-powered platform that transforms CVs into stunning portf
 ## Daily Development Commands
 ```bash
 # Frontend Development
-pnpm run dev                    # Start Next.js dev server (localhost:3000)
+pnpm run dev                    # Start Next.js dev server (localhost:3019)
 pnpm run typecheck             # ⚠️ MUST run before commits
 pnpm run build                 # Build for production
 pnpm run start                 # Start production build
 
 # Backend Development  
 source venv/bin/activate       # Activate Python environment
-python3 -m uvicorn main:app --host 127.0.0.1 --port 2000  # Start FastAPI (localhost:2000)
+python3 -m uvicorn main:app --host 127.0.0.1 --port 2000 --reload  # Start FastAPI with auto-reload
 python main.py                 # Alternative with optimizations
 
 # Testing & Quality
@@ -43,8 +43,9 @@ python3 tests/unit/test_cv_helpers_isolated.py  # Run isolated unit tests (no DB
 pnpm run typecheck            # TypeScript validation
 
 # Utilities
-.claude/commands/cleanup.sh    # Clean build artifacts and cache
-.claude/commands/prime.sh      # Initialize development environment
+.claude/commands/maintenance/cleanup.sh    # Clean build artifacts and cache
+.claude/commands/development/prime.sh      # Initialize development environment
+.claude/commands/development/commit-and-push.sh  # Git workflow with safety checks
 ```
 
 ## Git Workflow Rules (CRITICAL)
@@ -80,7 +81,7 @@ const config = {
 };
 ```
 
-## CV Data Structure (18 Sections)
+## CV Data Structure (15 Sections)
 CV extraction creates structured data with these sections:
 1. **Hero** - fullName, professionalTitle, summaryTagline, profilePhotoUrl
 2. **Contact** - email, phone, location, professionalLinks, availability
@@ -89,65 +90,171 @@ CV extraction creates structured data with these sections:
 5. **Education** - Array of degrees with institution, field, dates, gpa, honors
 6. **Skills** - skillCategories (grouped) + ungroupedSkills
 7. **Projects** - title, description, role, technologies, urls
-8. **Achievements** - value, label, context, timeframe
+8. **Achievements** - value, label, context, timeframe (includes patents)
 9. **Certifications** - title, organization, dates, credentials
 10. **Languages** - language, proficiency, certification
-11. **Volunteer** - role, organization, dates, description
-12. **Publications** - title, type, venue, date, url
-13. **Speaking** - events, topics, venues, presentations
-14. **Courses** - title, institution, completion, certificates
-15. **Memberships** - organization, role, type, dates
-16. **Hobbies** - Array of interests
-17. **Patents** - title, number, status, dates
-18. **Testimonials** - name, role, company, text, date
+11. **Courses** - title, institution, completion, certificates
+12. **Volunteer** - role, organization, dates, description
+13. **Publications** - title, type, venue, date, url
+14. **Speaking** - events, topics, venues, presentations
+15. **Hobbies** - Array of interests
+
+**Note**: Testimonials are handled in the frontend template editing, not in CV extraction.
+
+## ⚠️ CRITICAL: API Usage Standards
+
+**MANDATORY**: All API calls MUST use file-based JSON to avoid 422 errors. See `/docs/API_USAGE_STANDARDS.md`
+
+```bash
+# ✅ CORRECT - The ONLY way that works:
+cat > /tmp/data.json << 'EOF'
+{
+  "key": "value"
+}
+EOF
+curl -X POST http://localhost:2000/api/endpoint \
+  -H "Content-Type: application/json" \
+  -d @/tmp/data.json
+
+# ❌ WRONG - Will cause 422 Unprocessable Entity:
+curl -X POST http://localhost:2000/api/endpoint \
+  -H "Content-Type: application/json" \
+  -d '{"key": "value"}'
+```
 
 ## Key API Endpoints
 ```python
 # CV Management
-POST /api/v1/upload-cv                    # Upload CV file
+POST /api/v1/upload                       # Upload CV (authenticated users - validates + extracts)
+POST /api/v1/upload-anonymous             # Upload CV (anonymous - validates only, NO extraction)
+POST /api/v1/extract/{job_id}             # Extract CV data (called after signup for anonymous)
 GET /api/v1/cv/{job_id}                   # Get CV data
 PUT /api/v1/cv/{job_id}                   # Update CV data
 GET /api/v1/my-cvs                        # List user's CVs
 GET /api/v1/download/{job_id}             # Download original file
 
 # Portfolio Generation (PRIMARY)
-POST /api/v1/portfolio/generate/{job_id}  # Generate portfolio preview (local)
-POST /api/v1/portfolio/deploy/{job_id}    # Deploy portfolio to Vercel (after preview)
-POST /api/v1/portfolio/generate-anonymous/{job_id}  # Anonymous generation
-GET /api/v1/portfolio/list                # List user portfolios
-GET /api/v1/portfolio/{id}/status         # Check portfolio status
-POST /api/v1/portfolio/{id}/restart       # Restart portfolio server
+POST /api/v1/generation/generate/{job_id}  # Generate portfolio preview (local)
+POST /api/v1/generation/{id}/deploy        # Deploy portfolio to Vercel (after preview)
+GET /api/v1/generation/list                # List user portfolios
+GET /api/v1/generation/{id}/status         # Check portfolio status
+POST /api/v1/generation/{id}/restart       # Restart portfolio server
+DELETE /api/v1/generation/{id}             # Delete portfolio
 
 # Payment Processing
 POST /api/v1/payments/create-checkout-session  # Create Stripe checkout
 GET /api/v1/payments/session-status/{id}       # Check payment status
 
 # Authentication
-POST /api/v1/auth/register                # Register user
-POST /api/v1/auth/login                   # Login user
-POST /api/v1/auth/logout                  # Logout
+POST /api/v1/register                     # Register user
+POST /api/v1/login                        # Login user  
+POST /api/v1/logout                       # Logout
 GET /api/v1/auth/me                       # Get current user
 POST /api/v1/auth/google/callback         # Google OAuth callback
 POST /api/v1/auth/linkedin/callback       # LinkedIn OAuth callback
 GET /api/v1/auth/google/status            # Check Google OAuth availability
+
+# Real-Time Metrics System (/api/v1/metrics/*)
+GET /api/v1/metrics/health                    # Service health check
+GET /api/v1/metrics/current                   # Real-time aggregate metrics (PUBLIC)
+GET /api/v1/metrics/detailed                  # Detailed metrics with history (ADMIN)
+GET /api/v1/metrics/extraction/{extraction_id} # Single extraction metrics (ADMIN)
+GET /api/v1/metrics/performance/summary       # Dashboard-ready performance data (PUBLIC)
+GET /api/v1/metrics/circuit-breaker/status    # Circuit breaker health (PUBLIC)
+POST /api/v1/metrics/circuit-breaker/reset    # Manual circuit breaker reset (ADMIN)
+POST /api/v1/metrics/reset                    # Reset all metrics data (ADMIN)
+
+# Advanced Workflows System (/api/v1/workflows/*)
+GET /api/v1/workflows/test                    # System test endpoint
+POST /api/v1/workflows/start                  # Start complex workflow with SSE tracking
+GET /api/v1/workflows/status/{workflow_id}    # Get workflow execution status
+GET /api/v1/workflows/logs/{workflow_id}      # Retrieve workflow execution logs
+GET /api/v1/workflows/metrics                 # Workflow system metrics and analytics
+GET /api/v1/workflows/alerts                  # Active workflow alerts and issues
+POST /api/v1/workflows/alerts/{alert_id}/resolve  # Resolve workflow alerts
+GET /api/v1/workflows/analysis/patterns       # Workflow pattern analysis
+GET /api/v1/workflows/stream/{workflow_id}    # Real-time workflow updates via SSE
+
+# Server-Sent Events System (/api/v1/sse/*)
+GET /api/v1/sse/cv/extract-streaming/{job_id} # Real-time CV extraction updates
+POST /api/v1/sse/cv/extract-streaming         # Start extraction with streaming
+GET /api/v1/sse/portfolio/generate-streaming/{job_id}  # Portfolio generation stream
+GET /api/v1/sse/sandbox/status-streaming/{sandbox_id}  # Sandbox status monitoring
+GET /api/v1/sse/heartbeat                     # SSE connection heartbeat
+GET /api/v1/sse/rate-limit-status             # Check rate limiting status
+GET /api/v1/sse/test-error-handling           # Test SSE error handling
+GET /api/v1/sse/test-timeout/{duration}       # Test timeout handling
+GET /api/v1/sse/admin/rate-limit-stats        # Admin rate limit analytics (ADMIN)
+
+# Enhanced CV Processing (/api/v1/cv-enhanced/*)
+POST /api/v1/cv-enhanced/upload               # Upload with enhanced tracking
+GET /api/v1/cv-enhanced/stream/{job_id}       # Real-time processing stream
+GET /api/v1/cv-enhanced/test-with-sample      # Test with sample data
 ```
 
 ## Architecture Essentials
-- **CV Extraction**: 18 sections, cached in SQLite, hash-based deduplication
+- **Resume Gate Validation**: Stricter for images (requires 500+ chars, 3+ signal types, both contact AND experience)
+  - Smart rejection reasons with helpful suggestions
+  - Image-specific validation rules to prevent screenshot abuse
+- **CV Extraction**: 15 sections, cached in SQLite, hash-based deduplication
+  - Modular architecture with specialized components (section_extractor, post_processor, etc.)
+  - Circuit breaker pattern for LLM resilience (5 failures → exponential backoff: 30s, 60s, 120s...)
+  - Factory pattern for extractor instances (no singleton conflicts)
+  - Confidence scoring for extraction quality (caches only >0.75 confidence)
+  - Real-time metrics tracking at `/api/v1/metrics/current`
 - **Portfolio Generation**: Two-stage process - Preview first, then optional deployment
 - **Preview Mode**: Instant local preview on ports 4000-5000 (no deployment needed)
 - **Deployment**: Optional Vercel deployment after preview approval (~2-3 min)
-- **Templates**: 2 active (v0_template_v1.5, v0_template_v2.1)
+- **Templates**: 1 active template (official_template_v1)
 - **Authentication**: Email/password + Google OAuth + LinkedIn OAuth, session-based
 - **File Storage**: Preserved in data/uploads/ with hash-based deduplication
 - **Build Optimization**: .npmrc for legacy-peer-deps, no recursive install scripts
 - **Payment Integration**: Stripe Embedded Checkout (test & live modes)
 - **Portfolio Restoration**: Automatic portfolio recovery on page refresh/re-login
 
+## Advanced Features & Systems
+
+### Real-Time Metrics & Monitoring
+- **Performance Tracking**: Success rates, processing times, confidence scores
+- **Circuit Breaker Monitoring**: LLM health and failure detection
+- **Active Extractions**: Real-time count of concurrent operations
+- **Dashboard-Ready Data**: Public metrics API for frontend integration
+- **Admin Controls**: System resets and manual interventions
+
+### Workflow Orchestration
+- **Multi-step Workflows**: Complex operation coordination with phase tracking
+- **SSE Integration**: Real-time progress streaming to frontend
+- **Correlation Management**: Links related operations across services
+- **Alert System**: Proactive notification of workflow failures
+- **Pattern Analysis**: Workflow optimization insights
+
+### Server-Sent Events (SSE)
+- **Real-time Updates**: Live CV extraction and portfolio generation progress
+- **Connection Management**: Heartbeat, reconnection, graceful degradation
+- **Rate Limiting**: User-specific and IP-based limits
+- **Sandbox Monitoring**: Live resource usage and build status
+- **Error Handling**: Comprehensive error recovery mechanisms
+
+### Enhanced CV Processing
+- **Advanced Tracking**: Comprehensive workflow logging throughout processing
+- **Background Coordination**: Improved task management and error recovery
+- **Performance Metrics**: Built-in analytics for optimization
+- **Testing Infrastructure**: Sample data testing capabilities
+
 ## Development Workflow Patterns
 ### CV Processing Flow
+
+#### Anonymous Users (NEW FLOW):
 ```
-1. User uploads CV → Text extraction → Claude 4 Opus analysis → SQLite storage
+1. Upload file → /upload-anonymous → Resume Gate validation → Save file → Return job_id (NO extraction)
+2. Frontend shows MacBook animation → Shows signup modal after 6 seconds
+3. User signs up → handleAuthSuccess → Calls /extract/{job_id} → Claude 4 Opus extraction
+4. Portfolio generation continues with extracted data
+```
+
+#### Authenticated Users:
+```
+1. Upload CV → /upload → Resume Gate validation → Text extraction → Claude 4 Opus analysis → SQLite storage
 2. CV Editor → User edits extracted data → CRUD operations
 3. Portfolio generation → Isolated sandbox → Template injection → Vercel deployment
 4. Resource management → Health monitoring → Auto-cleanup → Metrics tracking
@@ -168,8 +275,7 @@ GET /api/v1/auth/google/status            # Check Google OAuth availability
 
 // Register in portfolio_generator.py:
 AVAILABLE_TEMPLATES = {
-    "v0_template_v1.5": "src/templates/v0_template_v1.5",
-    "v0_template_v2.1": "src/templates/v0_template_v2.1"
+    "official_template_v1": "src/templates/official_template_v1"
 }
 ```
 
@@ -195,6 +301,10 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 - **Live Logging**: Use structured prefixes (🚀 ⏳ ✅ ⚠️ ❌) for transparency
 - **Resource Management**: Auto-cleanup portfolios >24h, max 20 active, 512MB memory limit
 - **Caching Strategy**: File hash deduplication, SQLite CV data cache, API response optimization
+- **Validation Guards**: File fingerprinting (name-size-lastModified) to prevent double uploads
+- **Error Handling**: Structured errors with Resume Gate reasons and suggestions
+- **Retry Flow**: Seamless retry with skipValidation flag for already-validated files
+- **State Management**: currentJobId tracks anonymous uploads across signup flow
 
 ## Critical Reminders
 1. **Claude 4 Opus ONLY** - No other AI models (temperature 0.0)
@@ -208,20 +318,23 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 ### Common Issues & Quick Fixes
 - **CSS not loading**: Check postcss.config.mjs has autoprefixer, clear .next cache
 - **Next.js binary not found**: Sandboxes use npm, not pnpm - check PATH
-- **Port conflicts**: Backend=2000, Frontend=3000, Portfolios=4000-5000 range
+- **Port conflicts**: Backend=2000, Frontend=3019, Portfolios=4000-5000 range
 - **CV extraction hangs**: Check Claude API quota/credentials in keychain
 - **Portfolio stuck at 55%**: Check API response format, server startup logs
 - **Vercel deployment hangs**: Check `ps aux | grep vercel`, may be building
 - **Infinite npm install loop**: Remove `"install": "npm install"` from scripts
 - **"Cannot find module"**: Run `pnpm install` in project root
-- **TypeScript errors**: Run `pnpm run typecheck` to see all errors
+- **TypeScript errors**: Run `npx tsc --noEmit` in user_web_example folder
 - **Python venv issues**: Check `which python` shows venv path
+- **Resume Gate too strict/lenient**: Adjust threshold in settings.py (default=60)
+- **Double upload on retry**: Check validation guards in handleFileSelect
+- **Animation not starting**: Verify skipValidation flag and event dispatching
 
 ### Debug Commands
 ```bash
 # Health checks
 curl http://localhost:2000/health               # Backend health
-curl http://localhost:3000/api/health           # Frontend health
+curl http://localhost:3019/api/health           # Frontend health
 
 # Portfolio management
 curl http://localhost:2000/api/v1/portfolio/list              # List portfolios
@@ -246,7 +359,8 @@ pnpm run dev --verbose                         # Frontend verbose logs
 ## Portfolio Generation Flow
 ### Two-Stage Process
 1. **Preview Stage** (Default):
-   - User uploads CV → Extract → Generate → **Local Preview**
+   - Authenticated: Upload → Extract → Generate → **Local Preview**
+   - Anonymous: Upload (validation only) → Animation → Signup → Extract → Generate → **Local Preview**
    - Instant preview on `http://localhost:4000`
    - No deployment, runs locally for testing
    - Portfolio persists across page refreshes
@@ -255,6 +369,7 @@ pnpm run dev --verbose                         # Frontend verbose logs
    - User approves preview → Payment → **Deploy to Vercel**
    - Real-time progress monitoring (~2-3 min)
    - Returns live URL: `https://portfolio-xxxxx.vercel.app`
+   - Automatic custom domain: `https://john-doe.portfolios.resume2website.com`
 
 ### Key Implementation Details
 - **CLI Integration**: Uses `vercel` CLI to bypass 10MB API limit
@@ -274,7 +389,7 @@ The main app at resume2website.com is protected with authentication middleware:
 - **Coming Soon page**: Custom landing with email capture and gradient text styling
 - **Configuration**: Edit `user_web_example/middleware.ts` to change secret key
 - **Testing protection**: Use incognito window or clear cookies
-- **Local development**: Frontend on port 3000, Backend on port 2000 (no ngrok needed)
+- **Local development**: Frontend on port 3019, Backend on port 2000 (no ngrok needed)
 
 ## Directory Structure
 ```
@@ -285,16 +400,17 @@ Resume2Website-V4/
 │   │   │   ├── portfolio_generator.py  # Main portfolio creation
 │   │   │   ├── cv.py         # CV CRUD operations
 │   │   │   ├── auth.py       # Authentication dependencies
-│   │   │   └── future_use/   # Ready but not mounted
+│   │   │   └── [active routes only]
 │   │   └── db.py            # Database operations
 │   ├── core/               # Business logic
 │   │   ├── cv_extraction/ # AI-powered CV parsing
 │   │   └── schemas/      # Data models
 │   ├── services/          # Business services
 │   ├── templates/         # Portfolio templates
-│   │   ├── v0_template_v1.5/  # Active template
-│   │   └── v0_template_v2.1/  # Active template
-│   └── utils/            # Utility functions
+│   │   ├── official_template_v1/  # Active template (ONLY)
+│   │   └── future_templates/      # Old templates (v0_template_v1.5, v0_template_v2.1)
+│   ├── utils/            # Utility functions
+│   └── legacy/           # Old code for reference
 ├── user_web_example/          # Main frontend (Next.js)
 │   ├── app/              # App router pages
 │   ├── components/       # React components
@@ -357,23 +473,51 @@ HTTP/2 200
 - **DNS issues**: Wait 2-3 minutes for propagation
 - **Cache issues**: Clear browser cache if seeing old protected version
 
+## Claude Code Agents
+
+### Available Specialized Agents:
+1. **code-reviewer** - Comprehensive code review for Resume2Website V4
+   - Location: `.claude/agents/code-reviewer.md`
+   - Specializes in: SSE, workflows, metrics, security patterns, 29 undocumented endpoints
+   - Usage: `Task(subagent_type="code-reviewer", prompt="Review this code...")`
+
+2. **execution-services** - Complete API execution and monitoring
+   - Location: `.claude/agents/execution-services_1.md`
+   - Specializes in: All API endpoints, database operations, background tasks, debugging
+   - **CRITICAL**: Follows mandatory API standards in `/docs/API_USAGE_STANDARDS.md`
+   - Usage: `Task(subagent_type="execution-services", prompt="Execute this operation...")`
+
+### Agent Usage Guide:
+- Documentation: `.claude/agents/usage-guide.md`
+- Results saved to: `.claude/agents/data/[agent-name]/`
+- Templates: `.claude/agents/templates/`
+
 ## Important Files to Know
 - **config.py** - Backend configuration, environment variables, AI model settings
 - **main.py** - FastAPI application entry point with routing
 - **src/api/routes/portfolio_generator.py** - Portfolio generation + optional Vercel deployment
+- **src/api/routes/cv.py** - CV upload, extraction, CRUD operations (separate flows for anonymous/authenticated)
+- **src/api/routes/metrics.py** - Real-time extraction metrics endpoint
 - **src/api/routes/payments.py** - Stripe payment processing endpoints
-- **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
-- **src/api/routes/cv.py** - CV upload, extraction, CRUD operations
 - **src/api/routes/user_auth.py** - OAuth authentication endpoints (Google, LinkedIn)
 - **src/api/db.py** - SQLite database operations, user management, session handling
-- **src/core/cv_extraction/data_extractor.py** - Claude 4 Opus integration
-- **user_web_example/app/page.tsx** - Main frontend entry point with portfolio restoration
+- **src/core/cv_extraction/data_extractor.py** - Main extraction orchestrator (uses factory pattern)
+- **src/core/cv_extraction/llm_service.py** - Claude 4 Opus integration with circuit breaker
+- **src/core/cv_extraction/metrics.py** - Performance metrics collection
+- **src/core/cv_extraction/circuit_breaker.py** - Resilience pattern for LLM failures
+- **src/utils/cv_resume_gate.py** - Resume validation logic with image-specific rules
+- **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
+- **user_web_example/app/page.tsx** - Main frontend with anonymous/auth flows, retry handling
+- **user_web_example/lib/api.ts** - API client with uploadFile, extractCVData functions
+- **user_web_example/components/interactive-cv-pile.tsx** - CV upload UI with drag-drop
+- **user_web_example/components/ui/error-toast.tsx** - Resume Gate error display with retry
 - **user_web_example/components/embedded-checkout-modal.tsx** - Stripe payment modal
 - **user_web_example/app/payment-return/page.tsx** - Payment confirmation page
 - **package.json** - Frontend dependencies, scripts, workspace config
 - **requirements.txt** - Python backend dependencies
 - **.claude/commands/** - Development utility scripts
 - **docs/PORTFOLIO_IFRAME_SETUP.md** - Portfolio iframe embedding guide
+- **docs/API_USAGE_STANDARDS.md** - MANDATORY API call patterns to avoid 422 errors
 
 ---
 *For comprehensive documentation, architecture details, and troubleshooting guides, see: `extended_claude.md`*

@@ -10,7 +10,7 @@ import { X } from "lucide-react";
 
 interface EmbeddedCheckoutModalProps {
   portfolioId?: string;
-  amount?: number; // Amount in cents
+  productType?: "monthly" | "lifetime"; // Which product to purchase
   onSuccess?: () => void;
 }
 
@@ -21,7 +21,7 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
 export default function EmbeddedCheckoutModal({ 
   portfolioId, 
-  amount = 999, // Default $9.99
+  productType = "monthly", // Default to monthly plan
   onSuccess 
 }: EmbeddedCheckoutModalProps) {
   useEffect(() => {
@@ -42,13 +42,14 @@ export default function EmbeddedCheckoutModal({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ 
-        amount: amount, // Amount in cents
-        mode: "payment" // One-time payment
+        product_type: productType, // "monthly" or "lifetime"
+        portfolio_id: portfolioId,
+        // TODO: Add user_email if available from auth context
       }),
     })
       .then((res) => res.json())
       .then((data) => data.client_secret);
-  }, [amount]);
+  }, [productType, portfolioId]);
 
   const options = { fetchClientSecret };
 
@@ -65,9 +66,11 @@ export default function EmbeddedCheckoutModal({
       {/* Trigger Button */}
       <button 
         onClick={handleCheckoutClick}
-        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+        className="px-8 py-4 bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200 text-lg"
       >
-        Unlock Edit Mode - ${(amount / 100).toFixed(2)}
+        {productType === "monthly" 
+          ? "Go Live - $40 + $8/month" 
+          : "Go Live - $150 Lifetime"}
       </button>
 
       {/* Modal Overlay */}
@@ -80,14 +83,14 @@ export default function EmbeddedCheckoutModal({
           />
           
           {/* Modal Content */}
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-slideUp">
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-slideUp border border-sky-200 dark:border-sky-900">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b dark:border-gray-800">
+            <div className="flex items-center justify-between p-6 border-b border-sky-100 dark:border-gray-800 bg-gradient-to-r from-blue-50 via-sky-50 to-emerald-50 dark:from-gray-900 dark:to-gray-900">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">
                   Complete Your Purchase
                 </h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                   Secure payment powered by Stripe
                 </p>
               </div>
@@ -111,17 +114,10 @@ export default function EmbeddedCheckoutModal({
                   <p className="text-gray-900 dark:text-white font-semibold mb-2">Error Loading Checkout</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
                 </div>
-              ) : isLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                </div>
               ) : (
                 <EmbeddedCheckoutProvider 
                   stripe={stripePromise} 
                   options={options}
-                  onReady={() => {
-                    setIsLoading(false);
-                  }}
                 >
                   <EmbeddedCheckout />
                 </EmbeddedCheckoutProvider>

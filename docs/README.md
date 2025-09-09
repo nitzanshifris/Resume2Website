@@ -25,7 +25,7 @@ Transform CVs into stunning portfolio websites using AI-powered extraction and m
 ### ✅ What's Working
 - **Complete Pipeline**: CV Upload → AI Extraction → CV Editor → Portfolio Generation → Deploy
 - **AI Extraction**: Claude 4 Opus ONLY (temperature 0.0 for determinism)
-- **18 CV Sections**: Comprehensive data extraction with advanced classification
+- **15 CV Sections**: Comprehensive data extraction with advanced classification
 - **Portfolio Generation**: Isolated sandbox environments with real-time preview
 - **Authentication**: Email/password and Google OAuth
 - **File Management**: Original file preservation and secure download
@@ -35,7 +35,7 @@ Transform CVs into stunning portfolio websites using AI-powered extraction and m
 
 ```bash
 # Frontend development
-pnpm run dev            # Start Next.js (http://localhost:3000)
+pnpm run dev            # Start Next.js (http://localhost:3019)
 pnpm run typecheck      # TypeScript checking
 pnpm run build          # Production build
 

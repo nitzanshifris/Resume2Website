@@ -1,0 +1,77 @@
+[
+  {
+    "file": "Software Engineer.pdf",
+    "file_hash": "6d597100",
+    "timestamp": "2025-08-16T18:02:40.266951",
+    "extraction_success": true,
+    "error_message": null,
+    "text_length": 1267,
+    "extraction_time_seconds": 22.11,
+    "memory_used_mb": 2.58,
+    "sections_extracted": 7,
+    "section_details": {
+      "hero": 1,
+      "contact": 1,
+      "summary": 1,
+      "experience": 2,
+      "education": 2,
+      "skills": 1,
+      "languages": 3
+    },
+    "confidence_score": 0.787,
+    "total_sections_possible": 17,
+    "data_file": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/tests/refactoring/baseline_results/Software Engineer_data.json"
+  },
+  {
+    "file": "Marketing & Advertising  .pdf",
+    "file_hash": "6a220dd4",
+    "timestamp": "2025-08-16T18:03:13.757415",
+    "extraction_success": true,
+    "error_message": null,
+    "text_length": 1789,
+    "extraction_time_seconds": 30.0,
+    "memory_used_mb": 1.42,
+    "sections_extracted": 9,
+    "section_details": {
+      "hero": 1,
+      "contact": 1,
+      "summary": 1,
+      "experience": 2,
+      "education": 1,
+      "skills": 1,
+      "achievements": 1,
+      "certifications": 1,
+      "courses": 0
+    },
+    "confidence_score": 0.84,
+    "total_sections_possible": 17,
+    "data_file": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/tests/refactoring/baseline_results/Marketing & Advertising  _data.json"
+  },
+  {
+    "file": "comprehensive_all_components_cv.txt",
+    "file_hash": "8fefb037",
+    "timestamp": "2025-08-16T18:03:43.237804",
+    "extraction_success": true,
+    "error_message": null,
+    "text_length": 2376,
+    "extraction_time_seconds": 29.48,
+    "memory_used_mb": 1.3,
+    "sections_extracted": 11,
+    "section_details": {
+      "hero": 1,
+      "contact": 1,
+      "summary": 1,
+      "experience": 2,
+      "education": 2,
+      "skills": 1,
+      "projects": 1,
+      "achievements": 1,
+      "certifications": 3,
+      "courses": 1,
+      "volunteer": 1
+    },
+    "confidence_score": 0.893,
+    "total_sections_possible": 17,
+    "data_file": "/Users/nitzan_shifris/Desktop/CV2WEB-V4/tests/refactoring/baseline_results/comprehensive_all_components_cv_data.json"
+  }
+]

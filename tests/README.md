@@ -67,7 +67,7 @@ Total files reduced: 46 → 26 (freed ~236KB)
 
 Tests focus on:
 - Claude 4 Opus ONLY for CV extraction (temperature 0.0)
-- Two active templates: v0_template_v1.5 and v0_template_v2.1
+- One active template: official_template_v1
 - FastAPI backend with SQLite database
 - Next.js frontend with isolated sandbox generation
 - Authentication with session management

@@ -128,6 +128,9 @@ async def register(request: RegisterRequest):
             message="Registration successful"
         )
         
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (don't convert to 500)
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

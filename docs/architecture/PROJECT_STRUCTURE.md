@@ -54,7 +54,7 @@ RESUME2WEBSITE-V4/
   - `smart_deduplicator.py` - Text deduplication
   - `keychain_manager.py` - Credential management
 - **`schemas/`** - Data models
-  - `unified_nullable.py` - CV data schema (18 sections)
+  - `unified_nullable.py` - CV data schema (15 sections)
 
 #### `/src/services` - Business Services
 - `claude_service.py` - Claude API integration
@@ -65,8 +65,7 @@ RESUME2WEBSITE-V4/
 - `log_aggregation_service.py` - Log analysis
 
 #### `/src/templates` - Portfolio Templates
-- `v0_template_v1.5/` - Modern portfolio v1.5
-- `v0_template_v2.1/` - Modern portfolio v2.1
+- `official_template_v1/` - Official portfolio template
 - `resume2web_branded/` - Branded template
 - Each template contains:
   - `app/` - Next.js pages

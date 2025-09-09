@@ -29,7 +29,7 @@ from src.services.log_aggregation_service import log_aggregation_service
 from src.api.routes.auth import get_current_user_for_sse
 from src.services.rate_limiter import rate_limiter
 
-router = APIRouter(prefix="/workflows", tags=["workflows"])
+router = APIRouter(tags=["workflows"])
 
 
 @router.get("/test")

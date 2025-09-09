@@ -1,165 +1,215 @@
-# RESUME2WEBSITE - AI-Powered CV to Portfolio Generator
+# RESUME2WEBSITE V4 - AI-Powered CV to Portfolio Platform
 
-Transform your CV into a stunning portfolio website powered by AI and Aceternity UI components.
+Transform your CV into a stunning portfolio website using Claude 4 Opus AI and modern web technologies.
 
-## 🚀 Current State (Updated: 2025-07-03)
+## 🚀 Current State (Updated: 2025-01-08)
 
-### ✅ What's Working
-- **Complete End-to-End Pipeline**: Upload CV → Extract Data → Generate Portfolio
-- **AI-Powered Extraction**: 18 different CV sections extracted using Claude 4 Opus only
-- **Aceternity UI Integration**: 100+ real components with animations
-- **Smart Component Selection**: AI selects best components based on your profile
-- **Content-Aware Intelligence**: Analyzes content richness to optimize layouts
-- **Automated Generation**: One command from CV to deployed site
+### ✅ Production Features
+- **Complete Pipeline**: Upload CV → AI Extraction → Portfolio Preview → Optional Deployment
+- **AI-Powered**: Claude 4 Opus (temperature 0.0) for deterministic 15-section extraction
+- **Two-Stage Process**: Preview locally first, then optionally deploy to Vercel
+- **Authentication**: Email/password + Google OAuth + LinkedIn OAuth
+- **Payment Integration**: Stripe Embedded Checkout for premium features
+- **Anonymous Flow**: Try before signup with smart validation
+- **Portfolio Persistence**: Automatic restoration on login/refresh
+- **Real-time Updates**: SSE for live progress tracking
+- **Advanced Monitoring**: Metrics, workflows, and circuit breaker patterns
 
 ### 🎯 Quick Start
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+# Prerequisites
+node >= 18.0.0
+python >= 3.11
+pnpm >= 8.0.0
 
-# 2. Set up credentials (one-time)
-python scripts/setup_keychain.py
+# Setup
+git clone <repo> && cd Resume2Website-V4
+pnpm install                           # Frontend dependencies
+python3 -m venv venv                   # Create Python environment
+source venv/bin/activate               # Activate environment
+pip install -r requirements.txt       # Backend dependencies
+python3 src/utils/setup_keychain.py   # Setup API keys securely
 
-# 3. Generate portfolio from CV
-python3 test_automated_generation.py
+# Run Development
+# Terminal 1 - Backend
+source venv/bin/activate
+python3 -m uvicorn main:app --host 127.0.0.1 --port 2000
 
-# Or use smart content analysis (NEW!)
-python3 test_automated_generation_smart.py
+# Terminal 2 - Frontend  
+pnpm run dev
 
-# 4. Run generated portfolio
-cd test-automated-portfolio
-npm install
-npm run dev
-
-# Visit http://localhost:3000
+# Visit http://localhost:3019
 ```
 
 ## 🏗️ Architecture
 
 ```
-RESUME2WEBSITE-V4/
-├── api/                          # FastAPI backend
-│   ├── routes/
-│   │   ├── cv.py                # CV upload & processing
-│   │   └── portfolio.py         # Portfolio generation
-│   └── db.py                    # Database operations
-│
-├── backend/
-│   └── schemas/
-│       └── unified.py           # 17 CV section schemas
-│
-├── services/
-│   ├── llm/
-│   │   └── data_extractor.py   # AI-powered CV parsing
-│   ├── local/
-│   │   ├── text_extractor.py   # PDF/DOCX/Image extraction
-│   │   └── smart_deduplicator.py # Intelligent deduplication
-│   └── portfolio/
-│       ├── component_selector.py # Smart component selection
-│       ├── portfolio_generator.py # Next.js code generation
-│       └── component_adapter.py  # Data transformation
-│
-├── aceternity-components-library/ # 100+ UI components
-└── generated-portfolio/          # Your generated site
+Resume2Website-V4/
+├── src/                          # Backend (FastAPI)
+│   ├── api/                     # API routes
+│   │   ├── routes/             # Endpoints
+│   │   │   ├── cv.py          # CV operations
+│   │   │   ├── portfolio_generator.py # Portfolio creation
+│   │   │   ├── user_auth.py  # OAuth authentication
+│   │   │   ├── payments.py   # Stripe integration
+│   │   │   ├── metrics.py    # Real-time metrics
+│   │   │   ├── workflows.py  # Orchestration
+│   │   │   └── sse.py       # Server-sent events
+│   │   └── db.py             # SQLite operations
+│   ├── core/                  # Business logic
+│   │   ├── cv_extraction/    # AI extraction
+│   │   └── schemas/          # Data models
+│   ├── services/              # Business services
+│   └── templates/             # Portfolio templates
+│       └── official_template_v1/ # Active template
+├── user_web_example/            # Frontend (Next.js)
+│   ├── app/                   # App router
+│   ├── components/            # React components
+│   └── lib/                   # Utilities
+├── data/                        # Storage
+│   ├── uploads/              # User files
+│   └── resume2website.db     # SQLite database
+├── sandboxes/                   # Portfolio environments
+├── scripts/                     # Utility scripts
+│   ├── utilities/            # Database tools
+│   └── testing/              # Test scripts
+└── .claude/                     # Claude Code agents
+    └── agents/               # Custom agents
 ```
 
-## 🎨 Component Library
+## 🎨 Key Features
 
-### Supported Aceternity Components
-- **Hero Sections**: `background-gradient`, `hero-parallax`, `aurora-background`
-- **Text Effects**: `text-generate-effect`, `typewriter-effect`, `flip-words`
-- **Layouts**: `bento-grid`, `timeline`, `sticky-scroll-reveal`
-- **Cards**: `card-hover-effect`, `3d-card`, `infinite-moving-cards`
-- **Navigation**: `floating-dock`, `floating-navbar`
-- **Showcases**: `animated-testimonials`, `parallax-scroll`
+### CV Processing
+- **15 Sections**: Hero, Contact, Summary, Experience, Education, Skills, Projects, Achievements, Certifications, Languages, Volunteer, Publications, Speaking, Courses, Hobbies
+- **Smart Validation**: Resume Gate with image-specific rules
+- **File Support**: PDF, DOCX, TXT, MD, Images (JPG, PNG)
+- **Caching**: Hash-based deduplication, confidence scoring (>0.75)
 
-### Smart Selection Based on Profile
-- **Business/Marketing** → Professional gradients, testimonials
-- **Technical/Developer** → Code blocks, terminal effects, grids
-- **Creative/Designer** → 3D cards, parallax, visual effects
-- **Academic/Researcher** → Timelines, publication lists
+### Portfolio Generation
+- **Two-Stage Process**:
+  1. **Preview**: Instant local preview (ports 4000-5000)
+  2. **Deploy**: Optional Vercel deployment after payment
+- **Template**: official_template_v1 with Tailwind CSS v4
+- **Customization**: Drag-drop sections, theme selection
+- **Resource Limits**: Max 20 portfolios, 512MB each, 24h cleanup
 
-### NEW: Content-Aware Intelligence
-- **Richness Analysis** → Evaluates content depth per section
-- **Dynamic Layouts** → Adapts to CV density (sparse/balanced/dense/rich)
-- **Smart Suggestions** → Optional merge recommendations for sparse sections
-- **No Hard Limits** → Uses all your content intelligently
+### Advanced Systems
+- **SSE**: 9 endpoints for real-time updates
+- **Workflows**: 9 endpoints for orchestration
+- **Metrics**: 8 endpoints for monitoring
+- **Circuit Breaker**: Exponential backoff (30s, 60s, 120s...)
+- **Rate Limiting**: User and endpoint specific
 
-## 📊 What We Extract
+## 📊 API Endpoints
 
-1. **Hero** - Name, title, professional summary
-2. **Experience** - Work history with achievements
-3. **Education** - Degrees, institutions, GPAs
-4. **Skills** - Technical & soft skills categorized
-5. **Projects** - Portfolio pieces with descriptions
-6. **Certifications** - Professional credentials
-7. **Achievements** - Awards, honors, recognitions
-8. **Publications** - Research papers, articles
-9. **Speaking** - Conferences, presentations
-10. **Languages** - Spoken/programming languages
-11. **Contact** - Email, phone, social links
-12. And 5 more sections...
+### Core Operations
+```
+POST /api/v1/upload                      # Upload CV (authenticated)
+POST /api/v1/upload-anonymous            # Upload CV (validation only)
+POST /api/v1/extract/{job_id}           # Extract CV data
+GET  /api/v1/cv/{job_id}                # Get CV data
+PUT  /api/v1/cv/{job_id}                # Update CV data
+POST /api/v1/portfolio/generate/{job_id} # Generate preview
+POST /api/v1/portfolio/deploy/{job_id}   # Deploy to Vercel
+```
+
+### Authentication
+```
+POST /api/v1/auth/register              # Register user
+POST /api/v1/auth/login                 # Login
+POST /api/v1/auth/google/callback       # Google OAuth
+POST /api/v1/auth/linkedin/callback     # LinkedIn OAuth
+```
+
+### Payments
+```
+POST /api/v1/payments/create-checkout-session # Create Stripe session
+GET  /api/v1/payments/session-status/{id}     # Check payment status
+```
 
 ## 🧪 Testing
 
 ```bash
-# Run comprehensive tests
-python tests/comprehensive_test.py
+# Backend tests
+pytest                                          # All tests
+python3 tests/unit/run_unit_tests.py          # Unit tests
+python3 tests/unit/test_cv_helpers_isolated.py # Isolated tests
 
-# Test specific CV
-python test_portfolio_generation.py
+# Frontend validation
+pnpm run typecheck                            # TypeScript check
+pnpm run build                               # Production build
 
-# Test edge cases
-python tests/test_mvp_edge_cases.py
+# CV extraction testing
+python3 scripts/testing/extract_cv_to_json.py <pdf_file>
+
+# Database utilities
+python3 scripts/utilities/clear_cv_cache.py        # Clear cache
+python3 scripts/utilities/force_reextraction.py    # Force re-extraction
 ```
 
 ## 📈 Performance
 
-- **Text Extraction**: <1 second for most PDFs
-- **AI Processing**: 10-15 seconds with parallel extraction
-- **Portfolio Generation**: <5 seconds
-- **Total Time**: ~20 seconds from CV to running site
+- **Text Extraction**: <1 second for PDFs
+- **AI Processing**: 60-90 seconds with Claude 4 Opus
+- **Portfolio Generation**: 30-60 seconds
+- **Preview Available**: Instantly on port 4000
+- **Deployment**: 2-3 minutes to Vercel
 
-## 🐛 Known Issues
+## 🛠️ Development
 
-### High Priority
-- [ ] JSON parsing errors in achievements (intermittent)
-- [ ] Import path issues with some components
-- [ ] FloatingDock icon handling
+### Commands
+```bash
+pnpm run dev        # Frontend dev server
+pnpm run typecheck  # TypeScript validation
+pnpm run build      # Production build
 
-### In Progress
-- [ ] Better error recovery
-- [ ] Component preview mode
-- [ ] Multiple theme support
+# Backend with auto-reload
+python3 main.py
 
-## 🚀 Roadmap
+# Clean build artifacts
+.claude/commands/cleanup.sh
+```
 
-### Phase 1 (Current)
-- ✅ Basic CV extraction
-- ✅ Aceternity component integration
-- ✅ Automated generation
-- 🔄 Error handling improvements
+### Environment Variables
+Create `.env` file:
+```
+# Required
+CV_CLAUDE_API_KEY=your_key_here
 
-### Phase 2
-- [ ] Real-time preview
-- [ ] Custom component mappings
-- [ ] Deploy to Vercel button
-- [ ] Multiple themes
+# Optional
+DATABASE_PATH=data/resume2website.db
+SESSION_EXPIRY_DAYS=7
+PORTFOLIO_START_PORT=4000
+PORTFOLIO_END_PORT=5000
+```
 
-### Phase 3
-- [ ] Visual CV builder
-- [ ] Component marketplace
-- [ ] Team portfolios
-- [ ] Analytics integration
+## 🚀 Deployment
+
+### Production Access
+- **Main Site**: https://resume2website.com
+- **Protected**: Requires secret key in URL
+- **Cookie Auth**: Valid for 7 days after first access
+
+### Portfolio Deployment
+- **Automatic**: Deploys to Vercel after payment
+- **Custom Domain**: `https://john-doe.portfolios.resume2website.com`
+- **Iframe Support**: Automatic configuration
 
 ## 🤝 Contributing
 
-Key areas needing help:
-1. **Component Mappings** - Add support for more Aceternity components
-2. **AI Prompts** - Improve extraction accuracy
-3. **Error Handling** - Make the system more robust
-4. **Documentation** - Help others use the tool
+### Priority Areas
+1. **Security**: OAuth improvements, rate limiting
+2. **Templates**: New portfolio designs
+3. **AI Accuracy**: Extraction prompt refinement
+4. **Testing**: Expand test coverage
+5. **Documentation**: API documentation
+
+### Development Guidelines
+- **TypeScript**: Arrow functions, absolute imports
+- **Python**: Type hints, PEP 8, absolute imports
+- **Git**: Feature branches only, never commit to main
+- **Testing**: Run typecheck before commits
 
 ## 📄 License
 
@@ -167,6 +217,13 @@ MIT License - see [LICENSE](LICENSE) file
 
 ## 🙏 Credits
 
-- [Aceternity UI](https://ui.aceternity.com/) - Amazing component library
-- Anthropic Claude 4 Opus - Deterministic CV extraction
-- Next.js & Vercel - Modern web framework
+- [Anthropic Claude 4 Opus](https://anthropic.com) - AI extraction engine
+- [Aceternity UI](https://ui.aceternity.com/) - Component library
+- [Magic UI](https://magicui.design/) - Animation components
+- [Next.js](https://nextjs.org/) - React framework
+- [FastAPI](https://fastapi.tiangolo.com/) - Python backend
+- [Vercel](https://vercel.com/) - Deployment platform
+
+---
+
+For detailed documentation, see `/CLAUDE.md` and `/docs/`

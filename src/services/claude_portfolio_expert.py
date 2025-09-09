@@ -1037,7 +1037,7 @@ module.exports = {{
         
         name = hero.get("fullName", "Professional Portfolio")
         title = hero.get("professionalTitle", "Professional")
-        summary = hero.get("summaryTagline", "")
+        summary = cv_data.get("summary", {}).get("summaryText", "")
         
         # Build experience section
         experience_section = ""

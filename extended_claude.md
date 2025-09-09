@@ -5,16 +5,21 @@
 RESUME2WEBSITE is an AI-powered CV to portfolio website converter that transforms resumes into stunning portfolio websites using FastAPI (Python) backend and Next.js (TypeScript) frontend in a pnpm monorepo.
 
 ### What RESUME2WEBSITE Does
+- **Validates** uploaded files with Resume Gate (stricter for images - requires multiple signals)
 - **Extracts** CV data using Claude 4 Opus for maximum determinism (temperature 0.0)
+- **Anonymous Flow**: Validate only → Animation → Signup → Then extract (saves Claude API costs)
 - **Supports** multiple file uploads including PNG/JPEG images processed together
 - **Generates** beautiful portfolio websites with 100+ animated components in isolated sandbox environments
 - **Preview Mode**: Instant local portfolio preview without deployment (ports 4000-5000)
-- **Provides** AI-powered portfolio expert guidance using Claude 4 for personalized recommendations
+- **Error Handling**: Smart Resume Gate errors with helpful suggestions and retry flow
+- **Caching**: High-confidence extractions (>0.75) cached for instant reuse
 - **Offers** full CV editing capabilities with CRUD operations and original file preservation
 - **Manages** multiple portfolio instances with real-time health monitoring and server management
 - **Authenticates** users with email/password, Google OAuth, and LinkedIn OAuth
 - **Payment Processing**: Integrated Stripe Embedded Checkout for premium features
 - **Portfolio Persistence**: Automatically restores user's last portfolio on login/refresh
+- **Custom Domains**: Automatic subdomain generation (john-doe.portfolios.resume2website.com)
+- **Iframe Support**: Portfolios automatically work in iframes without manual configuration
 - **Deploys** to Vercel with one click (after preview approval and payment)
 - **Supports** multiple file formats (PDF, DOCX, images, etc.)
 
@@ -49,18 +54,15 @@ pnpm >= 8.0.0          # Package manager for main project (NOT npm/yarn)
 git                    # Version control
 ```
 
-### One-Command Setup
+### Setup
 ```bash
-# Clone and setup everything
-git clone <repo-url> && cd RESUME2WEBSITE-V4
-./quickstart.sh
-
-# This script will:
-# 1. Install all dependencies
-# 2. Setup Python virtual environment
-# 3. Configure environment variables
-# 4. Initialize database
-# 5. Start development servers
+# Clone and setup
+git clone <repo-url> && cd Resume2Website-V4
+pnpm install                           # Frontend dependencies
+python3 -m venv venv                   # Create Python environment
+source venv/bin/activate               # Activate environment
+pip install -r requirements.txt       # Backend dependencies
+python3 src/utils/setup_keychain.py   # Setup API keys securely
 ```
 
 ## 📋 Development Workflow
@@ -68,7 +70,7 @@ git clone <repo-url> && cd RESUME2WEBSITE-V4
 ### Daily Development Commands
 ```bash
 # Frontend development
-pnpm run dev            # Start Next.js dev server (http://localhost:3000)
+pnpm run dev            # Start Next.js dev server (http://localhost:3019)
 pnpm run typecheck      # ⚠️ MUST run before committing
 pnpm run build          # Build for production
 
@@ -91,17 +93,18 @@ python3 main.py                              # Alternative start method
 ```bash
 # 1. MANDATORY: Check current branch first
 git branch --show-current  # Must NOT be 'main'
-# Note: Currently on 'main' branch (as of 2025-08-05)
+# Note: Currently on 'development-flow-rebuild2' branch (as of 2025-01-08)
 
 # 2. Create feature branch (REQUIRED)
 git checkout -b feature/description
 # Branch naming: feature/*, fix/*, docs/*, refactor/*
-# Current branch: nitzan-4
+# Current branch: development-flow-rebuild2
 
 # 3. Make changes and verify
-pnpm run typecheck      # No TypeScript errors
+cd user_web_example && npx tsc --noEmit  # No TypeScript errors
 pytest                  # Backend tests pass
 python3 tests/unit/run_unit_tests.py  # Unit tests pass
+python3 tests/unit/test_cv_helpers_isolated.py  # Isolated unit tests (no DB)
 
 # 4. Stage changes (ask user first)
 git add .               # ⚠️ Requires user approval
@@ -147,8 +150,7 @@ RESUME2WEBSITE-V4/
 │   ├── services/          # Business services
 │   │   └── claude_portfolio_expert.py # AI expert service
 │   └── templates/         # Portfolio templates with data adapters
-│       ├── v0_template_v1.5/ # Modern portfolio template v1.5
-│       └── v0_template_v2.1/ # Modern portfolio template v2.1
+│       └── official_template_v1/ # Active portfolio template
 │           └── lib/       # Data transformation adapters
 ├── user_web_example/      # Main frontend (Next.js)
 │   ├── app/              # App router pages
@@ -219,7 +221,7 @@ User Upload → File Validation → AI Extraction → CV Editor → Portfolio Ex
 # Backend configuration (config.py)
 BACKEND_PORT = 2000             # ⚠️ Not 8000!
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
-ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:3001"]
+ALLOWED_ORIGINS = ["http://localhost:3019", "http://localhost:3000", "http://localhost:3001"]
 
 # AI Models
 PRIMARY_MODEL = "claude-opus-4-20250514"  # Claude 4 Opus for deterministic extraction
@@ -377,10 +379,9 @@ export const adaptCVData = (cvData: CVData): TemplateData => {
 // 3. Register template in portfolio generator
 // src/api/routes/portfolio_generator.py
 AVAILABLE_TEMPLATES = {
-    "v0_template_v1.5": "src/templates/v0_template_v1.5",
-    "v0_template_v2.1": "src/templates/v0_template_v2.1"
+    "official_template_v1": "src/templates/official_template_v1"
 }
-DEFAULT_TEMPLATE = "v0_template_v1.5"
+DEFAULT_TEMPLATE = "official_template_v1"
 ```
 
 ### Adding a New API Endpoint
@@ -429,7 +430,7 @@ POST /api/v1/portfolio-expert/chat
 POST /api/v1/portfolio-expert/generate
 {
     "session_id": "session_123",
-    "template_id": "v0_template_v1.5",
+    "template_id": "official_template_v1",
     "customizations": {...}
 }
 ```
@@ -443,14 +444,14 @@ POST /api/v1/portfolio-expert/generate
 # 1. Create new portfolio (anonymous access allowed)
 POST /api/v1/portfolio/generate-anonymous/{job_id}
 {
-    "template": "v0_template_v1.5",  # or "v0_template_v2.1"
+    "template": "official_template_v1",  # Only active template
     "config": {...}
 }
 
 # 1b. Create new portfolio (authenticated)
 POST /api/v1/portfolio/generate/{job_id}
 {
-    "template": "v0_template_v1.5",
+    "template": "official_template_v1",
     "config": {...}
 }
 
@@ -689,6 +690,162 @@ vercel
 - **Vercel** - Deployment platform
 - **Pinecone** - Optional vector search
 
+## 🛡️ Resume Gate Validation System
+
+### Overview
+Resume Gate is our first line of defense against non-CV files, preventing unnecessary Claude API calls and improving user experience with helpful error messages.
+
+### How It Works
+```python
+# Located in: src/utils/cv_resume_gate.py
+def is_likely_resume(text: str, threshold: int = 60, max_chars: int = 5000, is_image: bool = False)
+```
+
+### Image-Specific Rules (Stricter)
+Images like screenshots are more likely to pass basic validation, so we apply stricter rules:
+- **Minimum 500 characters** after OCR (penalizes short text)
+- **Requires 3+ different signal types** (e.g., contact + experience + education)
+- **Must have BOTH contact AND experience** sections
+- **Higher threshold** for passing validation
+
+### Validation Signals Checked
+1. **Contact Information**: Email, phone, LinkedIn, location
+2. **Professional Keywords**: Experience, skills, education, responsibilities
+3. **Formatting Patterns**: Dates, bullet points, sections
+4. **CV-Specific Terms**: Resume, CV, curriculum vitae, portfolio
+5. **Length Requirements**: Sufficient content to be a real CV
+
+### Smart Error Messages
+When a file is rejected, users get:
+- **Specific reason** why it failed (e.g., "No contact information found")
+- **Helpful suggestion** to fix it (e.g., "Include email, phone, or LinkedIn")
+- **Confidence score** showing how close they were to passing
+
+### Frontend Integration
+```typescript
+// Error handling in user_web_example/lib/api.ts
+if (response.status === 400 && errorData.detail) {
+  const { error, score, reason, suggestion } = errorData.detail
+  const err = new Error(error || 'Please upload a valid resume/CV file')
+  err.isResumeGateError = true
+  err.resumeGateReason = reason
+  err.resumeGateSuggestion = suggestion
+  throw err
+}
+```
+
+## 🔄 Anonymous User Flow
+
+### The Problem We Solved
+- Anonymous users upload CVs to test the system
+- Previously: Immediate Claude 4 Opus extraction (expensive!)
+- Now: Validation only → Animation preview → Signup → Then extraction
+
+### Implementation Details
+
+#### Backend Changes
+```python
+# /api/v1/upload-anonymous - NOW only validates, NO extraction
+1. Validate file with Resume Gate
+2. Save file to disk
+3. Create DB record with status='uploaded'
+4. Return job_id
+5. NO Claude API call!
+
+# /api/v1/extract/{job_id} - Called AFTER signup
+1. Retrieve file using job_id
+2. Extract text
+3. Call Claude 4 Opus for extraction
+4. Calculate confidence score
+5. Cache if confidence > 0.75
+6. Return extracted CV data
+```
+
+#### Frontend Flow
+```typescript
+// user_web_example/app/page.tsx
+const handleAuthSuccess = async (data: any) => {
+  // Check if we have a job_id from anonymous upload
+  if (currentJobId) {
+    // Extract CV data using existing job_id
+    const extractResult = await extractCVData(currentJobId)
+    // Continue with portfolio generation
+  } else if (pendingFile) {
+    // No existing job_id, upload and process normally
+    processPortfolioGeneration(pendingFile)
+  }
+}
+```
+
+### Benefits
+- **Cost Savings**: No Claude API calls until user commits (signs up)
+- **Better UX**: Users see animation preview immediately
+- **No Double Work**: Reuses uploaded file after signup
+
+## 🔁 Retry Flow & Error Handling
+
+### Retry After Resume Gate Rejection
+1. User uploads invalid file → Resume Gate rejects it
+2. Error toast shows with specific reason and suggestion
+3. User clicks "Try Another File" → File picker opens
+4. New file validates → Animation starts immediately
+5. No double upload due to validation guards
+
+### Validation Guards
+```typescript
+// Prevent concurrent uploads
+const isValidatingRef = useRef(false)
+const currentFileFingerprint = useRef<string | null>(null)
+
+const getFileFingerprint = (file: File): string => {
+  return `${file.name}-${file.size}-${file.lastModified}`
+}
+
+// Check before processing
+if (isValidatingRef.current) {
+  console.log('Already validating, ignoring duplicate')
+  return
+}
+```
+
+### Error Toast Component
+```typescript
+// user_web_example/components/ui/error-toast.tsx
+<ErrorToast
+  isOpen={true}
+  title="Not a resume"
+  message={error.message}
+  suggestion={error.resumeGateSuggestion}
+  onRetryUpload={(file) => handleFileSelect(file)}
+/>
+```
+
+## 📊 Extraction Confidence & Caching
+
+### Confidence Scoring
+Each extraction gets a confidence score (0.0 - 1.0) based on:
+- Number of sections populated
+- Quality of extracted data
+- Presence of key fields (name, contact, experience)
+
+### Smart Caching
+```python
+# Only cache high-confidence extractions
+if confidence_score >= 0.75:
+  cache_extraction_result(
+    file_hash=file_hash,
+    cv_data=cv_data_json,
+    extraction_model='claude-4-opus',
+    temperature=0.0,
+    confidence_score=confidence_score
+  )
+```
+
+### Cache Benefits
+- **Instant results** for duplicate files
+- **Cost savings** on repeated uploads
+- **Better UX** with immediate feedback
+
 ### External Documentation
 - [FastAPI Docs](https://fastapi.tiangolo.com/)
 - [Next.js 15 Docs](https://nextjs.org/docs)
@@ -921,6 +1078,21 @@ GET /api/v1/auth/google/status
 
 ### API Endpoints for CV Management
 ```python
+# Upload CV - Authenticated users (validates + extracts immediately)
+POST /api/v1/upload
+Headers: X-Session-ID: <session_id>
+Body: multipart/form-data with 'file' field
+
+# Upload CV - Anonymous users (validates only, NO extraction)
+POST /api/v1/upload-anonymous
+Body: multipart/form-data with 'file' field
+Returns: job_id for later extraction
+
+# Extract CV data - Called after anonymous user signs up
+POST /api/v1/extract/{job_id}
+Headers: X-Session-ID: <session_id>
+Returns: CV data with confidence score
+
 # Get all user's CVs (requires auth)
 GET /api/v1/my-cvs
 Headers: X-Session-ID: <session_id>
@@ -1162,7 +1334,7 @@ uvicorn.run(app, reload_excludes=reload_excludes)
   - Consolidated .claude/commands/ directory (deleted old scripts/)
   - Cleaned tests/ folder (46 → 26 files)
 - **⚙️ Configuration Updates**: Made all hardcoded values environment-configurable for K8s readiness
-- **📦 Template Simplification**: Reduced from 9 templates to 2 active templates (v0_template_v1.5, v0_template_v2.1)
+- **📦 Template Simplification**: Single active template (official_template_v1) for consistency
 - **🔧 Performance Enhancements**: Added automatic portfolio cleanup, resource monitoring, and metrics tracking
 
 ### Kubernetes Preparation & Major Cleanup (2025-08-05)
@@ -1176,7 +1348,7 @@ uvicorn.run(app, reload_excludes=reload_excludes)
 
 ### Git Branch Consolidation & CV Extraction Fix (2025-08-05)
 - **🌿 Branch Consolidation**: Successfully merged all work from nitzan-development-2 into main branch
-- **🏷️ Backup Tags Created**: Created backup tags for safety: backup-main-2025-08-05, backup-nitzan-development-2-2025-08-05
+- **🏷️ Backup Tags**: Historical backups available in git tags
 - **🧹 Branch Cleanup**: Deleted local branches (nitzan, Nitzan-development, nitzan-development-2) after merging
 - **🐛 Fixed Double CV Extraction**: Fixed issue where CV was extracted twice for anonymous users - now properly checks database cache
 - **⚡ Performance Improvement**: Eliminated redundant Claude API calls, significantly reducing processing time and costs

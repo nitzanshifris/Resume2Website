@@ -1,0 +1,410 @@
+{
+  "job_id": "e1decd70-ff75-428e-89ea-37dda623d64e",
+  "cv_data": {
+    "hero": {
+      "fullName": "Lior Naaman",
+      "professionalTitle": "Self-Developer - AI Smart Warehousing Agents & Machine Learning Solutions",
+      "profilePhotoUrl": null
+    },
+    "contact": {
+      "email": "liorn17@gmail.com",
+      "phone": "+1-732-710-8742",
+      "location": {
+        "city": "Tel Aviv",
+        "state": null,
+        "country": "Israel"
+      },
+      "professionalLinks": null,
+      "availability": null,
+      "placeOfBirth": null,
+      "nationality": null,
+      "drivingLicense": null,
+      "dateOfBirth": null,
+      "maritalStatus": null,
+      "visaStatus": null
+    },
+    "summary": {
+      "summaryText": "- 13 years of education and expertise in Microchips and Electronics, holding a Practical Engineer certification from 'Singalovskey' Institute, Israel. - Expert in Machine Learning, currently developing AI-powered Smart Warehousing Agents for management systems and customer service optimization. - Over 7 years of hands-on experience with Logiwa WMS, leading full warehouse implementations, API integrations, and automation. - Expert in API integration and all major marketplaces, including Amazon, Walmart, Shopify, TikTok, and AliExpress. - Proven track record in e-commerce logistics, warehouse operations, and reverse logistics. - Expertise in import/export logistics, IT systems, and supply chain optimization.",
+      "additionalData": {
+        "yearsOfExperience": 13,
+        "keySpecializations": [
+          "Microchips and Electronics",
+          "Machine Learning",
+          "AI-powered Smart Warehousing Agents",
+          "Logiwa WMS",
+          "API integration",
+          "Amazon",
+          "Walmart",
+          "Shopify",
+          "TikTok",
+          "AliExpress",
+          "e-commerce logistics",
+          "warehouse operations",
+          "reverse logistics",
+          "import/export logistics",
+          "IT systems",
+          "supply chain optimization"
+        ],
+        "careerHighlights": [
+          "13 years of education and expertise in Microchips and Electronics",
+          "Practical Engineer certification from 'Singalovskey' Institute, Israel",
+          "developing AI-powered Smart Warehousing Agents for management systems and customer service optimization",
+          "Over 7 years of hands-on experience with Logiwa WMS",
+          "leading full warehouse implementations, API integrations, and automation"
+        ]
+      }
+    },
+    "experience": {
+      "sectionTitle": "Professional Experience",
+      "experienceItems": [
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed",
+          "jobTitle": "Self-Developer - AI Smart Warehousing Agents & Machine Learning Solutions",
+          "companyName": null,
+          "location": {
+            "city": "Tel Aviv",
+            "state": null,
+            "country": "Israel"
+          },
+          "dateRange": {
+            "startDate": "Sep 2024",
+            "endDate": "Present",
+            "isCurrent": true
+          },
+          "duration": "11 months",
+          "responsibilitiesAndAchievements": [
+            "Developing AI-driven 'Smart Warehousing Agents' for management systems, warehouse automation, and customer service optimization.",
+            "Specializing in Machine Learning for intelligent decision-making, automated workflows, and predictive analytics in warehouse operations.",
+            "Integrating AI agents with WMS platforms, CRM systems, and marketplace integrations such as Amazon, Walmart, Shopify, and TikTok."
+          ],
+          "technologiesUsed": null,
+          "employmentType": null,
+          "remoteWork": null,
+          "companyLogo": null,
+          "additionalData": null
+        },
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed",
+          "jobTitle": "Co-Founder & Chief Operating Officer",
+          "companyName": "Pure NJ Logistics LLC",
+          "location": {
+            "city": "New Jersey",
+            "state": "New Jersey",
+            "country": "United States"
+          },
+          "dateRange": {
+            "startDate": "2021",
+            "endDate": "2024",
+            "isCurrent": false
+          },
+          "duration": "3 years",
+          "responsibilitiesAndAchievements": [
+            "Led strategic operations for a 3PL provider specializing in e-commerce fulfillment and returns.",
+            "Implemented and managed Logiwa WMS as the primary warehouse management system.",
+            "Specialized in API integration, developing connections between Logiwa WMS and Amazon, Walmart, Shopify, and other marketplaces."
+          ],
+          "technologiesUsed": [
+            "Logiwa WMS"
+          ],
+          "employmentType": null,
+          "remoteWork": null,
+          "companyLogo": null,
+          "additionalData": null
+        },
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed",
+          "jobTitle": "E-Commerce & Reverse Logistics Specialist",
+          "companyName": "iFulfillYou",
+          "location": {
+            "city": "North Bergen",
+            "state": null,
+            "country": "United States"
+          },
+          "dateRange": {
+            "startDate": "2020",
+            "endDate": "2021",
+            "isCurrent": false
+          },
+          "duration": "1 year",
+          "responsibilitiesAndAchievements": [
+            "Pioneered Amazon removal services, reverse logistics, and e-commerce fulfillment solutions.",
+            "Integrated Logiwa WMS as the core warehouse management system.",
+            "Led WMS implementation, overseeing integration, setup, and training of staff."
+          ],
+          "technologiesUsed": [
+            "Logiwa WMS"
+          ],
+          "employmentType": null,
+          "remoteWork": null,
+          "companyLogo": null,
+          "additionalData": null
+        },
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed",
+          "jobTitle": "Founder & General Manager",
+          "companyName": "Lantronics USA",
+          "location": {
+            "city": "New Jersey",
+            "state": "New Jersey",
+            "country": "United States"
+          },
+          "dateRange": {
+            "startDate": "2017",
+            "endDate": "2020",
+            "isCurrent": false
+          },
+          "duration": "3 years",
+          "responsibilitiesAndAchievements": [
+            "Established and managed a specialized logistics company focused on high-tech and electronic products for the Israeli industry.",
+            "Integrated Logiwa WMS and IoT tracking solutions to enhance supply chain visibility and efficiency.",
+            "Built strategic partnerships with Israeli defense and high-tech industries."
+          ],
+          "technologiesUsed": [
+            "Logiwa WMS"
+          ],
+          "employmentType": null,
+          "remoteWork": null,
+          "companyLogo": null,
+          "additionalData": null
+        },
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed",
+          "jobTitle": "IT & Logistics Expert",
+          "companyName": "EZ (Self-Imports for Individuals in the USA)",
+          "location": {
+            "city": "Tel Aviv",
+            "state": null,
+            "country": "Israel"
+          },
+          "dateRange": {
+            "startDate": "2015",
+            "endDate": "2017",
+            "isCurrent": false
+          },
+          "duration": "2 years",
+          "responsibilitiesAndAchievements": [
+            "Provided IT and logistics expertise for self-imports, focusing on personalized shipping solutions for U.S. customers.",
+            "Assisted in automating order fulfillment and shipment tracking systems."
+          ],
+          "technologiesUsed": null,
+          "employmentType": null,
+          "remoteWork": null,
+          "companyLogo": null,
+          "additionalData": null
+        },
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed",
+          "jobTitle": "Co-Founder & General Manager",
+          "companyName": "Lantronics Israel",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Israel"
+          },
+          "dateRange": {
+            "startDate": "1990",
+            "endDate": "2015",
+            "isCurrent": false
+          },
+          "duration": "25 years",
+          "responsibilitiesAndAchievements": [
+            "Co-founded and managed the company, overseeing strategy and operations for 25 years.",
+            "Expanded the company's portfolio to include network management, cybersecurity, and cloud-based services."
+          ],
+          "technologiesUsed": null,
+          "employmentType": null,
+          "remoteWork": null,
+          "companyLogo": null,
+          "additionalData": null
+        }
+      ]
+    },
+    "education": {
+      "sectionTitle": "Education",
+      "educationItems": [
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "timeline",
+          "textVariant": "detailed",
+          "institution": "Singalovskey Institute",
+          "degree": "Practical Engineer - Microchips & Electronics",
+          "dateRange": null,
+          "description": "13 years of education and expertise in Microchips and Electronics, holding a Practical Engineer certification from 'Singalovskey' Institute, Israel.. Location: Israel",
+          "gpa": null,
+          "honors": null,
+          "minors": null,
+          "relevantCoursework": null,
+          "exchangePrograms": null,
+          "fieldOfStudy": null,
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Israel"
+          },
+          "additionalData": null
+        }
+      ]
+    },
+    "skills": {
+      "sectionTitle": null,
+      "description": null,
+      "skillCategories": [
+        {
+          "categoryName": "Technical Expertise",
+          "skills": [
+            "Machine Learning",
+            "AI-powered Smart Warehousing Agents",
+            "API integration",
+            "Logiwa WMS",
+            "IoT tracking solutions"
+          ],
+          "description": null
+        },
+        {
+          "categoryName": "Marketplace Integrations",
+          "skills": [
+            "Amazon",
+            "Walmart",
+            "Shopify",
+            "TikTok",
+            "AliExpress"
+          ],
+          "description": null
+        },
+        {
+          "categoryName": "Professional Competencies",
+          "skills": [
+            "warehouse automation",
+            "customer service optimization",
+            "predictive analytics",
+            "e-commerce logistics",
+            "warehouse operations",
+            "reverse logistics",
+            "import/export logistics",
+            "supply chain optimization",
+            "network management",
+            "cybersecurity",
+            "cloud-based services"
+          ],
+          "description": null
+        }
+      ],
+      "ungroupedSkills": null,
+      "proficiencyIndicators": null
+    },
+    "projects": {
+      "sectionTitle": null,
+      "projectItems": [
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "text",
+          "textVariant": "detailed",
+          "title": "AI Smart Warehousing Agents & Machine Learning Solutions",
+          "description": "Developing AI-driven 'Smart Warehousing Agents' for management systems, warehouse automation, and customer service optimization. Specializing in Machine Learning for intelligent decision-making, automated workflows, and predictive analytics in warehouse operations. Integrating AI agents with WMS platforms, CRM systems, and marketplace integrations such as Amazon, Walmart, Shopify, and TikTok.",
+          "projectUrl": null,
+          "technologiesUsed": [
+            "Machine Learning",
+            "AI",
+            "WMS platforms",
+            "CRM systems"
+          ],
+          "additionalData": {
+            "role": "Self-Developer",
+            "dateRange": "Sep 2024 - Present"
+          }
+        }
+      ]
+    },
+    "achievements": {
+      "sectionTitle": null,
+      "achievements": []
+    },
+    "certifications": {
+      "sectionTitle": null,
+      "certificationItems": [
+        {
+          "videoUrl": null,
+          "githubUrl": null,
+          "imageUrl": null,
+          "linkUrl": null,
+          "hasLink": false,
+          "linkType": null,
+          "viewMode": "text",
+          "textVariant": "detailed",
+          "title": "Practical Engineer - Microchips & Electronics",
+          "description": "Issued by Singalovskey Institute, Israel. This professional certification demonstrates 13 years of education and expertise in Microchips and Electronics, validating advanced technical knowledge and practical engineering skills in electronic systems and microchip technology.",
+          "issuingOrganization": "Singalovskey Institute, Israel",
+          "issueDate": null,
+          "expirationDate": null,
+          "credentialId": null,
+          "verificationUrl": null
+        }
+      ]
+    },
+    "languages": {
+      "sectionTitle": null,
+      "languageItems": null
+    },
+    "courses": null,
+    "volunteer": null,
+    "publications": null,
+    "speaking": null,
+    "hobbies": null,
+    "unclassified_text": null
+  },
+  "status": "completed",
+  "filename": "Lior_Naaman.pdf",
+  "upload_date": "2025-08-30T23:30:21.475747"
+}

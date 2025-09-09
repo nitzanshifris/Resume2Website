@@ -1,0 +1,186 @@
+{
+  "hero": {
+    "fullName": "Lanford Jaden",
+    "professionalTitle": "Software Engineer",
+    "summaryTagline": "Results-driven software engineer with a Master's degree in Computer Science and a strong passion for developing innovative software solutions. Experienced in collaborating with cross-functional teams and delivering high-quality code on time.",
+    "profilePhotoUrl": null
+  },
+  "contact": {
+    "email": "lanfordjaden@email.com",
+    "phone": "725-320-2997",
+    "location": null,
+    "professionalLinks": [
+      {
+        "platform": "LinkedIn",
+        "url": "https://www.linkedin.com/lanfordj"
+      }
+    ],
+    "availability": null
+  },
+  "summary": {
+    "summaryText": "Results-driven software engineer with a Master's degree in Computer Science and a strong passion for developing innovative software solutions. Experienced in collaborating with cross-functional teams and delivering high-quality code on time.",
+    "yearsOfExperience": null,
+    "keySpecializations": null,
+    "careerHighlights": null
+  },
+  "experience": {
+    "sectionTitle": "WORK EXPERIENCE",
+    "experienceItems": [
+      {
+        "jobTitle": "Software Engineer",
+        "companyName": "Tech Solutions Inc.",
+        "location": null,
+        "dateRange": {
+          "startDate": "2030",
+          "endDate": "PRESENT",
+          "isCurrent": true
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Collaborated with a team of software engineers to develop and maintain a scalable web application using Java and Spring framework."
+        ],
+        "technologiesUsed": [
+          "Java",
+          "Spring framework"
+        ],
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      },
+      {
+        "jobTitle": "Senior Graphic Designer",
+        "companyName": "TechNova Solutions",
+        "location": null,
+        "dateRange": {
+          "startDate": "2029",
+          "endDate": "2030",
+          "isCurrent": false
+        },
+        "remoteWork": null,
+        "responsibilitiesAndAchievements": [
+          "Designed and implemented new features based on client requirements, following Agile development methodologies.",
+          "And assisted in the deployment and maintenance of software releases, including troubleshooting and optimizing performance."
+        ],
+        "technologiesUsed": null,
+        "summary": null,
+        "employmentType": null,
+        "teamSize": null,
+        "reportingTo": null
+      }
+    ]
+  },
+  "education": {
+    "sectionTitle": "EDUCATION",
+    "educationItems": [
+      {
+        "degree": "Master of Science in Computer Science",
+        "fieldOfStudy": "Computer Science",
+        "institution": "Emerald University",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": "United States"
+        },
+        "dateRange": {
+          "startDate": "2028",
+          "endDate": "2030",
+          "isCurrent": null
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      },
+      {
+        "degree": "Bachelor of Science in Computer Science",
+        "fieldOfStudy": "Computer Science",
+        "institution": "Emerald University",
+        "location": {
+          "city": null,
+          "state": null,
+          "country": "United States"
+        },
+        "dateRange": {
+          "startDate": "2024",
+          "endDate": "2028",
+          "isCurrent": null
+        },
+        "gpa": null,
+        "honors": null,
+        "minors": null,
+        "relevantCoursework": null,
+        "exchangePrograms": null
+      }
+    ]
+  },
+  "skills": {
+    "sectionTitle": "SKILLS",
+    "skillCategories": [
+      {
+        "categoryName": "Proficient in programming languages",
+        "skills": [
+          "Java",
+          "C++",
+          "Python"
+        ]
+      },
+      {
+        "categoryName": "Web development frameworks",
+        "skills": [
+          "Spring",
+          "Hibernate"
+        ]
+      },
+      {
+        "categoryName": "Database management",
+        "skills": [
+          "SQL",
+          "MySQL"
+        ]
+      },
+      {
+        "categoryName": "Front-end technologies",
+        "skills": [
+          "HTML",
+          "CSS",
+          "JavaScript"
+        ]
+      }
+    ],
+    "ungroupedSkills": null,
+    "proficiencyIndicators": null
+  },
+  "projects": null,
+  "achievements": null,
+  "certifications": null,
+  "languages": {
+    "sectionTitle": "LANGUAGE",
+    "languageItems": [
+      {
+        "language": "English",
+        "proficiency": "Native",
+        "certification": null
+      },
+      {
+        "language": "Romanian",
+        "proficiency": "Native",
+        "certification": null
+      },
+      {
+        "language": "Spanish",
+        "proficiency": "Intermediate",
+        "certification": null
+      }
+    ]
+  },
+  "courses": null,
+  "volunteer": null,
+  "publications": null,
+  "speaking": null,
+  "patents": null,
+  "memberships": null,
+  "hobbies": null,
+  "unclassified_text": null
+}

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Upload, File, CheckCircle, X, ArrowLeft, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { uploadFile, uploadMultipleFiles, setSessionId } from "@/lib/api"
+import { useAuthContext } from "@/contexts/AuthContext"
 
 interface UploadResumeProps {
   isOpen: boolean
@@ -14,11 +15,14 @@ interface UploadResumeProps {
   onBack: () => void
   onSuccess: (jobId: string) => void
   initialFile?: File | null
+  onAuthRequired?: () => void  // Callback to open auth modal
 }
 
-export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initialFile }: UploadResumeProps) {
+export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initialFile, onAuthRequired }: UploadResumeProps) {
+  const { isAuthenticated } = useAuthContext()
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isValidating, setIsValidating] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState<{file: string, status: 'uploading' | 'success' | 'error'}[]>([])
@@ -101,8 +105,8 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
     if (validFiles.length === 0) return
 
     setSelectedFiles(validFiles)
-    setIsUploading(true)
-    setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
+    setIsValidating(true) // Show validating state
+    setIsUploading(false) // Ensure upload animation is not shown yet
 
     // Check if multiple image files are being uploaded
     const imageExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.heif', '.tiff', '.tif', '.bmp']
@@ -113,14 +117,27 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
 
     try {
       if (isMultipleImages) {
+        // Multiple images require authentication
+        if (!isAuthenticated) {
+          setIsValidating(false)
+          if (onAuthRequired) {
+            onAuthRequired()
+          } else {
+            alert('Please sign in to upload multiple files')
+          }
+          return
+        }
+        
         // Use the multiple upload endpoint for multiple image files
         console.log('Uploading multiple image files as single CV')
         
-        // Show all files as uploading
-        setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
-        
-        // Upload all files together
+        // Start upload first, then show progress if successful
         const response = await uploadMultipleFiles(validFiles)
+        
+        // Only show progress after successful validation
+        setIsValidating(false)
+        setIsUploading(true)
+        setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'uploading' as const })))
         
         if (response.job_id) {
           // Store session ID if provided
@@ -153,6 +170,13 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
             // Upload file to backend
             const response = await uploadFile(file)
             
+            // Only show upload progress after successful validation (response.ok)
+            if (i === 0) {
+              setIsValidating(false)
+              setIsUploading(true)
+              setUploadProgress(validFiles.map(f => ({ file: f.name, status: 'uploading' as const })))
+            }
+            
             if (response.job_id) {
               // Store session ID if provided (only from first file)
               if (response.session_id && i === 0) {
@@ -170,8 +194,22 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
             } else {
               throw new Error('Upload failed - no job ID returned')
             }
-          } catch (error) {
+          } catch (error: any) {
             console.error(`Upload error for ${file.name}:`, error)
+            
+            // Stop validating immediately
+            setIsValidating(false)
+            setIsUploading(false)
+            
+            // Handle 401/403 authentication errors
+            if (error.message?.includes('401') || error.message?.includes('403') || error.message?.includes('Not authenticated')) {
+              if (onAuthRequired) {
+                onAuthRequired()
+              } else {
+                alert('Please sign in to continue')
+              }
+              return
+            }
             
             // Update progress for this file to show error
             setUploadProgress(prev => 
@@ -179,6 +217,13 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
                 p.file === file.name ? { ...p, status: 'error' as const } : p
               )
             )
+            
+            // Show detailed error message
+            const errorMessage = error instanceof Error ? error.message : `Failed to upload ${file.name}`
+            alert(errorMessage)
+            
+            // Stop further uploads on any error
+            break
           }
         }
 
@@ -195,12 +240,30 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
           }, 1000)
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error)
+      setIsValidating(false)
       setIsUploading(false)
+      
+      // Handle authentication errors
+      if (error.message?.includes('401') || error.message?.includes('403') || error.message?.includes('Not authenticated')) {
+        if (onAuthRequired) {
+          onAuthRequired()
+        } else {
+          alert('Please sign in to continue')
+        }
+        return
+      }
+      
       // Update all files as error
       setUploadProgress(validFiles.map(file => ({ file: file.name, status: 'error' as const })))
-      alert('Failed to upload files. Please try again.')
+      
+      // Show detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload files. Please try again.'
+      alert(errorMessage)
+    } finally {
+      // Always ensure we're not stuck in validating state
+      setIsValidating(false)
     }
   }
 
@@ -302,7 +365,13 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
                   />
 
                   <div className="text-center">
-                    {isUploading ? (
+                    {isValidating ? (
+                      <>
+                        <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mx-auto mb-4" />
+                        <p className="text-lg font-medium text-gray-700">Validating file...</p>
+                        <p className="text-sm text-gray-500 mt-2">Checking if your file is a valid resume</p>
+                      </>
+                    ) : isUploading ? (
                       <>
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
                         <p className="text-lg font-medium text-gray-700">Processing your files...</p>

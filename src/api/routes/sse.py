@@ -16,13 +16,13 @@ from src.api.routes.auth import get_current_user, get_current_user_for_sse, get_
 from src.services.rate_limiter import rate_limiter, apply_rate_limits
 from src.services.sse_service import sse_service, SSEMessage
 from src.core.local.text_extractor import text_extractor
-from src.core.cv_extraction.data_extractor import data_extractor
+from src.core.cv_extraction.data_extractor import create_data_extractor
 from src.core.schemas.unified_nullable import CVData
 from src.utils.sse_live_logger import SSELiveLogger, create_job_logger
 import config
 
 # Setup
-router = APIRouter(prefix="/sse", tags=["sse"])
+router = APIRouter(tags=["sse"])
 logger = logging.getLogger(__name__)
 
 # SSE Headers
@@ -232,7 +232,9 @@ async def extract_cv_streaming_upload(
             # Step 4: AI data extraction
             live_logger.step("Analyzing content with AI")
             
-            cv_data = await data_extractor.extract_cv_data(text)
+            # Create new extractor instance for this request
+            extractor = create_data_extractor()
+            cv_data = await extractor.extract_cv_data(text)
             
             live_logger.step_complete("AI analysis complete")
             

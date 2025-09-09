@@ -11,10 +11,15 @@ graph TD
     Auth -->|Credentials| Keys[🔑 Keychain Manager]
     
     %% CV Upload & Processing Flow
-    API -->|/upload-cv| Upload[📤 Upload Service]
-    Upload -->|Validate| Check{Valid File?}
-    Check -->|No| Error[❌ Error Response]
+    API -->|/upload or /upload-anonymous| Upload[📤 Upload Service]
+    Upload -->|Resume Gate| Check{Valid CV?}
+    Check -->|No| Error[❌ Error with Suggestions]
     Check -->|Yes| Store[💾 Store Original]
+    
+    %% Anonymous vs Authenticated Flow
+    Store -->|Anonymous| JobID[📝 Return Job ID Only]
+    JobID -->|After Signup| Extract2[/extract/{job_id}]
+    Store -->|Authenticated| Extract[📄 Text Extractor]
     
     %% Text Extraction
     Store -->|Extract| Extract[📄 Text Extractor]
@@ -25,8 +30,10 @@ graph TD
     
     %% AI Processing (Claude 4 Opus ONLY)
     Extract -->|Raw Text| Claude[🧠 Claude 4 Opus]
+    Extract2 -->|Raw Text| Claude
     Claude -->|Temperature 0.0| Extraction[🎯 Deterministic Extraction]
-    Extraction -->|18 Sections| CVData[📋 CV Data]
+    Extraction -->|15 Sections| CVData[📋 CV Data]
+    Extraction -->|Confidence Score| Cache{Cache if > 0.75}
     
     %% Advanced Classification
     CVData -->|Section Analysis| Classifier[🔍 Advanced Classifier]
@@ -71,9 +78,12 @@ graph TD
 ## ✅ What Works Now
 
 ### 1. Complete End-to-End Pipeline
-- **CV Upload** → **AI Extraction** → **CV Editor** → **Portfolio Generation** → **Live Preview**
+- **Anonymous Flow**: Upload → Validate Only → Animation → Signup → Extract → Portfolio
+- **Authenticated Flow**: Upload → Validate → Extract → CV Editor → Portfolio Generation → Live Preview
+- **Resume Gate**: Smart validation with image-specific rules and helpful error messages
+- **Caching**: High-confidence extractions (>0.75) cached for instant reuse
 - File preservation with secure download
-- Real-time progress tracking (simulated for better UX)
+- Real-time progress tracking with actual backend status
 
 ### 2. Text Extraction & Processing
 - **Supported formats**: PDF, DOCX, TXT, PNG, JPG, JPEG
@@ -84,7 +94,7 @@ graph TD
 
 ### 3. AI-Powered Data Extraction
 - **Claude 4 Opus ONLY** with temperature 0.0 for deterministic results
-- **18 CV sections** extracted:
+- **15 CV sections** extracted:
   - Hero (name, title, summary)
   - Contact (email, phone, location)
   - Experience (work history with achievements)
@@ -95,13 +105,11 @@ graph TD
   - Achievements & Awards
   - Publications & Research
   - Speaking Engagements
-  - Patents
   - Professional Memberships
   - Volunteer Experience
   - Languages
   - Courses & Training
   - Hobbies & Interests
-  - References
   - Social Links
 - **Advanced classification**: Prevents cross-section contamination
 - **Confidence scoring**: Caches high-confidence extractions (≥75%)

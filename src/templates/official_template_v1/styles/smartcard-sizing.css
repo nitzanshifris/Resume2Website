@@ -1,0 +1,417 @@
+/* SmartCard Universal Sizing System CSS Classes */
+/* Generated for Phase 2 implementation */
+
+/* ============================================================================
+   CARD WIDTH SIZES (Horizontal Layouts)
+   ============================================================================ */
+
+/* Large Cards - Showcase sections (Projects) */
+.smartcard-large {
+  flex-basis: 100%;
+}
+
+@media (min-width: 768px) {
+  .smartcard-large {
+    flex-basis: 60%; /* 3/5 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .smartcard-large {
+    flex-basis: 40%; /* 2/5 */
+  }
+}
+
+/* Medium Cards - Professional sections */
+.smartcard-medium {
+  flex-basis: 100%;
+}
+
+@media (min-width: 768px) {
+  .smartcard-medium {
+    flex-basis: 50%; /* 1/2 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .smartcard-medium {
+    flex-basis: 33.333333%; /* 1/3 */
+  }
+}
+
+/* Small Cards - Supporting sections with many items */
+.smartcard-small {
+  flex-basis: 100%;
+}
+
+@media (min-width: 768px) {
+  .smartcard-small {
+    flex-basis: 33.333333%; /* 1/3 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .smartcard-small {
+    flex-basis: 25%; /* 1/4 */
+  }
+}
+
+/* Mini Cards - High quantity sections (20+ items) */
+.smartcard-mini {
+  flex-basis: 100%;
+}
+
+@media (min-width: 768px) {
+  .smartcard-mini {
+    flex-basis: 20%; /* 1/5 - More distinct from Small */
+  }
+}
+
+@media (min-width: 1024px) {
+  .smartcard-mini {
+    flex-basis: 20%; /* 1/5 */
+  }
+}
+
+/* Micro Cards - For very tall shapes on mobile */
+.smartcard-micro {
+  flex-basis: 40%; /* Reasonable size on mobile */
+}
+
+@media (min-width: 768px) {
+  .smartcard-micro {
+    flex-basis: 18%; /* Still small but not tiny - prevents huge gaps */
+  }
+}
+
+@media (min-width: 1024px) {
+  .smartcard-micro {
+    flex-basis: 16%; /* Small but usable for desktop */
+  }
+}
+
+/* ============================================================================
+   CARD SHAPE/ASPECT RATIOS
+   ============================================================================ */
+
+
+/* Very Tall - 9:16 Ultra-tall portrait (inverse of very-wide 21:9) */
+.smartcard-shape-very-tall {
+  aspect-ratio: 9/16 !important; /* Force aspect ratio to never be overridden */
+  max-height: 80vh; /* Prevent extremely tall cards that go off-screen */
+  width: auto !important; /* Let width be determined by aspect ratio */
+  max-width: 400px; /* Reasonable max width for any container */
+  margin: 0 auto; /* Center in container if smaller than container width */
+}
+
+/* Tall - 11:16 Tall portrait (inverse of wide 16:11) */
+.smartcard-shape-tall {
+  aspect-ratio: 11/16 !important;
+  width: auto !important;
+  margin: 0 auto;
+}
+
+/* Square - 1:1 */
+.smartcard-shape-square {
+  aspect-ratio: 1/1 !important;
+  width: auto !important;
+  margin: 0 auto;
+}
+
+/* Wide - 16:11 YouTube/video format with header (merged from YouTube and old Wide) */
+.smartcard-shape-wide {
+  aspect-ratio: 16/11 !important;
+  width: auto !important;
+  margin: 0 auto;
+}
+
+/* Very Wide - 21:9 Ultra-wide cinematic format */
+.smartcard-shape-very-wide {
+  aspect-ratio: 21/9 !important;
+  width: auto !important;
+  margin: 0 auto;
+}
+
+/* ============================================================================
+   CARD HEIGHT SIZES (Vertical Layouts Only)
+   ============================================================================ */
+
+/* Compact Height - Save vertical space */
+.smartcard-height-compact {
+  min-height: 120px;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Standard Height - Current default */
+.smartcard-height-standard {
+  min-height: 180px;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+/* Tall Height - Showcase with more detail */
+.smartcard-height-tall {
+  min-height: 240px;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+/* Auto-sizing active indicator */
+.smartcard-auto-sizing {
+  position: relative;
+}
+
+.smartcard-auto-sizing::before {
+  content: "AUTO";
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: rgb(59, 130, 246);
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.smartcard-auto-sizing:hover::before {
+  opacity: 1;
+}
+
+/* Manual sizing active indicator */
+.smartcard-manual-sizing {
+  position: relative;
+}
+
+.smartcard-manual-sizing::before {
+  content: "MANUAL";
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: rgba(168, 85, 247, 0.1);
+  color: rgb(168, 85, 247);
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.smartcard-manual-sizing:hover::before {
+  opacity: 1;
+}
+
+/* Hide debug indicators completely - only for development debugging */
+.smartcard-manual-sizing::before,
+.smartcard-auto-sizing::before {
+  display: none !important;
+}
+
+
+/* ============================================================================
+   RESPONSIVE BEHAVIOR HELPERS
+   ============================================================================ */
+
+/* Ensure minimum card width on mobile */
+.smartcard-container {
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+/* Allow cards to grow freely on ultra-wide screens for timeline sections */
+.smartcard-max-width {
+  /* Removed max-width constraint to allow full growth */
+}
+
+/* Smooth transitions for size changes */
+.smartcard-transition {
+  transition: flex-basis 0.3s ease, aspect-ratio 0.3s ease, min-height 0.3s ease;
+}
+
+/* Fix for single very-tall cards that might be too extreme */
+.smartcard-shape-very-tall[style*="flex-basis: 100%"] {
+  max-width: 400px; /* Limit width when at full flex-basis */
+  margin: 0 auto; /* Center the card */
+}
+
+/* Mobile-specific fix for very-tall shapes */
+@media (max-width: 767px) {
+  .smartcard-shape-very-tall {
+    max-height: 70vh; /* More restrictive on mobile */
+    max-width: 280px; /* Narrower on mobile */
+  }
+}
+
+/* ============================================================================
+   SPECIFIC COMBINATIONS FOR TESTING
+   ============================================================================ */
+
+/* Large + Very Tall (Showcase portrait content) */
+.smartcard-large.smartcard-shape-very-tall {
+  /* Large width with 9:16 ultra-tall portrait ratio */
+}
+
+/* Large + Very Wide (Showcase media content) */
+.smartcard-large.smartcard-shape-very-wide {
+  /* Large width with 21:9 ultra-wide cinematic ratio */
+}
+
+/* Medium + Square (Balanced professional content) */
+.smartcard-medium.smartcard-shape-square {
+  /* Medium width with 1:1 square ratio */
+}
+
+/* Small + Wide (Efficient display for many items) */
+.smartcard-small.smartcard-shape-wide {
+  /* Small width with 16:11 wide ratio */
+}
+
+/* Mini + Square (Compact display for high quantities) */
+.smartcard-mini.smartcard-shape-square {
+  /* Mini width with 1:1 square ratio */
+}
+
+/* ============================================================================
+   TIMELINE CONTENT-OPTIMIZED SHAPES (Education V2)
+   ============================================================================ */
+
+/* Timeline shapes are optimized for above-average content (institution + degree + description + 2-4 tags + optional image) */
+/* While handling worst-case scenarios (long descriptions + 8+ tags) */
+
+.timeline-shape-wide {
+  width: 520px;
+  height: 300px;
+  /* Fixed dimensions - all cards same size */
+}
+
+.timeline-shape-very-wide {
+  width: 680px;
+  height: 280px;
+  /* Fixed dimensions - all cards same size */
+}
+
+/* Mobile responsive scaling for timeline shapes */
+@media (max-width: 767px) {
+  .timeline-shape-wide {
+    width: 350px;
+    height: 240px;
+  }
+  
+  .timeline-shape-very-wide {
+    width: 380px;
+    height: 220px;
+  }
+}
+
+/* Tablet responsive scaling */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .timeline-shape-wide {
+    width: 460px;
+    height: 270px;
+  }
+  
+  .timeline-shape-very-wide {
+    width: 580px;
+    height: 250px;
+  }
+}
+
+/* Timeline shape transitions and positioning */
+.timeline-shape-wide,
+.timeline-shape-very-wide {
+  transition: width 0.3s ease, height 0.3s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  /* Ensure consistent positioning relative to timeline center */
+  margin: 0;
+  position: relative;
+  /* Prevent content overflow from affecting layout */
+  overflow: hidden;
+}
+
+/* Ensure timeline card content respects fixed dimensions */
+.timeline-shape-wide > *,
+.timeline-shape-very-wide > * {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  /* Enable scrolling if content exceeds fixed height */
+}
+
+/* ============================================================================
+   FALLBACKS AND BROWSER SUPPORT
+   ============================================================================ */
+
+/* Fallback for browsers that don't support aspect-ratio */
+@supports not (aspect-ratio: 1/1) {
+  
+  .smartcard-shape-very-tall {
+    height: 0;
+    padding-bottom: 177.778%; /* 16/9 * 100% */
+    position: relative;
+  }
+  
+  .smartcard-shape-tall {
+    height: 0;
+    padding-bottom: 145.455%; /* 16/11 * 100% */
+    position: relative;
+  }
+  
+  .smartcard-shape-square {
+    height: 0;
+    padding-bottom: 100%; /* 1/1 * 100% */
+    position: relative;
+  }
+  
+  .smartcard-shape-wide {
+    height: 0;
+    padding-bottom: 60%; /* 3/5 * 100% */
+    position: relative;
+  }
+  
+  .smartcard-shape-very-wide {
+    height: 0;
+    padding-bottom: 42.857%; /* 9/21 * 100% */
+    position: relative;
+  }
+  
+  .smartcard-shape-very-tall > *,
+  .smartcard-shape-tall > *,
+  .smartcard-shape-square > *,
+  .smartcard-shape-wide > *,
+  .smartcard-shape-very-wide > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Print styles */
+@media print {
+  .smartcard-large,
+  .smartcard-medium,
+  .smartcard-small,
+  .smartcard-mini {
+    flex-basis: 100% !important;
+    break-inside: avoid;
+  }
+  
+  .smartcard-auto-sizing::before,
+  .smartcard-manual-sizing::before {
+    display: none;
+  }
+}

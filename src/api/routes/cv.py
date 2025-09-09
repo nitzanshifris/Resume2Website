@@ -2,7 +2,7 @@
 CV processing endpoints - MVP version
 """
 # ========== IMPORTS ==========
-from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Form, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Form, Depends, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, HttpUrl, EmailStr
 from typing import Dict, Any, Optional, List
@@ -16,9 +16,12 @@ import os  # For environment variables
 import re  # For filename validation
 from dotenv import load_dotenv  # For loading .env file
 from passlib.context import CryptContext  # For secure password hashing
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-import config
+# Import config from project root
+try:
+    import config
+except ImportError:
+    # If running as a module, try relative import
+    from ... import config
 
 # ========== CONFIGURATION ==========
 # Load environment variables from .env file
@@ -47,6 +50,7 @@ from src.api.db import (
     create_cv_upload,
     get_user_cv_uploads,
     update_cv_upload_status,
+    transfer_cv_ownership,  # Add the new function
     # Caching functions
     get_cached_extraction,
     cache_extraction_result,
@@ -58,13 +62,22 @@ init_db()
 
 # ========== Service Imports ==========
 from src.core.local.text_extractor import text_extractor
-from src.core.cv_extraction.data_extractor import data_extractor
+from src.core.cv_extraction.data_extractor import create_data_extractor
 from src.core.schemas.unified_nullable import CVData
 from src.utils.enhanced_sse_logger import EnhancedSSELogger, WorkflowPhase
 from src.api.schemas import UserCreate, UserLogin, SessionResponse, UploadResponse, CleanupResponse, UserProfileUpdate
 
 # Import authentication dependency
 from src.api.routes.auth import get_current_user, get_current_user_optional
+
+# Import file validation
+from src.utils.file_validator import validate_uploaded_file, sanitize_filename, generate_safe_filename
+
+# Import Resume Gate validator
+from src.utils.cv_resume_gate import is_likely_resume, get_rejection_reason
+
+# Import settings for Resume Gate configuration
+from src.core.settings import settings
 
 # ========== PASSWORD HASHING ==========
 # Initialize password context with bcrypt
@@ -231,228 +244,22 @@ def get_mime_type(file_extension: str) -> str:
 
 
 # ========== AUTHENTICATION ENDPOINTS ==========
-
-@router.post("/register", response_model=SessionResponse)
-async def register(user_data: UserCreate) -> SessionResponse:
-    """
-    Register a new user.
-    
-    Args:
-        user_data: User registration data (email and password)
-    
-    Returns:
-        SessionResponse with session_id and user_id
-    """
-    # Check if email already exists and create user
-    try:
-        user_id = create_user(user_data.email, hash_password(user_data.password), user_data.name, user_data.phone)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    # Create session
-    session_id = create_session(user_id)
-    
-    logger.info(f"New user registered: {user_data.email}")
-    
-    return SessionResponse(
-        message="Registration successful",
-        session_id=session_id,
-        user_id=user_id,
-        user={
-            "id": user_id,
-            "email": user_data.email,
-            "name": user_data.name
-        }
-    )
-
-
-@router.post("/login", response_model=SessionResponse)
-async def login(user_data: UserLogin) -> SessionResponse:
-    """
-    Login existing user.
-    
-    Args:
-        user_data: User login credentials
-        
-    Returns:
-        SessionResponse with session_id for authenticated requests
-    """
-    # Find user by email
-    user_db = get_user_by_email(user_data.email)
-    
-    # Verify credentials
-    if not user_db or not verify_password(user_data.password, user_db["password_hash"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    
-    # Create new session
-    session_id = create_session(user_db["user_id"])
-    
-    logger.info(f"User logged in: {user_data.email}")
-    
-    return SessionResponse(
-        message="Login successful",
-        session_id=session_id,
-        user_id=user_db["user_id"],
-        user={
-            "id": user_db["user_id"],
-            "email": user_db["email"],
-            "name": user_db.get("name", "")
-        }
-    )
-
-
-@router.post("/auth/google/callback", response_model=SessionResponse)
-async def google_oauth_callback(request: Dict[str, Any]) -> SessionResponse:
-    """
-    Handle Google OAuth callback.
-    
-    Args:
-        request: Contains 'code' and 'redirect_uri' from Google OAuth
-        
-    Returns:
-        SessionResponse with session_id and user_id
-    """
-    try:
-        import requests
-        import json
-        
-        code = request.get('code')
-        redirect_uri = request.get('redirect_uri')
-        
-        if not code:
-            raise HTTPException(status_code=400, detail="Authorization code missing")
-        
-        # Exchange code for tokens
-        google_client_id = os.getenv('GOOGLE_CLIENT_ID')
-        google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
-        
-        if not google_client_id:
-            logger.error("GOOGLE_CLIENT_ID not configured.")
-            raise HTTPException(
-                status_code=500, 
-                detail="Google OAuth Client ID is missing. Please configure GOOGLE_CLIENT_ID environment variable."
-            )
-        
-        if not google_client_secret or google_client_secret == 'YOUR_GOOGLE_CLIENT_SECRET_HERE':
-            logger.error("GOOGLE_CLIENT_SECRET not configured properly.")
-            raise HTTPException(
-                status_code=500, 
-                detail="Google OAuth Client Secret is missing. Please get the secret from Google Cloud Console and update the GOOGLE_CLIENT_SECRET environment variable."
-            )
-        
-        # Get tokens from Google
-        token_response = requests.post('https://oauth2.googleapis.com/token', data={
-            'client_id': google_client_id,
-            'client_secret': google_client_secret,
-            'code': code,
-            'grant_type': 'authorization_code',
-            'redirect_uri': redirect_uri
-        })
-        
-        if not token_response.ok:
-            logger.error(f"Google token exchange failed: {token_response.text}")
-            raise HTTPException(status_code=400, detail="Failed to exchange authorization code")
-        
-        tokens = token_response.json()
-        access_token = tokens.get('access_token')
-        
-        if not access_token:
-            raise HTTPException(status_code=400, detail="No access token received")
-        
-        # Get user info from Google
-        user_response = requests.get(
-            'https://www.googleapis.com/oauth2/v2/userinfo',
-            headers={'Authorization': f'Bearer {access_token}'}
-        )
-        
-        if not user_response.ok:
-            logger.error(f"Google user info failed: {user_response.text}")
-            raise HTTPException(status_code=400, detail="Failed to get user information")
-        
-        user_info = user_response.json()
-        email = user_info.get('email')
-        name = user_info.get('name', '')
-        
-        if not email:
-            raise HTTPException(status_code=400, detail="Email not provided by Google")
-        
-        # Check if user exists
-        existing_user = get_user_by_email(email)
-        
-        if existing_user:
-            # User exists - log them in
-            user_id = existing_user["user_id"]
-            session_id = create_session(user_id)
-            
-            logger.info(f"Google OAuth login for existing user: {email}")
-            
-            return SessionResponse(
-                message="Welcome back! Logged in successfully with Google.",
-                session_id=session_id,
-                user_id=user_id,
-                user={
-                    "id": user_id,
-                    "email": email,
-                    "name": existing_user.get("name", name)
-                }
-            )
-        else:
-            # User doesn't exist - create new account
-            # For OAuth users, we'll generate a random password since they won't use it
-            import secrets
-            random_password = secrets.token_urlsafe(32)
-            
-            user_id = create_user(email, hash_password(random_password), name)
-            session_id = create_session(user_id)
-            
-            logger.info(f"Google OAuth registration for new user: {email}")
-            
-            return SessionResponse(
-                message="Welcome to RESUME2WEBSITE! Account created successfully with Google.",
-                session_id=session_id,
-                user_id=user_id,
-                user={
-                    "id": user_id,
-                    "email": email,
-                    "name": name
-                }
-            )
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Google OAuth callback error: {e}")
-        raise HTTPException(status_code=500, detail="Authentication failed. Please try again.")
-
-
-@router.get("/auth/google/status")
-async def google_oauth_status():
-    """
-    Check if Google OAuth is configured and available
-    """
-    google_client_id = os.getenv('GOOGLE_CLIENT_ID')
-    google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
-    
-    has_client_id = bool(google_client_id)
-    has_client_secret = bool(google_client_secret and google_client_secret != 'YOUR_GOOGLE_CLIENT_SECRET_HERE')
-    is_available = has_client_id and has_client_secret
-    
-    status_details = {
-        "available": is_available,
-        "client_id_configured": has_client_id,
-        "client_secret_configured": has_client_secret
-    }
-    
-    if is_available:
-        status_details["message"] = "Google OAuth is fully configured"
-    elif has_client_id and not has_client_secret:
-        status_details["message"] = "Google OAuth Client Secret missing. Please get it from Google Cloud Console."
-    elif not has_client_id:
-        status_details["message"] = "Google OAuth Client ID missing"
-    else:
-        status_details["message"] = "Google OAuth is not configured"
-    
-    return status_details
+# 
+# IMPORTANT: Authentication routes have been moved to user_auth.py to avoid conflicts.
+# 
+# The following routes are now available in user_auth.py:
+# - POST /api/v1/auth/register          -> User registration with email/password
+# - POST /api/v1/auth/login             -> User login with email/password
+# - POST /api/v1/auth/logout            -> User logout (session invalidation)
+# - GET  /api/v1/auth/me                -> Get current user info
+# - POST /api/v1/auth/google/callback   -> Google OAuth callback handler
+# - POST /api/v1/auth/linkedin/callback -> LinkedIn OAuth callback handler
+# - GET  /api/v1/auth/google/status     -> Check Google OAuth configuration
+# 
+# This separation ensures clean route organization and prevents duplicate endpoint conflicts.
+# CV processing functionality remains in this file, while all authentication logic
+# is centralized in the dedicated user_auth.py module.
+#
 
 
 # ========== MAIN CV PROCESSING ENDPOINT ==========
@@ -487,15 +294,83 @@ async def upload_cv(
     if not file_content:
         raise HTTPException(status_code=400, detail="File is empty")
 
-    # Check file size
-    if len(file_content) > config.MAX_UPLOAD_SIZE:
-        raise HTTPException(
-            status_code=413, 
-            detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024}MB"
-        )
+    # Validate file content with magic bytes checking
+    is_valid, error_msg, mime_type = validate_uploaded_file(
+        file_content,
+        file.filename,
+        max_size=config.MAX_UPLOAD_SIZE
+    )
+    
+    if not is_valid:
+        logger.warning(f"File validation failed for user {current_user_id}: {error_msg}")
+        raise HTTPException(status_code=400, detail=error_msg)
+    
+    logger.info(f"File validated successfully: {mime_type}")
+    
+    # Sanitize filename for security
+    safe_filename = sanitize_filename(file.filename)
     
     # === 2.5 GET FILE EXTENSION ===
     file_extension = get_file_extension(file.filename)
+    
+    # === 2.6 RESUME GATE VALIDATION ===
+    if settings.cv_strict_cv_validation:
+        # Extract text for Resume Gate validation
+        import tempfile
+        import os
+        try:
+            # Save to temporary file for text extraction
+            with tempfile.NamedTemporaryFile(suffix=file_extension, delete=False) as tmp_file:
+                tmp_file.write(file_content)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                # Extract text from the temporary file
+                extracted_text = text_extractor.extract_text(tmp_file_path)
+                # Limit text for performance
+                gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            finally:
+                # Clean up temporary file
+                if os.path.exists(tmp_file_path):
+                    os.unlink(tmp_file_path)
+            
+            # Check if this is an image file
+            is_image_file = mime_type and mime_type.startswith('image/')
+            
+            # Check if content is likely a resume
+            is_resume, score, signals = is_likely_resume(
+                gate_text, 
+                threshold=settings.cv_min_resume_score,
+                max_chars=settings.cv_gate_max_chars,
+                is_image=is_image_file
+            )
+            
+            if not is_resume:
+                reason = get_rejection_reason(signals)
+                from src.utils.cv_resume_gate import get_suggestion_for_rejection
+                suggestion = get_suggestion_for_rejection(signals)
+                error_response = {
+                    "error": "Please upload a valid resume/CV file",
+                    "score": score,
+                    "reason": reason,
+                    "suggestion": suggestion
+                }
+                
+                # Include signals in debug mode
+                if settings.debug:
+                    error_response["signals"] = signals
+                
+                logger.warning(f"Resume Gate rejected file from user {current_user_id}: score={score}, reason={reason}")
+                raise HTTPException(status_code=400, detail=error_response)
+            
+            logger.info(f"Resume Gate passed: score={score}")
+            
+        except HTTPException:
+            raise  # Re-raise validation failures
+        except Exception as e:
+            logger.error(f"Resume Gate validation error: {e}")
+            # Don't block on Resume Gate errors - continue processing
+            logger.warning("Resume Gate check failed, continuing with upload")
     
     # === 2.6 CALCULATE FILE HASH FOR CACHING ===
     file_hash = hashlib.sha256(file_content).hexdigest()
@@ -596,7 +471,9 @@ async def upload_cv(
         # Extract structured data from text using Claude 4 Opus
         logger.info(f"🤖 Extracting structured data using Claude 4 Opus from {len(text)} characters of text")
         try:
-            cv_data = await data_extractor.extract_cv_data(text)
+            # Create new extractor instance for this request
+            extractor = create_data_extractor()
+            cv_data = await extractor.extract_cv_data(text)
             
             if not cv_data:
                 logger.error("❌ CV data extraction returned None")
@@ -612,7 +489,7 @@ async def upload_cv(
             logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
             
             # Calculate confidence score
-            confidence_score = data_extractor.calculate_extraction_confidence(cv_data, text)
+            confidence_score = extractor.calculate_extraction_confidence(cv_data, text)
             logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
             
             # Save CV data to database
@@ -931,7 +808,7 @@ async def extract_cv_data_endpoint(
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT job_id, filename, file_type, status, cv_data, user_id FROM cv_uploads WHERE job_id = ?",
+                "SELECT job_id, filename, file_type, status, cv_data, user_id, file_hash FROM cv_uploads WHERE job_id = ?",
                 (job_id,)
             )
             result = cursor.fetchone()
@@ -946,16 +823,26 @@ async def extract_cv_data_endpoint(
             
             cv_upload = dict(result)
             
-            # Only verify ownership for authenticated users if they're trying to access someone else's CV
-            if current_user_id and not current_user_id.startswith("anonymous_"):
-                upload_user_id = cv_upload.get('user_id')
-                # Allow access if: user owns it, or CV has no owner, or it's the same session
-                if upload_user_id and upload_user_id != current_user_id:
-                    # Check if this is the same session that uploaded it
-                    # (frontend might have different session ID than what was stored)
-                    logger.warning(f"User {current_user_id} trying to access CV from user {upload_user_id}")
-                    # For now, allow it since the frontend has the job_id
-                    pass
+            # STRICT OWNERSHIP ENFORCEMENT
+            upload_user_id = cv_upload.get('user_id')
+            
+            # If the CV belongs to an anonymous user and current user is authenticated
+            if upload_user_id and upload_user_id.startswith("anonymous_"):
+                if current_user_id and not current_user_id.startswith("anonymous_"):
+                    # Authenticated user trying to extract anonymous CV - MUST claim first
+                    logger.error(f"❌ User {current_user_id} trying to extract anonymous CV {job_id} without claiming it first")
+                    raise HTTPException(
+                        status_code=403, 
+                        detail="Anonymous CV must be claimed before extraction. Call /api/v1/cv/claim first."
+                    )
+            
+            # If CV belongs to a specific user, only that user can extract
+            elif upload_user_id and upload_user_id != current_user_id:
+                logger.error(f"❌ User {current_user_id} trying to access CV owned by {upload_user_id}")
+                raise HTTPException(
+                    status_code=403,
+                    detail="You don't have permission to access this CV"
+                )
         finally:
             conn.close()
         
@@ -1030,151 +917,31 @@ async def extract_cv_data_endpoint(
             raise HTTPException(status_code=400, detail="No text content found in file")
         
         # Extract structured data using Claude 4 Opus
-        logger.info(f"🤖 Extracting CV data for job {job_id} using Claude 4 Opus")
-        cv_data = await data_extractor.extract_cv_data(text)
+        logger.info(f"🤖 Extracting CV data for job {job_id} using Claude 4 Opus from {len(text)} characters of text")
+        # Create new extractor instance for this request
+        extractor = create_data_extractor()
+        cv_data = await extractor.extract_cv_data(text)
         
-        if cv_data:
-            # Store extraction result
-            import json
-            cv_data_json = json.dumps(cv_data.model_dump_nullable())
-            update_cv_upload_status(job_id, 'completed', cv_data_json)
-            
-            return {
-                "status": "completed",
-                "cv_data": cv_data.model_dump_nullable()
-            }
-        else:
+        if not cv_data:
+            logger.error("❌ CV data extraction returned None")
             update_cv_upload_status(job_id, 'failed')
             raise HTTPException(status_code=500, detail="Failed to extract CV data")
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        import traceback
-        logger.error(f"CV extraction error for job {job_id}: {e}")
-        logger.error(f"Full traceback:\n{traceback.format_exc()}")
-        update_cv_upload_status(job_id, 'failed')
-        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
-
-@router.post("/upload-anonymous", response_model=UploadResponse)
-async def upload_cv_anonymous(
-    file: UploadFile = File(...),
-    current_user_id: Optional[str] = Depends(get_current_user_optional)
-) -> UploadResponse:
-    """
-    Upload and process a CV file anonymously (for demo purposes).
-    
-    Authentication is optional - allows anonymous users to try the service.
-    
-    Args:
-        file: The CV file (PDF, DOCX, TXT, images, etc.)
-        current_user_id: Optional user ID if authenticated
         
-    Returns:
-        Job details including job_id
-    """
-    # Generate anonymous user ID if not authenticated
-    if not current_user_id:
-        current_user_id = f"anonymous_{uuid.uuid4().hex[:12]}"
-        logger.info(f"Anonymous user uploading file: {file.filename}")
-    else:
-        logger.info(f"Authenticated user {current_user_id} uploading file: {file.filename}")
-    
-    # === FILE VALIDATION ===
-    # Add timeout protection
-    import asyncio
-    try:
-        file_content = await asyncio.wait_for(file.read(), timeout=config.UPLOAD_TIMEOUT)
-    except asyncio.TimeoutError:
-        raise HTTPException(status_code=408, detail="File upload timed out. Please check your connection and try again.")
-    
-    if not file_content:
-        raise HTTPException(status_code=400, detail="File is empty")
-    
-    # Check file size
-    if len(file_content) > config.MAX_UPLOAD_SIZE:
-        raise HTTPException(
-            status_code=413, 
-            detail=f"File too large. Maximum size is {config.MAX_UPLOAD_SIZE / 1024 / 1024:.0f}MB"
-        )
-    
-    # Validate filename first
-    if not validate_filename(file.filename):
-        raise HTTPException(status_code=400, detail="Invalid filename")
-    
-    # Check file type
-    file_extension = get_file_extension(file.filename)
-    if file_extension not in config.ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"File type {file_extension} not supported. Allowed types: {', '.join(config.ALLOWED_EXTENSIONS)}"
-        )
-    
-    # === CREATE JOB ID & SAVE FILE ===
-    job_id = str(uuid.uuid4())
-    
-    # Ensure user directory exists
-    user_dir = os.path.join(config.UPLOAD_DIR, current_user_id)
-    os.makedirs(user_dir, exist_ok=True)
-    
-    # Build file path
-    file_path = os.path.join(user_dir, f"{job_id}_{file.filename}")
-    
-    # Save file
-    with open(file_path, "wb") as f:
-        f.write(file_content)
-    
-    logger.info(f"File saved for job {job_id}: {file_path}")
-    
-    # Calculate file hash for caching
-    import hashlib
-    file_hash = hashlib.sha256(file_content).hexdigest()
-    
-    # === CREATE CV UPLOAD RECORD ===
-    create_cv_upload(
-        user_id=current_user_id,
-        job_id=job_id,
-        filename=file.filename,
-        file_type=file_extension,
-        file_hash=file_hash
-    )
-    
-    # === CV PROCESSING (SAME AS REGULAR UPLOAD) ===
-    try:
-        # Extract text from file
-        text = text_extractor.extract_text(file_path)
+        sections_count = len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])
+        logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
         
-        if not text or len(text.strip()) < 10:
-            # Update status to failed
-            update_cv_upload_status(job_id, 'failed')
-            raise HTTPException(status_code=400, detail="File appears to be empty or unreadable")
+        # Calculate confidence score
+        confidence_score = extractor.calculate_extraction_confidence(cv_data, text)
+        logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
         
-        # Extract structured data from text using Claude 4 Opus
-        logger.info(f"🤖 Extracting structured data using Claude 4 Opus from {len(text)} characters of text")
-        try:
-            cv_data = await data_extractor.extract_cv_data(text)
-            
-            if not cv_data:
-                logger.error("❌ CV data extraction returned None")
-                update_cv_upload_status(job_id, 'failed')
-                # Return success with job_id even if extraction failed
-                return UploadResponse(
-                    message="File uploaded but CV extraction failed. Please try again.",
-                    job_id=job_id
-                )
-            
-            sections_count = len([f for f in cv_data.model_dump_nullable() if cv_data.model_dump_nullable()[f]])
-            logger.info(f"✅ Successfully extracted CV data with {sections_count} sections")
-            
-            # Calculate confidence score
-            confidence_score = data_extractor.calculate_extraction_confidence(cv_data, text)
-            logger.info(f"📊 Extraction confidence score: {confidence_score:.2f}")
-            
-            # Save CV data to database
-            import json
-            cv_data_json = json.dumps(cv_data.model_dump_nullable())
-            update_cv_upload_status(job_id, 'completed', cv_data_json)
-            
+        # Save CV data to database
+        import json
+        cv_data_json = json.dumps(cv_data.model_dump_nullable())
+        update_cv_upload_status(job_id, 'completed', cv_data_json)
+        
+        # Get file hash for caching (if available)
+        if cv_upload.get('file_hash'):
+            file_hash = cv_upload['file_hash']
             # Cache extraction result if confidence is high enough
             if confidence_score >= 0.75:  # Only cache high-confidence extractions
                 cache_success = cache_extraction_result(
@@ -1190,26 +957,244 @@ async def upload_cv_anonymous(
                     logger.warning("❌ Failed to cache extraction result")
             else:
                 logger.info(f"⚠️ Low confidence score ({confidence_score:.2f}) - not caching result")
-            
-            logger.info(f"✅ Anonymous CV upload and extraction completed for job {job_id}")
-            
-        except Exception as e:
-            logger.error(f"Failed to extract CV data: {e}")
-            import traceback
-            logger.error(f"Full traceback:\n{traceback.format_exc()}")
-            # Mark as failed but still return job_id
-            update_cv_upload_status(job_id, 'failed')
-            return UploadResponse(
-                message="File uploaded but CV extraction failed. Please try again.",
-                job_id=job_id
-            )
         
+        logger.info(f"✅ CV extraction completed for job {job_id}")
+        
+        return {
+            "status": "completed",
+            "cv_data": cv_data.model_dump_nullable(),
+            "confidence_score": confidence_score
+        }
+            
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"CV processing failed for job {job_id}: {e}")
+        import traceback
+        logger.error(f"CV extraction error for job {job_id}: {e}")
+        logger.error(f"Full traceback:\n{traceback.format_exc()}")
         update_cv_upload_status(job_id, 'failed')
-        raise HTTPException(status_code=500, detail=f"CV processing failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
+
+@router.post("/upload-anonymous", response_model=UploadResponse)
+async def upload_cv_anonymous(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user_id: Optional[str] = Depends(get_current_user_optional)
+) -> UploadResponse:
+    """
+    Upload and process a CV file anonymously (for demo purposes).
+    
+    Authentication is optional - allows anonymous users to try the service.
+    Rate limited for anonymous users by IP address.
+    
+    Args:
+        request: FastAPI request object for IP extraction
+        file: The CV file (PDF, DOCX, TXT, images, etc.)
+        current_user_id: Optional user ID if authenticated
+        
+    Returns:
+        Job details including job_id
+    """
+    # Rate limiting for anonymous users
+    if not current_user_id:
+        # Get client IP address
+        client_ip = request.client.host
+        if request.headers.get("X-Forwarded-For"):
+            # Handle proxy/load balancer
+            client_ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+        
+        # Import rate limiter
+        from src.utils.upload_rate_limiter import upload_rate_limiter
+        
+        # Check rate limit
+        allowed, reason = upload_rate_limiter.check_upload_allowed(client_ip)
+        if not allowed:
+            logger.warning(f"Rate limit exceeded for IP {client_ip}: {reason}")
+            raise HTTPException(
+                status_code=429,
+                detail=reason,
+                headers={"Retry-After": "3600"}  # Suggest retry after 1 hour
+            )
+        
+        # Generate anonymous user ID
+        current_user_id = f"anonymous_{uuid.uuid4().hex[:12]}"
+        logger.info(f"Anonymous user from IP {client_ip} uploading file: {file.filename}")
+        
+        # Record the upload for rate limiting (will be done after successful validation)
+    else:
+        logger.info(f"Authenticated user {current_user_id} uploading file: {file.filename}")
+    
+    # === FILE VALIDATION ===
+    # Add timeout protection
+    import asyncio
+    try:
+        file_content = await asyncio.wait_for(file.read(), timeout=config.UPLOAD_TIMEOUT)
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=408, detail="File upload timed out. Please check your connection and try again.")
+    
+    if not file_content:
+        raise HTTPException(status_code=400, detail="File is empty")
+    
+    # Validate file content with magic bytes checking
+    is_valid, error_msg, mime_type = validate_uploaded_file(
+        file_content,
+        file.filename,
+        max_size=config.MAX_UPLOAD_SIZE
+    )
+    
+    if not is_valid:
+        logger.warning(f"File validation failed for anonymous user: {error_msg}")
+        raise HTTPException(status_code=400, detail=error_msg)
+    
+    logger.info(f"File validated successfully: {mime_type}")
+    
+    # Sanitize filename for security
+    safe_filename = sanitize_filename(file.filename)
+    
+    # Get file extension
+    file_extension = get_file_extension(safe_filename)
+    
+    # === RESUME GATE VALIDATION ===
+    if settings.cv_strict_cv_validation:
+        # Extract text for Resume Gate validation
+        import tempfile
+        import os
+        try:
+            # Save to temporary file for text extraction
+            with tempfile.NamedTemporaryFile(suffix=file_extension, delete=False) as tmp_file:
+                tmp_file.write(file_content)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                # Extract text from the temporary file
+                extracted_text = text_extractor.extract_text(tmp_file_path)
+                # Limit text for performance
+                gate_text = extracted_text[:settings.cv_gate_max_chars] if extracted_text else ""
+            finally:
+                # Clean up temporary file
+                if os.path.exists(tmp_file_path):
+                    os.unlink(tmp_file_path)
+            
+            # Check if this is an image file
+            is_image_file = mime_type and mime_type.startswith('image/')
+            
+            # Check if content is likely a resume
+            is_resume, score, signals = is_likely_resume(
+                gate_text, 
+                threshold=settings.cv_min_resume_score,
+                max_chars=settings.cv_gate_max_chars,
+                is_image=is_image_file
+            )
+            
+            if not is_resume:
+                reason = get_rejection_reason(signals)
+                from src.utils.cv_resume_gate import get_suggestion_for_rejection
+                suggestion = get_suggestion_for_rejection(signals)
+                error_response = {
+                    "error": "Please upload a valid resume/CV file",
+                    "score": score,
+                    "reason": reason,
+                    "suggestion": suggestion
+                }
+                
+                # Include signals in debug mode
+                if settings.debug:
+                    error_response["signals"] = signals
+                
+                logger.warning(f"Resume Gate rejected anonymous upload: score={score}, reason={reason}")
+                raise HTTPException(status_code=400, detail=error_response)
+            
+            logger.info(f"Resume Gate passed for anonymous: score={score}")
+            
+        except HTTPException:
+            raise  # Re-raise validation failures
+        except Exception as e:
+            logger.error(f"Resume Gate validation error: {e}")
+            # Don't block on Resume Gate errors - continue processing
+            logger.warning("Resume Gate check failed, continuing with upload")
+    
+    # === CALCULATE FILE HASH FOR CACHING ===
+    import hashlib
+    file_hash = hashlib.sha256(file_content).hexdigest()
+    logger.info(f"File hash calculated: {file_hash[:8]}...")
+    
+    # Check if we have cached extraction result
+    cached_result = get_cached_extraction(file_hash)
+    if cached_result:
+        logger.info(f"🎯 CACHE HIT! Using cached extraction for anonymous upload (hash {file_hash[:8]})")
+        
+        # Create new job_id but use cached CV data
+        job_id = str(uuid.uuid4())
+        upload_id = create_cv_upload(
+            user_id=current_user_id,
+            job_id=job_id,
+            filename=file.filename,
+            file_type=file_extension,
+            file_hash=file_hash
+        )
+        
+        # Update status with cached data
+        update_cv_upload_status(job_id, 'completed', cached_result['cv_data'])
+        
+        # Still save the file for display purposes
+        user_dir = os.path.join(config.UPLOAD_DIR, current_user_id)
+        os.makedirs(user_dir, exist_ok=True)
+        file_path = os.path.join(user_dir, f"{job_id}{file_extension}")
+        
+        with open(file_path, "wb") as f:
+            f.write(file_content)
+        logger.info(f"File saved for display: {file_path}")
+        
+        # Record successful upload for rate limiting (even cache hits count)
+        if current_user_id.startswith("anonymous_") and 'client_ip' in locals():
+            from src.utils.upload_rate_limiter import upload_rate_limiter
+            upload_rate_limiter.record_upload(client_ip)
+            logger.info(f"Recorded cached upload for IP {client_ip}")
+        
+        return UploadResponse(
+            message=f"CV processed instantly (cached result)",
+            job_id=job_id
+        )
+    
+    # === CREATE JOB ID & SAVE FILE (NO CACHE HIT) ===
+    job_id = str(uuid.uuid4())
+    
+    # Ensure user directory exists  
+    user_dir = os.path.join(config.UPLOAD_DIR, current_user_id)
+    os.makedirs(user_dir, exist_ok=True)
+    
+    # Build file path - use consistent naming scheme
+    file_path = os.path.join(user_dir, f"{job_id}{file_extension}")
+    
+    # Save file
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+    
+    logger.info(f"File saved for job {job_id}: {file_path}")
+    
+    # === CREATE CV UPLOAD RECORD ===
+    create_cv_upload(
+        user_id=current_user_id,
+        job_id=job_id,
+        filename=file.filename,
+        file_type=file_extension,
+        file_hash=file_hash
+    )
+    
+    # === ANONYMOUS UPLOAD COMPLETE - NO EXTRACTION ===
+    # The extraction will happen later via /extract/{job_id} after user signs up
+    logger.info(f"✅ Anonymous file uploaded and validated successfully for job {job_id}")
+    logger.info(f"📁 File saved, awaiting user signup for extraction")
+    
+    # Set status to 'uploaded' instead of 'completed' since no extraction happened yet
+    update_cv_upload_status(job_id, 'uploaded')
+    
+    # === RECORD SUCCESSFUL UPLOAD FOR RATE LIMITING ===
+    # Only record for anonymous users
+    if current_user_id.startswith("anonymous_") and 'client_ip' in locals():
+        from src.utils.upload_rate_limiter import upload_rate_limiter
+        upload_rate_limiter.record_upload(client_ip)
+        logger.info(f"Recorded successful upload for IP {client_ip}")
     
     # === RETURN SUCCESS ===
     return UploadResponse(
@@ -1244,12 +1229,6 @@ async def upload_multiple_files(
         if not file.filename:
             continue
             
-        # Get file extension
-        file_extension = get_file_extension(file.filename)
-        if file_extension not in config.ALLOWED_EXTENSIONS:
-            logger.warning(f"Skipping file {file.filename} - invalid type {file_extension}")
-            continue
-            
         # Read file content
         file_content = await file.read()
         file_size = len(file_content)
@@ -1262,11 +1241,27 @@ async def upload_multiple_files(
                 detail=f"Total file size exceeds limit of {config.MAX_UPLOAD_SIZE * 3 / 1024 / 1024:.1f}MB"
             )
         
+        # Validate file content with magic bytes checking
+        is_valid, error_msg, mime_type = validate_uploaded_file(
+            file_content,
+            file.filename,
+            max_size=config.MAX_UPLOAD_SIZE * 3  # Per-file limit within total
+        )
+        
+        if not is_valid:
+            logger.warning(f"Skipping file {file.filename} - validation failed: {error_msg}")
+            continue
+        
+        # Sanitize filename
+        safe_filename = sanitize_filename(file.filename)
+        file_extension = get_file_extension(safe_filename)
+        
         allowed_files.append({
-            'filename': file.filename,
+            'filename': safe_filename,
             'extension': file_extension,
             'content': file_content,
-            'size': file_size
+            'size': file_size,
+            'mime_type': mime_type
         })
         
         # Reset file position
@@ -1350,7 +1345,9 @@ async def process_multiple_files(job_id: str, file_paths: List[str], user_id: st
         
         # Extract CV data from combined text
         logger.info(f"Extracting CV data from combined text ({len(combined_text)} chars)")
-        cv_data = await data_extractor.extract_cv_data(combined_text)
+        # Create new extractor instance for this request
+        extractor = create_data_extractor()
+        cv_data = await extractor.extract_cv_data(combined_text)
         
         if cv_data:
             # Store extraction result
@@ -1609,3 +1606,64 @@ async def update_profile(
         "message": "Profile updated successfully",
         "profile": updated_profile
     }
+
+
+# ========== CV OWNERSHIP TRANSFER ==========
+
+class ClaimRequest(BaseModel):
+    """Request body for claiming an anonymous CV"""
+    job_id: str
+
+
+@router.post("/claim")
+async def claim_anonymous_cv(
+    request: ClaimRequest,
+    current_user_id: str = Depends(get_current_user)
+):
+    """
+    Transfer ownership of an anonymous CV to the authenticated user.
+    This is used when an anonymous user signs up and needs to claim their uploaded CV.
+    
+    Args:
+        request: Contains the job_id of the CV to claim
+        current_user_id: Authenticated user's ID (injected by dependency)
+        
+    Returns:
+        Success status and transfer details
+    """
+    logger.info(f"🔄 User {current_user_id} attempting to claim CV with job_id: {request.job_id}")
+    
+    # Transfer ownership in the database
+    result = transfer_cv_ownership(request.job_id, current_user_id)
+    
+    if result["success"]:
+        if result.get("already_owned"):
+            logger.info(f"✅ CV {request.job_id} already owned by user {current_user_id}")
+            return {
+                "status": "success",
+                "message": "CV already owned by user",
+                "job_id": request.job_id,
+                "already_owned": True
+            }
+        else:
+            logger.info(f"✅ Successfully transferred CV {request.job_id} from {result['previous_owner']} to {current_user_id}")
+            return {
+                "status": "success", 
+                "message": "CV ownership transferred successfully",
+                "job_id": request.job_id,
+                "previous_owner": result["previous_owner"],
+                "new_owner": current_user_id
+            }
+    else:
+        error_code = result.get("code", "UNKNOWN")
+        error_message = result.get("error", "Failed to transfer CV ownership")
+        
+        if error_code == "NOT_FOUND":
+            logger.warning(f"❌ CV not found for job_id: {request.job_id}")
+            raise HTTPException(status_code=404, detail="CV not found")
+        elif error_code == "FORBIDDEN":
+            logger.warning(f"❌ CV {request.job_id} owned by another user, cannot transfer to {current_user_id}")
+            raise HTTPException(status_code=403, detail="CV is owned by another user")
+        else:
+            logger.error(f"❌ Failed to transfer CV {request.job_id}: {error_message}")
+            raise HTTPException(status_code=500, detail=error_message)
