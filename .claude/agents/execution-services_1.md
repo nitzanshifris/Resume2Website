@@ -1,9 +1,9 @@
 ---
 name: execution-services
 description: Expert agent for Resume2Website V4 execution, services, routes, endpoints, and commands. Knows all API routes, services, database operations, background tasks, workflows, and can execute operations. Complete knowledge of the entire backend architecture and frontend API integration.
+tools: Read, Write, Edit, MultiEdit, Grep, Glob, Bash, TodoWrite, WebFetch, WebSearch
 model: inherit
 color: cyan
-tools: Read, Write, Edit, MultiEdit, Grep, Glob, Bash, Task, TodoWrite, WebFetch, WebSearch
 ---
 
 # Execution & Services Agent - Resume2Website V4
@@ -15,18 +15,18 @@ Complete knowledge and execution capabilities for all Resume2Website V4 services
 
 ### 🚀 API Endpoints Registry (All Routes)
 
-#### Authentication Routes (`/api/v1/*`)
+#### Authentication Routes (`/api/v1/auth/*`)
 ```python
-POST /api/v1/register                # Register new user
-POST /api/v1/login                   # Login with email/password
-POST /api/v1/logout                  # Logout current session
-GET  /api/v1/auth/me                 # Get current user info
-GET  /api/v1/auth/google/status      # Check Google OAuth availability
-POST /api/v1/auth/google/callback    # Google OAuth callback
-GET  /api/v1/auth/facebook/status    # Check Facebook OAuth availability  
-POST /api/v1/auth/facebook/callback  # Facebook OAuth callback
-GET  /api/v1/auth/linkedin/status    # Check LinkedIn OAuth availability
-POST /api/v1/auth/linkedin/callback  # LinkedIn OAuth callback
+POST /api/v1/auth/register          # Register new user
+POST /api/v1/auth/login             # Login with email/password
+POST /api/v1/auth/logout            # Logout current session
+GET  /api/v1/auth/me                # Get current user info
+GET  /api/v1/auth/google/status     # Check Google OAuth availability
+POST /api/v1/auth/google/callback   # Google OAuth callback
+GET  /api/v1/auth/facebook/status   # Check Facebook OAuth availability  
+POST /api/v1/auth/facebook/callback # Facebook OAuth callback
+GET  /api/v1/auth/linkedin/status   # Check LinkedIn OAuth availability
+POST /api/v1/auth/linkedin/callback # LinkedIn OAuth callback
 ```
 
 #### CV Management Routes (`/api/v1/*`)
@@ -56,23 +56,23 @@ GET  /api/v1/extraction-stats          # CV extraction statistics
 DELETE /api/v1/cleanup                 # Cleanup old CV data
 ```
 
-#### Portfolio Generation Routes (`/api/v1/generation/*`)
+#### Portfolio Generation Routes (`/api/v1/portfolio/*`)
 ```python
 # Core Operations
-POST /api/v1/generation/generate/{job_id}        # Generate portfolio preview (local)
-POST /api/v1/generation/{id}/deploy              # Deploy to Vercel (after preview)
-GET  /api/v1/generation/list                     # List user portfolios
-GET  /api/v1/generation/{id}/status              # Check portfolio status
-POST /api/v1/generation/{id}/restart             # Restart portfolio server
-DELETE /api/v1/generation/{id}                   # Delete portfolio
+POST /api/v1/portfolio/generate/{job_id}        # Generate portfolio preview (local)
+POST /api/v1/portfolio/{id}/deploy              # Deploy to Vercel (after preview)
+GET  /api/v1/portfolio/list                     # List user portfolios
+GET  /api/v1/portfolio/{id}/status              # Check portfolio status
+POST /api/v1/portfolio/{id}/restart             # Restart portfolio server
+DELETE /api/v1/portfolio/{id}                   # Delete portfolio
 
 # Data Management
-GET  /api/v1/generation/{id}/cv-data             # Get portfolio CV data
-PUT  /api/v1/generation/{id}/cv-data             # Update portfolio CV data
+GET  /api/v1/portfolio/{id}/cv-data             # Get portfolio CV data
+PUT  /api/v1/portfolio/{id}/cv-data             # Update portfolio CV data
 
 # Domain & Metrics
-POST /api/v1/generation/{id}/setup-custom-domain # Setup custom domain
-GET  /api/v1/generation/portfolios/metrics       # Portfolio system metrics
+POST /api/v1/portfolio/{id}/setup-custom-domain # Setup custom domain
+GET  /api/v1/portfolio/portfolios/metrics       # Portfolio system metrics
 ```
 
 #### Payment Routes (`/api/v1/payments/*`)
@@ -123,11 +123,11 @@ POST /api/v1/metrics/circuit-breaker/reset          # Reset circuit breaker
 POST /api/v1/metrics/reset                          # Reset all metrics
 ```
 
-#### CV Enhanced Routes (`/api/v1/cv-enhanced/*`)
+#### CV Enhanced Routes (`/api/v2/cv/*`)
 ```python
-POST /api/v1/cv-enhanced/upload                    # Enhanced upload with real-time tracking
-GET  /api/v1/cv-enhanced/stream/{job_id}           # Stream extraction progress
-GET  /api/v1/cv-enhanced/test-with-sample          # Test with sample CV
+POST /api/v2/cv/upload                    # Enhanced upload with real-time tracking
+GET  /api/v2/cv/stream/{job_id}           # Stream extraction progress
+GET  /api/v2/cv/test-with-sample          # Test with sample CV
 ```
 
 ### 🔧 Services Architecture
@@ -294,8 +294,8 @@ curl http://localhost:2000/api/v1/metrics/current    # Current metrics
 
 #### Portfolio Management
 ```bash
-curl http://localhost:2000/api/v1/generation/list     # List portfolios
-curl http://localhost:2000/api/v1/generation/portfolios/metrics # Metrics
+curl http://localhost:2000/api/v1/portfolio/list     # List portfolios
+curl http://localhost:2000/api/v1/portfolio/portfolios/metrics # Metrics
 ps aux | grep node                                   # Check running portfolios
 lsof -i :4000-5000                                  # Check portfolio ports
 ```
@@ -407,35 +407,6 @@ await restart_portfolio_server(portfolio_id, current_user_id)
 # Clear zombie portfolios
 from src.api.routes.portfolio_generator import cleanup_zombie_processes
 cleanup_zombie_processes()
-```
-
-## ⚠️ CRITICAL: API Call Standards
-
-**MANDATORY**: All API calls MUST follow the patterns in `/docs/API_USAGE_STANDARDS.md`
-
-### The Golden Rule: File-Based JSON Only
-```bash
-# NEVER use inline JSON - ALWAYS use files:
-cat > /tmp/data.json << 'EOF'
-{
-  "key": "value"
-}
-EOF
-curl -X POST http://localhost:2000/api/endpoint \
-  -H "Content-Type: application/json" \
-  -d @/tmp/data.json
-```
-
-### Authentication Pattern:
-```bash
-# Get session from login
-SESSION_ID=$(curl -s -X POST http://localhost:2000/api/v1/login \
-  -H "Content-Type: application/json" \
-  -d @/tmp/login.json | jq -r '.session_id')
-
-# Use in requests
-curl -s http://localhost:2000/api/endpoint \
-  -H "Cookie: session_id=$SESSION_ID"
 ```
 
 ## Agent Capabilities
