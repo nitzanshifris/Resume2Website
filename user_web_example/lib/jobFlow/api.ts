@@ -127,11 +127,30 @@ const parseError = async (response: Response): Promise<APIError> => {
   
   try {
     const data = await response.json()
-    error = {
-      status: response.status,
-      code: data.error || data.code || response.statusText,
-      message: data.message || data.detail || response.statusText,
-      details: data
+    
+    // Handle Resume Gate errors (detail is an object with error, reason, suggestion)
+    if (response.status === 400 && data.detail && typeof data.detail === 'object') {
+      const resumeGateError = data.detail
+      error = {
+        status: response.status,
+        code: 'RESUME_GATE_REJECTION',
+        message: resumeGateError.error || 'Please upload a valid resume/CV file',
+        details: {
+          ...data,
+          isResumeGateError: true,
+          resumeGateReason: resumeGateError.reason,
+          resumeGateSuggestion: resumeGateError.suggestion,
+          resumeGateScore: resumeGateError.score
+        }
+      }
+    } else {
+      // Standard error handling
+      error = {
+        status: response.status,
+        code: data.error || data.code || response.statusText,
+        message: data.message || data.detail || response.statusText,
+        details: data
+      }
     }
   } catch {
     error = {
@@ -318,7 +337,7 @@ export const generate = async (jobId: string): Promise<GenerateResponse> => {
       throw new Error('Authentication required to generate portfolio')
     }
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/generate/${jobId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/generation/generate/${jobId}`, {
       method: 'POST',
       credentials: 'include',
       headers: {

@@ -421,7 +421,7 @@ export async function listUserPortfolios(): Promise<any> {
     throw new Error('Not authenticated')
   }
   
-  return apiRequest('/api/v1/portfolio/list', {
+  return apiRequest('/api/v1/generation/list', {
     headers: {
       'X-Session-ID': sessionId
     }
@@ -434,7 +434,7 @@ export async function deletePortfolio(portfolioId: string): Promise<any> {
     throw new Error('Not authenticated')
   }
   
-  return apiRequest(`/api/v1/portfolio/${portfolioId}`, {
+  return apiRequest(`/api/v1/generation/${portfolioId}`, {
     method: 'DELETE',
     headers: {
       'X-Session-ID': sessionId

@@ -37,6 +37,7 @@ import {
   useJobFlow, 
   ProgressBarVertical, 
   FlowState,
+  FlowAction,
   getSemanticProgressForState,
   mapSemanticToVisual 
 } from "@/lib/jobFlow"
@@ -760,10 +761,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // Get progress from JobFlow context instead of local state
   const { 
     context: jobFlowContext,
+    dispatch: jobFlowDispatch,
     startPreviewFlow,
     startAuthenticatedFlow,
     startPostSignupFlow,
-    restorePortfolio
+    restorePortfolio,
+    setIsAuthenticated
   } = useJobFlow()
   const targetProgress = getSemanticProgressForState(jobFlowContext.state)
   const [animatedProgress, setAnimatedProgress] = useState(0)
@@ -832,7 +835,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       
       console.log('✅ Authenticated user detected, proceeding with restoration')
       
-      // Check URL params first (but still require auth)
+      // First try to restore portfolios from various sources
+      // Check URL params for portfolio restoration (but still require auth)
       const urlParams = new URLSearchParams(window.location.search)
       const urlPortfolioId = urlParams.get('portfolio_id')
       const urlPortfolioUrl = urlParams.get('url')
@@ -840,44 +844,65 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       console.log('🔍 Checking URL params for user:', { urlPortfolioUrl, urlPortfolioId, sessionId })
       
       if (urlPortfolioUrl && sessionId) {
-        // Direct URL in query params - verify it belongs to this user
-        console.log('📦 Found portfolio URL in params, verifying ownership...')
+        // Direct URL in query params - verify it exists first
+        console.log('📦 Found portfolio URL in params, verifying existence...')
         
-        // For now, restore it if user is authenticated
-        // TODO: Add backend validation to verify portfolio belongs to user
         setIsRestoringPortfolio(true)
         
-        // Set all necessary states to show the portfolio
-        // Use the new restorePortfolio function that works from any state
-        restorePortfolio(urlPortfolioUrl, urlPortfolioId)
-        // Progress is now managed by JobFlow context
-        setShowPortfolioInMacBook(true)
-        setStage("complete") // Go directly to complete stage for restored portfolios
-        setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
-        setIsPlaying(false) // No animation needed for restoration
-        setShowCVCard(false) // Hide the CV card
-        setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
+        try {
+          // Check if the portfolio URL is accessible
+          const checkResponse = await fetch(urlPortfolioUrl, { method: 'HEAD' })
+          
+          if (checkResponse.ok || checkResponse.status === 200) {
+            // Portfolio exists - restore it
+            restorePortfolio(urlPortfolioUrl, urlPortfolioId || undefined)
+            // Progress is now managed by JobFlow context
+            setShowPortfolioInMacBook(true)
+            setStage("complete") // Go directly to complete stage for restored portfolios
+            setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
+            setIsPlaying(false) // No animation needed for restoration
+            setShowCVCard(false) // Hide the CV card
+            setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
+            
+            // Clear restoration state after a short delay
+            setTimeout(() => {
+              setIsRestoringPortfolio(false)
+              setStage("complete") // Final stage
+            }, 500)
+            
+            console.log('📦 Restored portfolio from URL for user:', urlPortfolioUrl)
+            return // Portfolio found and restored
+          } else {
+            // Portfolio doesn't exist - clear URL params
+            console.log('📦 Portfolio URL in params no longer exists (404), clearing')
+            const url = new URL(window.location.href)
+            url.searchParams.delete('portfolio_id')
+            url.searchParams.delete('url')
+            window.history.replaceState({}, '', url.toString())
+          }
+        } catch (error) {
+          console.error('Failed to verify portfolio URL:', error)
+          // Clear URL params
+          const url = new URL(window.location.href)
+          url.searchParams.delete('portfolio_id')
+          url.searchParams.delete('url')
+          window.history.replaceState({}, '', url.toString())
+        }
         
-        // Clear restoration state after a short delay
-        setTimeout(() => {
-          setIsRestoringPortfolio(false)
-          setStage("complete") // Final stage
-        }, 500)
-        
-        console.log('📦 Restored portfolio from URL for user:', urlPortfolioUrl)
-        return
+        setIsRestoringPortfolio(false)
+        // Don't return - continue to check for other restoration options
       }
       
       if (urlPortfolioId) {
         // Portfolio ID in query params - fetch details
         setIsRestoringPortfolio(true)
         try {
-          const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/${urlPortfolioId}/status`)
+          const response = await fetch(`${API_BASE_URL}/api/v1/generation/${urlPortfolioId}/status`)
           if (response.ok) {
             const data = await response.json()
             if (data.custom_domain_url || data.url) {
               // Use the new restorePortfolio function that works from any state
-              restorePortfolio(data.custom_domain_url || data.url, urlPortfolioId)
+              restorePortfolio(data.custom_domain_url || data.url, urlPortfolioId || undefined)
               setPortfolioId(urlPortfolioId)
               // Progress managed by JobFlow
               setShowPortfolioInMacBook(true)
@@ -885,13 +910,23 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
               setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
               setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
               console.log('📦 Restored portfolio from ID:', data.custom_domain_url || data.url)
+              setIsRestoringPortfolio(false)
+              return // Portfolio found and restored
             }
+          } else if (response.status === 404) {
+            // Portfolio doesn't exist - clear URL params and continue to check for CVs
+            console.log('📦 Portfolio not found (404), clearing URL params')
+            // Clear URL params without reload
+            const url = new URL(window.location.href)
+            url.searchParams.delete('portfolio_id')
+            url.searchParams.delete('url')
+            window.history.replaceState({}, '', url.toString())
           }
         } catch (error) {
           console.error('Failed to restore portfolio from ID:', error)
         }
         setIsRestoringPortfolio(false)
-        return
+        // Don't return here - continue to check for CVs
       }
       
       // Check localStorage - but only for authenticated users
@@ -903,28 +938,41 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
             // TODO: Verify this portfolio belongs to current user
             // For now, check if portfolio was saved with user ID
             if (portfolio.url && portfolio.userId === sessionId) {
-              setIsRestoringPortfolio(true)
-              
-              // Set all necessary states to show the portfolio
-              // Use the new restorePortfolio function that works from any state
-              restorePortfolio(portfolio.url, portfolio.id)
-              setPortfolioId(portfolio.id)
-              // Progress managed by JobFlow
-              setShowPortfolioInMacBook(true)
-              setStage("complete") // Go directly to complete stage for restored portfolios
-              setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
-              setIsPlaying(false) // No animation needed for restoration
-              setShowCVCard(false) // Hide the CV card
-              setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
-              
-              // Clear restoration state after a short delay
-              setTimeout(() => {
-                setIsRestoringPortfolio(false)
-                setStage("complete")
-              }, 500)
-              
-              console.log('📦 Restored portfolio from localStorage for user:', portfolio.url)
-              return
+              // Verify the portfolio still exists before showing it
+              try {
+                const checkResponse = await fetch(portfolio.url, { method: 'HEAD' })
+                if (checkResponse.ok || checkResponse.status === 200) {
+                  setIsRestoringPortfolio(true)
+                  
+                  // Set all necessary states to show the portfolio
+                  // Use the new restorePortfolio function that works from any state
+                  restorePortfolio(portfolio.url, portfolio.id || undefined)
+                  setPortfolioId(portfolio.id)
+                  // Progress managed by JobFlow
+                  setShowPortfolioInMacBook(true)
+                  setStage("complete") // Go directly to complete stage for restored portfolios
+                  setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
+                  setIsPlaying(false) // No animation needed for restoration
+                  setShowCVCard(false) // Hide the CV card
+                  setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
+                  
+                  // Clear restoration state after a short delay
+                  setTimeout(() => {
+                    setIsRestoringPortfolio(false)
+                    setStage("complete")
+                  }, 500)
+                  
+                  console.log('📦 Restored portfolio from localStorage for user:', portfolio.url)
+                  return
+                } else {
+                  // Portfolio no longer exists - clear it
+                  console.log('📦 Portfolio in localStorage no longer exists, clearing')
+                  localStorage.removeItem('lastPortfolio')
+                }
+              } catch (error) {
+                console.log('📦 Could not verify portfolio existence, clearing')
+                localStorage.removeItem('lastPortfolio')
+              }
             } else if (portfolio.url && !portfolio.userId) {
               // Old portfolio without user ID - clear it
               console.log('📦 Clearing old portfolio without user association')
@@ -942,7 +990,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       if (sessionId) {
         setIsRestoringPortfolio(true)
         try {
-          const response = await fetch(`${API_BASE_URL}/api/v1/portfolio/list`, {
+          const response = await fetch(`${API_BASE_URL}/api/v1/generation/list`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
@@ -957,34 +1005,163 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
             const portfolios = data.portfolios
             if (portfolios && portfolios.length > 0) {
               const latest = portfolios[0] // Assuming sorted by date
-              if (latest.custom_domain_url || latest.url) {
-                const restoredUrl = latest.custom_domain_url || latest.url
-                console.log('📦 Restoring portfolio from backend:', {
+              if (latest.custom_domain_url || latest.vercel_url || latest.url) {
+                const restoredUrl = latest.custom_domain_url || latest.vercel_url || latest.url
+                console.log('📦 Found portfolio in backend:', {
                   url: restoredUrl,
                   id: latest.portfolio_id || latest.id,
                   custom_domain: latest.custom_domain_url,
-                  vercel_url: latest.url
+                  vercel_url: latest.vercel_url,
+                  is_local: latest.is_local
                 })
-                // Use the new restorePortfolio function that works from any state
-                restorePortfolio(restoredUrl, latest.portfolio_id || latest.id)
-                setPortfolioId(latest.portfolio_id || latest.id)
-                // Progress managed by JobFlow
-                setShowPortfolioInMacBook(true)
-                setStage("complete")
-                setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
-                setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
-                console.log('📦 Portfolio state set, should display:', restoredUrl)
+                
+                // For local portfolios, skip verification (CORS blocks HEAD requests to localhost)
+                // For deployed portfolios, verify they still exist
+                let shouldRestore = false
+                
+                if (latest.is_local || restoredUrl.includes('localhost')) {
+                  // Local portfolios are always valid if backend returned them
+                  console.log('📦 Local portfolio found, restoring without verification:', restoredUrl)
+                  shouldRestore = true
+                } else {
+                  // For deployed portfolios, verify the URL exists
+                  try {
+                    const checkResponse = await fetch(restoredUrl, { method: 'HEAD' })
+                    if (checkResponse.ok || checkResponse.status === 200) {
+                      console.log('📦 Deployed portfolio verified, restoring:', restoredUrl)
+                      shouldRestore = true
+                    } else {
+                      console.log('📦 Portfolio URL from backend no longer exists (404):', restoredUrl)
+                    }
+                  } catch (error) {
+                    console.log('📦 Could not verify portfolio URL from backend:', restoredUrl, error)
+                  }
+                }
+                
+                if (shouldRestore) {
+                  // Portfolio exists - restore it
+                  console.log('📦 Restoring portfolio:', restoredUrl)
+                  restorePortfolio(restoredUrl, (latest.portfolio_id || latest.id) || undefined)
+                  setPortfolioId(latest.portfolio_id || latest.id)
+                  // Progress managed by JobFlow
+                  setShowPortfolioInMacBook(true)
+                  setStage("complete")
+                  setShowNewTypewriter(false) // Don't show typewriter animation for restored portfolios
+                  setUploadedFile(null) // Clear uploaded file to show portfolio instead of hero preview
+                  
+                  // Clear restoration loading state
+                  setIsRestoringPortfolio(false)
+                  
+                  console.log('📦 Portfolio state set, should display:', restoredUrl)
+                  return // Portfolio found and restored
+                }
               }
             }
           } else if (response.status === 401) {
             // Session expired or invalid - this is expected sometimes
             console.log('📦 Session invalid for portfolio fetch, skipping backend restoration')
+          } else if (response.status === 404) {
+            // No portfolios found - this is fine, user might have CVs without portfolios
+            console.log('📦 No portfolios found (404), will check for CVs')
           }
         } catch (error) {
           // Network error or other issue - not critical
           console.log('📦 Could not reach backend for portfolio restoration')
         }
         setIsRestoringPortfolio(false)
+      }
+      
+      // After all portfolio restoration attempts, check for existing CVs
+      // This ensures users with CVs but no portfolios see their CV ready to continue
+      console.log('📁 No valid portfolio found, checking for existing CVs...')
+      
+      try {
+        const cvResponse = await fetch(`${API_BASE_URL}/api/v1/my-cvs`, {
+          credentials: 'include',
+          headers: {
+            'X-Session-ID': sessionId
+          }
+        })
+        
+        if (cvResponse.ok) {
+          const cvData = await cvResponse.json()
+          if (cvData.cvs && cvData.cvs.length > 0) {
+            // User has CVs - show the most recent one
+            const latestCV = cvData.cvs[0] // Most recent CV
+            console.log('📁 Found existing CV, showing in CV pile:', latestCV)
+            
+            // Fetch the actual file content from backend
+            try {
+              console.log('📥 Fetching actual CV file from backend:', latestCV.job_id)
+              const fileResponse = await fetch(`${API_BASE_URL}/api/v1/download/${latestCV.job_id}`, {
+                credentials: 'include',
+                headers: {
+                  'X-Session-ID': sessionId
+                }
+              })
+              
+              if (fileResponse.ok) {
+                const blob = await fileResponse.blob()
+                const actualFile = new File(
+                  [blob],
+                  latestCV.filename,
+                  {
+                    type: blob.type || 'application/pdf',
+                    lastModified: new Date(latestCV.upload_date).getTime()
+                  }
+                )
+                
+                console.log('✅ Successfully fetched CV file:', actualFile.name, actualFile.size, 'bytes')
+                setUploadedFile(actualFile)
+                setShowCVCard(true)
+                setIsRestoredCV(true) // Mark this as a restored CV, not a new upload
+              } else {
+                console.warn('⚠️ Could not fetch CV file, showing placeholder')
+                // Fallback to placeholder if download fails
+                const placeholderFile = new File(
+                  [new Blob([''], { type: 'text/plain' })],
+                  latestCV.filename,
+                  {
+                    type: 'text/plain',
+                    lastModified: new Date(latestCV.upload_date).getTime()
+                  }
+                )
+                setUploadedFile(placeholderFile)
+                setShowCVCard(true)
+                setIsRestoredCV(true)
+              }
+            } catch (error) {
+              console.error('❌ Error fetching CV file:', error)
+              // Still show CV card with placeholder on error
+              const placeholderFile = new File(
+                [new Blob([''], { type: 'text/plain' })],
+                latestCV.filename,
+                {
+                  type: 'text/plain',
+                  lastModified: new Date(latestCV.upload_date).getTime()
+                }
+              )
+              setUploadedFile(placeholderFile)
+              setShowCVCard(true)
+              setIsRestoredCV(true)
+            }
+            
+            // Store the job_id for continuing the process
+            localStorage.setItem('pendingJobId', latestCV.job_id)
+            
+            // Also store in JobFlow context
+            jobFlowDispatch({ 
+              type: FlowAction.UploadSucceeded, 
+              jobId: latestCV.job_id 
+            })
+            
+            console.log('✅ CV restored, ready to continue generation with job_id:', latestCV.job_id)
+          } else {
+            console.log('📁 No existing CVs found, showing initial home page')
+          }
+        }
+      } catch (error) {
+        console.error('Error checking for existing CVs:', error)
       }
     }
     
@@ -1227,8 +1404,11 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     if (uploadedFile) {
       console.log('🔍 Starting demo with JobFlow...')
       try {
-        // Start the animation
-        setIsPlaying(true)
+        // For anonymous users, start animation immediately
+        // For authenticated users, animation will start from the useEffect when processing begins
+        if (!isAuthenticated) {
+          setIsPlaying(true)
+        }
         
         // Use JobFlow orchestrator based on auth state
         if (isAuthenticated) {
@@ -1329,7 +1509,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       setShowCVCard(true)
       
       // Get job ID from localStorage if available
-      const jobId = localStorage.getItem('pending_job_id')
+      const jobId = localStorage.getItem('pendingJobId')  // Fixed: match the key used in setItem
       if (jobId) {
         setCurrentJobId(jobId)
       }
@@ -1401,14 +1581,18 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     // Update auth context if signIn function is provided
     if (signIn && data.session_id) {
       await signIn(data.session_id, data.user || data)
+      // IMPORTANT: Update JobFlow auth state immediately
+      setIsAuthenticated(true)
     }
     
     // Close signup modal
     setShowSignupModal(false)
     setIsWaitingForAuth(false)
     
-    // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
-    if (jobFlowContext.currentJobId) {
+    // Only continue JobFlow if there's a pending job AND it's in a valid state for continuation
+    // Check that we're in Previewing or WaitingAuth state (user might sign up quickly before timer)
+    if (jobFlowContext.currentJobId && 
+        (jobFlowContext.state === FlowState.Previewing || jobFlowContext.state === FlowState.WaitingAuth)) {
       console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
       console.log('📊 Current JobFlow state before startPostSignupFlow:', jobFlowContext.state)
       
@@ -1458,6 +1642,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
 
   // Track previous uploadedFile to detect changes
   const [prevUploadedFile, setPrevUploadedFile] = useState<File | null>(null)
+  // Track if the uploadedFile is just for display (restored CV)
+  const [isRestoredCV, setIsRestoredCV] = useState(false)
   
   // Watch for JobFlow state changes to trigger animation AFTER validation
   useEffect(() => {
@@ -1487,18 +1673,43 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
   // Track uploadedFile changes just for UI updates (CV card display)
   useEffect(() => {
     if (uploadedFile && uploadedFile !== prevUploadedFile) {
-      console.log('📁 New file detected, showing CV card:', uploadedFile.name)
+      console.log('📁 New file detected, showing CV card:', uploadedFile.name, 'isRestoredCV:', isRestoredCV)
       setPrevUploadedFile(uploadedFile)
       setShowCVCard(true)
       
-      // For authenticated users, trigger the demo flow with validation
-      if (isAuthenticated) {
-        console.log('✅ User authenticated, will validate and start full process')
-        handleStartDemo() // This includes validation
+      // CRITICAL: Don't start upload flow for restored CVs
+      if (isRestoredCV) {
+        console.log('📦 This is a restored CV, not starting upload flow')
+        // Reset the flag after using it
+        setIsRestoredCV(false)
+        return
+      }
+      
+      // For authenticated users, start animation then process
+      // BUT NOT if we already have a job in progress or completed!
+      if (isAuthenticated && !jobFlowContext.currentJobId && jobFlowContext.state === FlowState.Idle) {
+        console.log('✅ User authenticated, starting animation and processing')
+        // Wait for CV to be visible, then start animation AND processing
+        setTimeout(async () => {
+          // Start the animation exactly like anonymous users
+          setIsPlaying(true)
+          console.log('🎬 Starting animation for authenticated user')
+          
+          // Start the authenticated flow (upload + extract + generate)
+          try {
+            await startAuthenticatedFlow(uploadedFile)
+          } catch (error: any) {
+            console.error('Authenticated flow failed:', error)
+            setProcessingError(error.message || 'Failed to process file')
+            setIsPlaying(false)
+          }
+        }, 1500)
+      } else if (isAuthenticated && jobFlowContext.currentJobId) {
+        console.log('⏭️ Authenticated user but already processing/completed, skipping duplicate upload')
       }
       // For anonymous users, do nothing here - wait for JobFlow state change above
     }
-  }, [uploadedFile, prevUploadedFile, isAuthenticated])
+  }, [uploadedFile, prevUploadedFile, isAuthenticated, jobFlowContext.currentJobId, jobFlowContext.state, isRestoredCV])
   
   // Watch for portfolio URL from JobFlow and update UI
   useEffect(() => {
@@ -1508,6 +1719,10 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       // Immediately show portfolio - no delays, no resets
       setShowPortfolioInMacBook(true)
       setStage("complete")
+      
+      // Clear uploadedFile to prevent duplicate uploads
+      setUploadedFile(null)
+      setPrevUploadedFile(null)
       setIsPlaying(false)
       setIsWaitingForAuth(false)
       setShowSignupModal(false)
@@ -1528,74 +1743,82 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
     }
   }, [jobFlowContext.portfolioUrl, jobFlowContext.state])
   
-  // Animate progress smoothly over time after auth
+  // Animate progress based on ACTUAL JobFlow state
   useEffect(() => {
+    // Track actual backend process state
+    const targetProgress = getSemanticProgressForState(jobFlowContext.state)
+    
+    console.log('🎯 Progress Update:', {
+      state: jobFlowContext.state,
+      targetProgress,
+      currentAnimated: animatedProgress,
+      isAuthenticated
+    })
+    
     // Only start animation after authentication (when processing begins)
     const isProcessing = [
       FlowState.Claiming,
       FlowState.Extracting, 
-      FlowState.Generating
+      FlowState.Generating,
+      FlowState.Completed
     ].includes(jobFlowContext.state)
     
-    if (!isProcessing && jobFlowContext.state !== FlowState.Completed) {
-      // Not processing yet, but don't reset if already animating
-      // Only reset to 0 if we're truly at the beginning
-      if (jobFlowContext.state === FlowState.Idle) {
-        setAnimatedProgress(0)
-      }
+    // For idle or waiting states, keep at 0
+    if (jobFlowContext.state === FlowState.Idle || 
+        jobFlowContext.state === FlowState.WaitingAuth ||
+        (!isAuthenticated && !isProcessing)) {
+      setAnimatedProgress(0)
       return
     }
     
-    // If portfolio is ready, jump straight to 60 (80% visual)
-    if (jobFlowContext.state === FlowState.Completed) {
-      setAnimatedProgress(60)
+    // For preview/validation states, show initial progress
+    if (jobFlowContext.state === FlowState.Validating || 
+        jobFlowContext.state === FlowState.Previewing) {
+      setAnimatedProgress(5) // Small progress to show something is happening
+      return  
+    }
+    
+    // For authenticated users or active processing, track the actual state progress
+    if (isAuthenticated || isProcessing) {
+      // Animate smoothly to the target progress
+      const animateToTarget = () => {
+        setAnimatedProgress(prevProgress => {
+          const diff = targetProgress - prevProgress
+          
+          // If we're close enough, just set it
+          if (Math.abs(diff) < 0.5) {
+            return targetProgress
+          }
+          
+          // Otherwise animate smoothly
+          const step = diff * 0.15 // Move 15% of the difference each frame for smoother animation
+          const newProgress = prevProgress + step
+          
+          // CRITICAL: Never go backwards! Only update if progress is higher
+          if (targetProgress === 0 || newProgress > prevProgress) {
+            return newProgress
+          }
+          
+          return prevProgress // Keep current if would go backwards
+        })
+        
+        // Continue animation if not at target (check current value)
+        setAnimatedProgress(currentProgress => {
+          if (Math.abs(targetProgress - currentProgress) > 0.5) {
+            animationRef.current = requestAnimationFrame(animateToTarget)
+          }
+          return currentProgress
+        })
+      }
+      
+      // Cancel any existing animation
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
-        animationRef.current = null
-      }
-      return
-    }
-    
-    // Two-phase animation with slower, smoother progress:
-    // Phase 1: Slowly animate from current progress to 52.5 (70% visual) over 30 seconds
-    // Phase 2: Very slowly increment from 52.5 to 59.25 (70% to 79% visual)
-    const startTime = Date.now()
-    const startProgress = animatedProgress // Start from current progress, not 0
-    const phase1Duration = 30000 // 30 seconds to reach 70% (slower)
-    const phase1Target = 52.5 // 70% visual (52.5 semantic)
-    const phase2IncrementDelay = 5000 // 5 seconds per 1% increment
-    const phase2MaxTarget = 59.25 // 79% visual (59.25 semantic)
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime
-      let progress: number
-      
-      if (elapsed < phase1Duration && startProgress < phase1Target) {
-        // Phase 1: Animate from current to 70%
-        const remainingToTarget = phase1Target - startProgress
-        const phase1Progress = Math.min(elapsed / phase1Duration, 1)
-        progress = startProgress + (remainingToTarget * phase1Progress)
-      } else {
-        // Phase 2: Slow increments from 70% to 79%
-        const phase2Elapsed = elapsed - phase1Duration
-        const increments = Math.floor(phase2Elapsed / phase2IncrementDelay)
-        const semanticIncrement = 0.75 // Each increment is 1% visual
-        progress = Math.min(phase1Target + (increments * semanticIncrement), phase2MaxTarget)
       }
       
-      setAnimatedProgress(progress)
-      
-      // Continue until we reach max target or state changes
-      if (progress < phase2MaxTarget && jobFlowContext.state !== FlowState.Completed) {
-        animationRef.current = requestAnimationFrame(animate)
-      }
+      // Start animating to target
+      animationRef.current = requestAnimationFrame(animateToTarget)
     }
-    
-    // Start animation
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current)
-    }
-    animationRef.current = requestAnimationFrame(animate)
     
     return () => {
       if (animationRef.current) {
@@ -1603,7 +1826,31 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         animationRef.current = null
       }
     }
-  }, [jobFlowContext.state])
+  }, [jobFlowContext.state, isAuthenticated]) // Removed animatedProgress from deps to avoid infinite loop
+  
+  // Start animation for authenticated users when processing begins
+  useEffect(() => {
+    if (isAuthenticated) {
+      const isProcessing = [
+        FlowState.Validating,
+        FlowState.Claiming,
+        FlowState.Extracting, 
+        FlowState.Generating
+      ].includes(jobFlowContext.state)
+      
+      if (isProcessing && !isPlaying) {
+        console.log('🎬 Starting animation for authenticated user processing')
+        setIsPlaying(true)
+      }
+      
+      // Stop animation when completed or failed
+      if ((jobFlowContext.state === FlowState.Completed || 
+           jobFlowContext.state === FlowState.Failed) && isPlaying) {
+        console.log('🛑 Stopping animation - process finished')
+        setIsPlaying(false)
+      }
+    }
+  }, [jobFlowContext.state, isAuthenticated, isPlaying])
   
   // Use animated progress instead of direct state progress
   const realProgress = animatedProgress
@@ -1940,7 +2187,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         </motion.div>
                         
                         {/* Primary CTA Section */}
-                        <div className="flex flex-col gap-6" style={{ marginTop: '32px' }}>
+                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center" style={{ marginTop: '32px' }}>
                           {/* Primary Upload CTA - Most prominent */}
                           <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -1991,7 +2238,49 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             </Button>
                           </motion.div>
 
-                          
+                          {/* Start Now Button - Show when user has existing CV but needs manual start */}
+                          {uploadedFile && isAuthenticated && !isPlaying && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.8, delay: 1.2, ease: "easeOut" }}
+                            >
+                              <Button
+                                onClick={() => {
+                                  console.log('🚀 Manual start flow triggered with existing CV:', uploadedFile.name)
+                                  // Reset everything and start the flow like a first-time user
+                                  handleFileSelect(uploadedFile)
+                                }}
+                                className="group relative bg-gradient-to-r from-green-500 via-emerald-400 to-green-600 hover:from-green-600 hover:via-emerald-500 hover:to-green-700 text-white border-0 px-12 py-6 rounded-full text-xl md:text-2xl font-bold shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_40px_rgba(34,197,94,0.3)] cursor-pointer overflow-hidden"
+                                style={{
+                                  minWidth: '320px',
+                                  minHeight: '72px'
+                                }}
+                              >
+                                <span className="relative z-10 flex items-center justify-center">
+                                  <svg
+                                    className="w-6 h-6 mr-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M19 10a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  Start now
+                                </span>
+                                {/* Animated gradient overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-green-600 via-emerald-500 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                {/* Shine effect */}
+                                <div className="absolute inset-0 -top-2 h-full w-1/2 bg-white/30 skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-700" />
+                              </Button>
+                            </motion.div>
+                          )}
                         </div>
                       </motion.span>
                     </motion.div>
@@ -2447,7 +2736,10 @@ const AppleNavbar = ({
   user, 
   onLogout,
   onShowDashboard,
-  onFileSelect 
+  onFileSelect,
+  jobFlowContext,
+  jobFlowDispatch,
+  onResetForNewUpload
 }: { 
   onOpenModal: () => void
   isAuthenticated: boolean
@@ -2455,6 +2747,9 @@ const AppleNavbar = ({
   onLogout: () => void
   onShowDashboard: () => void
   onFileSelect: (file: File) => void
+  jobFlowContext: any
+  jobFlowDispatch: any
+  onResetForNewUpload: () => void
 }) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -2477,12 +2772,14 @@ const AppleNavbar = ({
   }
 
   const handleUploadClick = () => {
-    if (isAuthenticated) {
-      // Show dashboard with resume page
-      onShowDashboard()
+    // Always allow new upload - reset everything first
+    if (isAuthenticated && jobFlowContext && (jobFlowContext.state === 'Completed' || jobFlowContext.portfolioUrl)) {
+      // User has existing portfolio - confirm they want to replace it
+      if (confirm('This will replace your existing portfolio. Continue?')) {
+        onResetForNewUpload()
+      }
     } else {
-      // For non-authenticated users, trigger file upload like the dropbox
-      // This will create a consistent experience across all upload methods
+      // Direct upload for everyone
       const fileInput = document.createElement('input')
       fileInput.type = 'file'
       fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
@@ -2995,11 +3292,13 @@ const VideoCarousel = () => {
 function HomeWithJobFlow() {
   const { 
     context: jobFlowContext, 
+    dispatch: jobFlowDispatch,
     startPreviewFlow, 
     startAuthenticatedFlow,
     startPostSignupFlow,
     restorePortfolio,
-    isAuthenticated: jobFlowAuth 
+    isAuthenticated: jobFlowAuth,
+    setIsAuthenticated
   } = useJobFlow()
   const [currentSection, setCurrentSection] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
@@ -3102,6 +3401,49 @@ function HomeWithJobFlow() {
       setHasTriggeredPhase6Modal(false) // Reset so it can trigger again if user logs out
     }
   }, [isAuthenticated])
+
+  // Watch for JobFlow errors and display them as toast
+  useEffect(() => {
+    if (jobFlowContext.state === FlowState.Failed && jobFlowContext.error) {
+      const error = jobFlowContext.error
+      console.log('🔴 JobFlow error detected:', error)
+      
+      // Check if it's a Resume Gate error
+      if (error.code === 'RESUME_GATE_REJECTION' && error.details) {
+        const details = error.details
+        setErrorToast({
+          isOpen: true,
+          title: 'Not a resume',
+          message: details.resumeGateReason || "This file doesn't look like a resume (CV).",
+          suggestion: details.resumeGateSuggestion || 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+        })
+      } else {
+        // Generic error handling - parse the error message more carefully
+        let errorInfo = { title: 'Upload Failed', message: '', suggestion: undefined as string | undefined }
+        
+        // Check if error message contains Resume Gate rejection details
+        if (error.message && error.message.includes('Please upload a valid resume/CV file')) {
+          errorInfo.title = 'Not a resume'
+          errorInfo.message = "This file doesn't look like a resume (CV)."
+          errorInfo.suggestion = 'Use a resume with contact info and sections like Experience, Education, and Skills.'
+        } else if (error.message) {
+          errorInfo.message = error.message
+        } else {
+          errorInfo.message = 'File upload failed. Please try again.'
+        }
+        
+        setErrorToast({
+          isOpen: true,
+          title: errorInfo.title,
+          message: errorInfo.message,
+          suggestion: errorInfo.suggestion
+        })
+      }
+      
+      // Clear the lock to allow retry - JobFlow will handle the state reset
+      jobFlowDispatch({ type: FlowAction.ClearLock })
+    }
+  }, [jobFlowContext.state, jobFlowContext.error, jobFlowDispatch])
   
   // Show completion popup when portfolio reaches 80% for authenticated users
   // Only show once per generation (tracked by job_id)
@@ -3225,13 +3567,16 @@ function HomeWithJobFlow() {
     // Update auth context - signIn is already in scope from useAuthContext above
     if (signIn && data.session_id) {
       await signIn(data.session_id, data.user || data)
+      // IMPORTANT: Update JobFlow auth state immediately
+      setIsAuthenticated(true)
     }
     
     // Close auth modal
     setShowAuthModal(false)
     
-    // Continue JobFlow if there's a pending job - ALWAYS continue if we have a jobId
-    if (jobFlowContext.currentJobId) {
+    // Only continue JobFlow if there's a pending job AND it's in a valid state for continuation
+    // Check that we're in WaitingAuth state to ensure this job belongs to current session
+    if (jobFlowContext.currentJobId && jobFlowContext.state === FlowState.WaitingAuth) {
       console.log('🚀 Continuing portfolio generation after auth with job:', jobFlowContext.currentJobId)
       console.log('📊 Current JobFlow state before startPostSignupFlow:', jobFlowContext.state)
       
@@ -3403,19 +3748,106 @@ function HomeWithJobFlow() {
     }
   }
   
+  const handleResetForNewUpload = () => {
+    // Reset JobFlow state
+    jobFlowDispatch({ type: FlowAction.Reset })
+    
+    // Clear all stored data
+    localStorage.removeItem('lastPortfolio')
+    localStorage.removeItem('jobFlowState')
+    localStorage.removeItem('resume2website_shown_completion_popups')
+    localStorage.removeItem('pendingJobId')
+    
+    // Reload the page to reset all UI states cleanly
+    window.location.reload()
+  }
+
   const handleFileSelect = async (file: File) => {
     // Use JobFlow orchestrators for all file uploads
     console.log('📁 File selected, using JobFlow orchestrator:', file.name)
     
-    // JobFlow handles all duplicate prevention internally
+    // CRITICAL: Reset to initial state for new CV uploads (both authenticated and anonymous)
+    console.log('🔄 Resetting to initial state for new CV upload')
+    
+    // Clear all states to start fresh
+    // Note: These states are in Resume2WebsiteDemo, not available in HomeWithJobFlow
+    // setShowCVCard(false)
+    // setShowPortfolioInMacBook(false)
+    // setStage("initial")
+    // setShowNewTypewriter(false)
+    // setShowStrikeThrough(false)
+    // setPortfolioId(null)
+    // setProcessingError(null)
+    // setIsPlaying(false)
+    // setIsWaitingForAuth(false)
+    // setShowSignupModal(false)
+    
+    // Clear portfolio data
+    localStorage.removeItem('lastPortfolio')
+    localStorage.removeItem('pendingJobId')
+    
+    // Clear URL params
+    const newUrl = new URL(window.location.href)
+    newUrl.searchParams.delete('url')
+    newUrl.searchParams.delete('portfolio_id')
+    window.history.pushState({}, '', newUrl)
+    
+    // Clear previous uploaded files
+    setUploadedFile(null)
+    // setPrevUploadedFile(null) // This is in Resume2WebsiteDemo, not available here
+    
+    // Check CV limit for authenticated users
     if (isAuthenticated) {
-      await startAuthenticatedFlow(file)
+      try {
+        // Check current CV count
+        const sessionId = localStorage.getItem('resume2website_session_id')
+        const response = await fetch(`${API_BASE_URL}/api/v1/my-cvs`, {
+          credentials: 'include',
+          headers: {
+            'X-Session-ID': sessionId || ''
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          
+          // If user has 10 or more CVs, show warning
+          if (data.at_limit && data.oldest_cv) {
+            const oldestDate = new Date(data.oldest_cv.upload_date).toLocaleDateString()
+            const confirmDelete = confirm(
+              `You have reached the maximum limit of ${data.max_cvs} CVs.\n\n` +
+              `To upload this new CV, your oldest CV will be automatically deleted:\n` +
+              `"${data.oldest_cv.filename}" (uploaded on ${oldestDate})\n\n` +
+              `Do you want to continue?`
+            )
+            
+            if (!confirmDelete) {
+              console.log('User cancelled upload due to CV limit')
+              return
+            }
+            
+            console.log('User confirmed deletion of oldest CV')
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check CV limit:', error)
+        // Continue with upload anyway
+      }
+      
+      // Set uploaded file and auto-start after 2 seconds (like first-time users)
+      setUploadedFile(file)
+      // setShowCVCard(true) // This is in Resume2WebsiteDemo, not available here
+      
+      console.log('⏰ Auto-starting authenticated flow in 2 seconds...')
+      setTimeout(async () => {
+        console.log('🚀 Starting authenticated flow automatically')
+        await startAuthenticatedFlow(file)
+      }, 2000)
     } else {
+      // Anonymous users: start preview flow immediately
+      setUploadedFile(file)
       await startPreviewFlow(file)
     }
-    
-    // Set uploaded file for UI tracking
-    setUploadedFile(file)
     
     return // JobFlow handles everything else
     
@@ -3495,9 +3927,45 @@ function HomeWithJobFlow() {
     })
   }
 
-  const handleCVCardClick = (file: File) => {
-    // This function is not used since Resume2WebsiteDemo handles clicks internally
-    // We can't directly trigger the animation from here
+  const handleCVCardClick = async (file: File) => {
+    // Check if this is a restored CV that needs to continue generation
+    const pendingJobId = localStorage.getItem('pendingJobId')
+    
+    if (pendingJobId && isAuthenticated) {
+      console.log('📦 Continuing generation with existing job_id:', pendingJobId)
+      
+      // Clear the pending job ID
+      localStorage.removeItem('pendingJobId')
+      
+      // Directly use the JobFlow to continue with generation
+      // The job_id is already in the context from restoration
+      try {
+        // Call the generate endpoint through JobFlow's API
+        const { generate } = await import('@/lib/jobFlow/api')
+        
+        const result = await generate(pendingJobId)
+        
+        if (result.portfolio_url) {
+          console.log('✅ Portfolio generation completed:', result)
+          
+          // Update JobFlow context with the portfolio URL
+          restorePortfolio(result.portfolio_url, result.portfolio_id || undefined)
+        }
+      } catch (error: any) {
+        console.error('Failed to generate portfolio:', error)
+        
+        // Show error through the existing error state
+        setErrorToast({
+          isOpen: true,
+          title: 'Generation Failed',
+          message: error.message || 'Failed to generate portfolio. Please try again.',
+          suggestion: 'Try uploading a new CV or contact support if the issue persists.'
+        })
+      }
+    } else {
+      // Normal file upload flow - this shouldn't happen as CV pile is only clickable with uploaded file
+      console.log('No pending job ID or not authenticated')
+    }
   }
 
   const handleLogout = async () => {
@@ -3729,6 +4197,9 @@ function HomeWithJobFlow() {
         onLogout={handleLogout}
         onShowDashboard={() => setShowDashboard(true)}
         onFileSelect={handleFileSelect}
+        jobFlowContext={jobFlowContext}
+        jobFlowDispatch={jobFlowDispatch}
+        onResetForNewUpload={handleResetForNewUpload}
       />
       <section id="hero" className="pt-16 relative min-h-screen">
         <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-white/50 to-gray-100 z-20"></div>

@@ -279,8 +279,20 @@ export const JobFlowProvider: React.FC<{
       await performExtract(jobId)
       
     } catch (error: any) {
-      console.error('Claim failed:', error)
-      dispatch({ type: FlowAction.ClaimFailed, error })
+      const errorMessage = error?.message || error?.error || 'Failed to claim job'
+      console.error('Claim failed:', errorMessage, error)
+      
+      // If claim failed due to ownership (403), clear the job and don't show error
+      if (error?.status === 403 || error?.response?.status === 403 || errorMessage?.includes('owned by another user')) {
+        console.log('🔓 Clearing job due to ownership conflict - this CV belongs to another user')
+        dispatch({ type: FlowAction.ClearLock })
+        // Clear from localStorage too
+        localStorage.removeItem('pendingJobId')
+        // Clear from tracking
+        startedForJobIds.current.delete(jobId)
+      } else {
+        dispatch({ type: FlowAction.ClaimFailed, error: { message: errorMessage, code: error?.code, details: error } })
+      }
     }
   }
   
@@ -447,8 +459,9 @@ export const JobFlowProvider: React.FC<{
       await performExtract(job_id)
       
     } catch (error: any) {
-      console.error('Authenticated flow failed:', error)
-      dispatch({ type: FlowAction.UploadFailed, error })
+      const errorMessage = error?.message || error?.error || 'Failed to process file'
+      console.error('Authenticated flow failed:', errorMessage, error)
+      dispatch({ type: FlowAction.UploadFailed, error: { message: errorMessage, code: error?.code, details: error } })
     }
   }
   

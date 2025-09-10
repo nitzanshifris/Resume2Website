@@ -177,7 +177,7 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
           console.log(`🎯 Selected template: ${randomTemplate}`)
 
           // Use the same endpoint for all users
-          const generateUrl = `${API_BASE_URL}/api/v1/portfolio/generate/${activeJobId}`
+          const generateUrl = `${API_BASE_URL}/api/v1/generation/generate/${activeJobId}`
           
           const generateResponse = await fetch(generateUrl, {
             method: 'POST',

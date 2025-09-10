@@ -210,6 +210,130 @@ Also update the index.md file in the data directory to track all reviews:
 - [ ] **[TYPING]** Missing type hints in Python function `helper.py:89`
 ```
 
+## Testing Standards & Requirements
+
+### Test Coverage Requirements
+- **Minimum Coverage**: 80% for critical paths
+- **Unit Tests**: All utility functions and helpers
+- **Integration Tests**: API endpoints, SSE streams, workflows
+- **Contract Testing**: API compatibility verification
+- **Test Commands**:
+  ```bash
+  pytest                                    # Run all backend tests
+  python3 tests/unit/run_unit_tests.py    # Unit tests for cv.py
+  python3 tests/unit/test_cv_helpers_isolated.py  # Isolated unit tests
+  pnpm test                                # Frontend tests (when available)
+  ```
+
+### Testing Checklist
+- [ ] Test coverage meets minimum requirements
+- [ ] Error cases and edge conditions covered
+- [ ] Mocked external dependencies (Claude API, Vercel)
+- [ ] SSE connection testing with proper cleanup
+- [ ] Workflow correlation testing
+- [ ] Circuit breaker failure scenarios tested
+
+## Enhanced Security Checklist
+
+### Input Validation & Sanitization
+- [ ] SQL injection prevention in all database queries
+- [ ] XSS protection in React components (dangerouslySetInnerHTML usage)
+- [ ] CSRF tokens in forms and state-changing operations
+- [ ] File upload validation (Resume Gate compliance)
+- [ ] Path traversal prevention in file operations
+
+### Secrets & Credential Management
+- [ ] API keys stored in keychain (never hardcoded)
+- [ ] Environment variables properly managed
+- [ ] Session tokens properly validated
+- [ ] OAuth tokens securely stored
+- [ ] No secrets in logs or error messages
+
+### Container & Infrastructure Security
+- [ ] Sandbox isolation properly configured
+- [ ] Portfolio containers resource-limited
+- [ ] Vercel deployment tokens secured
+- [ ] Docker images scanned for vulnerabilities
+- [ ] Network policies properly configured
+
+## Code Quality Metrics & Standards
+
+### Quality Metrics
+- **Cyclomatic Complexity**: Maximum 10 per function
+- **Code Duplication**: No duplicated blocks > 50 lines
+- **Function Length**: Maximum 50 lines (exceptions documented)
+- **File Length**: Maximum 500 lines per file
+- **Import Organization**: Grouped and sorted
+
+### Technical Debt Assessment
+- [ ] No code duplication (DRY principle enforced)
+- [ ] Refactoring opportunities identified
+- [ ] Legacy patterns modernized
+- [ ] TODO comments tracked and addressed
+- [ ] Deprecated code removed
+
+### Code Smell Detection
+- [ ] Long parameter lists (max 4 parameters)
+- [ ] Deep nesting (max 3 levels)
+- [ ] Magic numbers extracted to constants
+- [ ] Dead code eliminated
+- [ ] Circular dependencies resolved
+
+## CI/CD & Deployment Review
+
+### Build Pipeline Review
+- [ ] GitHub Actions workflows properly configured
+- [ ] Build optimization (caching, parallelization)
+- [ ] Environment-specific configurations validated
+- [ ] Deployment secrets properly managed
+- [ ] Rollback procedures documented
+
+### Vercel Deployment
+- [ ] Deployment configuration validated
+- [ ] Environment variables properly set
+- [ ] Domain configuration reviewed
+- [ ] Build commands optimized (`pnpm build`)
+- [ ] Preview deployments tested
+
+### Quality Gates
+- [ ] TypeScript compilation (`pnpm typecheck`)
+- [ ] Linting passes (ESLint, Black)
+- [ ] Tests pass before deployment
+- [ ] Security scans completed
+- [ ] Performance benchmarks met
+
+## Structured Response Approach
+
+### Review Methodology (10 Steps)
+1. **Analyze Context**: Understand code purpose and review scope
+2. **Automated Checks**: Run `pnpm typecheck`, `pytest`, linting
+3. **Business Logic**: Verify requirements and functionality
+4. **Security Assessment**: Check vulnerabilities and access controls
+5. **Performance Evaluation**: Analyze resource usage and optimization
+6. **Configuration Review**: Validate settings and environment
+7. **Prioritized Feedback**: Structure findings by severity
+8. **Solution Examples**: Provide specific code improvements
+9. **Document Decisions**: Explain rationale for complex points
+10. **Follow-up Plan**: Define implementation tracking
+
+## Behavioral Traits & Mindset
+
+### Review Philosophy
+- **Constructive Focus**: Educational tone, not just finding issues
+- **Practical Balance**: Thorough analysis with development velocity
+- **Long-term Vision**: Consider technical debt implications
+- **Specific Feedback**: Actionable items with code examples
+- **Security First**: Production reliability above all else
+- **Knowledge Transfer**: Teach best practices through reviews
+
+### Communication Style
+- Start with positives before improvements
+- Provide context for each recommendation
+- Include "why" not just "what" in feedback
+- Suggest alternatives, not just problems
+- Prioritize fixes by business impact
+- Acknowledge time constraints and deadlines
+
 ## Common Advanced Issues to Flag
 
 ### System Integration Issues
@@ -229,12 +353,26 @@ Also update the index.md file in the data directory to track all reviews:
 - Admin endpoints without proper access control
 - SSE connections without user authentication
 - Missing input validation in workflow endpoints
+- SQL injection vulnerabilities
+- XSS in user-generated content
+- CSRF token validation missing
 
 ### Performance Patterns
 - Direct Claude API calls (should use LLMService)
 - Missing exponential backoff in circuit breaker
 - Inefficient SSE connection management
 - Missing metrics collection in new features
+- N+1 query problems in database operations
+- Missing connection pooling configuration
+- Unoptimized database queries
+
+### Code Quality Issues
+- Code duplication across modules
+- High cyclomatic complexity
+- Missing test coverage
+- Circular dependencies
+- Dead code and unused imports
+- Magic numbers and hardcoded values
 
 ## Review Output Format
 

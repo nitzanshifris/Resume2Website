@@ -11,6 +11,7 @@ import Image from 'next/image'
 interface InteractiveCVPileProps {
   onFileSelect: (file: File) => void
   onFileClick?: (file: File) => void
+  onStartFlow?: (file: File) => void  // Manual start function
   className?: string
   uploadedFile?: File | null
   uploadedFiles?: File[] | null
@@ -37,7 +38,7 @@ const backgroundCVs = [
   }
 ]
 
-export default function InteractiveCVPile({ onFileSelect, onFileClick, className, uploadedFile, uploadedFiles, isProcessing }: InteractiveCVPileProps) {
+export default function InteractiveCVPile({ onFileSelect, onFileClick, onStartFlow, className, uploadedFile, uploadedFiles, isProcessing }: InteractiveCVPileProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [uploadState, setUploadState] = useState<'idle' | 'success' | 'error'>('idle')
@@ -202,15 +203,17 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
   }, [handleFile, handleMultipleFiles])
 
   const handleClick = useCallback(() => {
-    // If we have a file uploaded, clicking should trigger the animation
-    if (currentFile && onFileClick) {
-      onFileClick(currentFile)
+    // DISABLED: Don't allow clicking on existing CV files
+    // Only allow file selection dialog
+    if (currentFile) {
+      // Don't trigger onFileClick for existing files
+      console.log('CV pile click disabled - use Start now button instead')
       return
     }
     
     // Always open file dialog when clicking the upload area, regardless of auth status
     fileInputRef.current?.click()
-  }, [currentFile, onFileClick])
+  }, [currentFile])
 
   return (
     <div 
@@ -472,6 +475,7 @@ export default function InteractiveCVPile({ onFileSelect, onFileClick, className
                     >
                       or click to browse
                     </motion.p>
+                    
                     <motion.p 
                       className="text-sm text-gray-500 mt-4 font-medium"
                       initial={{ opacity: 0, y: 10 }}

@@ -150,12 +150,7 @@ export const ProgressBarVertical: React.FC<{
       {/* Glass container with centered elements */}
       <div className="relative w-20 h-96">
         {/* Progress Track - Narrower, centered within container */}
-        <div className="absolute left-1/2 -translate-x-1/2 w-12 h-full rounded-full overflow-hidden">
-          {/* Glass background */}
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full" />
-          
-          {/* Inner shadow for depth */}
-          <div className="absolute inset-[2px] bg-black/10 rounded-full" />
+        <div className="absolute left-1/2 -translate-x-1/2 w-12 h-full rounded-full bg-gray-100 border border-gray-300 shadow-inner overflow-hidden">
           
           {/* Progress Fill - uses correct visual progress */}
           <div
@@ -186,12 +181,12 @@ export const ProgressBarVertical: React.FC<{
             bottom: `calc(${visualProgress}% - 40px)` // Center the 80px button at progress level
           }}
         >
-          {/* Glow effect behind button */}
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-sky-400 to-blue-600 blur-xl opacity-70" />
+          {/* Subtle glow effect behind button */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/40 via-sky-400/40 to-blue-500/40 blur-2xl" />
           
-          {/* Glass button */}
+          {/* Clean glass button with slightly darker background for contrast */}
           <div 
-            className={`relative w-full h-full rounded-full bg-white/30 backdrop-blur-lg border-2 border-white/40 shadow-2xl flex items-center justify-center ${
+            className={`relative w-full h-full rounded-full bg-gray-600/20 backdrop-blur-xl border border-white/60 shadow-2xl flex items-center justify-center ${
               isClickable && isReady ? 'cursor-pointer hover:scale-110 transition-transform' : ''
             }`}
             onClick={() => {
@@ -200,11 +195,11 @@ export const ProgressBarVertical: React.FC<{
               }
             }}
           >
-            {/* Inner glass layer */}
-            <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-white/30 to-white/10" />
+            {/* Subtle inner highlight */}
+            <div className="absolute inset-[1px] rounded-full bg-gradient-to-b from-white/30 to-transparent" />
             
-            {/* Percentage text - shows visual progress */}
-            <span className="relative z-10 text-2xl font-bold text-white drop-shadow-lg">
+            {/* Percentage text - clean white like reference */}
+            <span className="relative z-10 text-2xl font-bold text-white drop-shadow-sm">
               {visualProgress}%
             </span>
             

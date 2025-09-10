@@ -344,7 +344,7 @@ def create_cv_upload(user_id: str, job_id: str, filename: str, file_type: str, f
 
 
 def get_user_cv_uploads(user_id: str) -> list:
-    """Get all CV uploads for a user"""
+    """Get all CV uploads for a user, sorted by most recent first"""
     conn = get_db_connection()
     try:
         cursor = conn.execute(
@@ -358,6 +358,179 @@ def get_user_cv_uploads(user_id: str) -> list:
         return [dict(row) for row in rows]
     finally:
         conn.close()
+
+
+def get_user_cv_count(user_id: str) -> int:
+    """Get the count of CV uploads for a user"""
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute(
+            """SELECT COUNT(*) as count
+            FROM cv_uploads 
+            WHERE user_id = ?""",
+            (user_id,)
+        )
+        result = cursor.fetchone()
+        return result['count'] if result else 0
+    finally:
+        conn.close()
+
+
+def delete_oldest_cv(user_id: str) -> dict:
+    """Delete the oldest CV upload for a user and return its info"""
+    conn = get_db_connection()
+    try:
+        # First get the oldest CV info
+        cursor = conn.execute(
+            """SELECT upload_id, job_id, filename, upload_date
+            FROM cv_uploads 
+            WHERE user_id = ? 
+            ORDER BY upload_date ASC
+            LIMIT 1""",
+            (user_id,)
+        )
+        oldest_cv = cursor.fetchone()
+        
+        if oldest_cv:
+            oldest_cv_dict = dict(oldest_cv)
+            
+            # Delete the oldest CV
+            conn.execute(
+                """DELETE FROM cv_uploads 
+                WHERE upload_id = ?""",
+                (oldest_cv_dict['upload_id'],)
+            )
+            conn.commit()
+            
+            # Also delete the file from disk if it exists
+            import os
+            from pathlib import Path
+            BASE_DIR = Path(__file__).parent.parent.parent
+            upload_dir = BASE_DIR / "data" / "uploads"
+            
+            # Try different file path patterns
+            possible_paths = []
+            
+            # Extract file extension from filename
+            file_ext = ''
+            if '.' in oldest_cv_dict['filename']:
+                file_ext = '.' + oldest_cv_dict['filename'].split('.')[-1]
+            
+            # Check standard single file path
+            possible_paths.append(upload_dir / f"{oldest_cv_dict['job_id']}{file_ext}")
+            
+            # Check for multi-file upload directory
+            possible_paths.append(upload_dir / oldest_cv_dict['job_id'])
+            
+            file_deleted = False
+            for file_path in possible_paths:
+                if file_path.exists():
+                    try:
+                        if file_path.is_dir():
+                            # Multi-file upload - delete entire directory
+                            import shutil
+                            shutil.rmtree(file_path)
+                        else:
+                            # Single file - delete file
+                            os.remove(file_path)
+                        file_deleted = True
+                        oldest_cv_dict['file_deleted'] = True
+                        oldest_cv_dict['deleted_path'] = str(file_path)
+                        break
+                    except Exception as e:
+                        print(f"Failed to delete {file_path}: {e}")
+            
+            if not file_deleted:
+                oldest_cv_dict['file_deleted'] = False
+                
+            return oldest_cv_dict
+        
+        return None
+    finally:
+        conn.close()
+
+
+def enforce_cv_limit(user_id: str, max_cvs: int = 10) -> list:
+    """
+    Enforce maximum CV limit per user.
+    Returns list of deleted CV info if any were deleted.
+    """
+    deleted_cvs = []
+    
+    conn = get_db_connection()
+    try:
+        # Get all CVs sorted by date (oldest first)
+        cursor = conn.execute(
+            """SELECT upload_id, job_id, filename, upload_date
+            FROM cv_uploads 
+            WHERE user_id = ? 
+            ORDER BY upload_date ASC""",
+            (user_id,)
+        )
+        all_cvs = cursor.fetchall()
+        
+        # If we have more than max_cvs, delete the oldest ones
+        if len(all_cvs) > max_cvs:
+            cvs_to_delete = all_cvs[:len(all_cvs) - max_cvs]
+            
+            for cv in cvs_to_delete:
+                cv_dict = dict(cv)
+                
+                # Delete from database
+                conn.execute(
+                    """DELETE FROM cv_uploads 
+                    WHERE upload_id = ?""",
+                    (cv_dict['upload_id'],)
+                )
+                
+                # Try to delete the file
+                import os
+                from pathlib import Path
+                BASE_DIR = Path(__file__).parent.parent.parent
+                upload_dir = BASE_DIR / "data" / "uploads"
+                
+                # Try different file path patterns
+                possible_paths = []
+                
+                # Extract file extension from filename
+                file_ext = ''
+                if '.' in cv_dict['filename']:
+                    file_ext = '.' + cv_dict['filename'].split('.')[-1]
+                
+                # Check standard single file path
+                possible_paths.append(upload_dir / f"{cv_dict['job_id']}{file_ext}")
+                
+                # Check for multi-file upload directory
+                possible_paths.append(upload_dir / cv_dict['job_id'])
+                
+                file_deleted = False
+                for file_path in possible_paths:
+                    if file_path.exists():
+                        try:
+                            if file_path.is_dir():
+                                # Multi-file upload - delete entire directory
+                                import shutil
+                                shutil.rmtree(file_path)
+                            else:
+                                # Single file - delete file
+                                os.remove(file_path)
+                            file_deleted = True
+                            cv_dict['file_deleted'] = True
+                            cv_dict['deleted_path'] = str(file_path)
+                            break
+                        except Exception as e:
+                            print(f"Failed to delete {file_path}: {e}")
+                
+                if not file_deleted:
+                    cv_dict['file_deleted'] = False
+                    
+                deleted_cvs.append(cv_dict)
+            
+            conn.commit()
+    finally:
+        conn.close()
+    
+    return deleted_cvs
 
 
 def update_cv_upload_status(job_id: str, status: str, cv_data: str = None) -> bool:

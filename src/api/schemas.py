@@ -73,6 +73,8 @@ class UploadResponse(BaseModel):
     """Response after successful file upload"""
     message: str
     job_id: str
+    deleted_cv: Optional[Dict[str, Any]] = None  # Info about single deleted CV (deprecated, use deleted_cvs)
+    deleted_cvs: Optional[list[Dict[str, Any]]] = None  # Info about multiple deleted CVs if limit was reached
 
 
 class ErrorResponse(BaseModel):

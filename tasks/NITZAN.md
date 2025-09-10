@@ -1,33 +1,13 @@
-{
-  "backend_path": "hero.summaryTagline",
-  "frontend_location": "cv-data-adapter.tsx:215",
-  "issue": "Field is extracted and mapped in adapter but NOT displayed in hero section",
-  "recommendation": "Add summaryTagline display below professionalTitle or as subtitle"     -done
-},
 
-IF LINK - SHOW LINK -    
-"frontend_expectation": "projects.projectItems[].viewMode",
-"frontend_location": "cv-data-adapter.tsx:463",
-"current_handling": "Determined by URL analysis",
-"recommendation": "Keep auto-detection logic"               -done
-},
-
-{
-  "backend_path": "experience.experienceItems[].technologiesUsed",
-  "frontend_location": "app/page.tsx:696",
-  "issue": "Technologies field exists in add item but not properly displayed in experience cards",
-  "recommendation": "Display technologies as badges below job description" -done
-},
 
 
 {
   "backend_path": "achievements.achievements[].timeframe",
   "frontend_location": "cv-data-adapter.tsx:503",
-  "issue": "Timeframe mapped to 'year' field, losing specificity",
-  "recommendation": "Display full timeframe string if more than just year" 
+  "issue": "Timeframe mapping currently truncates to only the 'year', which results in loss of detail for timeframes that specify months or ranges.",
+  "recommendation": "Display the full timeframe string (including month or range) when available, instead of truncating to just the year."
 },
 
-PROJECTS SECTION : SHOW AS PART OF DECRIPTION 
 {
   "backend_path": "projects.projectItems[].technologiesUsed",
   "frontend_location": "cv-data-adapter.tsx:472",
@@ -53,7 +33,7 @@ PROJECTS SECTION : SHOW AS PART OF DECRIPTION
   "importance": "high",
   "recommendation": "Display as bullet points or achievement cards"     -go in achievments section 
 },
-
+{
 "frontend_expectation": "testimonials.testimonialItems[].avatar",
 "frontend_location": "app/page.tsx:1089",
 "current_handling": "Empty field",
@@ -64,9 +44,8 @@ PROJECTS SECTION : SHOW AS PART OF DECRIPTION
 "frontend_location": "app/page.tsx:1090",
 "current_handling": "Default to 5",
 "recommendation": "Optional rating system"
-}
-]
 },
+{
 "frontend_expectation": "projects.projectItems[].githubUrl",
 "frontend_location": "cv-data-adapter.tsx:454",
 "current_handling": "Detected from projectUrl if GitHub",
@@ -151,7 +130,7 @@ PROJECTS SECTION : SHOW AS PART OF DECRIPTION
     }
   ]
 }
-},
+
 
 
 {
@@ -269,8 +248,6 @@ PROJECTS SECTION : SHOW AS PART OF DECRIPTION
   "importance": "low",
   "recommendation": "Could display as 'Additional Information' section"
 }
-]
-},
 
 
 HOBBIES -SIMPLE TEXT ALL OTHER DETAILED
@@ -279,4 +256,4 @@ HOBBIES -SIMPLE TEXT ALL OTHER DETAILED
 "frontend_location": "app/page.tsx:785",
 "current_handling": "Default to 'detailed'",
 "recommendation": "Keep as display preference"
-},
+

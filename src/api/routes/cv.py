@@ -283,8 +283,37 @@ async def upload_cv(
     """
     # === 1. USER IS ALREADY AUTHENTICATED ===
     logger.info(f"User {current_user_id} uploading file: {file.filename}")
-
-    # === 2. FILE VALIDATION ===
+    
+    # === 1.5 CLEANUP OLD PORTFOLIOS AND CVS ===
+    # When a user uploads a new CV, delete their old portfolios
+    try:
+        from src.api.routes.portfolio_generator import PORTFOLIO_PROCESSES, cleanup_portfolio
+        
+        # Find and delete all portfolios for this user
+        portfolios_to_delete = []
+        for portfolio_id, info in PORTFOLIO_PROCESSES.items():
+            if info.get('user_id') == current_user_id:
+                portfolios_to_delete.append(portfolio_id)
+        
+        for portfolio_id in portfolios_to_delete:
+            logger.info(f"Deleting old portfolio {portfolio_id} for user {current_user_id}")
+            try:
+                cleanup_portfolio(portfolio_id)
+                if portfolio_id in PORTFOLIO_PROCESSES:
+                    del PORTFOLIO_PROCESSES[portfolio_id]
+            except Exception as e:
+                logger.warning(f"Failed to cleanup portfolio {portfolio_id}: {e}")
+        
+        if portfolios_to_delete:
+            logger.info(f"Cleaned up {len(portfolios_to_delete)} old portfolios for user {current_user_id}")
+    except ImportError:
+        # If portfolio_generator is not available, continue anyway
+        logger.warning("Could not import portfolio cleanup functions, skipping portfolio cleanup")
+    except Exception as e:
+        logger.warning(f"Error during portfolio cleanup: {e}")
+        # Don't fail the upload if cleanup fails
+    
+    # === 2. FILE VALIDATION (MUST BE DONE BEFORE CV LIMIT CHECK) ===
     # Add timeout protection
     import asyncio
     try:
@@ -293,6 +322,25 @@ async def upload_cv(
         raise HTTPException(status_code=408, detail="File upload timed out. Please check your connection and try again.")
     if not file_content:
         raise HTTPException(status_code=400, detail="File is empty")
+    
+    # === 1.6 CHECK AND ENFORCE CV LIMIT (MAX 10 PER USER) ===
+    from src.api.db import get_user_cv_count, enforce_cv_limit
+    
+    current_cv_count = get_user_cv_count(current_user_id)
+    logger.info(f"User {current_user_id} currently has {current_cv_count} CVs")
+    
+    # If user has 10 or more CVs, enforce the limit (delete oldest ones)
+    deleted_cvs = []
+    if current_cv_count >= 10:
+        logger.info(f"User {current_user_id} has {current_cv_count} CVs (limit: 10), enforcing limit...")
+        # This will delete ALL excess CVs to bring the count down to 9 (leaving room for the new one)
+        deleted_cvs = enforce_cv_limit(current_user_id, max_cvs=9)  # Keep 9 so new upload makes it 10
+        if deleted_cvs:
+            logger.info(f"Deleted {len(deleted_cvs)} old CVs to enforce limit:")
+            for cv in deleted_cvs:
+                logger.info(f"  - {cv['filename']} (uploaded: {cv['upload_date']})")
+        else:
+            logger.warning(f"No CVs were deleted despite user having {current_cv_count} CVs")
 
     # Validate file content with magic bytes checking
     is_valid, error_msg, mime_type = validate_uploaded_file(
@@ -531,10 +579,19 @@ async def upload_cv(
         logger.debug(f"Saved to: {file_path}")
         
         # Simple response for the user
-        return UploadResponse(
+        response = UploadResponse(
             message="CV uploaded successfully. Building your portfolio website...",
             job_id=job_id
         )
+        
+        # Add info about deleted CVs if applicable
+        if deleted_cvs:
+            response.deleted_cvs = deleted_cvs
+            # Also support legacy single deleted_cv field for backwards compatibility
+            if len(deleted_cvs) == 1:
+                response.deleted_cv = deleted_cvs[0]
+        
+        return response
         
     except Exception as e:
         logger.error(f"Processing failed for job {job_id}: {e}")  # פרטים מלאים בלוג
@@ -559,9 +616,30 @@ async def get_my_cvs(current_user_id: str = Depends(get_current_user)):
     uploads = get_user_cv_uploads(current_user_id)
     logger.info(f"User {current_user_id} has {len(uploads)} CV uploads")
     
+    # Calculate how many CVs will be deleted on next upload
+    cvs_to_delete_info = []
+    if len(uploads) >= 10:
+        # Calculate how many need to be deleted to make room for a new one
+        num_to_delete = len(uploads) - 9  # Keep 9 to make room for 1 new upload
+        # The last items in the list are the oldest (since we order by DESC)
+        cvs_to_delete = uploads[-num_to_delete:] if num_to_delete > 0 else []
+        cvs_to_delete_info = [
+            {
+                "filename": cv["filename"],
+                "upload_date": cv["upload_date"],
+                "job_id": cv["job_id"]
+            }
+            for cv in cvs_to_delete
+        ]
+    
     return {
         "cvs": uploads,
-        "count": len(uploads)
+        "count": len(uploads),
+        "max_cvs": 10,
+        "at_limit": len(uploads) >= 10,
+        "over_limit": len(uploads) > 10,
+        "cvs_to_delete_on_next_upload": cvs_to_delete_info,
+        "num_to_delete": len(cvs_to_delete_info)
     }
 
 
@@ -740,11 +818,11 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
     if not cv_upload:
         raise HTTPException(status_code=404, detail="CV not found")
     
-    # Construct file path
+    # Construct file path using same logic as extraction endpoint
     BASE_DIR = Path(__file__).parent.parent.parent.parent  # Go up to project root
     file_extension = cv_upload['file_type'].lower() if cv_upload.get('file_type') else ''
     
-    # Check if this is a multi-file upload
+    # First check if this is a multi-file upload
     multi_file_dir = BASE_DIR / "data" / "uploads" / job_id
     if multi_file_dir.exists() and multi_file_dir.is_dir():
         # This is a multi-file upload, return the first file for preview
@@ -754,8 +832,17 @@ async def download_cv(job_id: str, current_user_id: str = Depends(get_current_us
         else:
             raise HTTPException(status_code=404, detail="No files found in upload")
     else:
-        # Single file upload
-        file_path = BASE_DIR / "data" / "uploads" / f"{job_id}{file_extension}"
+        # Single file upload - use glob to find file anywhere in uploads directory
+        # This handles both direct uploads and anonymous->authenticated transfers
+        import glob
+        file_pattern = str(BASE_DIR / "data" / "uploads" / "**" / f"{job_id}*")
+        matching_files = glob.glob(file_pattern, recursive=True)
+        if matching_files:
+            file_path = Path(matching_files[0])
+            logger.info(f"Found file using glob pattern: {file_path}")
+        else:
+            # Fallback to old path construction
+            file_path = BASE_DIR / "data" / "uploads" / f"{job_id}{file_extension}"
     
     # Check if file exists
     if not file_path.exists():
