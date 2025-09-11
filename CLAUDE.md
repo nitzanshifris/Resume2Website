@@ -247,9 +247,10 @@ GET /api/v1/cv-enhanced/test-with-sample      # Test with sample data
 #### Anonymous Users (NEW FLOW):
 ```
 1. Upload file → /upload-anonymous → Resume Gate validation → Save file → Return job_id (NO extraction)
-2. Frontend shows MacBook animation → Shows signup modal after 6 seconds
-3. User signs up → handleAuthSuccess → Calls /extract/{job_id} → Claude 4 Opus extraction
-4. Portfolio generation continues with extracted data
+2. Frontend shows MacBook animation → Shows signup modal after 13 seconds
+3. User signs up → handleAuthSuccess → Dispatches AuthSucceeded → Transitions to Claiming state
+4. Calls /claim → /extract/{job_id} → Claude 4 Opus extraction → /generate
+5. Progress animation: 0-70% in 60s (semantic 0-52.5), then 70-80% with 1% every 6s (max 60 semantic)
 ```
 
 #### Authenticated Users:
@@ -305,6 +306,8 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 - **Error Handling**: Structured errors with Resume Gate reasons and suggestions
 - **Retry Flow**: Seamless retry with skipValidation flag for already-validated files
 - **State Management**: currentJobId tracks anonymous uploads across signup flow
+- **JobFlow State Machine**: Strict state transitions with validation (Idle → Validating → Previewing → WaitingAuth → Claiming → Extracting → Generating → Completed)
+- **Progress Animation**: Semantic scale (0-60) maps to visual (0-80%), time-based animation synced with processing states
 
 ## Critical Reminders
 1. **Claude 4 Opus ONLY** - No other AI models (temperature 0.0)
@@ -329,6 +332,8 @@ python3 src/utils/setup_keychain.py   # Setup API keys securely
 - **Resume Gate too strict/lenient**: Adjust threshold in settings.py (default=60)
 - **Double upload on retry**: Check validation guards in handleFileSelect
 - **Animation not starting**: Verify skipValidation flag and event dispatching
+- **Progress bar stuck at 0%**: Check JobFlow state transitions, ensure AuthSucceeded dispatched
+- **State machine errors**: Verify transitions follow allowed paths in reducer.ts
 
 ### Debug Commands
 ```bash
@@ -507,8 +512,10 @@ HTTP/2 200
 - **src/core/cv_extraction/circuit_breaker.py** - Resilience pattern for LLM failures
 - **src/utils/cv_resume_gate.py** - Resume validation logic with image-specific rules
 - **src/services/vercel_deployer.py** - Vercel CLI integration for deployments
-- **user_web_example/app/page.tsx** - Main frontend with anonymous/auth flows, retry handling
+- **user_web_example/app/page.tsx** - Main frontend with anonymous/auth flows, progress animation, consolidated auth handlers
 - **user_web_example/lib/api.ts** - API client with uploadFile, extractCVData functions
+- **user_web_example/lib/jobFlow/useJobFlow.tsx** - JobFlow state machine with proper state transitions
+- **user_web_example/lib/jobFlow/reducer.ts** - State transition validation and action handling
 - **user_web_example/components/interactive-cv-pile.tsx** - CV upload UI with drag-drop
 - **user_web_example/components/ui/error-toast.tsx** - Resume Gate error display with retry
 - **user_web_example/components/embedded-checkout-modal.tsx** - Stripe payment modal
