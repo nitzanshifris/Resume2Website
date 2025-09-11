@@ -2197,7 +2197,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       <div className="w-full h-screen flex flex-row items-center justify-center gap-0">
         {/* Left Side - Text Content - Dynamic width based on stage and completion */}
         <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[400px] flex-shrink-0" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-8 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
-          <div className="w-full h-full flex flex-col justify-center gap-12">
+          <div className="w-full h-full flex flex-col gap-12" style={{ position: 'relative' }}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -2403,8 +2403,14 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex justify-start"
+                    style={{ 
+                      position: 'absolute',
+                      top: '120px',  // ← EASY TO ADJUST: Change this to move buttons up/down
+                    }}
                   >
-                    <div className="flex flex-col gap-10 w-full max-w-[380px]">
+                    <div className="flex flex-col w-full max-w-[380px]" style={{ 
+                      gap: '40px'  // ← EASY TO ADJUST: Change this for spacing between buttons
+                    }}>
                       {/* Edit Portfolio button - Primary action at top */}
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -2421,7 +2427,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                             repeatType: "reverse"
                           }
                         }}
-                        className="space-y-3"
+                        className="space-y-6"
                       >
                         <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           Bring your story to life—drop media, set the mood, make it yours.
@@ -2443,7 +2449,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
-                        className="space-y-3"
+                        className="space-y-6"
+                        style={{ marginTop: '145px' }}
                       >
                         <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           Grab your link and start impressing.
@@ -2464,7 +2471,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="space-y-3"
+                        className="space-y-6"
+                        style={{ marginTop: '145px' }}
                       >
                         <p className="text-lg md:text-xl font-bold bg-gradient-to-r from-emerald-600 via-sky-500 to-blue-700 bg-clip-text text-transparent leading-relaxed">
                           See how others shine.
