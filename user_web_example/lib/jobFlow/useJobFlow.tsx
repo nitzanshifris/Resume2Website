@@ -223,13 +223,20 @@ export const JobFlowProvider: React.FC<{
         clearTimeout(authTimerRef.current)
       }
       
+      console.log('⏱️ Setting auth timer for 13 seconds from now (animation takes ~6s + 7s to appreciate)...')
       authTimerRef.current = setTimeout(() => {
-        if (context.state === FlowState.Previewing) {
-          dispatch({ type: FlowAction.AuthRequested })
-          onAuthRequired?.()
+        console.log('⏰ Auth timer fired! Current state:', context.state)
+        // Don't check state here - we know we just set it to Previewing
+        // The timer was set right after upload succeeded, so we should show auth
+        dispatch({ type: FlowAction.AuthRequested })
+        if (onAuthRequired) {
+          console.log('🔔 Calling onAuthRequired callback...')
+          onAuthRequired()
+        } else {
+          console.log('⚠️ onAuthRequired callback is not defined!')
         }
         authTimerRef.current = null
-      }, 6000)
+      }, 13000) // Increased to 13000ms (animation ~6s + 7s viewing time)
       
     } catch (error: any) {
       console.error('Preview flow failed:', error)
@@ -260,6 +267,14 @@ export const JobFlowProvider: React.FC<{
       details: {}
     })
     
+    // CRITICAL: If we're in WaitingAuth state, dispatch AuthSucceeded first to transition properly
+    if (context.state === FlowState.WaitingAuth) {
+      console.log('🔑 Dispatching AuthSucceeded to transition from WaitingAuth to Claiming')
+      dispatch({ type: FlowAction.AuthSucceeded })
+      // Small delay to ensure state updates before continuing
+      await new Promise(resolve => setTimeout(resolve, 10))
+    }
+    
     // Claim -> Extract -> Generate
     await performClaim(jobId)
   }
@@ -269,7 +284,10 @@ export const JobFlowProvider: React.FC<{
    */
   const performClaim = async (jobId: string) => {
     try {
-      dispatch({ type: FlowAction.ClaimStarted })
+      // Don't dispatch ClaimStarted if we're already in Claiming state
+      if (context.state !== FlowState.Claiming) {
+        dispatch({ type: FlowAction.ClaimStarted })
+      }
       
       await api.claim(jobId)
       

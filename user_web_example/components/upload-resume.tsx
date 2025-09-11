@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Upload, File, CheckCircle, X, ArrowLeft, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { uploadFile, uploadMultipleFiles, setSessionId } from "@/lib/api"
+import { uploadFile, uploadMultipleFiles, setSessionId, API_BASE_URL } from "@/lib/api"
 import { useAuthContext } from "@/contexts/AuthContext"
 
 interface UploadResumeProps {
@@ -16,9 +16,10 @@ interface UploadResumeProps {
   onSuccess: (jobId: string) => void
   initialFile?: File | null
   onAuthRequired?: () => void  // Callback to open auth modal
+  onFileSelect?: (file: File) => Promise<void>  // New prop to handle file selection with portfolio warning
 }
 
-export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initialFile, onAuthRequired }: UploadResumeProps) {
+export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initialFile, onAuthRequired, onFileSelect }: UploadResumeProps) {
   const { isAuthenticated } = useAuthContext()
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -103,6 +104,59 @@ export default function UploadResume({ isOpen, onClose, onBack, onSuccess, initi
     // Validate all files first
     const validFiles = files.filter(file => validateFile(file))
     if (validFiles.length === 0) return
+
+    // Anonymous users: delegate to parent to start JobFlow preview flow (ensures 6s signup modal timer)
+    if (!isAuthenticated && validFiles.length === 1 && onFileSelect) {
+      try {
+        await onFileSelect(validFiles[0])
+        onClose()
+        return
+      } catch (error) {
+        console.error('File selection error (anonymous):', error)
+        alert(error instanceof Error ? error.message : 'Failed to process file')
+        return
+      }
+    }
+
+    // Check for existing portfolios ONLY for authenticated users
+    if (isAuthenticated && validFiles.length === 1) {
+      try {
+        const sessionId = localStorage.getItem('resume2website_session_id')
+        const portfolioListResponse = await fetch(`${API_BASE_URL}/api/v1/generation/list`, {
+          credentials: 'include',
+          headers: {
+            'X-Session-ID': sessionId || ''
+          }
+        })
+
+        if (portfolioListResponse.ok) {
+          const data = await portfolioListResponse.json()
+          if (data.portfolios && data.portfolios.length > 0) {
+            // User has existing portfolios - warn them
+            const confirmDelete = confirm(
+              'You already have a generated portfolio.\n\n' +
+              'Uploading a new CV will delete your existing portfolio.\n\n' +
+              'Do you want to continue?'
+            )
+
+            if (!confirmDelete) {
+              console.log('User cancelled upload to preserve existing portfolio')
+              return
+            }
+
+            // User confirmed - use the special flow with deletion and refresh
+            if (onFileSelect) {
+              await onFileSelect(validFiles[0])
+              onClose()
+              return
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking existing portfolios:', error)
+        // Continue with normal upload if check fails
+      }
+    }
 
     setSelectedFiles(validFiles)
     setIsValidating(true) // Show validating state

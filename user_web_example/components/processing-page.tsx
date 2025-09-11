@@ -171,8 +171,8 @@ export default function ProcessingPage({ isOpen, jobId, file, onComplete, onTemp
 
         try {
           const sessionId = localStorage.getItem('resume2website_session_id')
-          const templates = ['v0_template_v1.5', 'v0_template_v2.1']
-          const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
+          // Only one active template now - official_template_v1
+          const randomTemplate = 'official_template_v1'
           
           console.log(`🎯 Selected template: ${randomTemplate}`)
 
