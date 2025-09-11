@@ -2196,7 +2196,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       {/* Keep the existing desktop layout but simplified */}
       <div className="w-full h-screen flex flex-row items-center justify-center gap-0">
         {/* Left Side - Text Content - Dynamic width based on stage and completion */}
-        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[20%]" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-2 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
+        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[400px] flex-shrink-0" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-8 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
           <div className="w-full h-full flex flex-col justify-center gap-12">
             <motion.div
               initial={{ opacity: 0 }}
@@ -2567,7 +2567,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         </div>
 
         {/* Right Side - Dynamic width based on stage and completion (desktop only, keep MacBookFrame) */}
-        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[80%]" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8 pr-20" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
+        <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "flex-1" : isTransformationStage() ? "w-[65%]" : "w-1/2"} h-full relative ${(stage === "materializing" || stage === "complete") ? "pl-8" : "pl-0 pr-4 md:pr-8 lg:pr-12"}`}>
 
 
 
@@ -2638,9 +2638,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                     duration: 0.8,
                     ease: [0.34, 1.56, 0.64, 1],
                   }}
-                className="absolute inset-0 flex items-center justify-center"
+                className="flex items-center justify-center h-full w-full"
                 >
-                <div className="w-[1200px] xs:w-[1300px] sm:w-[1450px] md:w-[1600px] lg:w-[1750px] xl:w-[1900px] 2xl:w-[2050px] relative">
+                <div className="w-full mx-auto max-w-[900px] sm:max-w-[1000px] md:max-w-[1100px] lg:max-w-[1200px] xl:max-w-[1300px] 2xl:max-w-[1400px] relative px-4" style={{ transform: 'scale(0.9)', transformOrigin: 'center' }}>
                   <MacBookFrame isComplete={stage === "complete"}>
                     <div key={jobFlowContext.portfolioUrl || 'no-portfolio'}>
                     {isRestoringPortfolio ? (
