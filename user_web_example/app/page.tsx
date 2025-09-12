@@ -28,6 +28,7 @@ import AuthModal from "@/components/auth-modal-new"
 import PricingSelector from "@/components/pricing-selector"
 import ErrorToast from "@/components/ui/error-toast"
 import PortfolioCompletionPopup from "@/components/portfolio-completion-popup"
+import { SmartDebugPanel } from "@/components/SmartDebugPanel"
 import { useAuthContext } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
@@ -1830,6 +1831,9 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
         cancelAnimationFrame(animationRef.current)
       }
       
+      // Track current progress value for animation (fix for React state not updating between frames)
+      let currentAnimatedProgress = animatedProgress
+      
       // Time-based animation per site.md:
       // 0-70% in 60 seconds (linear 5% steps)
       // Then 70-80% with 1% every 6 seconds
@@ -1853,6 +1857,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           newProgress = Math.min(60, 52.5 + (additionalSteps * 0.75))
         }
         
+        // Update local variable and state
+        currentAnimatedProgress = newProgress
         setAnimatedProgress(newProgress)
         
         // Continue animation if not completed and still processing
@@ -2038,7 +2044,7 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
           />
           {/* Boxed block: badge, headline, subheadline */}
           {showStableHeadline && (
-            <div className="w-full max-w-[95vw] mx-auto flex flex-col text-left pt-4 pb-3 md:hidden pl-4">
+            <div className={`w-full max-w-[95vw] mx-auto flex flex-col text-left ${uploadedFile ? 'pt-24' : 'pt-4'} pb-3 md:hidden pl-4`}>
 
               <div className="w-full max-w-[95vw]">
                 {/* Headline - shows when loadingStep >= 1 */}
@@ -2197,12 +2203,12 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
       <div className="w-full h-screen flex flex-row items-center justify-center gap-0">
         {/* Left Side - Text Content - Dynamic width based on stage and completion */}
         <div className={`${(hasCompletedGeneration || jobFlowContext.portfolioUrl) ? "w-[400px] flex-shrink-0" : isTransformationStage() ? "w-[35%]" : "w-1/2"} h-full flex flex-col items-start justify-center pl-8 pr-8 text-foreground relative isolate`} style={{ pointerEvents: 'auto', zIndex: 20, isolation: 'isolate' }}>
-          <div className="w-full h-full flex flex-col gap-12" style={{ position: 'relative' }}>
+          <div className="w-full h-full flex flex-col gap-12 justify-center" style={{ position: 'relative' }}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className={`max-w-none w-full relative ${isTransformationStage() ? "space-y-16" : "space-y-16"}`}
+              className={`max-w-none w-full relative ${isTransformationStage() ? "space-y-16" : "space-y-16"} ${uploadedFile ? 'mt-24' : ''}`}
             >
 
 
@@ -2457,9 +2463,8 @@ function Resume2WebsiteDemo({ onOpenModal, setShowPricing, uploadedFile, setUplo
                         </p>
                         <Button
                           size="lg"
-                          variant="outline"
                           onClick={onGoLive}
-                          className="bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300 hover:border-gray-400 w-full text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full"
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 w-full text-base md:text-lg px-6 py-4 transition-all duration-300 hover:scale-105 rounded-full shadow-lg hover:shadow-xl"
                         >
                           Ready to Go
                           <ArrowRight className="ml-3 w-5 h-5 inline-block" />
@@ -2860,25 +2865,18 @@ const AppleNavbar = ({
   }
 
   const handleUploadClick = () => {
-    // Always allow new upload - reset everything first
-    if (isAuthenticated && jobFlowContext && (jobFlowContext.state === 'Completed' || jobFlowContext.portfolioUrl)) {
-      // User has existing portfolio - confirm they want to replace it
-      if (confirm('This will replace your existing portfolio. Continue?')) {
-        onResetForNewUpload()
+    // ALWAYS open file picker first, regardless of portfolio state
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
+    fileInput.onchange = (e) => {
+      const target = e.target as HTMLInputElement
+      if (target.files && target.files[0]) {
+        // File selected - now pass it to onFileSelect which will handle validation and warning
+        onFileSelect(target.files[0])
       }
-    } else {
-      // Direct upload for everyone
-      const fileInput = document.createElement('input')
-      fileInput.type = 'file'
-      fileInput.accept = '.pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg,.webp,.heic,.heif,.tiff,.tif,.bmp'
-      fileInput.onchange = (e) => {
-        const target = e.target as HTMLInputElement
-        if (target.files && target.files[0]) {
-          onFileSelect(target.files[0])
-        }
-      }
-      fileInput.click()
     }
+    fileInput.click()
   }
 
   return (
@@ -3864,31 +3862,50 @@ function HomeWithJobFlow({ showSignupModal, setShowSignupModal }: { showSignupMo
     console.log('📁 File selected, using JobFlow orchestrator:', file.name)
     
     // Check if user has an existing portfolio
-    if (jobFlowContext.portfolioUrl || jobFlowContext.state === FlowState.Completed) {
-      const confirmDelete = confirm(
-        'You already have a generated portfolio.\n\n' +
-        'Uploading a new CV will delete your existing portfolio.\n\n' +
-        'Do you want to continue?'
-      )
-      
-      if (!confirmDelete) {
-        console.log('User cancelled upload to preserve existing portfolio')
-        return
-      }
-      
-      console.log('User confirmed deletion of existing portfolio')
-      
-      // First, validate and upload the new file
+    const hasExistingPortfolio = jobFlowContext.portfolioUrl || jobFlowContext.state === FlowState.Completed
+    
+    // If user has existing portfolio, validate FIRST then ask for confirmation
+    if (hasExistingPortfolio) {
       try {
-        // Store the file temporarily
-        const fileToUpload = file
+        console.log('🔍 Validating new file before showing warning...')
         
-        // Validate and upload the file first (before deleting old portfolio)
+        // First validate the file using anonymous endpoint (validation only)
+        const formData = new FormData()
+        formData.append('file', file)
+        
+        const validationResponse = await fetch(`${API_BASE_URL}/api/v1/upload-anonymous`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        })
+        
+        if (!validationResponse.ok) {
+          const errorData = await validationResponse.json().catch(() => ({}))
+          throw new Error(errorData.detail || errorData.message || 'Validation failed')
+        }
+        
+        console.log('✅ File validation passed!')
+        
+        // NOW show the warning after successful validation
+        const confirmDelete = confirm(
+          'You already have a generated portfolio.\n\n' +
+          'Uploading this new CV will delete your existing portfolio.\n\n' +
+          'Do you want to continue?'
+        )
+        
+        if (!confirmDelete) {
+          console.log('User cancelled upload to preserve existing portfolio')
+          return
+        }
+        
+        console.log('User confirmed deletion of existing portfolio')
+        
+        // Now proceed with actual upload and portfolio deletion
         if (isAuthenticated) {
-          // For authenticated users, use authenticated upload
+          // For authenticated users
           const sessionId = localStorage.getItem('resume2website_session_id')
           const formData = new FormData()
-          formData.append('file', fileToUpload)
+          formData.append('file', file)
           
           const uploadResponse = await fetch(`${API_BASE_URL}/api/v1/upload`, {
             method: 'POST',
@@ -3932,9 +3949,9 @@ function HomeWithJobFlow({ showSignupModal, setShowSignupModal }: { showSignupMo
             }
           }
           
-          // Store the new job_id for auto-start after refresh
+          // Store the new job_id but DON'T auto-start - user needs to click Start Now
           localStorage.setItem('pendingJobId', uploadResult.job_id)
-          localStorage.setItem('autoStartOnLoad', 'true')
+          // localStorage.setItem('autoStartOnLoad', 'true') // DISABLED - user must click Start Now
           
           // Clear old portfolio data
           localStorage.removeItem('lastPortfolio')
@@ -3946,27 +3963,14 @@ function HomeWithJobFlow({ showSignupModal, setShowSignupModal }: { showSignupMo
           return // Stop here, page will reload
           
         } else {
-          // For anonymous users, use anonymous upload
-          const formData = new FormData()
-          formData.append('file', fileToUpload)
+          // For anonymous users, the validation upload already created the job
+          // So we use that response
+          const uploadResult = await validationResponse.json()
+          console.log('✅ Using validation upload result (anonymous):', uploadResult.job_id)
           
-          const uploadResponse = await fetch(`${API_BASE_URL}/api/v1/upload-anonymous`, {
-            method: 'POST',
-            credentials: 'include',
-            body: formData
-          })
-          
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json().catch(() => ({}))
-            throw new Error(errorData.detail || errorData.message || 'Upload failed')
-          }
-          
-          const uploadResult = await uploadResponse.json()
-          console.log('✅ New CV uploaded successfully (anonymous):', uploadResult.job_id)
-          
-          // Store for auto-start after refresh
+          // Store the job_id but DON'T auto-start - user needs to click Start Now
           localStorage.setItem('pendingJobId', uploadResult.job_id)
-          localStorage.setItem('autoStartOnLoad', 'true')
+          // localStorage.setItem('autoStartOnLoad', 'true') // DISABLED - user must click Start Now
           
           // Clear old data and refresh
           localStorage.removeItem('lastPortfolio')
@@ -4611,6 +4615,15 @@ function HomeWithJobFlow({ showSignupModal, setShowSignupModal }: { showSignupMo
         message={errorToast.message}
         suggestion={errorToast.suggestion}
         onRetryUpload={handleFileSelect}
+      />
+      
+      {/* Smart Debug Panel - Not just shows, but DIAGNOSES problems */}
+      <SmartDebugPanel 
+        jobFlowState={jobFlowContext.state}
+        user={user}
+        portfolioUrl={jobFlowContext.portfolioUrl}
+        currentJobId={jobFlowContext.currentJobId}
+        lastError={errorToast.message || undefined}
       />
     </main>
   )
