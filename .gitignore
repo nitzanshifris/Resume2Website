@@ -100,3 +100,24 @@ lovable-clone-main/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local sandboxes and generated artifacts
+sandboxes/portfolios/
+data/generated_portfolios/
+
+# Next.js/Turbopack/Vercel
+.turbo/
+.vercel/
+*.tsbuildinfo
+.eslintcache
+
+# Playwright outputs
+user_web_example/playwright-report/
+user_web_example/test-results/
+
+# Caches and coverage
+.cache/
+.mypy_cache/
+.ruff_cache/
+.coverage.*
+coverage/
