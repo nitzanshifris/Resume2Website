@@ -121,3 +121,7 @@ user_web_example/test-results/
 .ruff_cache/
 .coverage.*
 coverage/
+
+# Remove from VCS (kept locally)
+components/
+.taskmaster/
